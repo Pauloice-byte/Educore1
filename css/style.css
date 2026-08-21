@@ -14,11 +14,9 @@
     box-sizing: border-box;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
-
 
 body {
     min-height: 100vh;
@@ -39,21 +37,17 @@ body {
     overflow-x: hidden;
 }
 
-
 button,
 input {
     font-family: inherit;
 }
 
-
 button {
     border: 0;
 }
 
-
 a {
     text-decoration: none;
-
     color: inherit;
 }
 
@@ -74,7 +68,6 @@ a {
     z-index: 1000;
 
     display: flex;
-
     flex-direction: column;
 
     background:
@@ -97,7 +90,7 @@ a {
 }
 
 
-/* Collapsed */
+/* Collapsed desktop sidebar */
 
 .sidebar.collapsed {
     width: 78px;
@@ -112,7 +105,6 @@ a {
     height: 100px;
 
     display: flex;
-
     align-items: center;
 
     gap: 13px;
@@ -127,52 +119,30 @@ a {
     transition: 0.3s ease;
 }
 
-
-/* ==========================================================
-   EDUCORE LOGO
-========================================================== */
-
-.edcore-logo {
+.logo {
     width: 49px;
     height: 49px;
 
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
+    object-fit: cover;
 
     border-radius: 12px;
 
-    background: #ffffff;
-
-    color: #11141b;
-
-    font-size: 15px;
-
-    font-weight: 850;
-
-    letter-spacing: -0.5px;
+    flex-shrink: 0;
 
     box-shadow:
         0 8px 25px rgba(0, 0, 0, 0.35);
 }
 
-
 .brand-information {
     display: flex;
-
     flex-direction: column;
 
     white-space: nowrap;
-
     overflow: hidden;
 
     transition:
         opacity 0.2s ease;
 }
-
 
 .brand-name {
     font-size: 16px;
@@ -184,11 +154,11 @@ a {
     letter-spacing: -0.3px;
 }
 
-
 .brand-subtitle {
     margin-top: 6px;
 
-    color: rgba(255, 255, 255, 0.35);
+    color:
+        rgba(255, 255, 255, 0.35);
 
     font-size: 8px;
 
@@ -199,13 +169,10 @@ a {
     letter-spacing: 1.5px;
 }
 
-
 .sidebar.collapsed .brand-information {
     opacity: 0;
-
     width: 0;
 }
-
 
 .sidebar.collapsed .sidebar-brand {
     justify-content: center;
@@ -226,11 +193,9 @@ a {
     padding: 25px 13px;
 }
 
-
 .navigation-section {
     margin-bottom: 28px;
 }
-
 
 .navigation-heading {
     padding:
@@ -251,7 +216,6 @@ a {
     transition: 0.2s ease;
 }
 
-
 .sidebar.collapsed .navigation-heading {
     opacity: 0;
 
@@ -260,14 +224,12 @@ a {
     padding: 0;
 }
 
-
 .navigation-button {
     width: 100%;
 
-    min-height: 45px;
+    height: 45px;
 
     display: flex;
-
     align-items: center;
 
     gap: 13px;
@@ -297,7 +259,6 @@ a {
         transform 0.2s ease;
 }
 
-
 .navigation-button:hover {
     background:
         rgba(255, 255, 255, 0.055);
@@ -307,7 +268,6 @@ a {
     transform:
         translateX(3px);
 }
-
 
 .navigation-button.active {
     background:
@@ -319,14 +279,11 @@ a {
         inset 2px 0 0 #8d95ef;
 }
 
-
 .navigation-symbol {
     width: 22px;
 
     display: flex;
-
     justify-content: center;
-
     align-items: center;
 
     color:
@@ -337,16 +294,61 @@ a {
     font-size: 13px;
 }
 
-
 .sidebar.collapsed .navigation-button {
     justify-content: center;
 
     padding: 0;
 }
 
-
-.sidebar.collapsed .navigation-button > span:last-child {
+.sidebar.collapsed
+.navigation-button > span:last-child {
     display: none;
+}
+
+
+/* ==========================================================
+   COURSE CATEGORY DOTS
+========================================================== */
+
+.category-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+}
+
+.category-dot.languages {
+    background: #6686f5;
+}
+
+.category-dot.ms-office {
+    background: #54b788;
+}
+
+.category-dot.trading {
+    background: #df6262;
+}
+
+.category-dot.business {
+    background: #c69b52;
+}
+
+.category-dot.technology {
+    background: #7d76dc;
+}
+
+.category-dot.finance {
+    background: #df8546;
+}
+
+.category-dot.personal {
+    background: #9b75c9;
+}
+
+.sidebar.collapsed .category-dot {
+    margin: 0;
 }
 
 
@@ -371,7 +373,6 @@ a {
     white-space: nowrap;
 }
 
-
 .sidebar-footer-line {
     width: 100%;
 
@@ -382,7 +383,6 @@ a {
     background:
         rgba(255, 255, 255, 0.07);
 }
-
 
 .sidebar-footer small {
     display: block;
@@ -396,7 +396,6 @@ a {
 
     font-weight: 400;
 }
-
 
 .sidebar.collapsed .sidebar-footer {
     opacity: 0;
@@ -418,7 +417,6 @@ a {
         margin-left 0.35s ease;
 }
 
-
 .sidebar.collapsed + .main {
     margin-left: 78px;
 }
@@ -438,7 +436,6 @@ a {
     z-index: 500;
 
     display: flex;
-
     align-items: center;
 
     padding:
@@ -457,11 +454,6 @@ a {
         blur(18px);
 }
 
-
-/* ==========================================================
-   MENU BUTTON
-========================================================== */
-
 .menu-button {
     width: 42px;
     height: 42px;
@@ -471,7 +463,6 @@ a {
     flex-direction: column;
 
     justify-content: center;
-
     align-items: center;
 
     gap: 4px;
@@ -485,11 +476,9 @@ a {
     transition: 0.2s ease;
 }
 
-
 .menu-button:hover {
     background: #e5e6e9;
 }
-
 
 .menu-button span {
     width: 17px;
@@ -502,11 +491,6 @@ a {
     transition: 0.2s ease;
 }
 
-
-/* ==========================================================
-   HEADER TITLE
-========================================================== */
-
 .header-title {
     display: flex;
 
@@ -514,7 +498,6 @@ a {
 
     margin-left: 17px;
 }
-
 
 .header-title span {
     color: #9b9da5;
@@ -526,7 +509,6 @@ a {
     letter-spacing: 1.5px;
 }
 
-
 .header-title strong {
     margin-top: 3px;
 
@@ -535,16 +517,10 @@ a {
     font-weight: 700;
 }
 
-
-/* ==========================================================
-   HEADER STATUS
-========================================================== */
-
 .header-status {
     margin-left: auto;
 
     display: flex;
-
     align-items: center;
 
     gap: 8px;
@@ -553,7 +529,6 @@ a {
 
     font-size: 10px;
 }
-
 
 .online-dot {
     width: 7px;
@@ -569,68 +544,6 @@ a {
 
 
 /* ==========================================================
-   LOGIN BUTTON
-========================================================== */
-
-.header-login {
-    min-height: 40px;
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    margin-left: 22px;
-
-    padding:
-        0 17px;
-
-    border:
-        1px solid #20242c;
-
-    border-radius: 9px;
-
-    background: #20242c;
-
-    color: white;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-
-.header-login:hover {
-    background: #11141b;
-
-    border-color: #11141b;
-
-    transform:
-        translateY(-1px);
-
-    box-shadow:
-        0 8px 20px rgba(20, 24, 32, 0.16);
-}
-
-
-.header-login:active {
-    transform:
-        translateY(0);
-}
-
-
-/* ==========================================================
    HERO
 ========================================================== */
 
@@ -640,7 +553,6 @@ a {
     position: relative;
 
     display: flex;
-
     align-items: center;
 
     padding:
@@ -656,7 +568,6 @@ a {
         );
 }
 
-
 .hero-content {
     position: relative;
 
@@ -667,7 +578,6 @@ a {
     animation:
         heroAppear 0.8s ease both;
 }
-
 
 @keyframes heroAppear {
 
@@ -687,7 +597,6 @@ a {
 
 }
 
-
 .hero-label {
     color: #737bd4;
 
@@ -699,7 +608,6 @@ a {
 
     margin-bottom: 14px;
 }
-
 
 .hero h1 {
     font-size:
@@ -716,13 +624,11 @@ a {
     font-weight: 760;
 }
 
-
 .hero h1 span {
     display: block;
 
     color: #7079d9;
 }
-
 
 .hero p {
     max-width: 560px;
@@ -738,7 +644,7 @@ a {
 
 
 /* ==========================================================
-   HERO DECORATIVE CIRCLES
+   HERO DECORATION
 ========================================================== */
 
 .hero-background-circle {
@@ -748,7 +654,6 @@ a {
 
     pointer-events: none;
 }
-
 
 .circle-one {
     width: 430px;
@@ -760,7 +665,6 @@ a {
     border:
         1px solid rgba(108, 119, 219, 0.12);
 }
-
 
 .circle-two {
     width: 270px;
@@ -784,19 +688,16 @@ a {
         80px;
 }
 
-
 .library-header {
     display: flex;
 
     justify-content: space-between;
-
     align-items: flex-end;
 
     gap: 25px;
 
     margin-bottom: 25px;
 }
-
 
 .library-label {
     color: #999ca4;
@@ -809,7 +710,6 @@ a {
 
     margin-bottom: 6px;
 }
-
 
 .library-header h2 {
     font-size: 29px;
@@ -830,7 +730,6 @@ a {
     height: 44px;
 
     display: flex;
-
     align-items: center;
 
     padding:
@@ -848,7 +747,6 @@ a {
         box-shadow 0.2s ease;
 }
 
-
 .search-box:focus-within {
     border-color: #8a91dc;
 
@@ -861,7 +759,6 @@ a {
         );
 }
 
-
 .search-symbol {
     color: #999ca5;
 
@@ -869,7 +766,6 @@ a {
 
     margin-right: 7px;
 }
-
 
 .search-box input {
     width: 100%;
@@ -884,7 +780,6 @@ a {
 
     font-size: 12px;
 }
-
 
 .search-box input::placeholder {
     color: #aaacb3;
@@ -904,7 +799,6 @@ a {
 
     margin-bottom: 30px;
 }
-
 
 .filter-button {
     padding:
@@ -932,7 +826,6 @@ a {
         transform 0.2s ease;
 }
 
-
 .filter-button:hover {
     border-color: #a9aee2;
 
@@ -941,7 +834,6 @@ a {
     transform:
         translateY(-1px);
 }
-
 
 .filter-button.active {
     background: #20242c;
@@ -997,7 +889,6 @@ a {
         transform;
 }
 
-
 .book-card.show {
     opacity: 1;
 
@@ -1005,11 +896,9 @@ a {
         translateY(0);
 }
 
-
 .book-card.hide {
     display: none;
 }
-
 
 .book-card-link {
     display: block;
@@ -1053,7 +942,6 @@ a {
         box-shadow 0.45s ease;
 }
 
-
 .book-card-link:hover
 .book-cover-wrapper {
     transform:
@@ -1067,7 +955,6 @@ a {
             0.18
         );
 }
-
 
 .book-cover {
     width: 100%;
@@ -1086,7 +973,6 @@ a {
         );
 }
 
-
 .book-card-link:hover
 .book-cover {
     transform:
@@ -1095,7 +981,7 @@ a {
 
 
 /* ==========================================================
-   COURSE HOVER OVERLAY
+   COURSE HOVER
 ========================================================== */
 
 .book-hover {
@@ -1123,12 +1009,10 @@ a {
         opacity 0.35s ease;
 }
 
-
 .book-card-link:hover
 .book-hover {
     opacity: 1;
 }
-
 
 .open-button {
     width: 100%;
@@ -1136,7 +1020,6 @@ a {
     height: 42px;
 
     display: flex;
-
     align-items: center;
 
     justify-content: space-between;
@@ -1169,13 +1052,11 @@ a {
         transform 0.35s ease;
 }
 
-
 .book-card-link:hover
 .open-button {
     transform:
         translateY(0);
 }
-
 
 .open-arrow {
     font-size: 17px;
@@ -1193,7 +1074,6 @@ a {
         15px 2px 0;
 }
 
-
 .book-language {
     color: #92959d;
 
@@ -1206,7 +1086,6 @@ a {
     margin-bottom: 6px;
 }
 
-
 .book-title {
     color: #1e222a;
 
@@ -1218,7 +1097,6 @@ a {
 
     letter-spacing: -0.3px;
 }
-
 
 .book-level {
     color: #92959d;
@@ -1242,11 +1120,9 @@ a {
         90px 20px;
 }
 
-
 .no-results.visible {
     display: block;
 }
-
 
 .no-results-circle {
     width: 55px;
@@ -1270,13 +1146,11 @@ a {
     font-size: 23px;
 }
 
-
 .no-results h3 {
     font-size: 16px;
 
     margin-bottom: 5px;
 }
-
 
 .no-results p {
     color: #999ca4;
@@ -1366,17 +1240,14 @@ a {
             translateX(-100%);
     }
 
-
     .sidebar.mobile-open {
         transform:
             translateX(0);
     }
 
-
     .sidebar.collapsed {
         width: 270px;
     }
-
 
     .sidebar-backdrop.active {
         display: block;
@@ -1384,12 +1255,10 @@ a {
         opacity: 1;
     }
 
-
     .main,
     .sidebar.collapsed + .main {
         margin-left: 0;
     }
-
 
     .top-header {
         height: 68px;
@@ -1398,33 +1267,9 @@ a {
             0 20px;
     }
 
-
     .header-status {
         display: none;
     }
-
-
-    .header-title {
-        margin-left: 12px;
-    }
-
-
-    .header-title strong {
-        font-size: 13px;
-    }
-
-
-    .header-login {
-        margin-left: auto;
-
-        min-height: 37px;
-
-        padding:
-            0 13px;
-
-        font-size: 10px;
-    }
-
 
     .hero {
         min-height: 310px;
@@ -1433,13 +1278,11 @@ a {
             50px 24px;
     }
 
-
     .hero h1 {
         font-size: 39px;
 
         letter-spacing: -2px;
     }
-
 
     .library {
         padding:
@@ -1447,18 +1290,15 @@ a {
             60px;
     }
 
-
     .library-header {
         flex-direction: column;
 
         align-items: stretch;
     }
 
-
     .search-box {
         width: 100%;
     }
-
 
     .book-grid {
         grid-template-columns:
@@ -1474,11 +1314,65 @@ a {
             28px 14px;
     }
 
-
     .footer {
         padding:
             20px;
 
         flex-direction: column;
 
-  
+        align-items: flex-start;
+
+        gap: 7px;
+    }
+
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+========================================================== */
+
+@media (max-width: 430px) {
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .hero p {
+        font-size: 13px;
+    }
+
+    .book-title {
+        font-size: 13px;
+    }
+
+    .book-level {
+        font-size: 10px;
+    }
+
+    .book-language {
+        font-size: 7px;
+    }
+
+}
+
+
+/* ==========================================================
+   REDUCED MOTION
+========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation: none !important;
+
+        transition: none !important;
+
+        scroll-behavior: auto !important;
+
+    }
+
+       }
