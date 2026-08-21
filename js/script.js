@@ -8,18 +8,15 @@
    COURSE DATABASE
 ==========================================================
 
-   Add new courses here.
+   Add your courses here.
 
-   categoryKey:
-   language / ms-office / trading /
-   technology / business / finance /
-   personal-development
+   category:
+   language / ms-office / trading / business /
+   technology / finance / personal-development
 
-   programmeKey:
-   autonomous / guided / blended
+   The URL is the URL of the individual
+   course platform/page.
 
-   url:
-   URL of the individual course platform/page.
 ========================================================== */
 
 
@@ -34,8 +31,6 @@ const courses = [
         level: "Beginner",
         category: "Language",
         categoryKey: "language",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/english-a1.jpg",
         url: "https://hwa1.vercel.app"
     },
@@ -45,10 +40,26 @@ const courses = [
         level: "Elementary",
         category: "Language",
         categoryKey: "language",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/english-a2.jpg",
         url: "https://hwa2.vercel.app"
+    },
+
+    {
+        title: "English B1",
+        level: "Pre-Intermediate",
+        category: "Language",
+        categoryKey: "language",
+        cover: "images/books/english-b1.jpg",
+        url: "https://YOUR-ENGLISH-B1-SITE.vercel.app"
+    },
+
+    {
+        title: "English B2",
+        level: "Intermediate",
+        category: "Language",
+        categoryKey: "language",
+        cover: "images/books/english-b1plus.jpg",
+        url: "https://test1965.vercel.app"
     },
 
     {
@@ -56,10 +67,17 @@ const courses = [
         level: "Beginner",
         category: "Language",
         categoryKey: "language",
-        programme: "Blended",
-        programmeKey: "blended",
         cover: "images/books/french-a1.jpg",
-        url: "#"
+        url: "https://YOUR-FRENCH-A1-SITE.vercel.app"
+    },
+
+    {
+        title: "French A2",
+        level: "Elementary",
+        category: "Language",
+        categoryKey: "language",
+        cover: "images/books/french-a2.jpg",
+        url: "https://YOUR-FRENCH-A2-SITE.vercel.app"
     },
 
     {
@@ -67,10 +85,17 @@ const courses = [
         level: "Beginner",
         category: "Language",
         categoryKey: "language",
-        programme: "Guided",
-        programmeKey: "guided",
         cover: "images/books/portuguese-a1.jpg",
-        url: "#"
+        url: "https://YOUR-PORTUGUESE-A1-SITE.vercel.app"
+    },
+
+    {
+        title: "Spanish A1",
+        level: "Beginner",
+        category: "Language",
+        categoryKey: "language",
+        cover: "images/books/spanish-a1.jpg",
+        url: "https://YOUR-SPANISH-A1-SITE.vercel.app"
     },
 
 
@@ -80,35 +105,38 @@ const courses = [
 
     {
         title: "Microsoft Word",
-        level: "Complete Course",
+        level: "Beginner",
         category: "MS Office",
         categoryKey: "ms-office",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/ms-word.jpg",
-        url: "#"
+        url: "https://YOUR-WORD-COURSE.vercel.app"
     },
 
     {
         title: "Microsoft Excel",
-        level: "Beginner to Advanced",
+        level: "Beginner",
         category: "MS Office",
         categoryKey: "ms-office",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/ms-excel.jpg",
-        url: "#"
+        url: "https://YOUR-EXCEL-COURSE.vercel.app"
+    },
+
+    {
+        title: "Microsoft Excel Advanced",
+        level: "Advanced",
+        category: "MS Office",
+        categoryKey: "ms-office",
+        cover: "images/books/ms-excel-advanced.jpg",
+        url: "https://YOUR-EXCEL-ADVANCED-COURSE.vercel.app"
     },
 
     {
         title: "Microsoft PowerPoint",
-        level: "Complete Course",
+        level: "Beginner",
         category: "MS Office",
         categoryKey: "ms-office",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/ms-powerpoint.jpg",
-        url: "#"
+        url: "https://YOUR-POWERPOINT-COURSE.vercel.app"
     },
 
 
@@ -121,10 +149,8 @@ const courses = [
         level: "Beginner",
         category: "Trading",
         categoryKey: "trading",
-        programme: "Blended",
-        programmeKey: "blended",
         cover: "images/books/trading-fundamentals.jpg",
-        url: "#"
+        url: "https://YOUR-TRADING-FUNDAMENTALS.vercel.app"
     },
 
     {
@@ -132,37 +158,17 @@ const courses = [
         level: "Intermediate",
         category: "Trading",
         categoryKey: "trading",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/technical-analysis.jpg",
-        url: "#"
-    },
-
-
-    /* ======================================================
-       TECHNOLOGY
-    ====================================================== */
-
-    {
-        title: "Web Development",
-        level: "Beginner",
-        category: "Technology",
-        categoryKey: "technology",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
-        cover: "images/books/web-development.jpg",
-        url: "#"
+        url: "https://YOUR-TECHNICAL-ANALYSIS.vercel.app"
     },
 
     {
-        title: "Programming Fundamentals",
-        level: "Beginner",
-        category: "Technology",
-        categoryKey: "technology",
-        programme: "Blended",
-        programmeKey: "blended",
-        cover: "images/books/programming.jpg",
-        url: "#"
+        title: "Risk Management",
+        level: "Intermediate",
+        category: "Trading",
+        categoryKey: "trading",
+        cover: "images/books/risk-management.jpg",
+        url: "https://YOUR-RISK-MANAGEMENT.vercel.app"
     },
 
 
@@ -172,24 +178,52 @@ const courses = [
 
     {
         title: "Business Fundamentals",
-        level: "Complete Course",
+        level: "Beginner",
         category: "Business",
         categoryKey: "business",
-        programme: "Blended",
-        programmeKey: "blended",
-        cover: "images/books/business.jpg",
-        url: "#"
+        cover: "images/books/business-fundamentals.jpg",
+        url: "https://YOUR-BUSINESS-COURSE.vercel.app"
     },
 
     {
-        title: "Business Communication",
-        level: "Professional",
+        title: "Entrepreneurship",
+        level: "Beginner",
         category: "Business",
         categoryKey: "business",
-        programme: "Guided",
-        programmeKey: "guided",
-        cover: "images/books/business-communication.jpg",
-        url: "#"
+        cover: "images/books/entrepreneurship.jpg",
+        url: "https://YOUR-ENTREPRENEURSHIP-COURSE.vercel.app"
+    },
+
+
+    /* ======================================================
+       TECHNOLOGY
+    ====================================================== */
+
+    {
+        title: "Computer Fundamentals",
+        level: "Beginner",
+        category: "Technology",
+        categoryKey: "technology",
+        cover: "images/books/computer-fundamentals.jpg",
+        url: "https://YOUR-COMPUTER-COURSE.vercel.app"
+    },
+
+    {
+        title: "Web Development",
+        level: "Beginner",
+        category: "Technology",
+        categoryKey: "technology",
+        cover: "images/books/web-development.jpg",
+        url: "https://YOUR-WEB-DEVELOPMENT-COURSE.vercel.app"
+    },
+
+    {
+        title: "Artificial Intelligence",
+        level: "Beginner",
+        category: "Technology",
+        categoryKey: "technology",
+        cover: "images/books/artificial-intelligence.jpg",
+        url: "https://YOUR-AI-COURSE.vercel.app"
     },
 
 
@@ -202,21 +236,17 @@ const courses = [
         level: "Beginner",
         category: "Finance",
         categoryKey: "finance",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
         cover: "images/books/personal-finance.jpg",
-        url: "#"
+        url: "https://YOUR-PERSONAL-FINANCE-COURSE.vercel.app"
     },
 
     {
-        title: "Financial Markets",
-        level: "Intermediate",
+        title: "Financial Literacy",
+        level: "Beginner",
         category: "Finance",
         categoryKey: "finance",
-        programme: "Blended",
-        programmeKey: "blended",
-        cover: "images/books/financial-markets.jpg",
-        url: "#"
+        cover: "images/books/financial-literacy.jpg",
+        url: "https://YOUR-FINANCIAL-LITERACY-COURSE.vercel.app"
     },
 
 
@@ -225,25 +255,21 @@ const courses = [
     ====================================================== */
 
     {
-        title: "Productivity",
-        level: "Complete Course",
+        title: "Communication Skills",
+        level: "Beginner",
         category: "Personal Development",
         categoryKey: "personal-development",
-        programme: "Autonomous",
-        programmeKey: "autonomous",
-        cover: "images/books/productivity.jpg",
-        url: "#"
+        cover: "images/books/communication.jpg",
+        url: "https://YOUR-COMMUNICATION-COURSE.vercel.app"
     },
 
     {
-        title: "Communication Skills",
-        level: "Professional",
+        title: "Time Management",
+        level: "Beginner",
         category: "Personal Development",
         categoryKey: "personal-development",
-        programme: "Guided",
-        programmeKey: "guided",
-        cover: "images/books/communication.jpg",
-        url: "#"
+        cover: "images/books/time-management.jpg",
+        url: "https://YOUR-TIME-MANAGEMENT-COURSE.vercel.app"
     }
 
 ];
@@ -322,16 +348,13 @@ if (year) {
 
 function createCourseCards() {
 
-    if (!bookGrid) {
-        return;
-    }
-
+    if (!bookGrid) return;
 
     bookGrid.innerHTML = "";
 
 
     courses.forEach(
-        (course) => {
+        course => {
 
             const article =
                 document.createElement("article");
@@ -345,50 +368,20 @@ function createCourseCards() {
                 course.categoryKey;
 
 
-            /*
-                Keep the old data attributes too.
-                This makes the new system compatible
-                with the existing CSS/HTML structure.
-            */
-
-            article.dataset.language =
-                course.categoryKey;
-
-
-            article.dataset.programme =
-                course.programmeKey;
-
-
             article.dataset.search =
                 (
                     course.title +
                     " " +
                     course.level +
                     " " +
-                    course.category +
-                    " " +
-                    course.programme
+                    course.category
                 ).toLowerCase();
-
-
-            /*
-                A real URL opens normally.
-
-                "#" courses are still displayed,
-                but clicking them does not send the
-                user to a broken page.
-            */
-
-            const courseURL =
-                course.url && course.url !== "#"
-                    ? course.url
-                    : "#";
 
 
             article.innerHTML = `
 
                 <a
-                    href="${courseURL}"
+                    href="${course.url}"
                     class="book-card-link"
                     target="_self"
                     aria-label="Open ${course.title}"
@@ -426,19 +419,23 @@ function createCourseCards() {
                     <div class="book-information">
 
                         <div class="book-language">
+
                             ${course.category.toUpperCase()}
-                            ·
-                            ${course.programme.toUpperCase()}
+
                         </div>
 
 
                         <div class="book-title">
+
                             ${course.title}
+
                         </div>
 
 
                         <div class="book-level">
+
                             ${course.level}
+
                         </div>
 
                     </div>
@@ -448,34 +445,7 @@ function createCourseCards() {
             `;
 
 
-            /*
-                Prevent "#" courses from jumping
-                to the top of the page.
-            */
-
-            if (courseURL === "#") {
-
-                const link =
-                    article.querySelector(
-                        ".book-card-link"
-                    );
-
-
-                link.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-                    }
-                );
-
-            }
-
-
-            bookGrid.appendChild(
-                article
-            );
+            bookGrid.appendChild(article);
 
         }
     );
@@ -491,11 +461,9 @@ function createCourseCards() {
    FILTER COURSES
 ========================================================== */
 
-function filterCourses() {
+function filterBooks() {
 
-    if (!bookGrid) {
-        return;
-    }
+    if (!bookGrid) return;
 
 
     const cards =
@@ -512,10 +480,6 @@ function filterCourses() {
 
             const category =
                 card.dataset.category;
-
-
-            const programme =
-                card.dataset.programme;
 
 
             const searchableText =
@@ -539,25 +503,514 @@ function filterCourses() {
 
 
             /*
-                LEARNING MODE
+                CATEGORY
             */
 
-            else if (
-                activeFilter === "autonomous" ||
-                activeFilter === "blended" ||
-                activeFilter === "guided"
-            ) {
+            else {
 
                 matchesFilter =
-                    programme === activeFilter;
+                    category === activeFilter;
 
             }
 
 
             /*
-                COURSE CATEGORY
+                SEARCH
+            */
+
+            const matchesSearch =
+                searchTerm === "" ||
+                searchableText.includes(
+                    searchTerm
+                );
+
+
+            /*
+                FINAL RESULT
+            */
+
+            const visible =
+                matchesFilter &&
+                matchesSearch;
+
+
+            if (visible) {
+
+                card.classList.remove(
+                    "hide"
+                );
+
+                visibleCount++;
+
+            }
+
+            else {
+
+                card.classList.add(
+                    "hide"
+                );
+
+                card.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+        NO RESULTS
+    */
+
+    if (noResults) {
+
+        if (visibleCount === 0) {
+
+            noResults.classList.add(
+                "visible"
+            );
+
+        }
+
+        else {
+
+            noResults.classList.remove(
+                "visible"
+            );
+
+        }
+
+    }
+
+
+    /*
+        Animate visible cards
+    */
+
+    requestAnimationFrame(
+        () => {
+
+            document
+                .querySelectorAll(
+                    ".book-card:not(.hide)"
+                )
+                .forEach(
+                    (card, index) => {
+
+                        card.style.transitionDelay =
+                            `${index * 0.045}s`;
+
+
+                        requestAnimationFrame(
+                            () => {
+
+                                card.classList.add(
+                                    "show"
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+    );
+
+}
+
+
+
+/* ==========================================================
+   CATEGORY TITLES
+========================================================== */
+
+const titles = {
+
+    all:
+        "All Courses",
+
+    language:
+        "Language",
+
+    "ms-office":
+        "MS Office",
+
+    trading:
+        "Trading",
+
+    business:
+        "Business",
+
+    technology:
+        "Technology",
+
+    finance:
+        "Finance",
+
+    "personal-development":
+        "Personal Development"
+
+};
+
+
+
+/* ==========================================================
+   CHANGE TITLE
+========================================================== */
+
+function changeTitle(
+    filter
+) {
+
+    if (!libraryTitle) return;
+
+
+    libraryTitle.textContent =
+        titles[filter] ||
+        "All Courses";
+
+}
+
+
+
+/* ==========================================================
+   SET ACTIVE FILTER
+========================================================== */
+
+function setFilter(
+    filter
+) {
+
+    activeFilter =
+        filter;
+
+
+    /*
+        Sidebar navigation
+    */
+
+    navigationButtons.forEach(
+        button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.filter === filter
+            );
+
+        }
+    );
+
+
+    /*
+        Filter buttons
+    */
+
+    filterButtons.forEach(
+        button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.filter === filter
+            );
+
+        }
+    );
+
+
+    changeTitle(filter);
+
+    filterBooks();
+
+}
+
+
+
+/* ==========================================================
+   SIDEBAR NAVIGATION
+========================================================== */
+
+navigationButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                setFilter(
+                    button.dataset.filter
+                );
+
+
+                /*
+                    Close mobile sidebar
+                */
+
+                if (
+                    window.innerWidth <= 768
+                ) {
+
+                    closeMobileSidebar();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+
+/* ==========================================================
+   FILTER BUTTONS
+========================================================== */
+
+filterButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                setFilter(
+                    button.dataset.filter
+                );
+
+            }
+        );
+
+    }
+);
+
+
+
+/* ==========================================================
+   SEARCH
+========================================================== */
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        event => {
+
+            searchTerm =
+                event.target.value
+                    .toLowerCase()
+                    .trim();
+
+
+            filterBooks();
+
+        }
+    );
+
+}
+
+
+
+/* ==========================================================
+   SIDEBAR TOGGLE
+========================================================== */
+
+if (menuButton) {
+
+    menuButton.addEventListener(
+        "click",
+        () => {
+
+            /*
+                DESKTOP
+            */
+
+            if (
+                window.innerWidth > 768
+            ) {
+
+                sidebar.classList.toggle(
+                    "collapsed"
+                );
+
+            }
+
+
+            /*
+                MOBILE
             */
 
             else {
 
-                matchesFilter
+                sidebar.classList.toggle(
+                    "mobile-open"
+                );
+
+
+                backdrop.classList.toggle(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* ==========================================================
+   CLOSE MOBILE SIDEBAR
+========================================================== */
+
+function closeMobileSidebar() {
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
+            "mobile-open"
+        );
+
+    }
+
+
+    if (backdrop) {
+
+        backdrop.classList.remove(
+            "active"
+        );
+
+    }
+
+}
+
+
+
+if (backdrop) {
+
+    backdrop.addEventListener(
+        "click",
+        closeMobileSidebar
+    );
+
+}
+
+
+
+/* ==========================================================
+   ESCAPE KEY
+========================================================== */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeMobileSidebar();
+
+        }
+
+    }
+);
+
+
+
+/* ==========================================================
+   SCROLL ANIMATION
+========================================================== */
+
+let cardObserver;
+
+
+function observeCards() {
+
+    /*
+        Disconnect previous observer
+    */
+
+    if (cardObserver) {
+
+        cardObserver.disconnect();
+
+    }
+
+
+    /*
+        Intersection Observer
+    */
+
+    if (
+        !("IntersectionObserver" in window)
+    ) {
+
+        document
+            .querySelectorAll(
+                ".book-card"
+            )
+            .forEach(
+                card => {
+
+                    card.classList.add(
+                        "show"
+                    );
+
+                }
+            );
+
+        return;
+
+    }
+
+
+    cardObserver =
+        new IntersectionObserver(
+            entries => {
+
+                entries.forEach(
+                    entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.classList.add(
+                                "show"
+                            );
+
+
+                            cardObserver.unobserve(
+                                entry.target
+                            );
+
+                        }
+
+                    }
+                );
+
+            },
+            {
+                threshold: 0.12,
+
+                rootMargin:
+                    "0px 0px -50px 0px"
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".book-card:not(.hide)"
+        )
+        .forEach(
+            card => {
+
+                cardObserver.observe(
+                    card
+                );
+
+  
