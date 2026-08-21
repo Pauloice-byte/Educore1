@@ -1001,5 +1001,76 @@ function observeCards() {
             }
         );
 
+========================================================
+   INITIALISE
+========================================================== */
 
+createBookCards();
+
+setFilter("all");
+
+
+
+/* ==========================================================
+   KEYBOARD SEARCH
+==========================================================
+
+   Press "/" to activate search.
+
+========================================================== */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "/" &&
+            document.activeElement.tagName !== "INPUT"
+        ) {
+
+            event.preventDefault();
+
+            searchInput.focus();
+
+        }
+
+
+        if (
+            event.key === "Escape" &&
+            document.activeElement === searchInput
+        ) {
+
+            searchInput.value = "";
+
+            searchTerm = "";
+
+            filterBooks();
+
+            searchInput.blur();
+
+        }
+
+    }
+);
+
+
+
+/* ==========================================================
+   HANDLE WINDOW RESIZE
+========================================================== */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        if (
+            window.innerWidth > 768
+        ) {
+
+            closeMobileSidebar();
+
+        }
+
+    }
+);
    
