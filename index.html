@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,18 +9,17 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>EduCore | Autonomous Learning</title>
+    <title>EduCore | Autonomous Learning Platform</title>
 
     <meta
         name="description"
-        content="EduCore is an AI-powered autonomous learning platform where students learn through structured courses, practice and intelligent support."
+        content="EduCore autonomous learning platform. Learn through structured courses, AI support and expert teaching."
     >
 
     <link
         rel="stylesheet"
         href="css/style.css"
     >
-
 </head>
 
 
@@ -36,6 +34,7 @@
         class="sidebar-backdrop"
         id="sidebarBackdrop"
     ></div>
+
 
 
     <!-- =====================================================
@@ -54,15 +53,20 @@
 
         <div class="sidebar-brand">
 
-            <div class="edcore-logo">
-                EC
-            </div>
-
+            <img
+                src="images/logo.jpg"
+                alt="EduCore"
+                class="logo"
+            >
 
             <div class="brand-information">
 
                 <div class="brand-name">
                     EduCore
+                </div>
+
+                <div class="brand-name">
+                    Learning
                 </div>
 
                 <div class="brand-subtitle">
@@ -83,7 +87,7 @@
 
 
             <!-- =================================================
-                 COURSE CATEGORIES
+                 COURSES
             ================================================== -->
 
             <div class="navigation-section">
@@ -93,11 +97,10 @@
                 </div>
 
 
-                <!-- ALL COURSES -->
-
                 <button
                     class="navigation-button active"
                     data-filter="all"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
@@ -111,47 +114,44 @@
                 </button>
 
 
-                <!-- LANGUAGES -->
-
                 <button
                     class="navigation-button"
-                    data-filter="languages"
+                    data-filter="language"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        ◉
+                        A
                     </span>
 
                     <span>
-                        Languages
+                        Language
                     </span>
 
                 </button>
 
 
-                <!-- MICROSOFT OFFICE -->
-
                 <button
                     class="navigation-button"
-                    data-filter="microsoft-office"
+                    data-filter="ms-office"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        ◆
+                        ▣
                     </span>
 
                     <span>
-                        Microsoft Office
+                        MS Office
                     </span>
 
                 </button>
 
-
-                <!-- TRADING -->
 
                 <button
                     class="navigation-button"
                     data-filter="trading"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
@@ -165,33 +165,31 @@
                 </button>
 
 
-                <!-- PROGRAMMING -->
-
                 <button
                     class="navigation-button"
-                    data-filter="programming"
+                    data-filter="technology"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        &lt;/&gt;
+                        ◉
                     </span>
 
                     <span>
-                        Programming
+                        Technology
                     </span>
 
                 </button>
 
 
-                <!-- BUSINESS -->
-
                 <button
                     class="navigation-button"
                     data-filter="business"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        ●
+                        ◆
                     </span>
 
                     <span>
@@ -201,51 +199,14 @@
                 </button>
 
 
-                <!-- MARKETING -->
-
-                <button
-                    class="navigation-button"
-                    data-filter="marketing"
-                >
-
-                    <span class="navigation-symbol">
-                        ◆
-                    </span>
-
-                    <span>
-                        Marketing
-                    </span>
-
-                </button>
-
-
-                <!-- AI & TECHNOLOGY -->
-
-                <button
-                    class="navigation-button"
-                    data-filter="ai"
-                >
-
-                    <span class="navigation-symbol">
-                        ✦
-                    </span>
-
-                    <span>
-                        AI & Technology
-                    </span>
-
-                </button>
-
-
-                <!-- FINANCE -->
-
                 <button
                     class="navigation-button"
                     data-filter="finance"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        ◇
+                        $
                     </span>
 
                     <span>
@@ -255,19 +216,83 @@
                 </button>
 
 
-                <!-- DESIGN -->
-
                 <button
                     class="navigation-button"
-                    data-filter="design"
+                    data-filter="personal-development"
+                    type="button"
                 >
 
                     <span class="navigation-symbol">
-                        ✧
+                        +
                     </span>
 
                     <span>
-                        Design
+                        Personal Development
+                    </span>
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 LEARNING MODES
+            ================================================== -->
+
+            <div class="navigation-section">
+
+                <div class="navigation-heading">
+                    LEARNING MODE
+                </div>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="autonomous"
+                    type="button"
+                >
+
+                    <span class="navigation-symbol">
+                        AI
+                    </span>
+
+                    <span>
+                        Autonomous
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="blended"
+                    type="button"
+                >
+
+                    <span class="navigation-symbol">
+                        ◐
+                    </span>
+
+                    <span>
+                        Blended
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="guided"
+                    type="button"
+                >
+
+                    <span class="navigation-symbol">
+                        ●
+                    </span>
+
+                    <span>
+                        Guided
                     </span>
 
                 </button>
@@ -317,12 +342,13 @@
         <header class="top-header">
 
 
-            <!-- MENU -->
-
             <button
                 class="menu-button"
                 id="menuButton"
+                type="button"
                 aria-label="Toggle navigation"
+                aria-controls="sidebar"
+                aria-expanded="false"
             >
 
                 <span></span>
@@ -331,9 +357,6 @@
 
             </button>
 
-
-
-            <!-- HEADER TITLE -->
 
             <div class="header-title">
 
@@ -348,9 +371,6 @@
             </div>
 
 
-
-            <!-- PLATFORM STATUS -->
-
             <div class="header-status">
 
                 <span class="online-dot"></span>
@@ -362,12 +382,22 @@
             </div>
 
 
-
             <!-- LOGIN -->
 
             <a
                 href="login.html"
                 class="header-login"
+                style="
+                    margin-left: 25px;
+                    padding: 9px 17px;
+                    border: 1px solid #e1e2e6;
+                    border-radius: 9px;
+                    background: white;
+                    color: #20242c;
+                    font-size: 11px;
+                    font-weight: 700;
+                    white-space: nowrap;
+                "
             >
                 Log in
             </a>
@@ -387,7 +417,6 @@
                 class="hero-background-circle circle-one"
             ></div>
 
-
             <div
                 class="hero-background-circle circle-two"
             ></div>
@@ -395,257 +424,4 @@
 
             <div class="hero-content">
 
-                <div class="hero-label">
-                    AI-POWERED AUTONOMOUS LEARNING
-                </div>
-
-
-                <h1>
-
-                    Learn independently.
-                    <span>
-                        Progress intelligently.
-                    </span>
-
-                </h1>
-
-
-                <p>
-
-                    Structured courses, practical exercises,
-                    immediate feedback and AI-powered support —
-                    designed to help you learn at your own pace.
-
-                </p>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             COURSE LIBRARY
-        ================================================== -->
-
-        <section class="library">
-
-
-            <!-- =================================================
-                 SECTION HEADER
-            ================================================== -->
-
-            <div class="library-header">
-
-                <div>
-
-                    <div class="library-label">
-                        COURSE LIBRARY
-                    </div>
-
-
-                    <h2 id="libraryTitle">
-                        All Courses
-                    </h2>
-
-                </div>
-
-
-
-                <!-- SEARCH -->
-
-                <div class="search-box">
-
-                    <span class="search-symbol">
-                        ⌕
-                    </span>
-
-
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Search courses..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 CATEGORY FILTERS
-            ================================================== -->
-
-            <div
-                class="filter-bar"
-                id="filterBar"
-            >
-
-
-                <button
-                    class="filter-button active"
-                    data-filter="all"
-                >
-                    All
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="languages"
-                >
-                    Languages
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="microsoft-office"
-                >
-                    Microsoft Office
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="trading"
-                >
-                    Trading
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="programming"
-                >
-                    Programming
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="business"
-                >
-                    Business
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="marketing"
-                >
-                    Marketing
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="ai"
-                >
-                    AI & Technology
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="finance"
-                >
-                    Finance
-                </button>
-
-
-                <button
-                    class="filter-button"
-                    data-filter="design"
-                >
-                    Design
-                </button>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 COURSES
-            ================================================== -->
-
-            <div
-                class="book-grid"
-                id="bookGrid"
-            >
-
-                <!--
-                    JavaScript creates the course cards here.
-                -->
-
-            </div>
-
-
-
-            <!-- =================================================
-                 NO RESULTS
-            ================================================== -->
-
-            <div
-                class="no-results"
-                id="noResults"
-            >
-
-                <div class="no-results-circle">
-                    ⌕
-                </div>
-
-
-                <h3>
-                    No courses found
-                </h3>
-
-
-                <p>
-                    Try another search or category.
-                </p>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             FOOTER
-        ================================================== -->
-
-        <footer class="footer">
-
-            <span>
-
-                ©
-                <span id="year"></span>
-                EduCore
-
-            </span>
-
-
-            <span>
-                Autonomous Learning Platform
-            </span>
-
-        </footer>
-
-
-    </main>
-
-
-
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
-
-    <script src="js/script.js"></script>
-
-
-</body>
-
-    </html>
+               
