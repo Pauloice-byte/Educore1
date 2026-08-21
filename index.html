@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        content="width=device-width, initial-scale=1.0"
     >
+
+    <title>Academia Poliglota | Teaching Platform</title>
 
     <meta
-        name="theme-color"
-        content="#0f172a"
+        name="description"
+        content="Academia Poliglota digital teaching materials platform."
     >
-
-    <title>AP Teacher — English Course</title>
 
     <link
         rel="stylesheet"
@@ -21,688 +22,535 @@
     >
 </head>
 
+
 <body>
 
-<div id="app">
 
-    <!-- MOBILE HEADER -->
-    <header class="mobile-header">
+    <!-- =====================================================
+         MOBILE BACKDROP
+    ====================================================== -->
 
-        <button
-            id="mobile-menu-button"
-            class="icon-button"
-            aria-label="Open menu"
-        >
-            ☰
-        </button>
-
-        <div class="mobile-brand">
-            AP <span>Teacher</span>
-        </div>
-
-        <button
-            id="mobile-profile-button"
-            class="profile-mini"
-            aria-label="Profile"
-        >
-            P
-        </button>
-
-    </header>
+    <div
+        class="sidebar-backdrop"
+        id="sidebarBackdrop"
+    ></div>
 
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar">
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-        <div class="brand">
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
 
-            <div class="brand-mark">
-                AP
+        <!-- LOGO -->
+
+        <div class="sidebar-brand">
+
+            <img
+                src="images/logo.jpg"
+                alt="Academia Poliglota"
+                class="logo"
+            >
+
+            <div class="brand-information">
+
+                <div class="brand-name">
+                    Academia
+                </div>
+
+                <div class="brand-name">
+                    Poliglota
+                </div>
+
+                <div class="brand-subtitle">
+                    Teaching Platform
+                </div>
+
             </div>
 
-            <div>
-                <strong>AP Teacher</strong>
-                <span>Learning Platform</span>
-            </div>
-
         </div>
 
 
-        <nav class="main-navigation">
+        <!-- NAVIGATION -->
 
-            <button
-                class="nav-item active"
-                data-page="dashboard"
-            >
-                <span>⌂</span>
-                <span data-i18n="dashboard">Dashboard</span>
-            </button>
+        <nav class="sidebar-navigation">
 
-            <button
-                class="nav-item"
-                data-page="course"
-            >
-                <span>▣</span>
-                <span data-i18n="myCourse">My Course</span>
-            </button>
 
-            <button
-                class="nav-item"
-                data-page="progress"
-            >
-                <span>◔</span>
-                <span data-i18n="progress">Progress</span>
-            </button>
+            <!-- PROGRAMMES -->
+
+            <div class="navigation-section">
+
+                <div class="navigation-heading">
+                    PROGRAMMES
+                </div>
+
+
+                <button
+                    class="navigation-button active"
+                    data-filter="all"
+                >
+
+                    <span class="navigation-symbol">
+                        ◈
+                    </span>
+
+                    <span>
+                        All Materials
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="kids"
+                >
+
+                    <span class="navigation-symbol">
+                        ●
+                    </span>
+
+                    <span>
+                        Kids
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="teens"
+                >
+
+                    <span class="navigation-symbol">
+                        ◆
+                    </span>
+
+                    <span>
+                        Teens
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="adults"
+                >
+
+                    <span class="navigation-symbol">
+                        ●
+                    </span>
+
+                    <span>
+                        Adults
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <!-- LANGUAGES -->
+
+            <div class="navigation-section">
+
+                <div class="navigation-heading">
+                    LANGUAGES
+                </div>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="english"
+                >
+
+                    <span class="language-dot english"></span>
+
+                    <span>
+                        English
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="french"
+                >
+
+                    <span class="language-dot french"></span>
+
+                    <span>
+                        French
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="portuguese"
+                >
+
+                    <span class="language-dot portuguese"></span>
+
+                    <span>
+                        Portuguese
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="mandarin"
+                >
+
+                    <span class="language-dot mandarin"></span>
+
+                    <span>
+                        Mandarin
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="arabic"
+                >
+
+                    <span class="language-dot arabic"></span>
+
+                    <span>
+                        Arabic
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    data-filter="spanish"
+                >
+
+                    <span class="language-dot spanish"></span>
+
+                    <span>
+                        Spanish
+                    </span>
+
+                </button>
+
+            </div>
 
         </nav>
 
 
-        <div class="sidebar-course">
+        <!-- SIDEBAR FOOTER -->
 
-            <div class="sidebar-course-label">
-                CURRENT COURSE
+        <div class="sidebar-footer">
+
+            <div class="sidebar-footer-line"></div>
+
+            <div>
+                ACADEMIA POLIGLOTA
             </div>
 
-            <strong>English Course</strong>
-
-            <div class="sidebar-progress">
-
-                <div class="progress-track">
-                    <div
-                        id="sidebar-progress"
-                        class="progress-fill"
-                    ></div>
-                </div>
-
-                <span id="sidebar-progress-text">
-                    0%
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="sidebar-bottom">
-
-            <button class="sidebar-option">
-                ⚙
-                <span data-i18n="settings">
-                    Settings
-                </span>
-            </button>
-
-            <button class="sidebar-option">
-                ?
-                <span data-i18n="help">
-                    Help
-                </span>
-            </button>
+            <small>
+                Digital Teaching Materials
+            </small>
 
         </div>
 
     </aside>
 
 
-    <!-- MAIN -->
-    <main class="main">
 
-        <!-- DASHBOARD -->
-        <section
-            id="dashboard-page"
-            class="page"
-        >
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
 
-            <div class="page-header">
+    <main
+        class="main"
+        id="main"
+    >
 
-                <div>
 
-                    <span class="eyebrow">
-                        YOUR LEARNING SPACE
-                    </span>
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
-                    <h1>
-                        <span data-i18n="welcome">
-                            Welcome back
-                        </span>,
-                        Paulo
-                    </h1>
+        <header class="top-header">
 
-                    <p data-i18n="dashboardSubtitle">
-                        Continue your English learning journey.
-                    </p>
 
-                </div>
+            <button
+                class="menu-button"
+                id="menuButton"
+                aria-label="Toggle navigation"
+            >
 
-                <div class="language-selector">
+                <span></span>
+                <span></span>
+                <span></span>
 
-                    <span>🌐</span>
+            </button>
 
-                    <select id="language-selector">
-                        <option value="en">English</option>
-                        <option value="pt">Português</option>
-                        <option value="fr">Français</option>
-                        <option value="es">Español</option>
-                    </select>
 
-                </div>
+            <div class="header-title">
+
+                <span>
+                    ACADEMIA POLIGLOTA
+                </span>
+
+                <strong>
+                    Teaching Materials
+                </strong>
 
             </div>
 
 
-            <!-- CONTINUE CARD -->
-            <div class="continue-card">
+            <div class="header-status">
 
-                <div class="continue-content">
+                <span class="online-dot"></span>
 
-                    <span class="continue-label">
-                        CONTINUE LEARNING
-                    </span>
+                <span>
+                    Platform Online
+                </span>
 
-                    <h2 id="dashboard-lesson-title">
-                        Unit 1 · Lesson 1
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="hero">
+
+
+            <div class="hero-background-circle circle-one"></div>
+
+            <div class="hero-background-circle circle-two"></div>
+
+
+            <div class="hero-content">
+
+                <div class="hero-label">
+                    DIGITAL TEACHING PLATFORM
+                </div>
+
+
+                <h1>
+                    Your teaching materials.
+                    <span>One place.</span>
+                </h1>
+
+
+                <p>
+                    Access the digital presentation platforms
+                    for the courses and materials you teach.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             LIBRARY
+        ================================================== -->
+
+        <section class="library">
+
+
+            <!-- SECTION HEADER -->
+
+            <div class="library-header">
+
+                <div>
+
+                    <div class="library-label">
+                        TEACHING LIBRARY
+                    </div>
+
+                    <h2 id="libraryTitle">
+                        All Materials
                     </h2>
 
-                    <p id="dashboard-lesson-description">
-                        Getting Started
-                    </p>
-
-                    <div class="continue-progress">
-
-                        <div class="progress-track">
-                            <div
-                                id="dashboard-progress"
-                                class="progress-fill"
-                            ></div>
-                        </div>
-
-                        <span id="dashboard-progress-text">
-                            0%
-                        </span>
-
-                    </div>
-
-                    <button
-                        id="continue-lesson-button"
-                        class="primary-button"
-                    >
-                        Continue lesson
-                        <span>→</span>
-                    </button>
-
-                </div>
-
-                <div class="continue-illustration">
-                    <div class="floating-book">
-                        📖
-                    </div>
-                </div>
-
-            </div>
-
-
-            <!-- STATS -->
-            <div class="stats-grid">
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        📚
-                    </div>
-
-                    <div>
-                        <span>Current unit</span>
-                        <strong id="stat-unit">
-                            Unit 1
-                        </strong>
-                    </div>
-
                 </div>
 
 
-                <div class="stat-card">
+                <!-- SEARCH -->
 
-                    <div class="stat-icon">
-                        🎯
-                    </div>
+                <div class="search-box">
 
-                    <div>
-                        <span>Lesson progress</span>
-                        <strong id="stat-lesson-progress">
-                            0%
-                        </strong>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon">
-                        🏆
-                    </div>
-
-                    <div>
-                        <span>Lessons completed</span>
-                        <strong id="stat-completed">
-                            0
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- CURRENT LESSON -->
-            <div class="section-heading">
-
-                <div>
-                    <span class="eyebrow">
-                        YOUR COURSE
+                    <span class="search-symbol">
+                        ⌕
                     </span>
 
-                    <h2>
-                        Current lesson
-                    </h2>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search books..."
+                    >
+
                 </div>
 
+            </div>
+
+
+
+            <!-- FILTERS -->
+
+            <div
+                class="filter-bar"
+                id="filterBar"
+            >
+
                 <button
-                    id="view-course-button"
-                    class="text-button"
+                    class="filter-button active"
+                    data-filter="all"
                 >
-                    View course →
+                    All
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="kids"
+                >
+                    Kids
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="teens"
+                >
+                    Teens
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="adults"
+                >
+                    Adults
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="english"
+                >
+                    English
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="french"
+                >
+                    French
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="portuguese"
+                >
+                    Portuguese
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="mandarin"
+                >
+                    Mandarin
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="arabic"
+                >
+                    Arabic
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-filter="spanish"
+                >
+                    Spanish
                 </button>
 
             </div>
 
 
-            <div class="dashboard-lesson-card">
 
-                <div class="lesson-number">
-                    01
-                </div>
-
-                <div class="lesson-info">
-
-                    <span class="lesson-unit">
-                        UNIT 1
-                    </span>
-
-                    <h3>
-                        Getting Started
-                    </h3>
-
-                    <p>
-                        Introduce yourself, learn essential vocabulary,
-                        practise grammar and communicate with your AI teacher.
-                    </p>
-
-                    <div class="lesson-meta">
-
-                        <span>⏱ 45–60 min</span>
-                        <span>● 8 activities</span>
-
-                    </div>
-
-                </div>
-
-                <button
-                    id="dashboard-start-button"
-                    class="round-arrow-button"
-                >
-                    →
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- COURSE PAGE -->
-        <section
-            id="course-page"
-            class="page hidden"
-        >
-
-            <div class="page-header">
-
-                <div>
-
-                    <span class="eyebrow">
-                        ENGLISH COURSE
-                    </span>
-
-                    <h1>
-                        My Course
-                    </h1>
-
-                    <p>
-                        Follow the course step by step.
-                    </p>
-
-                </div>
-
-            </div>
-
+            <!-- BOOKS -->
 
             <div
-                id="course-units"
-                class="course-units"
-            ></div>
-
-        </section>
-
-
-        <!-- PROGRESS PAGE -->
-        <section
-            id="progress-page"
-            class="page hidden"
-        >
-
-            <div class="page-header">
-
-                <div>
-
-                    <span class="eyebrow">
-                        YOUR PERFORMANCE
-                    </span>
-
-                    <h1>
-                        Progress
-                    </h1>
-
-                    <p>
-                        Track your learning progress.
-                    </p>
-
-                </div>
-
+                class="book-grid"
+                id="bookGrid"
+            >
+                <!-- JavaScript creates the cards here -->
             </div>
 
 
-            <div class="progress-overview">
 
-                <div class="big-progress-card">
+            <!-- NO RESULTS -->
 
-                    <div class="big-progress-circle">
-                        <span id="big-progress-number">
-                            0%
-                        </span>
-                    </div>
-
-                    <div>
-                        <span>Course completion</span>
-                        <h2>
-                            Keep going!
-                        </h2>
-                    </div>
-
-                </div>
-
-
-                <div class="progress-stat-card">
-
-                    <span>Lessons completed</span>
-
-                    <strong id="progress-completed">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="progress-stat-card">
-
-                    <span>Average score</span>
-
-                    <strong id="progress-score">
-                        0%
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- LESSON PAGE -->
-        <section
-            id="lesson-page"
-            class="page lesson-page hidden"
-        >
-
-            <div class="lesson-top">
-
-                <button
-                    id="back-dashboard"
-                    class="back-button"
-                >
-                    ← Dashboard
-                </button>
-
-                <div class="lesson-top-info">
-
-                    <span id="lesson-unit-label">
-                        UNIT 1
-                    </span>
-
-                    <strong id="lesson-title">
-                        Getting Started
-                    </strong>
-
-                </div>
-
-                <div class="lesson-progress-display">
-
-                    <span id="lesson-progress-number">
-                        0%
-                    </span>
-
-                    <div class="progress-track">
-                        <div
-                            id="lesson-progress-fill"
-                            class="progress-fill"
-                        ></div>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- LESSON OVERVIEW -->
             <div
-                id="lesson-overview"
-                class="lesson-overview"
+                class="no-results"
+                id="noResults"
             >
 
-                <div class="lesson-hero">
-
-                    <div class="lesson-hero-text">
-
-                        <span class="eyebrow">
-                            UNIT 1 · LESSON 1
-                        </span>
-
-                        <h1>
-                            Getting Started
-                        </h1>
-
-                        <p>
-                            Learn how to introduce yourself,
-                            talk about where you are from and
-                            communicate basic personal information.
-                        </p>
-
-                        <button
-                            id="start-lesson-button"
-                            class="primary-button large-button"
-                        >
-                            Start lesson
-                            <span>→</span>
-                        </button>
-
-                    </div>
-
-                    <div class="lesson-hero-icon">
-                        👋
-                    </div>
-
+                <div class="no-results-circle">
+                    ⌕
                 </div>
 
+                <h3>
+                    No materials found
+                </h3>
 
-                <div
-                    id="lesson-activity-list"
-                    class="activity-list"
-                ></div>
-
-            </div>
-
-
-            <!-- ACTIVITY -->
-            <div
-                id="activity-view"
-                class="activity-view hidden"
-            >
-
-                <div class="activity-breadcrumb">
-
-                    <button
-                        id="activity-back"
-                        class="back-button"
-                    >
-                        ← Lesson overview
-                    </button>
-
-                    <span id="activity-step-label">
-                        STEP 1 OF 8
-                    </span>
-
-                </div>
-
-
-                <div class="activity-card">
-
-                    <div
-                        id="activity-content"
-                    ></div>
-
-                </div>
-
-
-                <div class="activity-navigation">
-
-                    <button
-                        id="previous-activity"
-                        class="secondary-button"
-                    >
-                        ← Previous
-                    </button>
-
-                    <div
-                        id="activity-counter"
-                        class="activity-counter"
-                    >
-                        1 / 8
-                    </div>
-
-                    <button
-                        id="next-activity"
-                        class="primary-button"
-                    >
-                        Continue →
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- COMPLETION -->
-            <div
-                id="completion-view"
-                class="completion-view hidden"
-            >
-
-                <div class="completion-card">
-
-                    <div class="completion-trophy">
-                        🏆
-                    </div>
-
-                    <span class="eyebrow">
-                        LESSON COMPLETE
-                    </span>
-
-                    <h1>
-                        Excellent work!
-                    </h1>
-
-                    <p>
-                        You have completed Unit 1 · Lesson 1.
-                    </p>
-
-                    <div class="score-display">
-
-                        <strong id="final-score">
-                            0%
-                        </strong>
-
-                        <span>
-                            lesson score
-                        </span>
-
-                    </div>
-
-                    <div class="completion-actions">
-
-                        <button
-                            id="review-lesson"
-                            class="secondary-button"
-                        >
-                            Review lesson
-                        </button>
-
-                        <button
-                            id="return-dashboard"
-                            class="primary-button"
-                        >
-                            Back to dashboard →
-                        </button>
-
-                    </div>
-
-                </div>
+                <p>
+                    Try another search or category.
+                </p>
 
             </div>
 
         </section>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="footer">
+
+            <span>
+                © <span id="year"></span>
+                Academia Poliglota
+            </span>
+
+            <span>
+                Digital Teaching Materials
+            </span>
+
+        </footer>
+
 
     </main>
 
-</div>
 
 
-<!-- MOBILE OVERLAY -->
-<div
-    id="mobile-overlay"
-    class="mobile-overlay hidden"
-></div>
+    <!-- JAVASCRIPT -->
 
-
-<script src="course/unit-1.js"></script>
-<script src="js/progress.js"></script>
-<script src="js/exercises.js"></script>
-<script src="js/speaking.js"></script>
-<script src="js/course-engine.js"></script>
-<script src="js/app.js"></script>
+    <script src="js/script.js"></script>
 
 </body>
-    </html>
 
-
-
-
-                        
+                    </html>
