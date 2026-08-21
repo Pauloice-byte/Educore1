@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b1730"
+    >
+
+    <title>EduCore — Login</title>
+
+    <link rel="stylesheet" href="css/login.css">
+
+</head>
+
+
+<body>
+
+    <div class="login-page">
+
+
+        <!-- =====================================
+             LEFT SIDE — BRAND / MESSAGE
+        ====================================== -->
+
+        <section class="login-intro">
+
+            <a href="index.html" class="login-brand">
+
+                <div class="brand-mark">
+                    EC
+                </div>
+
+                <div class="brand-text">
+
+                    <strong>
+                        EduCore
+                    </strong>
+
+                    <span>
+                        Autonomous Learning
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <div class="intro-content">
+
+                <span class="intro-eyebrow">
+                    WELCOME BACK
+                </span>
+
+                <h1>
+                    Continue your
+                    <span>learning journey.</span>
+                </h1>
+
+                <p>
+                    Sign in to continue your lessons,
+                    practise your skills and track your
+                    progress across devices.
+                </p>
+
+
+                <div class="intro-points">
+
+                    <div>
+                        <span>✓</span>
+                        <p>
+                            Continue where you left off
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>✓</span>
+                        <p>
+                            Track your learning progress
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>✓</span>
+                        <p>
+                            Practise with AI support
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="intro-footer">
+                © 2026 EduCore
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             RIGHT SIDE — LOGIN FORM
+        ====================================== -->
+
+        <main class="login-panel">
+
+            <div class="login-card">
+
+
+                <div class="mobile-brand">
+
+                    <div class="brand-mark">
+                        EC
+                    </div>
+
+                    <strong>
+                        EduCore
+                    </strong>
+
+                </div>
+
+
+                <div class="login-heading">
+
+                    <span>
+                        ACCOUNT ACCESS
+                    </span>
+
+                    <h2>
+                        Sign in
+                    </h2>
+
+                    <p>
+                        Enter your account details
+                        to continue.
+                    </p>
+
+                </div>
+
+
+                <!-- =================================
+                     ERROR MESSAGE
+                ================================== -->
+
+                <div
+                    id="login-error"
+                    class="form-message error hidden"
+                    role="alert"
+                ></div>
+
+
+                <!-- =================================
+                     LOGIN FORM
+                ================================== -->
+
+                <form id="login-form">
+
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <div class="password-label">
+
+                            <label for="password">
+                                Password
+                            </label>
+
+                            <a
+                                href="forgot-password.html"
+                            >
+                                Forgot password?
+                            </a>
+
+                        </div>
+
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        id="login-button"
+                        class="login-button"
+                    >
+
+                        <span id="login-button-text">
+                            Sign in
+                        </span>
+
+                        <span
+                            id="login-spinner"
+                            class="spinner hidden"
+                        ></span>
+
+                    </button>
+
+
+                </form>
+
+
+                <div class="login-divider">
+                    <span>OR</span>
+                </div>
+
+
+                <p class="register-text">
+
+                    Don't have an account?
+
+                    <a href="register.html">
+                        Create one
+                    </a>
+
+                </p>
+
+
+                <a
+                    href="index.html"
+                    class="back-home"
+                >
+                    ← Back to EduCore
+                </a>
+
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================
+         SUPABASE
+    ====================================== -->
+
+    <script src="js/supabase.js"></script>
+
+    <!-- =====================================
+         AUTHENTICATION
+    ====================================== -->
+
+    <script src="js/auth.js"></script>
+
+    <!-- =====================================
+         LOGIN CONTROLLER
+    ====================================== -->
+
+    <script>
+
+        document
+            .getElementById("login-form")
+            .addEventListener(
+                "submit",
+                handleLogin
+            );
+
+
+        async function handleLogin(event) {
+
+            event.preventDefault();
+
+
+            const emailInput =
+                document.getElementById("email");
+
+            const passwordInput =
+                document.getElementById("password");
+
+            const button =
+                document.getElementById("login-button");
+
+            const buttonText =
+                document.getElementById(
+                    "login-button-text"
+                );
+
+            const spinner =
+                document.getElementById(
+                    "login-spinner"
+                );
+
+            const errorBox =
+                document.getElementById(
+                    "login-error"
+                );
+
+
+            const email =
+                emailInput.value.trim();
+
+            const password =
+                passwordInput.value;
+
+
+            /*
+             * Clear previous error.
+             */
+
+            errorBox.textContent = "";
+
+            errorBox.classList.add("hidden");
+
+
+            /*
+             * Loading state.
+             */
+
+            button.disabled = true;
+
+            buttonText.textContent =
+                "Signing in...";
+
+            spinner.classList.remove("hidden");
+
+
+            try {
+
+                /*
+                 * Phase 2 authentication function.
+                 */
+
+                await loginUser(
+                    email,
+                    password
+                );
+
+
+                /*
+                 * Authentication succeeded.
+                 *
+                 * Now determine whether this
+                 * is an admin or student.
+                 */
+
+                const profile =
+                    await getCurrentProfile();
+
+
+                if (!profile) {
+
+                    throw new Error(
+                        "Your account profile could not be found."
+                    );
+
+                }
+
+
+                /*
+                 * Account must be active.
+                 */
+
+                if (profile.active !== true) {
+
+                    throw new Error(
+                        "Your account is currently inactive. Please contact an administrator."
+                    );
+
+                }
+
+
+                /*
+                 * ADMIN
+                 */
+
+                if (profile.role === "admin") {
+
+                    window.location.href =
+                        "admin.html";
+
+                    return;
+
+                }
+
+
+                /*
+                 * STUDENT
+                 */
+
+                if (profile.role === "student") {
+
+                    window.location.href =
+                        "student.html";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Unknown role.
+                 */
+
+                throw new Error(
+                    "Your account does not have a valid EduCore role."
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login failed:",
+                    error
+                );
+
+
+                /*
+                 * Display a user-friendly message.
+                 */
+
+                let message =
+                    "Unable to sign in. Please check your email and password.";
+
+
+                if (error?.message) {
+
+                    message =
+                        error.message;
+
+                }
+
+
+                errorBox.textContent =
+                    message;
+
+                errorBox.classList.remove(
+                    "hidden"
+                );
+
+
+                button.disabled = false;
+
+                buttonText.textContent =
+                    "Sign in";
+
+                spinner.classList.add(
+                    "hidden"
+                );
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
