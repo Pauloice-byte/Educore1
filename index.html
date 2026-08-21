@@ -10,12 +10,15 @@
 
     <meta
         name="theme-color"
-        content="#0b1730"
+        content="#0f172a"
     >
 
-    <title>EduCore — Autonomous Learning</title>
+    <title>AP Teacher — English Course</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 </head>
 
 <body>
@@ -34,15 +37,16 @@
         </button>
 
         <div class="mobile-brand">
-            <strong>EduCore</strong>
+            AP <span>Teacher</span>
         </div>
 
-        <a
-            href="login.html"
-            class="profile-mini login-mobile"
+        <button
+            id="mobile-profile-button"
+            class="profile-mini"
+            aria-label="Profile"
         >
-            Log in
-        </a>
+            P
+        </button>
 
     </header>
 
@@ -53,12 +57,12 @@
         <div class="brand">
 
             <div class="brand-mark">
-                EC
+                AP
             </div>
 
-            <div class="brand-text">
-                <strong>EduCore</strong>
-                <span>Autonomous Learning</span>
+            <div>
+                <strong>AP Teacher</strong>
+                <span>Learning Platform</span>
             </div>
 
         </div>
@@ -71,7 +75,7 @@
                 data-page="dashboard"
             >
                 <span>⌂</span>
-                <span>Dashboard</span>
+                <span data-i18n="dashboard">Dashboard</span>
             </button>
 
             <button
@@ -79,7 +83,7 @@
                 data-page="course"
             >
                 <span>▣</span>
-                <span>My Course</span>
+                <span data-i18n="myCourse">My Course</span>
             </button>
 
             <button
@@ -87,7 +91,7 @@
                 data-page="progress"
             >
                 <span>◔</span>
-                <span>Progress</span>
+                <span data-i18n="progress">Progress</span>
             </button>
 
         </nav>
@@ -123,22 +127,17 @@
 
             <button class="sidebar-option">
                 ⚙
-                <span>Settings</span>
+                <span data-i18n="settings">
+                    Settings
+                </span>
             </button>
 
             <button class="sidebar-option">
                 ?
-                <span>Help</span>
+                <span data-i18n="help">
+                    Help
+                </span>
             </button>
-
-            <!-- IMPORTANT LOGIN BUTTON -->
-            <a
-                href="login.html"
-                class="sidebar-login"
-            >
-                <span>⇥</span>
-                <span>Log in</span>
-            </a>
 
         </div>
 
@@ -147,7 +146,6 @@
 
     <!-- MAIN -->
     <main class="main">
-
 
         <!-- DASHBOARD -->
         <section
@@ -164,26 +162,35 @@
                     </span>
 
                     <h1>
-                        Welcome back, Paulo
+                        <span data-i18n="welcome">
+                            Welcome back
+                        </span>,
+                        Paulo
                     </h1>
 
-                    <p>
+                    <p data-i18n="dashboardSubtitle">
                         Continue your English learning journey.
                     </p>
 
                 </div>
 
-                <a
-                    href="login.html"
-                    class="header-login"
-                >
-                    Log in
-                </a>
+                <div class="language-selector">
+
+                    <span>🌐</span>
+
+                    <select id="language-selector">
+                        <option value="en">English</option>
+                        <option value="pt">Português</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                    </select>
+
+                </div>
 
             </div>
 
 
-            <!-- CONTINUE -->
+            <!-- CONTINUE CARD -->
             <div class="continue-card">
 
                 <div class="continue-content">
@@ -226,11 +233,9 @@
                 </div>
 
                 <div class="continue-illustration">
-
                     <div class="floating-book">
                         📖
                     </div>
-
                 </div>
 
             </div>
@@ -293,7 +298,6 @@
             <div class="section-heading">
 
                 <div>
-
                     <span class="eyebrow">
                         YOUR COURSE
                     </span>
@@ -301,7 +305,6 @@
                     <h2>
                         Current lesson
                     </h2>
-
                 </div>
 
                 <button
@@ -338,7 +341,7 @@
                     <div class="lesson-meta">
 
                         <span>⏱ 45–60 min</span>
-                        <span>● 7 activities</span>
+                        <span>● 8 activities</span>
 
                     </div>
 
@@ -356,7 +359,7 @@
         </section>
 
 
-        <!-- COURSE -->
+        <!-- COURSE PAGE -->
         <section
             id="course-page"
             class="page hidden"
@@ -380,14 +383,8 @@
 
                 </div>
 
-                <a
-                    href="login.html"
-                    class="header-login"
-                >
-                    Log in
-                </a>
-
             </div>
+
 
             <div
                 id="course-units"
@@ -397,7 +394,7 @@
         </section>
 
 
-        <!-- PROGRESS -->
+        <!-- PROGRESS PAGE -->
         <section
             id="progress-page"
             class="page hidden"
@@ -436,7 +433,6 @@
 
                     <div>
                         <span>Course completion</span>
-
                         <h2>
                             Keep going!
                         </h2>
@@ -471,7 +467,7 @@
         </section>
 
 
-        <!-- LESSON -->
+        <!-- LESSON PAGE -->
         <section
             id="lesson-page"
             class="page lesson-page hidden"
@@ -581,7 +577,7 @@
                     </button>
 
                     <span id="activity-step-label">
-                        STEP 1 OF 7
+                        STEP 1 OF 8
                     </span>
 
                 </div>
@@ -589,7 +585,9 @@
 
                 <div class="activity-card">
 
-                    <div id="activity-content"></div>
+                    <div
+                        id="activity-content"
+                    ></div>
 
                 </div>
 
@@ -607,7 +605,7 @@
                         id="activity-counter"
                         class="activity-counter"
                     >
-                        1 / 7
+                        1 / 8
                     </div>
 
                     <button
@@ -694,7 +692,12 @@
 ></div>
 
 
+<script src="course/unit-1.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/exercises.js"></script>
+<script src="js/speaking.js"></script>
+<script src="js/course-engine.js"></script>
 <script src="js/app.js"></script>
 
 </body>
-                </html>
+    </html>
