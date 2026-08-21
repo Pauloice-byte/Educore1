@@ -1,1 +1,357 @@
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b1730"
+    >
+
+    <title>EduCore — Autonomous Learning</title>
+
+    <link rel="stylesheet" href="css/home.css">
+
+</head>
+
+
+<body>
+
+    <div class="home-page">
+
+
+        <!-- =====================================
+             HEADER
+        ====================================== -->
+
+        <header class="home-header">
+
+            <a href="index.html" class="home-brand">
+
+                <div class="home-brand-mark">
+                    EC
+                </div>
+
+                <div class="home-brand-text">
+
+                    <strong>
+                        EduCore
+                    </strong>
+
+                    <span>
+                        Autonomous Learning
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <a
+                href="login.html"
+                class="header-login"
+            >
+                Log in
+            </a>
+
+        </header>
+
+
+        <!-- =====================================
+             HERO
+        ====================================== -->
+
+        <main class="home-main">
+
+            <section class="hero-section">
+
+
+                <div class="hero-copy">
+
+                    <span class="hero-eyebrow">
+                        AUTONOMOUS LEARNING PLATFORM
+                    </span>
+
+
+                    <h1>
+                        Learn independently.
+                        <span>Progress intelligently.</span>
+                    </h1>
+
+
+                    <p class="hero-description">
+                        Structured lessons, repeated practice,
+                        immediate feedback and AI-powered learning
+                        support — all in one place.
+                    </p>
+
+
+                    <div class="hero-actions">
+
+                        <a
+                            href="login.html"
+                            class="primary-button"
+                        >
+                            Start learning
+                            <span>→</span>
+                        </a>
+
+
+                        <a
+                            href="login.html"
+                            class="secondary-button"
+                        >
+                            Sign in
+                        </a>
+
+                    </div>
+
+
+                    <div class="hero-meta">
+
+                        <span>
+                            <strong>25 min</strong>
+                            structured lessons
+                        </span>
+
+                        <span>
+                            <strong>AI</strong>
+                            learning support
+                        </span>
+
+                        <span>
+                            <strong>Any device</strong>
+                            learn anywhere
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================
+                     VISUAL
+                ================================== -->
+
+                <div class="hero-visual">
+
+                    <div class="visual-glow"></div>
+
+
+                    <div class="learning-card">
+
+                        <div class="learning-card-top">
+
+                            <div>
+
+                                <span class="card-label">
+                                    CONTINUE LEARNING
+                                </span>
+
+                                <strong>
+                                    English A1
+                                </strong>
+
+                            </div>
+
+                            <span class="card-progress">
+                                82%
+                            </span>
+
+                        </div>
+
+
+                        <div class="course-progress">
+
+                            <div
+                                class="course-progress-fill"
+                            ></div>
+
+                        </div>
+
+
+                        <div class="lesson-preview">
+
+                            <div class="lesson-icon">
+                                ▶
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Unit 2
+                                </span>
+
+                                <strong>
+                                    Everyday English
+                                </strong>
+
+                                <small>
+                                    25 min lesson
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="learning-steps">
+
+                            <span class="step completed">
+                                ✓
+                            </span>
+
+                            <span class="line"></span>
+
+                            <span class="step completed">
+                                ✓
+                            </span>
+
+                            <span class="line"></span>
+
+                            <span class="step current">
+                                3
+                            </span>
+
+                            <span class="line"></span>
+
+                            <span class="step">
+                                4
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="floating-ai-card">
+
+                        <span>
+                            EDUCORE AI
+                        </span>
+
+                        <strong>
+                            Ready to help
+                        </strong>
+
+                        <small>
+                            Practise • Correct • Improve
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 PLATFORM FEATURES
+            ================================== -->
+
+            <section class="feature-section">
+
+                <div class="feature-heading">
+
+                    <span>
+                        HOW EDUCORE WORKS
+                    </span>
+
+                    <h2>
+                        Learning built around progress.
+                    </h2>
+
+                </div>
+
+
+                <div class="feature-grid">
+
+                    <article class="feature-card">
+
+                        <div class="feature-number">
+                            01
+                        </div>
+
+                        <h3>
+                            Structured lessons
+                        </h3>
+
+                        <p>
+                            Follow focused lessons designed
+                            around a clear learning path.
+                        </p>
+
+                    </article>
+
+
+                    <article class="feature-card">
+
+                        <div class="feature-number">
+                            02
+                        </div>
+
+                        <h3>
+                            Practise repeatedly
+                        </h3>
+
+                        <p>
+                            Repeat activities whenever you
+                            need to strengthen your knowledge.
+                        </p>
+
+                    </article>
+
+
+                    <article class="feature-card">
+
+                        <div class="feature-number">
+                            03
+                        </div>
+
+                        <h3>
+                            Learn with AI
+                        </h3>
+
+                        <p>
+                            Receive immediate feedback and
+                            personalised learning support.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================
+             FOOTER
+        ====================================== -->
+
+        <footer class="home-footer">
+
+            <span>
+                © 2026 EduCore
+            </span>
+
+            <span>
+                Autonomous Learning
+            </span>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>
