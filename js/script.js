@@ -1,311 +1,249 @@
 /* ==========================================================
-   ACADEMIA POLIGLOTA
-   TEACHING MATERIALS PLATFORM
+   EDUCORE
+   AUTONOMOUS LEARNING PLATFORM
 ========================================================== */
 
 
 /* ==========================================================
-   BOOK DATABASE
+   COURSE DATABASE
 ==========================================================
 
-   ADD YOUR BOOKS HERE.
+   Add new courses here.
 
-   programme:
-   kids / teens / adults
+   categoryKey:
+   language / ms-office / trading /
+   technology / business / finance /
+   personal-development
 
-   language:
-   english / french / portuguese /
-   mandarin / arabic / spanish
+   programmeKey:
+   autonomous / guided / blended
 
-   The URL is the URL of the individual
-   presentation website.
-
+   url:
+   URL of the individual course platform/page.
 ========================================================== */
 
 
-const books = [
+const courses = [
 
     /* ======================================================
-       ENGLISH — ADULTS
+       LANGUAGE
     ====================================================== */
 
     {
         title: "English A1",
-        level: "A1",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
+        level: "Beginner",
+        category: "Language",
+        categoryKey: "language",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
         cover: "images/books/english-a1.jpg",
         url: "https://hwa1.vercel.app"
     },
 
-
     {
         title: "English A2",
         level: "Elementary",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
+        category: "Language",
+        categoryKey: "language",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
         cover: "images/books/english-a2.jpg",
         url: "https://hwa2.vercel.app"
     },
 
-
-    {
-        title: "English B1",
-        level: "Pre-Intermediate",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/english-b1.jpg",
-        url: "https://YOUR-ENGLISH-B1-SITE.vercel.app"
-    },
-
-
-    {
-        title: "English B1+",
-        level: "Intermediate",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/english-b1plus.jpg",
-        url: "https://test1965.vercel.app"
-    },
-
-
-    {
-        title: "English C1",
-        level: "Upper Intermediate",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/english-c1.jpg",
-        url: "https://YOUR-ENGLISH-C1-SITE.vercel.app"
-    },
-
-
-    {
-        title: "English C2",
-        level: "Advanced",
-        language: "English",
-        languageKey: "english",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/english-c2.jpg",
-        url: "https://YOUR-ENGLISH-C2-SITE.vercel.app"
-    },
-
-
-    /* ======================================================
-       ENGLISH — KIDS
-    ====================================================== */
-
-    {
-        title: "English Kids Starters 1",
-        level: "Starter",
-        language: "English",
-        languageKey: "english",
-        programme: "Kids",
-        programmeKey: "kids",
-        cover: "images/books/kids-starters1.jpg",
-        url: "https://kbx1.vercel.app"
-    },
-
-
-    {
-        title: "English Kids Level 1",
-        level: "Level 1",
-        language: "English",
-        languageKey: "english",
-        programme: "Kids",
-        programmeKey: "kids",
-        cover: "images/books/kids-starters2.jpg",
-        url: "https://kbx2.vercel.app"
-    },
-
-
-    /* ======================================================
-       ENGLISH — TEENS
-    ====================================================== */
-
-    {
-        title: "English Teens Starter",
-        level: "Starter",
-        language: "English",
-        languageKey: "english",
-        programme: "Teens",
-        programmeKey: "teens",
-        cover: "images/books/teens-starter.jpg",
-        url: "https://tha1.vercel.app"
-    },
-
-
-    {
-        title: "English Teens Level 1",
-        level: "Level 1",
-        language: "English",
-        languageKey: "english",
-        programme: "Teens",
-        programmeKey: "teens",
-        cover: "images/books/teens-level-1.jpg",
-        url: "https://YOUR-TEENS-LEVEL1-SITE.vercel.app"
-    },
-
-
-    /* ======================================================
-       FRENCH
-    ====================================================== */
-
     {
         title: "French A1",
         level: "Beginner",
-        language: "French",
-        languageKey: "french",
-        programme: "Adults",
-        programmeKey: "adults",
+        category: "Language",
+        categoryKey: "language",
+        programme: "Blended",
+        programmeKey: "blended",
         cover: "images/books/french-a1.jpg",
-        url: "https://YOUR-FRENCH-A1-SITE.vercel.app"
+        url: "#"
     },
-
-
-    {
-        title: "French A2",
-        level: "Elementary",
-        language: "French",
-        languageKey: "french",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/french-a2.jpg",
-        url: "https://YOUR-FRENCH-A2-SITE.vercel.app"
-    },
-
-
-    {
-        title: "French B1",
-        level: "Pre-Intermediate",
-        language: "French",
-        languageKey: "french",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/french-b1.jpg",
-        url: "https://YOUR-FRENCH-B1-SITE.vercel.app"
-    },
-
-
-    /* ======================================================
-       PORTUGUESE
-    ====================================================== */
 
     {
         title: "Portuguese A1",
         level: "Beginner",
-        language: "Portuguese",
-        languageKey: "portuguese",
-        programme: "Adults",
-        programmeKey: "adults",
+        category: "Language",
+        categoryKey: "language",
+        programme: "Guided",
+        programmeKey: "guided",
         cover: "images/books/portuguese-a1.jpg",
-        url: "https://YOUR-PORTUGUESE-A1-SITE.vercel.app"
-    },
-
-
-    {
-        title: "Portuguese A2",
-        level: "Elementary",
-        language: "Portuguese",
-        languageKey: "portuguese",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/portuguese-a2.jpg",
-        url: "https://YOUR-PORTUGUESE-A2-SITE.vercel.app"
+        url: "#"
     },
 
 
     /* ======================================================
-       MANDARIN
+       MS OFFICE
     ====================================================== */
 
     {
-        title: "Mandarin A1",
-        level: "Beginner",
-        language: "Mandarin",
-        languageKey: "mandarin",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/mandarin-a1.jpg",
-        url: "https://YOUR-MANDARIN-A1-SITE.vercel.app"
+        title: "Microsoft Word",
+        level: "Complete Course",
+        category: "MS Office",
+        categoryKey: "ms-office",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/ms-word.jpg",
+        url: "#"
     },
 
+    {
+        title: "Microsoft Excel",
+        level: "Beginner to Advanced",
+        category: "MS Office",
+        categoryKey: "ms-office",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/ms-excel.jpg",
+        url: "#"
+    },
 
     {
-        title: "Mandarin A2",
-        level: "Elementary",
-        language: "Mandarin",
-        languageKey: "mandarin",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/mandarin-a2.jpg",
-        url: "https://YOUR-MANDARIN-A2-SITE.vercel.app"
+        title: "Microsoft PowerPoint",
+        level: "Complete Course",
+        category: "MS Office",
+        categoryKey: "ms-office",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/ms-powerpoint.jpg",
+        url: "#"
     },
 
 
     /* ======================================================
-       ARABIC
+       TRADING
     ====================================================== */
 
     {
-        title: "Arabic A1",
+        title: "Trading Fundamentals",
         level: "Beginner",
-        language: "Arabic",
-        languageKey: "arabic",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/arabic-a1.jpg",
-        url: "https://YOUR-ARABIC-A1-SITE.vercel.app"
+        category: "Trading",
+        categoryKey: "trading",
+        programme: "Blended",
+        programmeKey: "blended",
+        cover: "images/books/trading-fundamentals.jpg",
+        url: "#"
     },
 
-
     {
-        title: "Arabic A2",
-        level: "Elementary",
-        language: "Arabic",
-        languageKey: "arabic",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/arabic-a2.jpg",
-        url: "https://YOUR-ARABIC-A2-SITE.vercel.app"
+        title: "Technical Analysis",
+        level: "Intermediate",
+        category: "Trading",
+        categoryKey: "trading",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/technical-analysis.jpg",
+        url: "#"
     },
 
 
     /* ======================================================
-       SPANISH
+       TECHNOLOGY
     ====================================================== */
 
     {
-        title: "Spanish A1",
+        title: "Web Development",
         level: "Beginner",
-        language: "Spanish",
-        languageKey: "spanish",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/spanish-a1.jpg",
-        url: "https://YOUR-SPANISH-A1-SITE.vercel.app"
+        category: "Technology",
+        categoryKey: "technology",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/web-development.jpg",
+        url: "#"
+    },
+
+    {
+        title: "Programming Fundamentals",
+        level: "Beginner",
+        category: "Technology",
+        categoryKey: "technology",
+        programme: "Blended",
+        programmeKey: "blended",
+        cover: "images/books/programming.jpg",
+        url: "#"
     },
 
 
+    /* ======================================================
+       BUSINESS
+    ====================================================== */
+
     {
-        title: "Spanish A2",
-        level: "Elementary",
-        language: "Spanish",
-        languageKey: "spanish",
-        programme: "Adults",
-        programmeKey: "adults",
-        cover: "images/books/spanish-a2.jpg",
-        url: "https://YOUR-SPANISH-A2-SITE.vercel.app"
+        title: "Business Fundamentals",
+        level: "Complete Course",
+        category: "Business",
+        categoryKey: "business",
+        programme: "Blended",
+        programmeKey: "blended",
+        cover: "images/books/business.jpg",
+        url: "#"
+    },
+
+    {
+        title: "Business Communication",
+        level: "Professional",
+        category: "Business",
+        categoryKey: "business",
+        programme: "Guided",
+        programmeKey: "guided",
+        cover: "images/books/business-communication.jpg",
+        url: "#"
+    },
+
+
+    /* ======================================================
+       FINANCE
+    ====================================================== */
+
+    {
+        title: "Personal Finance",
+        level: "Beginner",
+        category: "Finance",
+        categoryKey: "finance",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/personal-finance.jpg",
+        url: "#"
+    },
+
+    {
+        title: "Financial Markets",
+        level: "Intermediate",
+        category: "Finance",
+        categoryKey: "finance",
+        programme: "Blended",
+        programmeKey: "blended",
+        cover: "images/books/financial-markets.jpg",
+        url: "#"
+    },
+
+
+    /* ======================================================
+       PERSONAL DEVELOPMENT
+    ====================================================== */
+
+    {
+        title: "Productivity",
+        level: "Complete Course",
+        category: "Personal Development",
+        categoryKey: "personal-development",
+        programme: "Autonomous",
+        programmeKey: "autonomous",
+        cover: "images/books/productivity.jpg",
+        url: "#"
+    },
+
+    {
+        title: "Communication Skills",
+        level: "Professional",
+        category: "Personal Development",
+        categoryKey: "personal-development",
+        programme: "Guided",
+        programmeKey: "guided",
+        cover: "images/books/communication.jpg",
+        url: "#"
     }
 
 ];
@@ -369,22 +307,31 @@ let searchTerm = "";
    YEAR
 ========================================================== */
 
-year.textContent =
-    new Date().getFullYear();
+if (year) {
+
+    year.textContent =
+        new Date().getFullYear();
+
+}
 
 
 
 /* ==========================================================
-   CREATE BOOK CARDS
+   CREATE COURSE CARDS
 ========================================================== */
 
-function createBookCards() {
+function createCourseCards() {
+
+    if (!bookGrid) {
+        return;
+    }
+
 
     bookGrid.innerHTML = "";
 
 
-    books.forEach(
-        (book, index) => {
+    courses.forEach(
+        (course) => {
 
             const article =
                 document.createElement("article");
@@ -394,40 +341,64 @@ function createBookCards() {
                 "book-card";
 
 
+            article.dataset.category =
+                course.categoryKey;
+
+
+            /*
+                Keep the old data attributes too.
+                This makes the new system compatible
+                with the existing CSS/HTML structure.
+            */
+
             article.dataset.language =
-                book.languageKey;
+                course.categoryKey;
 
 
             article.dataset.programme =
-                book.programmeKey;
+                course.programmeKey;
 
 
             article.dataset.search =
                 (
-                    book.title +
+                    course.title +
                     " " +
-                    book.level +
+                    course.level +
                     " " +
-                    book.language +
+                    course.category +
                     " " +
-                    book.programme
+                    course.programme
                 ).toLowerCase();
+
+
+            /*
+                A real URL opens normally.
+
+                "#" courses are still displayed,
+                but clicking them does not send the
+                user to a broken page.
+            */
+
+            const courseURL =
+                course.url && course.url !== "#"
+                    ? course.url
+                    : "#";
 
 
             article.innerHTML = `
 
                 <a
-                    href="${book.url}"
+                    href="${courseURL}"
                     class="book-card-link"
                     target="_self"
-                    aria-label="Open ${book.title}"
+                    aria-label="Open ${course.title}"
                 >
 
                     <div class="book-cover-wrapper">
 
                         <img
-                            src="${book.cover}"
-                            alt="${book.title}"
+                            src="${course.cover}"
+                            alt="${course.title}"
                             class="book-cover"
                             loading="lazy"
                         >
@@ -438,7 +409,7 @@ function createBookCards() {
                             <div class="open-button">
 
                                 <span>
-                                    OPEN PLATFORM
+                                    OPEN COURSE
                                 </span>
 
                                 <span class="open-arrow">
@@ -455,19 +426,19 @@ function createBookCards() {
                     <div class="book-information">
 
                         <div class="book-language">
-                            ${book.language.toUpperCase()}
+                            ${course.category.toUpperCase()}
                             ·
-                            ${book.programme.toUpperCase()}
+                            ${course.programme.toUpperCase()}
                         </div>
 
 
                         <div class="book-title">
-                            ${book.title}
+                            ${course.title}
                         </div>
 
 
                         <div class="book-level">
-                            ${book.level}
+                            ${course.level}
                         </div>
 
                     </div>
@@ -477,17 +448,38 @@ function createBookCards() {
             `;
 
 
-            bookGrid.appendChild(article);
+            /*
+                Prevent "#" courses from jumping
+                to the top of the page.
+            */
+
+            if (courseURL === "#") {
+
+                const link =
+                    article.querySelector(
+                        ".book-card-link"
+                    );
+
+
+                link.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                    }
+                );
+
+            }
+
+
+            bookGrid.appendChild(
+                article
+            );
 
         }
     );
 
-
-
-    /*
-        Start observing the cards
-        after creating them.
-    */
 
     observeCards();
 
@@ -496,10 +488,15 @@ function createBookCards() {
 
 
 /* ==========================================================
-   FILTER BOOKS
+   FILTER COURSES
 ========================================================== */
 
-function filterBooks() {
+function filterCourses() {
+
+    if (!bookGrid) {
+        return;
+    }
+
 
     const cards =
         document.querySelectorAll(
@@ -513,8 +510,8 @@ function filterBooks() {
     cards.forEach(
         card => {
 
-            const language =
-                card.dataset.language;
+            const category =
+                card.dataset.category;
 
 
             const programme =
@@ -529,7 +526,7 @@ function filterBooks() {
 
 
             /*
-                ALL
+                ALL COURSES
             */
 
             if (
@@ -542,13 +539,13 @@ function filterBooks() {
 
 
             /*
-                PROGRAMME
+                LEARNING MODE
             */
 
             else if (
-                activeFilter === "kids" ||
-                activeFilter === "teens" ||
-                activeFilter === "adults"
+                activeFilter === "autonomous" ||
+                activeFilter === "blended" ||
+                activeFilter === "guided"
             ) {
 
                 matchesFilter =
@@ -558,519 +555,9 @@ function filterBooks() {
 
 
             /*
-                LANGUAGE
+                COURSE CATEGORY
             */
 
             else {
 
-                matchesFilter =
-                    language === activeFilter;
-
-            }
-
-
-            /*
-                SEARCH
-            */
-
-            const matchesSearch =
-                searchTerm === "" ||
-                searchableText.includes(
-                    searchTerm
-                );
-
-
-            /*
-                FINAL RESULT
-            */
-
-            const visible =
-                matchesFilter &&
-                matchesSearch;
-
-
-            if (visible) {
-
-                card.classList.remove(
-                    "hide"
-                );
-
-                visibleCount++;
-
-            } else {
-
-                card.classList.add(
-                    "hide"
-                );
-
-                card.classList.remove(
-                    "show"
-                );
-
-            }
-
-        }
-    );
-
-
-    /*
-        No results
-    */
-
-    if (visibleCount === 0) {
-
-        noResults.classList.add(
-            "visible"
-        );
-
-    } else {
-
-        noResults.classList.remove(
-            "visible"
-        );
-
-    }
-
-
-    /*
-        Animate visible cards
-    */
-
-    requestAnimationFrame(
-        () => {
-
-            document
-                .querySelectorAll(
-                    ".book-card:not(.hide)"
-                )
-                .forEach(
-                    (card, index) => {
-
-                        card.style.transitionDelay =
-                            `${index * 0.045}s`;
-
-                        requestAnimationFrame(
-                            () => {
-
-                                card.classList.add(
-                                    "show"
-                                );
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-    );
-
-}
-
-
-
-/* ==========================================================
-   CHANGE TITLE
-========================================================== */
-
-const titles = {
-
-    all:
-        "All Materials",
-
-    kids:
-        "Kids",
-
-    teens:
-        "Teens",
-
-    adults:
-        "Adults",
-
-    english:
-        "English",
-
-    french:
-        "French",
-
-    portuguese:
-        "Portuguese",
-
-    mandarin:
-        "Mandarin",
-
-    arabic:
-        "Arabic",
-
-    spanish:
-        "Spanish"
-
-};
-
-
-function changeTitle(
-    filter
-) {
-
-    libraryTitle.textContent =
-        titles[filter] ||
-        "All Materials";
-
-}
-
-
-
-/* ==========================================================
-   SET ACTIVE FILTER
-========================================================== */
-
-function setFilter(
-    filter
-) {
-
-    activeFilter =
-        filter;
-
-
-    /*
-        Navigation
-    */
-
-    navigationButtons.forEach(
-        button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.filter === filter
-            );
-
-        }
-    );
-
-
-    /*
-        Filter pills
-    */
-
-    filterButtons.forEach(
-        button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.filter === filter
-            );
-
-        }
-    );
-
-
-    changeTitle(filter);
-
-    filterBooks();
-
-}
-
-
-
-/* ==========================================================
-   NAVIGATION BUTTONS
-========================================================== */
-
-navigationButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                setFilter(
-                    button.dataset.filter
-                );
-
-
-                /*
-                    Close mobile
-                    navigation.
-                */
-
-                if (
-                    window.innerWidth <= 768
-                ) {
-
-                    closeMobileSidebar();
-
-                }
-
-            }
-        );
-
-    }
-);
-
-
-
-/* ==========================================================
-   FILTER BUTTONS
-========================================================== */
-
-filterButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                setFilter(
-                    button.dataset.filter
-                );
-
-            }
-        );
-
-    }
-);
-
-
-
-/* ==========================================================
-   SEARCH
-========================================================== */
-
-searchInput.addEventListener(
-    "input",
-    event => {
-
-        searchTerm =
-            event.target.value
-                .toLowerCase()
-                .trim();
-
-
-        filterBooks();
-
-    }
-);
-
-
-
-/* ==========================================================
-   SIDEBAR TOGGLE
-========================================================== */
-
-menuButton.addEventListener(
-    "click",
-    () => {
-
-        /*
-            Desktop
-        */
-
-        if (
-            window.innerWidth > 768
-        ) {
-
-            sidebar.classList.toggle(
-                "collapsed"
-            );
-
-        }
-
-
-        /*
-            Mobile
-        */
-
-        else {
-
-            sidebar.classList.toggle(
-                "mobile-open"
-            );
-
-            backdrop.classList.toggle(
-                "active"
-            );
-
-        }
-
-    }
-);
-
-
-
-/* ==========================================================
-   CLOSE MOBILE SIDEBAR
-========================================================== */
-
-function closeMobileSidebar() {
-
-    sidebar.classList.remove(
-        "mobile-open"
-    );
-
-    backdrop.classList.remove(
-        "active"
-    );
-
-}
-
-
-backdrop.addEventListener(
-    "click",
-    closeMobileSidebar
-);
-
-
-
-/* ==========================================================
-   ESCAPE KEY
-========================================================== */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeMobileSidebar();
-
-        }
-
-    }
-);
-
-
-
-/* ==========================================================
-   SCROLL ANIMATION
-========================================================== */
-
-let cardObserver;
-
-
-function observeCards() {
-
-    /*
-        Disconnect previous observer.
-    */
-
-    if (cardObserver) {
-
-        cardObserver.disconnect();
-
-    }
-
-
-    cardObserver =
-        new IntersectionObserver(
-            entries => {
-
-                entries.forEach(
-                    entry => {
-
-                        if (
-                            entry.isIntersecting
-                        ) {
-
-                            entry.target.classList.add(
-                                "show"
-                            );
-
-
-                            /*
-                                Once animated,
-                                stop observing it.
-                            */
-
-                            cardObserver.unobserve(
-                                entry.target
-                            );
-
-                        }
-
-                    }
-                );
-
-            },
-            {
-                threshold: 0.12,
-
-                rootMargin:
-                    "0px 0px -50px 0px"
-            }
-        );
-
-========================================================
-   INITIALISE
-========================================================== */
-
-createBookCards();
-
-setFilter("all");
-
-
-
-/* ==========================================================
-   KEYBOARD SEARCH
-==========================================================
-
-   Press "/" to activate search.
-
-========================================================== */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "/" &&
-            document.activeElement.tagName !== "INPUT"
-        ) {
-
-            event.preventDefault();
-
-            searchInput.focus();
-
-        }
-
-
-        if (
-            event.key === "Escape" &&
-            document.activeElement === searchInput
-        ) {
-
-            searchInput.value = "";
-
-            searchTerm = "";
-
-            filterBooks();
-
-            searchInput.blur();
-
-        }
-
-    }
-);
-
-
-
-/* ==========================================================
-   HANDLE WINDOW RESIZE
-========================================================== */
-
-window.addEventListener(
-    "resize",
-    () => {
-
-        if (
-            window.innerWidth > 768
-        ) {
-
-            closeMobileSidebar();
-
-        }
-
-    }
-);
-   
+                matchesFilter
