@@ -1,6 +1,6 @@
 /* ==========================================================
-   ACADEMIA POLIGLOTA
-   TEACHING PLATFORM
+   EDUCORE
+   AUTONOMOUS LEARNING PLATFORM
 ========================================================== */
 
 
@@ -128,15 +128,32 @@ a {
 }
 
 
-.logo {
+/* ==========================================================
+   EDUCORE LOGO
+========================================================== */
+
+.edcore-logo {
     width: 49px;
     height: 49px;
 
-    object-fit: cover;
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
 
     border-radius: 12px;
 
-    flex-shrink: 0;
+    background: #ffffff;
+
+    color: #11141b;
+
+    font-size: 15px;
+
+    font-weight: 850;
+
+    letter-spacing: -0.5px;
 
     box-shadow:
         0 8px 25px rgba(0, 0, 0, 0.35);
@@ -247,7 +264,7 @@ a {
 .navigation-button {
     width: 100%;
 
-    height: 45px;
+    min-height: 45px;
 
     display: flex;
 
@@ -330,50 +347,6 @@ a {
 
 .sidebar.collapsed .navigation-button > span:last-child {
     display: none;
-}
-
-
-/* ==========================================================
-   LANGUAGE DOTS
-========================================================== */
-
-.language-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-
-    flex-shrink: 0;
-}
-
-
-.language-dot.english {
-    background: #6686f5;
-}
-
-.language-dot.french {
-    background: #7d76dc;
-}
-
-.language-dot.portuguese {
-    background: #54b788;
-}
-
-.language-dot.mandarin {
-    background: #df6262;
-}
-
-.language-dot.arabic {
-    background: #c69b52;
-}
-
-.language-dot.spanish {
-    background: #df8546;
-}
-
-
-.sidebar.collapsed .language-dot {
-    margin: 0;
 }
 
 
@@ -485,6 +458,10 @@ a {
 }
 
 
+/* ==========================================================
+   MENU BUTTON
+========================================================== */
+
 .menu-button {
     width: 42px;
     height: 42px;
@@ -526,6 +503,10 @@ a {
 }
 
 
+/* ==========================================================
+   HEADER TITLE
+========================================================== */
+
 .header-title {
     display: flex;
 
@@ -555,6 +536,10 @@ a {
 }
 
 
+/* ==========================================================
+   HEADER STATUS
+========================================================== */
+
 .header-status {
     margin-left: auto;
 
@@ -580,6 +565,68 @@ a {
 
     box-shadow:
         0 0 0 4px rgba(77, 183, 131, 0.10);
+}
+
+
+/* ==========================================================
+   LOGIN BUTTON
+========================================================== */
+
+.header-login {
+    min-height: 40px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-left: 22px;
+
+    padding:
+        0 17px;
+
+    border:
+        1px solid #20242c;
+
+    border-radius: 9px;
+
+    background: #20242c;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.header-login:hover {
+    background: #11141b;
+
+    border-color: #11141b;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(20, 24, 32, 0.16);
+}
+
+
+.header-login:active {
+    transform:
+        translateY(0);
 }
 
 
@@ -690,7 +737,9 @@ a {
 }
 
 
-/* Decorative circles */
+/* ==========================================================
+   HERO DECORATIVE CIRCLES
+========================================================== */
 
 .hero-background-circle {
     position: absolute;
@@ -904,7 +953,7 @@ a {
 
 
 /* ==========================================================
-   BOOK GRID
+   COURSE GRID
 ========================================================== */
 
 .book-grid {
@@ -925,7 +974,7 @@ a {
 
 
 /* ==========================================================
-   BOOK CARD
+   COURSE CARD
 ========================================================== */
 
 .book-card {
@@ -970,7 +1019,7 @@ a {
 
 
 /* ==========================================================
-   BOOK COVER
+   COURSE COVER
 ========================================================== */
 
 .book-cover-wrapper {
@@ -1046,7 +1095,7 @@ a {
 
 
 /* ==========================================================
-   BOOK HOVER OVERLAY
+   COURSE HOVER OVERLAY
 ========================================================== */
 
 .book-hover {
@@ -1136,7 +1185,7 @@ a {
 
 
 /* ==========================================================
-   BOOK INFORMATION
+   COURSE INFORMATION
 ========================================================== */
 
 .book-information {
@@ -1355,6 +1404,28 @@ a {
     }
 
 
+    .header-title {
+        margin-left: 12px;
+    }
+
+
+    .header-title strong {
+        font-size: 13px;
+    }
+
+
+    .header-login {
+        margin-left: auto;
+
+        min-height: 37px;
+
+        padding:
+            0 13px;
+
+        font-size: 10px;
+    }
+
+
     .hero {
         min-height: 310px;
 
@@ -1410,63 +1481,4 @@ a {
 
         flex-direction: column;
 
-        align-items: flex-start;
-
-        gap: 7px;
-    }
-
-}
-
-
-/* ==========================================================
-   SMALL MOBILE
-========================================================== */
-
-@media (max-width: 430px) {
-
-    .hero h1 {
-        font-size: 34px;
-    }
-
-
-    .hero p {
-        font-size: 13px;
-    }
-
-
-    .book-title {
-        font-size: 13px;
-    }
-
-
-    .book-level {
-        font-size: 10px;
-    }
-
-
-    .book-language {
-        font-size: 7px;
-    }
-
-}
-
-
-/* ==========================================================
-   REDUCED MOTION
-========================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        animation: none !important;
-
-        transition: none !important;
-
-        scroll-behavior: auto !important;
-
-    }
-
-   }
+  
