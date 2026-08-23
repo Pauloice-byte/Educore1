@@ -1,8 +1,10 @@
 /* =========================================================
    EDUCORE ADMIN DASHBOARD
    STANDALONE INTERFACE JAVASCRIPT
-   No Supabase
-   No authentication
+
+   NO SUPABASE
+   NO AUTHENTICATION
+   NO BACKEND
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,40 +13,83 @@ document.addEventListener("DOMContentLoaded", () => {
        ELEMENTS
     ===================================================== */
 
-    const app = document.getElementById("admin-app");
+    const app =
+        document.getElementById("admin-app");
 
     if (!app) {
-        console.error("EduCore Admin: #admin-app not found.");
+        console.error(
+            "EduCore Admin: #admin-app not found."
+        );
         return;
     }
 
-    const sidebar = app.querySelector(".admin-sidebar");
-    const sidebarToggle = app.querySelector(".sidebar-toggle");
-    const sidebarClose = app.querySelector(".mobile-sidebar-close");
-    const sidebarOverlay = app.querySelector(".sidebar-overlay");
 
-    const navItems = app.querySelectorAll(".nav-item");
+    const sidebar =
+        app.querySelector(".admin-sidebar");
 
-    const sections = app.querySelectorAll(".admin-section");
+    const sidebarToggle =
+        app.querySelector(".sidebar-toggle");
 
-    const headerTitle = app.querySelector(".header-title h1");
+    const sidebarClose =
+        app.querySelector(".mobile-sidebar-close");
 
-    const modalOverlay = app.querySelector(".modal-overlay");
-    const modalClose = app.querySelector(".modal-close");
+    const sidebarOverlay =
+        app.querySelector(".sidebar-overlay");
 
-    const courseForm = document.getElementById("course-form");
+    const navItems =
+        app.querySelectorAll(".nav-item");
 
-    const cancelButton = app.querySelector(
-        ".modal-footer .secondary-button"
-    );
+    const sections =
+        app.querySelectorAll(".admin-section");
 
-    const createCourseButtons = app.querySelectorAll(
-        "#create-course-btn, " +
-        ".create-course-button, " +
-        "[data-action='create-course']"
-    );
+    const headerTitle =
+        app.querySelector(".header-title h1");
 
-    const logoutButton = app.querySelector(".logout-button");
+    const modalOverlay =
+        document.getElementById(
+            "course-modal-overlay"
+        );
+
+    const modalClose =
+        app.querySelector(".modal-close");
+
+    const courseForm =
+        document.getElementById("course-form");
+
+    const cancelButton =
+        courseForm
+            ? courseForm.querySelector(
+                ".modal-footer .secondary-button"
+            )
+            : null;
+
+    const createCourseButton =
+        document.getElementById(
+            "create-course-btn"
+        );
+
+    const logoutButton =
+        app.querySelector(".logout-button");
+
+    const coursesList =
+        document.getElementById(
+            "courses-list"
+        );
+
+    const courseSearch =
+        document.getElementById(
+            "course-search"
+        );
+
+    const courseFilter =
+        document.getElementById(
+            "course-filter"
+        );
+
+    const courseCount =
+        document.getElementById(
+            "course-count"
+        );
 
 
     /* =====================================================
@@ -52,7 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function isMobile() {
+
         return window.innerWidth <= 768;
+
     }
 
 
@@ -61,296 +108,249 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function openSidebar() {
+
         if (isMobile()) {
-            app.classList.add("sidebar-open");
+
+            app.classList.add(
+                "sidebar-open"
+            );
+
         }
+
     }
 
 
     function closeSidebar() {
-        app.classList.remove("sidebar-open");
+
+        app.classList.remove(
+            "sidebar-open"
+        );
+
     }
 
 
     function toggleSidebar() {
 
         if (isMobile()) {
-            app.classList.toggle("sidebar-open");
-        } else {
-            app.classList.toggle("sidebar-collapsed");
-        }
-    }
 
-
-    if (sidebarToggle) {
-
-        sidebarToggle.addEventListener("click", (event) => {
-
-            event.preventDefault();
-
-            toggleSidebar();
-        });
-    }
-
-
-    if (sidebarClose) {
-
-        sidebarClose.addEventListener("click", (event) => {
-
-            event.preventDefault();
-
-            closeSidebar();
-        });
-    }
-
-
-    if (sidebarOverlay) {
-
-        sidebarOverlay.addEventListener("click", () => {
-
-            closeSidebar();
-        });
-    }
-
-
-    /* =====================================================
-       NAVIGATION
-    ===================================================== */
-
-    const pageTitles = {
-        overview: "Overview",
-        courses: "Courses",
-        students: "Students",
-        progress: "Progress",
-        media: "Media",
-        settings: "Settings"
-    };
-
-
-    /*
-       IMPORTANT:
-       This is the actual mapping between the sidebar
-       buttons and the content sections.
-    */
-
-    const navigationMap = {
-
-        overview: "overview-section",
-
-        courses: "courses-section",
-
-        students: "students-section",
-
-        progress: "progress-section",
-
-        media: "media-section",
-
-        settings: "settings-section"
-
-    };
-
-
-    /*
-       Convert any sidebar button into a navigation key.
-    */
-
-    function getNavigationKey(item) {
-
-        if (!item) {
-            return null;
-        }
-
-
-        /*
-           Preferred:
-           data-section="courses"
-        */
-
-        if (item.dataset.section) {
-
-            return item.dataset.section
-                .trim()
-                .toLowerCase();
-        }
-
-
-        /*
-           Alternative:
-           data-page="courses"
-        */
-
-        if (item.dataset.page) {
-
-            return item.dataset.page
-                .trim()
-                .toLowerCase();
-        }
-
-
-        /*
-           Alternative:
-           href="#courses"
-        */
-
-        const href = item.getAttribute("href");
-
-        if (href && href.startsWith("#")) {
-
-            return href
-                .substring(1)
-                .replace("-section", "")
-                .trim()
-                .toLowerCase();
-        }
-
-
-        /*
-           Alternative:
-           id="courses-btn"
-        */
-
-        if (item.id) {
-
-            return item.id
-                .replace("-btn", "")
-                .replace("-button", "")
-                .replace("-nav", "")
-                .trim()
-                .toLowerCase();
-        }
-
-
-        return null;
-    }
-
-
-    /*
-       Find the actual content section.
-    */
-
-    function getSectionForKey(key) {
-
-        if (!key) {
-            return null;
-        }
-
-
-        const expectedId =
-            navigationMap[key];
-
-
-        if (expectedId) {
-
-            const section =
-                document.getElementById(expectedId);
-
-            if (section) {
-                return section;
-            }
-        }
-
-
-        /*
-           Fallback for sections using:
-           data-section="courses"
-        */
-
-        const matchingSection =
-            app.querySelector(
-                `.admin-section[data-section="${key}"]`
-            );
-
-        if (matchingSection) {
-            return matchingSection;
-        }
-
-
-        /*
-           Fallback for:
-           data-page="courses"
-        */
-
-        const matchingPage =
-            app.querySelector(
-                `.admin-section[data-page="${key}"]`
-            );
-
-        if (matchingPage) {
-            return matchingPage;
-        }
-
-
-        return null;
-    }
-
-
-    /*
-       SHOW SECTION
-    */
-
-    function showSection(sectionKey) {
-
-        if (!sectionKey) {
-            sectionKey = "overview";
-        }
-
-
-        sectionKey =
-            sectionKey.toLowerCase();
-
-
-        /*
-           If an unknown navigation item was clicked,
-           don't destroy the current page.
-        */
-
-        if (!pageTitles[sectionKey]) {
-
-            console.warn(
-                "EduCore Admin: Unknown section:",
-                sectionKey
+            app.classList.toggle(
+                "sidebar-open"
             );
 
             return;
         }
 
 
-        const targetSection =
-            getSectionForKey(sectionKey);
+        app.classList.toggle(
+            "sidebar-collapsed"
+        );
+
+    }
+
+
+    if (sidebarToggle) {
+
+        sidebarToggle.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                toggleSidebar();
+
+            }
+        );
+
+    }
+
+
+    if (sidebarClose) {
+
+        sidebarClose.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                closeSidebar();
+
+            }
+        );
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.addEventListener(
+            "click",
+            () => {
+
+                closeSidebar();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       PAGE TITLES
+    ===================================================== */
+
+    const pageTitles = {
+
+        overview: "Overview",
+        courses: "Courses",
+        students: "Students",
+        progress: "Progress",
+        media: "Media",
+        settings: "Settings"
+
+    };
+
+
+    /* =====================================================
+       NAVIGATION KEY
+    ===================================================== */
+
+    function getNavigationKey(item) {
+
+        if (item.dataset.section) {
+
+            return item.dataset.section
+                .trim()
+                .toLowerCase();
+
+        }
+
+
+        if (item.dataset.page) {
+
+            return item.dataset.page
+                .trim()
+                .toLowerCase();
+
+        }
+
+
+        const href =
+            item.getAttribute("href");
+
+        if (
+            href &&
+            href.startsWith("#")
+        ) {
+
+            return href
+                .substring(1)
+                .replace("-section", "")
+                .toLowerCase();
+
+        }
+
+
+        return "";
+
+    }
+
+
+    /* =====================================================
+       SHOW SECTION
+    ===================================================== */
+
+    function showSection(sectionKey) {
+
+        if (!sectionKey) {
+            return;
+        }
+
+
+        sectionKey =
+            sectionKey
+                .trim()
+                .toLowerCase();
 
 
         /*
-           Remove active from ALL sections first.
+           Hide ALL sections
         */
 
         sections.forEach(section => {
 
-            section.classList.remove("active");
-
-            section.setAttribute(
-                "aria-hidden",
-                "true"
+            section.classList.remove(
+                "active"
             );
+
         });
 
 
         /*
-           Activate requested section.
+           Find requested section
         */
 
-        if (targetSection) {
-
-            targetSection.classList.add("active");
-
-            targetSection.setAttribute(
-                "aria-hidden",
-                "false"
+        let targetSection =
+            document.getElementById(
+                `${sectionKey}-section`
             );
+
+
+        /*
+           Fallback: data-section
+        */
+
+        if (!targetSection) {
+
+            targetSection =
+                app.querySelector(
+                    `.admin-section[data-section="${sectionKey}"]`
+                );
+
         }
 
 
         /*
-           Update sidebar active state.
+           Fallback: data-page
+        */
+
+        if (!targetSection) {
+
+            targetSection =
+                app.querySelector(
+                    `.admin-section[data-page="${sectionKey}"]`
+                );
+
+        }
+
+
+        /*
+           If section doesn't exist,
+           stop here.
+        */
+
+        if (!targetSection) {
+
+            console.error(
+                "EduCore Admin: section not found:",
+                sectionKey
+            );
+
+            return;
+
+        }
+
+
+        /*
+           Show section
+        */
+
+        targetSection.classList.add(
+            "active"
+        );
+
+
+        /*
+           Update sidebar active state
         */
 
         navItems.forEach(item => {
@@ -362,49 +362,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 "active",
                 itemKey === sectionKey
             );
+
         });
 
 
         /*
-           Update header title.
+           Update title
         */
 
         if (headerTitle) {
 
             headerTitle.textContent =
-                pageTitles[sectionKey];
+                pageTitles[sectionKey] ||
+                "EduCore Admin";
+
         }
 
 
         /*
-           Update browser URL hash.
-           This does NOT reload the page.
-        */
-
-        if (
-            window.location.hash !==
-            "#" + sectionKey
-        ) {
-
-            history.replaceState(
-                null,
-                "",
-                "#" + sectionKey
-            );
-        }
-
-
-        /*
-           Close mobile sidebar.
+           Close mobile sidebar
         */
 
         if (isMobile()) {
+
             closeSidebar();
+
         }
 
 
         /*
-           Scroll to top.
+           Scroll content to top
         */
 
         window.scrollTo({
@@ -412,29 +399,31 @@ document.addEventListener("DOMContentLoaded", () => {
             behavior: "smooth"
         });
 
-
-        console.log(
-            "EduCore Admin section:",
-            sectionKey
-        );
     }
 
 
-    /*
-       SIDEBAR NAVIGATION CLICK
-    */
+    /* =====================================================
+       SIDEBAR NAVIGATION
+    ===================================================== */
 
     navItems.forEach(item => {
 
-        item.addEventListener("click", (event) => {
+        item.addEventListener(
+            "click",
+            event => {
 
-            event.preventDefault();
+                event.preventDefault();
 
-            const sectionKey =
-                getNavigationKey(item);
+                const sectionKey =
+                    getNavigationKey(item);
 
-            showSection(sectionKey);
-        });
+                showSection(
+                    sectionKey
+                );
+
+            }
+        );
+
     });
 
 
@@ -442,53 +431,371 @@ document.addEventListener("DOMContentLoaded", () => {
        INITIAL SECTION
     ===================================================== */
 
-    let initialSection = "overview";
+    const activeNav =
+        app.querySelector(
+            ".nav-item.active"
+        );
 
 
-    /*
-       If URL is:
-       admin.html#courses
-
-       open Courses automatically.
-    */
-
-    const hash =
-        window.location.hash
-            .replace("#", "")
-            .trim()
-            .toLowerCase();
+    let initialSection =
+        "overview";
 
 
-    if (hash && pageTitles[hash]) {
+    if (activeNav) {
 
-        initialSection = hash;
-
-    } else {
-
-        /*
-           Otherwise use whichever sidebar item
-           is marked active in the HTML.
-        */
-
-        const activeNav =
-            app.querySelector(
-                ".nav-item.active"
+        const detected =
+            getNavigationKey(
+                activeNav
             );
 
-        if (activeNav) {
+        if (detected) {
 
-            const activeKey =
-                getNavigationKey(activeNav);
+            initialSection =
+                detected;
 
-            if (activeKey && pageTitles[activeKey]) {
-
-                initialSection = activeKey;
-            }
         }
+
     }
 
 
-    showSection(initialSection);
+    showSection(
+        initialSection
+    );
+
+
+    /* =====================================================
+       COURSE DATA
+    ===================================================== */
+
+    let courses = [
+
+        {
+            id: 1,
+            title: "English Beginner",
+            description:
+                "English language course for beginners.",
+            category: "Language",
+            level: "Beginner",
+            status: "published",
+            updated: "Today"
+        },
+
+        {
+            id: 2,
+            title: "English Intermediate",
+            description:
+                "Develop your English communication skills.",
+            category: "Language",
+            level: "Intermediate",
+            status: "published",
+            updated: "Yesterday"
+        },
+
+        {
+            id: 3,
+            title: "Business English",
+            description:
+                "Professional English for the workplace.",
+            category: "Business",
+            level: "Upper-Intermediate",
+            status: "draft",
+            updated: "3 days ago"
+        }
+
+    ];
+
+
+    /* =====================================================
+       RENDER COURSES
+    ===================================================== */
+
+    function renderCourses() {
+
+        if (!coursesList) {
+            return;
+        }
+
+
+        const searchValue =
+            courseSearch
+                ? courseSearch.value
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+
+        const filterValue =
+            courseFilter
+                ? courseFilter.value
+                : "all";
+
+
+        let filteredCourses =
+            courses.filter(course => {
+
+
+                const matchesSearch =
+                    !searchValue ||
+                    course.title
+                        .toLowerCase()
+                        .includes(searchValue) ||
+                    course.description
+                        .toLowerCase()
+                        .includes(searchValue);
+
+
+                const matchesFilter =
+                    filterValue === "all" ||
+                    course.status === filterValue;
+
+
+                return (
+                    matchesSearch &&
+                    matchesFilter
+                );
+
+            });
+
+
+        /*
+           Empty state
+        */
+
+        if (
+            filteredCourses.length === 0
+        ) {
+
+            coursesList.innerHTML = `
+
+                <div class="courses-empty">
+
+                    <div class="courses-empty-icon">
+                        ▣
+                    </div>
+
+                    <h3>
+                        No courses found
+                    </h3>
+
+                    <p>
+                        There are no courses matching your search.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        data-action="create-course"
+                    >
+                        Create Course
+                    </button>
+
+                </div>
+
+            `;
+
+            updateCourseCount(0);
+
+            return;
+
+        }
+
+
+        coursesList.innerHTML =
+            filteredCourses
+                .map(course =>
+                    createCourseRow(course)
+                )
+                .join("");
+
+
+        updateCourseCount(
+            filteredCourses.length
+        );
+
+    }
+
+
+    /* =====================================================
+       COURSE ROW
+    ===================================================== */
+
+    function createCourseRow(course) {
+
+        const safeTitle =
+            escapeHTML(course.title);
+
+        const safeDescription =
+            escapeHTML(
+                course.description
+            );
+
+        const safeCategory =
+            escapeHTML(
+                course.category
+            );
+
+        const safeLevel =
+            escapeHTML(
+                course.level
+            );
+
+
+        return `
+
+            <div
+                class="course-row"
+                data-course-id="${course.id}"
+            >
+
+                <div class="course-main">
+
+                    <div class="course-cover">
+
+                        <div
+                            class="course-cover-placeholder"
+                        >
+                            ▣
+                        </div>
+
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <div class="course-title">
+                            ${safeTitle}
+                        </div>
+
+                        <div class="course-description">
+                            ${safeDescription}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="course-category">
+                    ${safeCategory}
+                </div>
+
+
+                <div class="course-level">
+                    ${safeLevel}
+                </div>
+
+
+                <div>
+
+                    <span
+                        class="course-status ${course.status}"
+                    >
+                        ${course.status}
+                    </span>
+
+                </div>
+
+
+                <div class="course-updated">
+                    ${escapeHTML(course.updated)}
+                </div>
+
+
+                <div class="course-actions">
+
+                    <button
+                        type="button"
+                        class="course-action"
+                        data-action="edit-course"
+                        data-course-id="${course.id}"
+                    >
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        class="course-action danger"
+                        data-action="delete-course"
+                        data-course-id="${course.id}"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* =====================================================
+       COURSE COUNT
+    ===================================================== */
+
+    function updateCourseCount(count) {
+
+        if (!courseCount) {
+            return;
+        }
+
+
+        courseCount.textContent =
+            `${count} ${
+                count === 1
+                    ? "course"
+                    : "courses"
+            }`;
+
+    }
+
+
+    /* =====================================================
+       COURSE SEARCH
+    ===================================================== */
+
+    if (courseSearch) {
+
+        courseSearch.addEventListener(
+            "input",
+            renderCourses
+        );
+
+    }
+
+
+    if (courseFilter) {
+
+        courseFilter.addEventListener(
+            "change",
+            renderCourses
+        );
+
+    }
+
+
+    /* =====================================================
+       INITIAL COURSES
+    ===================================================== */
+
+    renderCourses();
 
 
     /* =====================================================
@@ -502,33 +809,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        modalOverlay.classList.add("open");
+        modalOverlay.classList.add(
+            "open"
+        );
+
 
         document.body.classList.add(
             "modal-open"
         );
 
 
-        /*
-           Focus first form field.
-        */
-
-        if (courseForm) {
-
-            const firstField =
-                courseForm.querySelector(
+        const firstField =
+            courseForm
+                ? courseForm.querySelector(
                     "input:not([type='hidden']), textarea, select"
-                );
+                )
+                : null;
 
-            if (firstField) {
 
-                setTimeout(() => {
+        if (firstField) {
 
-                    firstField.focus();
+            setTimeout(() => {
 
-                }, 100);
-            }
+                firstField.focus();
+
+            }, 100);
+
         }
+
     }
 
 
@@ -539,135 +847,105 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        modalOverlay.classList.remove("open");
+        modalOverlay.classList.remove(
+            "open"
+        );
+
 
         document.body.classList.remove(
             "modal-open"
         );
-    }
 
-
-    /*
-       CREATE COURSE BUTTONS
-    */
-
-    createCourseButtons.forEach(button => {
-
-        button.addEventListener("click", (event) => {
-
-            event.preventDefault();
-
-            openCourseModal();
-        });
-    });
-
-
-    /*
-       MODAL CLOSE BUTTON
-    */
-
-    if (modalClose) {
-
-        modalClose.addEventListener("click", (event) => {
-
-            event.preventDefault();
-
-            closeCourseModal();
-        });
-    }
-
-
-    /*
-       CANCEL
-    */
-
-    if (cancelButton) {
-
-        cancelButton.addEventListener("click", (event) => {
-
-            event.preventDefault();
-
-            closeCourseModal();
-        });
-    }
-
-
-    /*
-       CLICK OUTSIDE MODAL
-    */
-
-    if (modalOverlay) {
-
-        modalOverlay.addEventListener("click", (event) => {
-
-            if (event.target === modalOverlay) {
-
-                closeCourseModal();
-            }
-        });
     }
 
 
     /* =====================================================
-       ESCAPE KEY
+       CREATE COURSE BUTTONS
     ===================================================== */
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener(
+        "click",
+        event => {
 
-        if (event.key !== "Escape") {
-            return;
+            const button =
+                event.target.closest(
+                    "#create-course-btn, " +
+                    "[data-action='create-course']"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+            openCourseModal();
+
         }
+    );
 
 
-        /*
-           Close confirmation first.
-        */
+    /* =====================================================
+       CLOSE COURSE MODAL
+    ===================================================== */
 
-        const confirmation =
-            document.getElementById(
-                "admin-confirmation-modal"
-            );
+    if (modalClose) {
 
+        modalClose.addEventListener(
+            "click",
+            event => {
 
-        if (
-            confirmation &&
-            confirmation.classList.contains("open")
-        ) {
+                event.preventDefault();
 
-            closeConfirmation();
+                closeCourseModal();
 
-            return;
-        }
+            }
+        );
 
-
-        /*
-           Then course modal.
-        */
-
-        if (
-            modalOverlay &&
-            modalOverlay.classList.contains("open")
-        ) {
-
-            closeCourseModal();
-
-            return;
-        }
+    }
 
 
-        /*
-           Finally mobile sidebar.
-        */
+    if (cancelButton) {
 
-        if (
-            app.classList.contains(
-                "sidebar-open"
-            )
-        ) {
+        cancelButton.addEventListener(
+            "click",
+            event => {
 
-            closeSidebar();
-        }
-    });
+                event.preventDefault();
+
+                closeCourseModal();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       CLICK OUTSIDE COURSE MODAL
+    ===================================================== */
+
+    if (modalOverlay) {
+
+        modalOverlay.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    modalOverlay
+                ) {
+
+                    closeCourseModal();
+
+                }
+
+            }
+        );
+
+    }
 
 
     /* =====================================================
@@ -678,96 +956,260 @@ document.addEventListener("DOMContentLoaded", () => {
 
         courseForm.addEventListener(
             "submit",
-            (event) => {
+            event => {
 
                 event.preventDefault();
 
 
-                const formError =
-                    courseForm.querySelector(
-                        ".form-error"
+                const formData =
+                    new FormData(
+                        courseForm
                     );
 
 
-                if (formError) {
+                const title =
+                    formData
+                        .get("title")
+                        .trim();
 
-                    formError.classList.remove(
-                        "visible"
+
+                const description =
+                    formData
+                        .get("description")
+                        .trim();
+
+
+                const category =
+                    formData.get(
+                        "category"
                     );
+
+
+                const level =
+                    formData.get(
+                        "level"
+                    );
+
+
+                const status =
+                    formData.get(
+                        "status"
+                    );
+
+
+                const error =
+                    document.getElementById(
+                        "course-form-error"
+                    );
+
+
+                if (
+                    !title ||
+                    !description ||
+                    !category ||
+                    !level
+                ) {
+
+                    if (error) {
+
+                        error.textContent =
+                            "Please complete all required fields.";
+
+                        error.classList.add(
+                            "visible"
+                        );
+
+                    }
+
+                    return;
+
                 }
 
 
-                const formData =
-                    new FormData(courseForm);
+                if (error) {
+
+                    error.classList.remove(
+                        "visible"
+                    );
+
+                }
 
 
-                const course = {};
+                const newCourse = {
+
+                    id:
+                        Date.now(),
+
+                    title:
+                        title,
+
+                    description:
+                        description,
+
+                    category:
+                        category,
+
+                    level:
+                        level,
+
+                    status:
+                        status,
+
+                    updated:
+                        "Just now"
+
+                };
 
 
-                formData.forEach(
-                    (value, key) => {
-
-                        course[key] = value;
-                    }
+                courses.unshift(
+                    newCourse
                 );
 
 
-                console.log(
-                    "Course created locally:",
-                    course
-                );
+                renderCourses();
 
+                updateDashboardStats();
 
-                closeCourseModal();
 
                 courseForm.reset();
+
+                closeCourseModal();
 
 
                 showNotification(
                     "Course created successfully."
                 );
+
             }
         );
+
     }
+
+
+    /* =====================================================
+       COURSE ACTIONS
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    ".course-action"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const courseId =
+                Number(
+                    button.dataset.courseId
+                );
+
+
+            if (
+                button.dataset.action ===
+                "delete-course"
+            ) {
+
+                const course =
+                    courses.find(
+                        item =>
+                            item.id === courseId
+                    );
+
+
+                if (!course) {
+                    return;
+                }
+
+
+                showConfirmation(
+                    `Are you sure you want to delete "${course.title}"?`,
+                    () => {
+
+                        courses =
+                            courses.filter(
+                                item =>
+                                    item.id !== courseId
+                            );
+
+
+                        renderCourses();
+
+                        updateDashboardStats();
+
+
+                        showNotification(
+                            "Course deleted."
+                        );
+
+                    }
+                );
+
+            }
+
+
+            if (
+                button.dataset.action ===
+                "edit-course"
+            ) {
+
+                showNotification(
+                    "Course editing is not connected yet."
+                );
+
+            }
+
+        }
+    );
 
 
     /* =====================================================
        CONFIRMATION MODAL
     ===================================================== */
 
-    let confirmationCallback = null;
+    let confirmationCallback =
+        null;
 
 
     function createConfirmationModal() {
 
-        let confirmation =
+        let modal =
             document.getElementById(
                 "admin-confirmation-modal"
             );
 
 
-        if (confirmation) {
-            return confirmation;
+        if (modal) {
+            return modal;
         }
 
 
-        confirmation =
-            document.createElement("div");
+        modal =
+            document.createElement(
+                "div"
+            );
 
-        confirmation.id =
+
+        modal.id =
             "admin-confirmation-modal";
 
-        confirmation.className =
+
+        modal.className =
             "modal-overlay";
 
 
-        confirmation.innerHTML = `
+        modal.innerHTML = `
 
             <div
                 class="course-modal"
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="confirmation-title"
                 style="max-width:430px;"
             >
 
@@ -779,32 +1221,36 @@ document.addEventListener("DOMContentLoaded", () => {
                             CONFIRMATION
                         </div>
 
-                        <h2 id="confirmation-title">
+                        <h2>
                             Are you sure?
                         </h2>
 
                     </div>
 
+
                     <button
                         type="button"
                         class="modal-close confirmation-close"
-                        aria-label="Close"
                     >
                         ×
                     </button>
 
                 </div>
 
-                <div style="
-                    padding:24px;
-                    color:#7d8089;
-                    font-size:12px;
-                    line-height:1.6;
-                ">
+
+                <div
+                    style="
+                        padding:24px;
+                        color:#7d8089;
+                        font-size:12px;
+                        line-height:1.6;
+                    "
+                >
 
                     <p id="confirmation-message">
-                        Are you sure you want to continue?
+                        Are you sure?
                     </p>
+
 
                     <div
                         class="modal-footer"
@@ -818,6 +1264,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             Cancel
                         </button>
 
+
                         <button
                             type="button"
                             class="primary-button confirmation-confirm"
@@ -830,15 +1277,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
             </div>
+
         `;
 
 
         document.body.appendChild(
-            confirmation
+            modal
         );
 
 
-        return confirmation;
+        return modal;
+
     }
 
 
@@ -847,12 +1296,12 @@ document.addEventListener("DOMContentLoaded", () => {
         callback
     ) {
 
-        const confirmation =
+        const modal =
             createConfirmationModal();
 
 
         const messageElement =
-            confirmation.querySelector(
+            modal.querySelector(
                 "#confirmation-message"
             );
 
@@ -861,61 +1310,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
             messageElement.textContent =
                 message;
+
         }
 
 
         confirmationCallback =
-            callback || null;
+            callback;
 
 
-        confirmation.classList.add("open");
+        modal.classList.add(
+            "open"
+        );
+
 
         document.body.classList.add(
             "modal-open"
         );
+
     }
 
 
     function closeConfirmation() {
 
-        const confirmation =
+        const modal =
             document.getElementById(
                 "admin-confirmation-modal"
             );
 
 
-        if (!confirmation) {
+        if (!modal) {
             return;
         }
 
 
-        confirmation.classList.remove(
+        modal.classList.remove(
             "open"
         );
 
 
+        confirmationCallback =
+            null;
+
+
         if (
             !modalOverlay ||
-            !modalOverlay.classList.contains("open")
+            !modalOverlay.classList.contains(
+                "open"
+            )
         ) {
 
             document.body.classList.remove(
                 "modal-open"
             );
+
         }
 
-
-        confirmationCallback = null;
     }
 
 
-    /*
-       Confirmation controls.
-    */
-
     document.addEventListener(
         "click",
-        (event) => {
+        event => {
 
             const target =
                 event.target;
@@ -933,6 +1388,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 closeConfirmation();
 
                 return;
+
             }
 
 
@@ -955,102 +1411,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 ) {
 
                     callback();
+
                 }
-            }
-        }
-    );
 
-
-    /*
-       Close confirmation by clicking background.
-    */
-
-    document.addEventListener(
-        "click",
-        (event) => {
-
-            const confirmation =
-                document.getElementById(
-                    "admin-confirmation-modal"
-                );
-
-
-            if (
-                confirmation &&
-                event.target === confirmation
-            ) {
-
-                closeConfirmation();
-            }
-        }
-    );
-
-
-    /* =====================================================
-       DELETE COURSE
-    ===================================================== */
-
-    document.addEventListener(
-        "click",
-        (event) => {
-
-            const button =
-                event.target.closest(
-                    ".course-action.danger"
-                );
-
-
-            if (!button) {
-                return;
             }
 
-
-            event.preventDefault();
-
-
-            const row =
-                button.closest(
-                    ".course-row"
-                );
-
-
-            let courseName =
-                "this course";
-
-
-            if (row) {
-
-                const title =
-                    row.querySelector(
-                        ".course-title"
-                    );
-
-
-                if (
-                    title &&
-                    title.textContent.trim()
-                ) {
-
-                    courseName =
-                        `"${title.textContent.trim()}"`;
-                }
-            }
-
-
-            showConfirmation(
-                `Are you sure you want to delete ${courseName}?`,
-                () => {
-
-                    if (row) {
-
-                        row.remove();
-
-                        showNotification(
-                            "Course deleted."
-                        );
-                    }
-                }
-            );
         }
     );
 
@@ -1063,7 +1428,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         logoutButton.addEventListener(
             "click",
-            (event) => {
+            event => {
 
                 event.preventDefault();
 
@@ -1080,22 +1445,161 @@ document.addEventListener("DOMContentLoaded", () => {
                             "Logged out."
                         );
 
-
-                        console.log(
-                            "EduCore interface logout."
-                        );
                     }
                 );
+
             }
         );
+
     }
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !==
+                "Escape"
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+               Confirmation first
+            */
+
+            const confirmation =
+                document.getElementById(
+                    "admin-confirmation-modal"
+                );
+
+
+            if (
+                confirmation &&
+                confirmation.classList.contains(
+                    "open"
+                )
+            ) {
+
+                closeConfirmation();
+
+                return;
+
+            }
+
+
+            /*
+               Course modal
+            */
+
+            if (
+                modalOverlay &&
+                modalOverlay.classList.contains(
+                    "open"
+                )
+            ) {
+
+                closeCourseModal();
+
+                return;
+
+            }
+
+
+            /*
+               Mobile sidebar
+            */
+
+            if (
+                app.classList.contains(
+                    "sidebar-open"
+                )
+            ) {
+
+                closeSidebar();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       DASHBOARD STATISTICS
+    ===================================================== */
+
+    function updateDashboardStats() {
+
+        const totalCourses =
+            document.getElementById(
+                "total-courses"
+            );
+
+
+        const publishedCourses =
+            document.getElementById(
+                "published-courses"
+            );
+
+
+        const draftCourses =
+            document.getElementById(
+                "draft-courses"
+            );
+
+
+        if (totalCourses) {
+
+            totalCourses.textContent =
+                courses.length;
+
+        }
+
+
+        if (publishedCourses) {
+
+            publishedCourses.textContent =
+                courses.filter(
+                    course =>
+                        course.status ===
+                        "published"
+                ).length;
+
+        }
+
+
+        if (draftCourses) {
+
+            draftCourses.textContent =
+                courses.filter(
+                    course =>
+                        course.status ===
+                        "draft"
+                ).length;
+
+        }
+
+    }
+
+
+    updateDashboardStats();
 
 
     /* =====================================================
        NOTIFICATION
     ===================================================== */
 
-    function showNotification(message) {
+    function showNotification(
+        message
+    ) {
 
         let notification =
             document.getElementById(
@@ -1116,29 +1620,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             notification.style.cssText = `
+
                 position:fixed;
+
                 right:24px;
                 bottom:24px;
+
                 z-index:5000;
+
                 max-width:320px;
+
                 padding:13px 17px;
+
                 border-radius:10px;
+
                 background:#20242c;
+
                 color:white;
+
                 font-size:11px;
+
                 font-weight:600;
-                box-shadow:0 12px 30px rgba(0,0,0,.18);
+
+                box-shadow:
+                    0 12px 30px rgba(0,0,0,.18);
+
                 opacity:0;
+
                 transform:translateY(10px);
+
                 transition:
                     opacity .2s ease,
                     transform .2s ease;
+
             `;
 
 
             document.body.appendChild(
                 notification
             );
+
         }
 
 
@@ -1146,14 +1667,17 @@ document.addEventListener("DOMContentLoaded", () => {
             message;
 
 
-        requestAnimationFrame(() => {
+        requestAnimationFrame(
+            () => {
 
-            notification.style.opacity =
-                "1";
+                notification.style.opacity =
+                    "1";
 
-            notification.style.transform =
-                "translateY(0)";
-        });
+                notification.style.transform =
+                    "translateY(0)";
+
+            }
+        );
 
 
         clearTimeout(
@@ -1162,15 +1686,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         notification._timeout =
-            setTimeout(() => {
+            setTimeout(
+                () => {
 
-                notification.style.opacity =
-                    "0";
+                    notification.style.opacity =
+                        "0";
 
-                notification.style.transform =
-                    "translateY(10px)";
+                    notification.style.transform =
+                        "translateY(10px)";
 
-            }, 3000);
+                },
+                3000
+            );
+
     }
 
 
@@ -1184,10 +1712,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!isMobile()) {
 
-                app.classList.remove(
-                    "sidebar-open"
-                );
+                closeSidebar();
+
             }
+
         }
     );
 
@@ -1198,9 +1726,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     closeSidebar();
 
+    updateDashboardStats();
+
+    renderCourses();
+
 
     console.log(
-        "EduCore Admin interface initialized."
+        "EduCore Admin initialized successfully."
     );
 
 });
+                        
