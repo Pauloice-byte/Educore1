@@ -10,12 +10,12 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta
-        name="theme-color"
-        content="#0b1730"
-    >
-
     <title>EduCore Admin</title>
+
+    <meta
+        name="description"
+        content="EduCore administration dashboard."
+    >
 
     <link
         rel="stylesheet"
@@ -27,678 +27,786 @@
 
 <body>
 
-    <div id="admin-app">
+<div
+    class="admin-app"
+    id="admin-app"
+>
 
 
-        <!-- =========================================
-             SIDEBAR
-        ========================================== -->
+    <!-- =====================================================
+         MOBILE BACKDROP
+    ====================================================== -->
 
-        <aside class="admin-sidebar">
+    <div
+        class="admin-sidebar-backdrop"
+        id="admin-sidebar-backdrop"
+    ></div>
 
 
-            <!-- BRAND -->
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-            <div class="sidebar-brand">
+    <aside
+        class="admin-sidebar"
+        id="admin-sidebar"
+    >
 
-                <div class="brand-mark">
-                    E
+
+        <!-- BRAND -->
+
+        <div class="admin-sidebar-brand">
+
+            <img
+                src="images/logo.jpg"
+                alt="EduCore"
+                class="admin-logo"
+            >
+
+            <div class="admin-brand-information">
+
+                <div class="admin-brand-name">
+                    EduCore
                 </div>
 
-                <div class="brand-text">
-
-                    <span class="brand-name">
-                        EduCore
-                    </span>
-
-                    <span class="brand-label">
-                        Admin
-                    </span>
-
+                <div class="admin-brand-label">
+                    ADMIN
                 </div>
 
             </div>
 
+        </div>
 
-            <!-- NAVIGATION -->
 
-            <nav class="admin-navigation">
+        <!-- NAVIGATION -->
+
+        <nav class="admin-navigation">
+
+
+            <div class="admin-navigation-heading">
+                ADMINISTRATION
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-nav-item active"
+                data-section="overview"
+            >
+
+                <span class="admin-nav-icon">
+                    ◈
+                </span>
+
+                <span class="admin-nav-label">
+                    Overview
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="courses"
+            >
+
+                <span class="admin-nav-icon">
+                    ▣
+                </span>
+
+                <span class="admin-nav-label">
+                    Courses
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="students"
+            >
+
+                <span class="admin-nav-icon">
+                    ♙
+                </span>
+
+                <span class="admin-nav-label">
+                    Students
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="progress"
+            >
+
+                <span class="admin-nav-icon">
+                    ◫
+                </span>
+
+                <span class="admin-nav-label">
+                    Progress
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="media"
+            >
+
+                <span class="admin-nav-icon">
+                    ▤
+                </span>
+
+                <span class="admin-nav-label">
+                    Media
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="settings"
+            >
+
+                <span class="admin-nav-icon">
+                    ⚙
+                </span>
+
+                <span class="admin-nav-label">
+                    Settings
+                </span>
+
+            </button>
+
+        </nav>
+
+
+        <!-- SIDEBAR FOOTER -->
+
+        <div class="admin-sidebar-footer">
+
+            <div class="admin-footer-line"></div>
+
+
+            <button
+                type="button"
+                class="admin-logout"
+                id="admin-logout"
+            >
+
+                <span class="admin-nav-icon">
+                    ↪
+                </span>
+
+                <span class="admin-nav-label">
+                    Logout
+                </span>
+
+            </button>
+
+
+            <div class="admin-sidebar-version">
+
+                EduCore Administration
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="admin-main">
+
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <header class="admin-header">
+
+
+            <div class="admin-header-left">
 
 
                 <button
-                    class="nav-item active"
-                    data-section="overview"
                     type="button"
+                    class="admin-menu-button"
+                    id="admin-menu-button"
+                    aria-label="Toggle sidebar"
+                    aria-controls="admin-sidebar"
+                    aria-expanded="true"
                 >
 
-                    <span class="nav-icon">
-                        ⌂
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
+
+                <div class="admin-header-title">
+
+                    <span>
+                        EDUCORE
                     </span>
 
-                    <span class="nav-label">
+                    <strong id="page-title">
                         Overview
-                    </span>
+                    </strong>
 
-                </button>
-
-
-                <button
-                    class="nav-item"
-                    data-section="courses"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ▣
-                    </span>
-
-                    <span class="nav-label">
-                        Courses
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="nav-item"
-                    data-section="students"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ♙
-                    </span>
-
-                    <span class="nav-label">
-                        Students
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="nav-item"
-                    data-section="progress"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ◒
-                    </span>
-
-                    <span class="nav-label">
-                        Progress
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="nav-item"
-                    data-section="media"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ▧
-                    </span>
-
-                    <span class="nav-label">
-                        Media
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="nav-item"
-                    data-section="settings"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ⚙
-                    </span>
-
-                    <span class="nav-label">
-                        Settings
-                    </span>
-
-                </button>
-
-
-            </nav>
-
-
-            <!-- SIDEBAR FOOTER -->
-
-            <div class="sidebar-footer">
-
-                <button
-                    id="admin-logout"
-                    class="logout-button"
-                    type="button"
-                >
-
-                    <span class="nav-icon">
-                        ↪
-                    </span>
-
-                    <span class="nav-label">
-                        Logout
-                    </span>
-
-                </button>
+                </div>
 
             </div>
 
 
-        </aside>
+            <div class="admin-header-right">
 
 
+                <div class="admin-status">
 
-        <!-- =========================================
-             MAIN AREA
-        ========================================== -->
+                    <span class="admin-status-dot"></span>
 
-        <main class="admin-main">
-
-
-            <!-- HEADER -->
-
-            <header class="admin-header">
-
-
-                <div class="header-left">
-
-
-                    <button
-                        id="sidebar-toggle"
-                        class="sidebar-toggle"
-                        type="button"
-                        aria-label="Toggle navigation"
-                        aria-expanded="false"
-                    >
-                        ☰
-                    </button>
-
-
-                    <div>
-
-                        <p class="header-eyebrow">
-                            EDUCORE ADMIN
-                        </p>
-
-                        <h1 id="page-title">
-                            Overview
-                        </h1>
-
-                    </div>
-
+                    <span>
+                        Platform Online
+                    </span>
 
                 </div>
 
-
-
-                <!-- ADMIN USER -->
 
                 <div class="admin-user">
 
-
                     <div
-                        id="admin-avatar"
                         class="admin-avatar"
+                        id="admin-avatar"
                     >
                         A
                     </div>
 
 
-                    <div class="admin-user-details">
+                    <div class="admin-user-information">
 
-                        <span
-                            id="admin-name"
+                        <div
                             class="admin-name"
+                            id="admin-name"
                         >
                             Admin
-                        </span>
+                        </div>
 
-                        <span class="admin-role">
+                        <div class="admin-role">
                             Administrator
-                        </span>
+                        </div>
 
                     </div>
 
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
+        <div class="admin-content">
+
+
+            <!-- =================================================
+                 OVERVIEW
+            ================================================== -->
+
+            <section
+                class="admin-section active"
+                id="section-overview"
+            >
+
+
+                <div class="admin-section-introduction">
+
+                    <div>
+
+                        <div class="admin-section-kicker">
+                            DASHBOARD
+                        </div>
+
+                        <h1>
+                            Overview
+                        </h1>
+
+                        <p>
+                            Monitor your EduCore learning platform.
+                        </p>
+
+                    </div>
 
                 </div>
 
 
-            </header>
+                <!-- STATISTICS -->
+
+                <div class="admin-statistics-grid">
 
 
+                    <!-- COURSES -->
 
-            <!-- =========================================
-                 CONTENT
-            ========================================== -->
+                    <div class="admin-stat-card">
 
-            <div class="admin-content">
+                        <div class="admin-stat-top">
+
+                            <span class="admin-stat-label">
+                                Courses
+                            </span>
+
+                            <span class="admin-stat-icon">
+                                ▣
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="admin-stat-value"
+                            id="stat-courses"
+                        >
+                            —
+                        </div>
+
+                        <div class="admin-stat-description">
+                            Total courses
+                        </div>
+
+                    </div>
 
 
-                <!-- =====================================
-                     OVERVIEW
-                ====================================== -->
+                    <!-- UNITS -->
 
-                <section
-                    id="section-overview"
-                    class="admin-section active"
-                >
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-top">
+
+                            <span class="admin-stat-label">
+                                Units
+                            </span>
+
+                            <span class="admin-stat-icon">
+                                ◫
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="admin-stat-value"
+                            id="stat-units"
+                        >
+                            —
+                        </div>
+
+                        <div class="admin-stat-description">
+                            Total learning units
+                        </div>
+
+                    </div>
 
 
-                    <div class="section-introduction">
+                    <!-- LESSONS -->
+
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-top">
+
+                            <span class="admin-stat-label">
+                                Lessons
+                            </span>
+
+                            <span class="admin-stat-icon">
+                                ▤
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="admin-stat-value"
+                            id="stat-lessons"
+                        >
+                            —
+                        </div>
+
+                        <div class="admin-stat-description">
+                            Total lessons
+                        </div>
+
+                    </div>
+
+
+                    <!-- STUDENTS -->
+
+                    <div class="admin-stat-card">
+
+                        <div class="admin-stat-top">
+
+                            <span class="admin-stat-label">
+                                Students
+                            </span>
+
+                            <span class="admin-stat-icon">
+                                ♙
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="admin-stat-value"
+                            id="stat-students"
+                        >
+                            —
+                        </div>
+
+                        <div class="admin-stat-description">
+                            Active students
+                        </div>
+
+                    </div>
+
+
+                    <!-- PUBLISHED -->
+
+                    <div
+                        class="admin-stat-card admin-stat-card-wide"
+                    >
+
+                        <div class="admin-stat-top">
+
+                            <span class="admin-stat-label">
+                                Published content
+                            </span>
+
+                            <span class="admin-stat-icon">
+                                ✓
+                            </span>
+
+                        </div>
+
+                        <div
+                            class="admin-stat-value"
+                            id="stat-published"
+                        >
+                            —
+                        </div>
+
+                        <div class="admin-stat-description">
+                            Published courses
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECENT ACTIVITY -->
+
+                <div class="admin-panel">
+
+
+                    <div class="admin-panel-header">
 
                         <div>
 
-                            <p class="section-kicker">
-                                Dashboard
-                            </p>
+                            <div class="admin-panel-kicker">
+                                ACTIVITY
+                            </div>
 
                             <h2>
-                                Welcome back
+                                Recent activity
                             </h2>
 
-                            <p>
-                                Here's an overview of your EduCore platform.
-                            </p>
-
                         </div>
 
                     </div>
 
 
-
-                    <!-- STATISTICS -->
-
-                    <div class="statistics-grid">
-
-
-                        <!-- COURSES -->
-
-                        <article class="stat-card">
-
-                            <div class="stat-card-top">
-
-                                <span class="stat-label">
-                                    Courses
-                                </span>
-
-                                <span class="stat-icon">
-                                    ▣
-                                </span>
-
-                            </div>
-
-
-                            <strong
-                                id="stat-courses"
-                                class="stat-value"
-                            >
-                                —
-                            </strong>
-
-
-                            <span class="stat-description">
-                                Total courses
-                            </span>
-
-                        </article>
-
-
-
-                        <!-- UNITS -->
-
-                        <article class="stat-card">
-
-                            <div class="stat-card-top">
-
-                                <span class="stat-label">
-                                    Units
-                                </span>
-
-                                <span class="stat-icon">
-                                    ◫
-                                </span>
-
-                            </div>
-
-
-                            <strong
-                                id="stat-units"
-                                class="stat-value"
-                            >
-                                —
-                            </strong>
-
-
-                            <span class="stat-description">
-                                Total units
-                            </span>
-
-                        </article>
-
-
-
-                        <!-- LESSONS -->
-
-                        <article class="stat-card">
-
-                            <div class="stat-card-top">
-
-                                <span class="stat-label">
-                                    Lessons
-                                </span>
-
-                                <span class="stat-icon">
-                                    ▤
-                                </span>
-
-                            </div>
-
-
-                            <strong
-                                id="stat-lessons"
-                                class="stat-value"
-                            >
-                                —
-                            </strong>
-
-
-                            <span class="stat-description">
-                                Total lessons
-                            </span>
-
-                        </article>
-
-
-
-                        <!-- STUDENTS -->
-
-                        <article class="stat-card">
-
-                            <div class="stat-card-top">
-
-                                <span class="stat-label">
-                                    Students
-                                </span>
-
-                                <span class="stat-icon">
-                                    ♙
-                                </span>
-
-                            </div>
-
-
-                            <strong
-                                id="stat-students"
-                                class="stat-value"
-                            >
-                                —
-                            </strong>
-
-
-                            <span class="stat-description">
-                                Registered students
-                            </span>
-
-                        </article>
-
-
-
-                        <!-- PUBLISHED CONTENT -->
-
-                        <article class="stat-card stat-card-wide">
-
-                            <div class="stat-card-top">
-
-                                <span class="stat-label">
-                                    Published Content
-                                </span>
-
-                                <span class="stat-icon">
-                                    ✓
-                                </span>
-
-                            </div>
-
-
-                            <strong
-                                id="stat-published"
-                                class="stat-value"
-                            >
-                                —
-                            </strong>
-
-
-                            <span class="stat-description">
-                                Published courses
-                            </span>
-
-                        </article>
-
-
-                    </div>
-
-
-
-                    <!-- =================================
-                         RECENT ACTIVITY
-                    ================================== -->
-
-                    <section class="dashboard-panel">
-
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <p class="panel-kicker">
-                                    Activity
-                                </p>
-
-                                <h3>
-                                    Recent Activity
-                                </h3>
-
-                            </div>
-
+                    <div
+                        class="admin-activity-list"
+                        id="recent-activity"
+                    >
+
+                        <div class="admin-activity-loading">
+                            Loading recent activity...
                         </div>
 
-
-                        <div
-                            id="recent-activity"
-                            class="activity-list"
-                        >
-
-                            <div class="activity-loading">
-                                Loading recent activity...
-                            </div>
-
-                        </div>
-
-
-                    </section>
-
-
-                </section>
-
-
-
-                <!-- =====================================
-                     COURSES
-                ====================================== -->
-
-                <section
-                    id="section-courses"
-                    class="admin-section"
-                >
-
-                    <div class="empty-section">
-
-                        <span class="empty-section-icon">
-                            ▣
-                        </span>
-
-                        <h2>
-                            Courses
-                        </h2>
-
-                        <p>
-                            Course management will appear here.
-                        </p>
-
                     </div>
 
-                </section>
+                </div>
+
+            </section>
 
 
+            <!-- =================================================
+                 COURSES
+            ================================================== -->
 
-                <!-- =====================================
-                     STUDENTS
-                ====================================== -->
+            <section
+                class="admin-section"
+                id="section-courses"
+            >
 
-                <section
-                    id="section-students"
-                    class="admin-section"
-                >
+                <div class="admin-page-introduction">
 
-                    <div class="empty-section">
-
-                        <span class="empty-section-icon">
-                            ♙
-                        </span>
-
-                        <h2>
-                            Students
-                        </h2>
-
-                        <p>
-                            Student management will appear here.
-                        </p>
-
+                    <div class="admin-section-kicker">
+                        CONTENT
                     </div>
 
-                </section>
+                    <h1>
+                        Courses
+                    </h1>
+
+                    <p>
+                        Manage courses available on EduCore.
+                    </p>
+
+                </div>
 
 
+                <div class="admin-empty-section">
 
-                <!-- =====================================
-                     PROGRESS
-                ====================================== -->
-
-                <section
-                    id="section-progress"
-                    class="admin-section"
-                >
-
-                    <div class="empty-section">
-
-                        <span class="empty-section-icon">
-                            ◒
-                        </span>
-
-                        <h2>
-                            Progress
-                        </h2>
-
-                        <p>
-                            Progress analytics will appear here.
-                        </p>
-
+                    <div class="admin-empty-icon">
+                        ▣
                     </div>
 
-                </section>
+                    <h2>
+                        Course management
+                    </h2>
+
+                    <p>
+                        Course management will be implemented
+                        in the next phase.
+                    </p>
+
+                </div>
+
+            </section>
 
 
+            <!-- =================================================
+                 STUDENTS
+            ================================================== -->
 
-                <!-- =====================================
-                     MEDIA
-                ====================================== -->
+            <section
+                class="admin-section"
+                id="section-students"
+            >
 
-                <section
-                    id="section-media"
-                    class="admin-section"
-                >
+                <div class="admin-page-introduction">
 
-                    <div class="empty-section">
-
-                        <span class="empty-section-icon">
-                            ▧
-                        </span>
-
-                        <h2>
-                            Media
-                        </h2>
-
-                        <p>
-                            Media management will appear here.
-                        </p>
-
+                    <div class="admin-section-kicker">
+                        USERS
                     </div>
 
-                </section>
+                    <h1>
+                        Students
+                    </h1>
+
+                    <p>
+                        Manage registered EduCore students.
+                    </p>
+
+                </div>
 
 
+                <div class="admin-empty-section">
 
-                <!-- =====================================
-                     SETTINGS
-                ====================================== -->
-
-                <section
-                    id="section-settings"
-                    class="admin-section"
-                >
-
-                    <div class="empty-section">
-
-                        <span class="empty-section-icon">
-                            ⚙
-                        </span>
-
-                        <h2>
-                            Settings
-                        </h2>
-
-                        <p>
-                            EduCore settings will appear here.
-                        </p>
-
+                    <div class="admin-empty-icon">
+                        ♙
                     </div>
 
-                </section>
+                    <h2>
+                        Student management
+                    </h2>
+
+                    <p>
+                        Student management will be implemented
+                        in the next phase.
+                    </p>
+
+                </div>
+
+            </section>
 
 
-            </div>
+            <!-- =================================================
+                 PROGRESS
+            ================================================== -->
+
+            <section
+                class="admin-section"
+                id="section-progress"
+            >
+
+                <div class="admin-page-introduction">
+
+                    <div class="admin-section-kicker">
+                        ANALYTICS
+                    </div>
+
+                    <h1>
+                        Progress
+                    </h1>
+
+                    <p>
+                        Monitor student learning progress.
+                    </p>
+
+                </div>
 
 
-        </main>
+                <div class="admin-empty-section">
+
+                    <div class="admin-empty-icon">
+                        ◫
+                    </div>
+
+                    <h2>
+                        Progress analytics
+                    </h2>
+
+                    <p>
+                        Progress analytics will be implemented
+                        in the next phase.
+                    </p>
+
+                </div>
+
+            </section>
 
 
-    </div>
+            <!-- =================================================
+                 MEDIA
+            ================================================== -->
+
+            <section
+                class="admin-section"
+                id="section-media"
+            >
+
+                <div class="admin-page-introduction">
+
+                    <div class="admin-section-kicker">
+                        PLATFORM
+                    </div>
+
+                    <h1>
+                        Media
+                    </h1>
+
+                    <p>
+                        Manage images, audio and other media.
+                    </p>
+
+                </div>
 
 
+                <div class="admin-empty-section">
 
-    <!-- =========================================
-         EXISTING AUTHENTICATION / SUPABASE
-         
-         DO NOT CHANGE THESE.
-    ========================================== -->
+                    <div class="admin-empty-icon">
+                        ▤
+                    </div>
 
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
+                    <h2>
+                        Media library
+                    </h2>
 
-    <!-- ADMIN DASHBOARD ONLY -->
+                    <p>
+                        Media management will be implemented
+                        in the next phase.
+                    </p>
 
-    <script src="js/admin.js"></script>
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SETTINGS
+            ================================================== -->
+
+            <section
+                class="admin-section"
+                id="section-settings"
+            >
+
+                <div class="admin-page-introduction">
+
+                    <div class="admin-section-kicker">
+                        SYSTEM
+                    </div>
+
+                    <h1>
+                        Settings
+                    </h1>
+
+                    <p>
+                        Configure EduCore platform settings.
+                    </p>
+
+                </div>
+
+
+                <div class="admin-empty-section">
+
+                    <div class="admin-empty-icon">
+                        ⚙
+                    </div>
+
+                    <h2>
+                        Platform settings
+                    </h2>
+
+                    <p>
+                        Settings will be implemented
+                        in the next phase.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     AUTHENTICATION
+========================================================== -->
+
+<script src="js/auth.js"></script>
+
+
+<!-- =========================================================
+     ADMIN DASHBOARD
+========================================================== -->
+
+<script src="js/admin.js"></script>
 
 
 </body>
 
-                                    </html>
+    </html>
