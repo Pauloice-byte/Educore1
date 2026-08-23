@@ -12,122 +12,394 @@
 
     <meta
         name="theme-color"
-        content="#0b1730"
+        content="#11141b"
     >
 
-    <title>EduCore — Login</title>
+    <title>EduCore | Login</title>
 
-    <link rel="stylesheet" href="css/login.css">
+    <link
+        rel="stylesheet"
+        href="css/login.css"
+    >
 
 </head>
 
 
-<body>
-
-    <div class="login-page">
+<body data-page="login">
 
 
-        <!-- =====================================
-             LEFT SIDE — BRAND / MESSAGE
-        ====================================== -->
+    <!-- =====================================================
+         MOBILE BACKDROP
+    ====================================================== -->
 
-        <section class="login-intro">
+    <div
+        class="sidebar-backdrop"
+        id="sidebarBackdrop"
+    ></div>
 
-            <a href="index.html" class="login-brand">
 
-                <div class="brand-mark">
-                    EC
-                </div>
 
-                <div class="brand-text">
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-                    <strong>
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
+
+        <!-- BRAND -->
+
+        <div class="sidebar-brand">
+
+            <a
+                href="index.html"
+                class="sidebar-brand-link"
+            >
+
+                <img
+                    src="images/logo.jpg"
+                    alt="EduCore"
+                    class="logo"
+                >
+
+                <div class="brand-information">
+
+                    <div class="brand-name">
                         EduCore
-                    </strong>
+                    </div>
 
-                    <span>
+                    <div class="brand-name">
+                        Learning
+                    </div>
+
+                    <div class="brand-subtitle">
                         Autonomous Learning
-                    </span>
+                    </div>
 
                 </div>
 
             </a>
 
-
-            <div class="intro-content">
-
-                <span class="intro-eyebrow">
-                    WELCOME BACK
-                </span>
-
-                <h1>
-                    Continue your
-                    <span>learning journey.</span>
-                </h1>
-
-                <p>
-                    Sign in to continue your lessons,
-                    practise your skills and track your
-                    progress across devices.
-                </p>
+        </div>
 
 
-                <div class="intro-points">
+        <!-- NAVIGATION -->
 
-                    <div>
-                        <span>✓</span>
-                        <p>
-                            Continue where you left off
-                        </p>
-                    </div>
+        <nav class="sidebar-navigation">
 
-                    <div>
-                        <span>✓</span>
-                        <p>
-                            Track your learning progress
-                        </p>
-                    </div>
+            <div class="navigation-section">
 
-                    <div>
-                        <span>✓</span>
-                        <p>
-                            Practise with AI support
-                        </p>
-                    </div>
-
+                <div class="navigation-heading">
+                    COURSES
                 </div>
 
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="all"
+                >
+                    <span class="navigation-symbol">
+                        ◈
+                    </span>
+
+                    <span>
+                        All Courses
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="language"
+                >
+                    <span class="navigation-symbol">
+                        A
+                    </span>
+
+                    <span>
+                        Language
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="ms-office"
+                >
+                    <span class="navigation-symbol">
+                        ▣
+                    </span>
+
+                    <span>
+                        MS Office
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="trading"
+                >
+                    <span class="navigation-symbol">
+                        ◇
+                    </span>
+
+                    <span>
+                        Trading
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="technology"
+                >
+                    <span class="navigation-symbol">
+                        ◉
+                    </span>
+
+                    <span>
+                        Technology
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="business"
+                >
+                    <span class="navigation-symbol">
+                        ◆
+                    </span>
+
+                    <span>
+                        Business
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="finance"
+                >
+                    <span class="navigation-symbol">
+                        $
+                    </span>
+
+                    <span>
+                        Finance
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="personal-development"
+                >
+                    <span class="navigation-symbol">
+                        +
+                    </span>
+
+                    <span>
+                        Personal Development
+                    </span>
+                </button>
+
             </div>
 
 
-            <div class="intro-footer">
-                © 2026 EduCore
+
+            <!-- LEARNING MODE -->
+
+            <div class="navigation-section">
+
+                <div class="navigation-heading">
+                    LEARNING MODE
+                </div>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="autonomous"
+                >
+                    <span class="navigation-symbol">
+                        AI
+                    </span>
+
+                    <span>
+                        Autonomous
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="blended"
+                >
+                    <span class="navigation-symbol">
+                        ◐
+                    </span>
+
+                    <span>
+                        Blended
+                    </span>
+                </button>
+
+
+                <button
+                    class="navigation-button"
+                    type="button"
+                    data-filter="guided"
+                >
+                    <span class="navigation-symbol">
+                        ●
+                    </span>
+
+                    <span>
+                        Guided
+                    </span>
+                </button>
+
             </div>
 
-        </section>
+        </nav>
 
 
-        <!-- =====================================
-             RIGHT SIDE — LOGIN FORM
-        ====================================== -->
 
-        <main class="login-panel">
+        <!-- FOOTER -->
+
+        <div class="sidebar-footer">
+
+            <div class="sidebar-footer-line"></div>
+
+            <div>
+                EDUCORE
+            </div>
+
+            <small>
+                Autonomous Learning Platform
+            </small>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main
+        class="main"
+        id="main"
+    >
+
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <header class="top-header">
+
+            <button
+                class="menu-button"
+                id="menuButton"
+                type="button"
+                aria-label="Toggle navigation"
+                aria-controls="sidebar"
+                aria-expanded="false"
+            >
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+
+            <div class="header-title">
+
+                <span>
+                    EDUCORE
+                </span>
+
+                <strong>
+                    Autonomous Learning
+                </strong>
+
+            </div>
+
+
+            <div class="header-status">
+
+                <span class="online-dot"></span>
+
+                <span>
+                    Platform Online
+                </span>
+
+            </div>
+
+
+            <a
+                href="index.html"
+                class="header-login"
+            >
+                Home
+            </a>
+
+        </header>
+
+
+
+        <!-- =================================================
+             LOGIN CONTENT
+        ================================================== -->
+
+        <section class="login-section">
 
             <div class="login-card">
 
 
+                <!-- MOBILE BRAND -->
+
                 <div class="mobile-brand">
 
-                    <div class="brand-mark">
-                        EC
-                    </div>
+                    <img
+                        src="images/logo.jpg"
+                        alt="EduCore"
+                        class="mobile-logo"
+                    >
 
-                    <strong>
-                        EduCore
-                    </strong>
+                    <div>
+
+                        <strong>
+                            EduCore
+                        </strong>
+
+                        <span>
+                            Autonomous Learning
+                        </span>
+
+                    </div>
 
                 </div>
 
+
+
+                <!-- LOGIN HEADING -->
 
                 <div class="login-heading">
 
@@ -135,9 +407,9 @@
                         ACCOUNT ACCESS
                     </span>
 
-                    <h2>
+                    <h1>
                         Sign in
-                    </h2>
+                    </h1>
 
                     <p>
                         Enter your account details
@@ -147,9 +419,8 @@
                 </div>
 
 
-                <!-- =================================
-                     ERROR MESSAGE
-                ================================== -->
+
+                <!-- ERROR MESSAGE -->
 
                 <div
                     id="login-error"
@@ -158,9 +429,8 @@
                 ></div>
 
 
-                <!-- =================================
-                     LOGIN FORM
-                ================================== -->
+
+                <!-- LOGIN FORM -->
 
                 <form id="login-form">
 
@@ -181,6 +451,7 @@
                         >
 
                     </div>
+
 
 
                     <div class="form-group">
@@ -212,6 +483,7 @@
                     </div>
 
 
+
                     <button
                         type="submit"
                         id="login-button"
@@ -229,14 +501,23 @@
 
                     </button>
 
-
                 </form>
 
 
+
+                <!-- DIVIDER -->
+
                 <div class="login-divider">
-                    <span>OR</span>
+
+                    <span>
+                        OR
+                    </span>
+
                 </div>
 
+
+
+                <!-- REGISTER -->
 
                 <p class="register-text">
 
@@ -249,6 +530,9 @@
                 </p>
 
 
+
+                <!-- BACK -->
+
                 <a
                     href="index.html"
                     class="back-home"
@@ -256,39 +540,228 @@
                     ← Back to EduCore
                 </a>
 
-
             </div>
 
-        </main>
-
-    </div>
+        </section>
 
 
-  <!-- =====================================
-     SUPABASE LIBRARY
-====================================== -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="footer">
+
+            <span>
+                © <span id="year"></span> EduCore
+            </span>
+
+            <span>
+                Autonomous Learning Platform
+            </span>
+
+        </footer>
+
+    </main>
 
 
-<!-- =====================================
-     EDUCORE SUPABASE CLIENT
-====================================== -->
 
-<script src="js/supabase.js"></script>
+    <!-- =====================================================
+         SUPABASE
+    ====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="js/supabase.js"></script>
+
+    <script src="js/auth.js"></script>
 
 
-<!-- =====================================
-     AUTHENTICATION
-====================================== -->
 
-<script src="js/auth.js"></script>
-
-    <!-- =====================================
-         LOGIN CONTROLLER
-    ====================================== -->
+    <!-- =====================================================
+         SIDEBAR + LOGIN CONTROLLER
+    ====================================================== -->
 
     <script>
+
+        /* =================================================
+           SIDEBAR
+        ================================================= */
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        const menuButton =
+            document.getElementById("menuButton");
+
+        const backdrop =
+            document.getElementById("sidebarBackdrop");
+
+
+        function openMobileSidebar() {
+
+            if (!sidebar) return;
+
+            sidebar.classList.add("mobile-open");
+
+            if (backdrop) {
+                backdrop.classList.add("active");
+            }
+
+            menuButton?.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+        }
+
+
+        function closeMobileSidebar() {
+
+            if (!sidebar) return;
+
+            sidebar.classList.remove("mobile-open");
+
+            if (backdrop) {
+                backdrop.classList.remove("active");
+            }
+
+            menuButton?.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+
+        function toggleSidebar() {
+
+            if (!sidebar) return;
+
+
+            if (window.innerWidth <= 768) {
+
+                if (
+                    sidebar.classList.contains(
+                        "mobile-open"
+                    )
+                ) {
+
+                    closeMobileSidebar();
+
+                } else {
+
+                    openMobileSidebar();
+
+                }
+
+                return;
+            }
+
+
+            sidebar.classList.toggle("collapsed");
+
+            menuButton?.setAttribute(
+                "aria-expanded",
+                sidebar.classList.contains(
+                    "collapsed"
+                )
+                    ? "false"
+                    : "true"
+            );
+
+        }
+
+
+        if (menuButton) {
+
+            menuButton.addEventListener(
+                "click",
+                toggleSidebar
+            );
+
+        }
+
+
+        if (backdrop) {
+
+            backdrop.addEventListener(
+                "click",
+                closeMobileSidebar
+            );
+
+        }
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (event.key === "Escape") {
+
+                    closeMobileSidebar();
+
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           SIDEBAR NAVIGATION
+        ================================================= */
+
+        document
+            .querySelectorAll(".navigation-button")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const filter =
+                            button.dataset.filter;
+
+
+                        /*
+                         * The login page has no
+                         * course grid.
+                         *
+                         * Return to the main
+                         * library and pass the
+                         * selected category.
+                         */
+
+                        window.location.href =
+                            "index.html?filter=" +
+                            encodeURIComponent(filter);
+
+                    }
+                );
+
+            });
+
+
+        /* =================================================
+           YEAR
+        ================================================= */
+
+        const year =
+            document.getElementById("year");
+
+        if (year) {
+
+            year.textContent =
+                new Date().getFullYear();
+
+        }
+
+
+        /* =================================================
+           LOGIN CONTROLLER
+           YOUR SUPABASE AUTHENTICATION LOGIC
+           IS KEPT INTACT.
+        ================================================= */
 
         document
             .getElementById("login-form")
@@ -335,18 +808,10 @@
                 passwordInput.value;
 
 
-            /*
-             * Clear previous error.
-             */
-
             errorBox.textContent = "";
 
             errorBox.classList.add("hidden");
 
-
-            /*
-             * Loading state.
-             */
 
             button.disabled = true;
 
@@ -358,22 +823,11 @@
 
             try {
 
-                /*
-                 * Phase 2 authentication function.
-                 */
-
                 await loginUser(
                     email,
                     password
                 );
 
-
-                /*
-                 * Authentication succeeded.
-                 *
-                 * Now determine whether this
-                 * is an admin or student.
-                 */
 
                 const profile =
                     await getCurrentProfile();
@@ -388,10 +842,6 @@
                 }
 
 
-                /*
-                 * Account must be active.
-                 */
-
                 if (profile.active !== true) {
 
                     throw new Error(
@@ -400,10 +850,6 @@
 
                 }
 
-
-                /*
-                 * ADMIN
-                 */
 
                 if (profile.role === "admin") {
 
@@ -415,10 +861,6 @@
                 }
 
 
-                /*
-                 * STUDENT
-                 */
-
                 if (profile.role === "student") {
 
                     window.location.href =
@@ -428,10 +870,6 @@
 
                 }
 
-
-                /*
-                 * Unknown role.
-                 */
 
                 throw new Error(
                     "Your account does not have a valid EduCore role."
@@ -445,10 +883,6 @@
                     error
                 );
 
-
-                /*
-                 * Display a user-friendly message.
-                 */
 
                 let message =
                     "Unable to sign in. Please check your email and password.";
@@ -487,4 +921,4 @@
 
 </body>
 
-</html>
+                                     </html>
