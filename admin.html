@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -15,42 +17,68 @@
 
     <title>EduCore Admin</title>
 
-    <link rel="stylesheet" href="css/admin.css">
+    <link
+        rel="stylesheet"
+        href="css/admin.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- =========================================
-         ADMIN APPLICATION
-    ========================================== -->
-
     <div id="admin-app">
 
-        <!-- =====================================
+
+        <!-- =========================================
              SIDEBAR
-        ====================================== -->
+        ========================================== -->
 
         <aside class="admin-sidebar">
 
+
+            <!-- BRAND -->
+
             <div class="sidebar-brand">
-                <div class="brand-mark">E</div>
+
+                <div class="brand-mark">
+                    E
+                </div>
 
                 <div class="brand-text">
-                    <span class="brand-name">EduCore</span>
-                    <span class="brand-label">Admin</span>
+
+                    <span class="brand-name">
+                        EduCore
+                    </span>
+
+                    <span class="brand-label">
+                        Admin
+                    </span>
+
                 </div>
+
             </div>
 
 
+            <!-- NAVIGATION -->
+
             <nav class="admin-navigation">
+
 
                 <button
                     class="nav-item active"
                     data-section="overview"
                     type="button"
                 >
-                    <span class="nav-icon">⌂</span>
-                    <span class="nav-label">Overview</span>
+
+                    <span class="nav-icon">
+                        ⌂
+                    </span>
+
+                    <span class="nav-label">
+                        Overview
+                    </span>
+
                 </button>
 
 
@@ -59,8 +87,15 @@
                     data-section="courses"
                     type="button"
                 >
-                    <span class="nav-icon">▣</span>
-                    <span class="nav-label">Courses</span>
+
+                    <span class="nav-icon">
+                        ▣
+                    </span>
+
+                    <span class="nav-label">
+                        Courses
+                    </span>
+
                 </button>
 
 
@@ -69,8 +104,15 @@
                     data-section="students"
                     type="button"
                 >
-                    <span class="nav-icon">♙</span>
-                    <span class="nav-label">Students</span>
+
+                    <span class="nav-icon">
+                        ♙
+                    </span>
+
+                    <span class="nav-label">
+                        Students
+                    </span>
+
                 </button>
 
 
@@ -79,8 +121,15 @@
                     data-section="progress"
                     type="button"
                 >
-                    <span class="nav-icon">◒</span>
-                    <span class="nav-label">Progress</span>
+
+                    <span class="nav-icon">
+                        ◒
+                    </span>
+
+                    <span class="nav-label">
+                        Progress
+                    </span>
+
                 </button>
 
 
@@ -89,8 +138,15 @@
                     data-section="media"
                     type="button"
                 >
-                    <span class="nav-icon">▧</span>
-                    <span class="nav-label">Media</span>
+
+                    <span class="nav-icon">
+                        ▧
+                    </span>
+
+                    <span class="nav-label">
+                        Media
+                    </span>
+
                 </button>
 
 
@@ -99,12 +155,22 @@
                     data-section="settings"
                     type="button"
                 >
-                    <span class="nav-icon">⚙</span>
-                    <span class="nav-label">Settings</span>
+
+                    <span class="nav-icon">
+                        ⚙
+                    </span>
+
+                    <span class="nav-label">
+                        Settings
+                    </span>
+
                 </button>
+
 
             </nav>
 
+
+            <!-- SIDEBAR FOOTER -->
 
             <div class="sidebar-footer">
 
@@ -113,37 +179,52 @@
                     class="logout-button"
                     type="button"
                 >
-                    <span class="nav-icon">↪</span>
-                    <span class="nav-label">Logout</span>
+
+                    <span class="nav-icon">
+                        ↪
+                    </span>
+
+                    <span class="nav-label">
+                        Logout
+                    </span>
+
                 </button>
 
             </div>
 
+
         </aside>
 
 
-        <!-- =====================================
+
+        <!-- =========================================
              MAIN AREA
-        ====================================== -->
+        ========================================== -->
 
         <main class="admin-main">
+
 
             <!-- HEADER -->
 
             <header class="admin-header">
 
+
                 <div class="header-left">
+
 
                     <button
                         id="sidebar-toggle"
                         class="sidebar-toggle"
                         type="button"
                         aria-label="Toggle navigation"
+                        aria-expanded="false"
                     >
                         ☰
                     </button>
 
+
                     <div>
+
                         <p class="header-eyebrow">
                             EDUCORE ADMIN
                         </p>
@@ -151,16 +232,26 @@
                         <h1 id="page-title">
                             Overview
                         </h1>
+
                     </div>
+
 
                 </div>
 
 
+
+                <!-- ADMIN USER -->
+
                 <div class="admin-user">
 
-                    <div class="admin-avatar" id="admin-avatar">
+
+                    <div
+                        id="admin-avatar"
+                        class="admin-avatar"
+                    >
                         A
                     </div>
+
 
                     <div class="admin-user-details">
 
@@ -177,30 +268,35 @@
 
                     </div>
 
+
                 </div>
+
 
             </header>
 
 
-            <!-- =================================
-                 PAGE CONTENT
-            ================================== -->
+
+            <!-- =========================================
+                 CONTENT
+            ========================================== -->
 
             <div class="admin-content">
 
 
-                <!-- =============================
+                <!-- =====================================
                      OVERVIEW
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-overview"
                     class="admin-section active"
                 >
 
+
                     <div class="section-introduction">
 
                         <div>
+
                             <p class="section-kicker">
                                 Dashboard
                             </p>
@@ -212,9 +308,11 @@
                             <p>
                                 Here's an overview of your EduCore platform.
                             </p>
+
                         </div>
 
                     </div>
+
 
 
                     <!-- STATISTICS -->
@@ -227,6 +325,7 @@
                         <article class="stat-card">
 
                             <div class="stat-card-top">
+
                                 <span class="stat-label">
                                     Courses
                                 </span>
@@ -234,7 +333,9 @@
                                 <span class="stat-icon">
                                     ▣
                                 </span>
+
                             </div>
+
 
                             <strong
                                 id="stat-courses"
@@ -243,6 +344,7 @@
                                 —
                             </strong>
 
+
                             <span class="stat-description">
                                 Total courses
                             </span>
@@ -250,11 +352,13 @@
                         </article>
 
 
+
                         <!-- UNITS -->
 
                         <article class="stat-card">
 
                             <div class="stat-card-top">
+
                                 <span class="stat-label">
                                     Units
                                 </span>
@@ -262,7 +366,9 @@
                                 <span class="stat-icon">
                                     ◫
                                 </span>
+
                             </div>
+
 
                             <strong
                                 id="stat-units"
@@ -271,6 +377,7 @@
                                 —
                             </strong>
 
+
                             <span class="stat-description">
                                 Total units
                             </span>
@@ -278,11 +385,13 @@
                         </article>
 
 
+
                         <!-- LESSONS -->
 
                         <article class="stat-card">
 
                             <div class="stat-card-top">
+
                                 <span class="stat-label">
                                     Lessons
                                 </span>
@@ -290,7 +399,9 @@
                                 <span class="stat-icon">
                                     ▤
                                 </span>
+
                             </div>
+
 
                             <strong
                                 id="stat-lessons"
@@ -299,6 +410,7 @@
                                 —
                             </strong>
 
+
                             <span class="stat-description">
                                 Total lessons
                             </span>
@@ -306,11 +418,13 @@
                         </article>
 
 
+
                         <!-- STUDENTS -->
 
                         <article class="stat-card">
 
                             <div class="stat-card-top">
+
                                 <span class="stat-label">
                                     Students
                                 </span>
@@ -318,7 +432,9 @@
                                 <span class="stat-icon">
                                     ♙
                                 </span>
+
                             </div>
+
 
                             <strong
                                 id="stat-students"
@@ -327,6 +443,7 @@
                                 —
                             </strong>
 
+
                             <span class="stat-description">
                                 Registered students
                             </span>
@@ -334,11 +451,13 @@
                         </article>
 
 
+
                         <!-- PUBLISHED CONTENT -->
 
                         <article class="stat-card stat-card-wide">
 
                             <div class="stat-card-top">
+
                                 <span class="stat-label">
                                     Published Content
                                 </span>
@@ -346,7 +465,9 @@
                                 <span class="stat-icon">
                                     ✓
                                 </span>
+
                             </div>
+
 
                             <strong
                                 id="stat-published"
@@ -355,24 +476,29 @@
                                 —
                             </strong>
 
+
                             <span class="stat-description">
                                 Published courses
                             </span>
 
                         </article>
 
+
                     </div>
 
 
-                    <!-- =========================
+
+                    <!-- =================================
                          RECENT ACTIVITY
-                    ========================== -->
+                    ================================== -->
 
                     <section class="dashboard-panel">
+
 
                         <div class="panel-header">
 
                             <div>
+
                                 <p class="panel-kicker">
                                     Activity
                                 </p>
@@ -380,6 +506,7 @@
                                 <h3>
                                     Recent Activity
                                 </h3>
+
                             </div>
 
                         </div>
@@ -396,14 +523,17 @@
 
                         </div>
 
+
                     </section>
+
 
                 </section>
 
 
-                <!-- =============================
+
+                <!-- =====================================
                      COURSES
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-courses"
@@ -429,9 +559,10 @@
                 </section>
 
 
-                <!-- =============================
+
+                <!-- =====================================
                      STUDENTS
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-students"
@@ -457,9 +588,10 @@
                 </section>
 
 
-                <!-- =============================
+
+                <!-- =====================================
                      PROGRESS
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-progress"
@@ -485,9 +617,10 @@
                 </section>
 
 
-                <!-- =============================
+
+                <!-- =====================================
                      MEDIA
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-media"
@@ -513,9 +646,10 @@
                 </section>
 
 
-                <!-- =============================
+
+                <!-- =====================================
                      SETTINGS
-                ============================== -->
+                ====================================== -->
 
                 <section
                     id="section-settings"
@@ -540,20 +674,31 @@
 
                 </section>
 
+
             </div>
 
+
         </main>
+
 
     </div>
 
 
+
     <!-- =========================================
-         SCRIPTS
+         EXISTING AUTHENTICATION / SUPABASE
+         
+         DO NOT CHANGE THESE.
     ========================================== -->
 
     <script src="js/supabase.js"></script>
     <script src="js/auth.js"></script>
+
+    <!-- ADMIN DASHBOARD ONLY -->
+
     <script src="js/admin.js"></script>
 
+
 </body>
-</html>
+
+                                    </html>
