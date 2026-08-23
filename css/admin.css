@@ -94,10 +94,9 @@ button {
 }
 
 
-/* COLLAPSED */
+/* DESKTOP COLLAPSED */
 
-#admin-app.sidebar-collapsed
-.admin-sidebar {
+#admin-app.sidebar-collapsed .admin-sidebar {
     width: var(--sidebar-collapsed);
 }
 
@@ -126,26 +125,19 @@ button {
     width: 49px;
     height: 49px;
 
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    object-fit: cover;
 
     border-radius: 12px;
 
-    background: white;
-
-    color: #171a21;
-
-    font-size: 20px;
-    font-weight: 800;
+    flex-shrink: 0;
 }
 
 .brand-information {
     min-width: 0;
 
     white-space: nowrap;
+
+    overflow: hidden;
 
     transition:
         opacity 0.2s ease;
@@ -244,7 +236,6 @@ button {
 
 .nav-icon {
     width: 22px;
-
     min-width: 22px;
 
     display: flex;
@@ -255,21 +246,16 @@ button {
 }
 
 
-/* COLLAPSED NAV */
+/* COLLAPSED */
 
-#admin-app.sidebar-collapsed
-.nav-item,
-#admin-app.sidebar-collapsed
-.logout-button {
+#admin-app.sidebar-collapsed .nav-item,
+#admin-app.sidebar-collapsed .logout-button {
     justify-content: center;
-
     padding: 0;
 }
 
-#admin-app.sidebar-collapsed
-.nav-item .nav-label,
-#admin-app.sidebar-collapsed
-.logout-button span:last-child {
+#admin-app.sidebar-collapsed .nav-label,
+#admin-app.sidebar-collapsed .logout-button span:last-child {
     display: none;
 }
 
@@ -304,8 +290,7 @@ button {
         margin-left 0.3s ease;
 }
 
-#admin-app.sidebar-collapsed
-.admin-main {
+#admin-app.sidebar-collapsed .admin-main {
     margin-left: var(--sidebar-collapsed);
 }
 
@@ -334,12 +319,18 @@ button {
         1px solid var(--border);
 
     backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
 
 .header-left {
     display: flex;
     align-items: center;
 }
+
+
+/* =========================================================
+   SIDEBAR TOGGLE
+========================================================= */
 
 .sidebar-toggle {
     width: 42px;
@@ -359,6 +350,9 @@ button {
     background: #f0f1f3;
 
     cursor: pointer;
+
+    transition:
+        background 0.2s ease;
 }
 
 .sidebar-toggle:hover {
@@ -373,6 +367,11 @@ button {
 
     border-radius: 2px;
 }
+
+
+/* =========================================================
+   HEADER TITLE
+========================================================= */
 
 .header-title {
     margin-left: 17px;
@@ -463,7 +462,7 @@ button {
 
 
 /* =========================================================
-   INTRO
+   INTRODUCTION
 ========================================================= */
 
 .section-introduction {
@@ -535,7 +534,9 @@ button {
 
 .stat-card-top {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 }
 
@@ -551,6 +552,7 @@ button {
     height: 32px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -623,6 +625,7 @@ button {
     min-height: 150px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -633,6 +636,7 @@ button {
 
 .activity-item {
     display: flex;
+
     align-items: center;
 
     gap: 13px;
@@ -654,6 +658,7 @@ button {
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -690,6 +695,7 @@ button {
     min-height: 400px;
 
     display: flex;
+
     flex-direction: column;
 
     align-items: center;
@@ -699,8 +705,7 @@ button {
 
     background: white;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     border-radius: var(--radius);
 }
@@ -710,6 +715,7 @@ button {
     height: 55px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -767,9 +773,12 @@ button {
         transform: translateX(-100%);
     }
 
+
     /*
-     * On mobile, sidebar-collapsed means CLOSED.
-     */
+       IMPORTANT:
+       Mobile does NOT use the desktop
+       collapsed width.
+    */
 
     #admin-app.sidebar-collapsed
     .admin-sidebar {
@@ -778,10 +787,12 @@ button {
         transform: translateX(-100%);
     }
 
+
     #admin-app.sidebar-open
     .admin-sidebar {
         transform: translateX(0);
     }
+
 
     .admin-main,
     #admin-app.sidebar-collapsed
@@ -789,29 +800,35 @@ button {
         margin-left: 0;
     }
 
+
     .admin-header {
         height: 68px;
 
         padding: 0 20px;
     }
 
+
     .admin-user-details {
         display: none;
     }
+
 
     .admin-content {
         padding: 35px 20px 60px;
     }
 
+
     .section-introduction h2 {
         font-size: 25px;
     }
+
 
     .statistics-grid {
         grid-template-columns: 1fr;
 
         gap: 12px;
     }
+
 
     .stat-card-wide {
         grid-column: span 1;
@@ -831,4 +848,4 @@ button {
         padding-right: 16px;
     }
 
-       }
+    }
