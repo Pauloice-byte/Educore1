@@ -1,31 +1,11 @@
 /* ==========================================================
    EDUCORE
-   AUTONOMOUS LEARNING PLATFORM
-========================================================== */
-
-
-/* ==========================================================
    COURSE DATABASE
-==========================================================
-
-   Add your courses here.
-
-   category:
-   language / ms-office / trading / business /
-   technology / finance / personal-development
-
-   The URL is the URL of the individual
-   course platform/page.
-
 ========================================================== */
-
 
 const courses = [
 
-    /* ======================================================
-       LANGUAGE
-    ====================================================== */
-
+    // LANGUAGE
     {
         title: "English A1",
         level: "Beginner",
@@ -34,7 +14,6 @@ const courses = [
         cover: "images/books/english-a1.jpg",
         url: "https://hwa1.vercel.app"
     },
-
     {
         title: "English A2",
         level: "Elementary",
@@ -43,7 +22,6 @@ const courses = [
         cover: "images/books/english-a2.jpg",
         url: "https://hwa2.vercel.app"
     },
-
     {
         title: "English B1",
         level: "Pre-Intermediate",
@@ -52,7 +30,6 @@ const courses = [
         cover: "images/books/english-b1.jpg",
         url: "https://YOUR-ENGLISH-B1-SITE.vercel.app"
     },
-
     {
         title: "English B2",
         level: "Intermediate",
@@ -61,7 +38,6 @@ const courses = [
         cover: "images/books/english-b1plus.jpg",
         url: "https://test1965.vercel.app"
     },
-
     {
         title: "French A1",
         level: "Beginner",
@@ -70,7 +46,6 @@ const courses = [
         cover: "images/books/french-a1.jpg",
         url: "https://YOUR-FRENCH-A1-SITE.vercel.app"
     },
-
     {
         title: "French A2",
         level: "Elementary",
@@ -79,7 +54,6 @@ const courses = [
         cover: "images/books/french-a2.jpg",
         url: "https://YOUR-FRENCH-A2-SITE.vercel.app"
     },
-
     {
         title: "Portuguese A1",
         level: "Beginner",
@@ -88,7 +62,6 @@ const courses = [
         cover: "images/books/portuguese-a1.jpg",
         url: "https://YOUR-PORTUGUESE-A1-SITE.vercel.app"
     },
-
     {
         title: "Spanish A1",
         level: "Beginner",
@@ -98,11 +71,7 @@ const courses = [
         url: "https://YOUR-SPANISH-A1-SITE.vercel.app"
     },
 
-
-    /* ======================================================
-       MS OFFICE
-    ====================================================== */
-
+    // MS OFFICE
     {
         title: "Microsoft Word",
         level: "Beginner",
@@ -111,7 +80,6 @@ const courses = [
         cover: "images/books/ms-word.jpg",
         url: "https://YOUR-WORD-COURSE.vercel.app"
     },
-
     {
         title: "Microsoft Excel",
         level: "Beginner",
@@ -120,7 +88,6 @@ const courses = [
         cover: "images/books/ms-excel.jpg",
         url: "https://YOUR-EXCEL-COURSE.vercel.app"
     },
-
     {
         title: "Microsoft Excel Advanced",
         level: "Advanced",
@@ -129,7 +96,6 @@ const courses = [
         cover: "images/books/ms-excel-advanced.jpg",
         url: "https://YOUR-EXCEL-ADVANCED-COURSE.vercel.app"
     },
-
     {
         title: "Microsoft PowerPoint",
         level: "Beginner",
@@ -139,11 +105,7 @@ const courses = [
         url: "https://YOUR-POWERPOINT-COURSE.vercel.app"
     },
 
-
-    /* ======================================================
-       TRADING
-    ====================================================== */
-
+    // TRADING
     {
         title: "Trading Fundamentals",
         level: "Beginner",
@@ -152,7 +114,6 @@ const courses = [
         cover: "images/books/trading-fundamentals.jpg",
         url: "https://YOUR-TRADING-FUNDAMENTALS.vercel.app"
     },
-
     {
         title: "Technical Analysis",
         level: "Intermediate",
@@ -161,7 +122,6 @@ const courses = [
         cover: "images/books/technical-analysis.jpg",
         url: "https://YOUR-TECHNICAL-ANALYSIS.vercel.app"
     },
-
     {
         title: "Risk Management",
         level: "Intermediate",
@@ -171,11 +131,7 @@ const courses = [
         url: "https://YOUR-RISK-MANAGEMENT.vercel.app"
     },
 
-
-    /* ======================================================
-       BUSINESS
-    ====================================================== */
-
+    // BUSINESS
     {
         title: "Business Fundamentals",
         level: "Beginner",
@@ -184,7 +140,6 @@ const courses = [
         cover: "images/books/business-fundamentals.jpg",
         url: "https://YOUR-BUSINESS-COURSE.vercel.app"
     },
-
     {
         title: "Entrepreneurship",
         level: "Beginner",
@@ -194,11 +149,7 @@ const courses = [
         url: "https://YOUR-ENTREPRENEURSHIP-COURSE.vercel.app"
     },
 
-
-    /* ======================================================
-       TECHNOLOGY
-    ====================================================== */
-
+    // TECHNOLOGY
     {
         title: "Computer Fundamentals",
         level: "Beginner",
@@ -207,7 +158,6 @@ const courses = [
         cover: "images/books/computer-fundamentals.jpg",
         url: "https://YOUR-COMPUTER-COURSE.vercel.app"
     },
-
     {
         title: "Web Development",
         level: "Beginner",
@@ -216,7 +166,6 @@ const courses = [
         cover: "images/books/web-development.jpg",
         url: "https://YOUR-WEB-DEVELOPMENT-COURSE.vercel.app"
     },
-
     {
         title: "Artificial Intelligence",
         level: "Beginner",
@@ -226,11 +175,7 @@ const courses = [
         url: "https://YOUR-AI-COURSE.vercel.app"
     },
 
-
-    /* ======================================================
-       FINANCE
-    ====================================================== */
-
+    // FINANCE
     {
         title: "Personal Finance",
         level: "Beginner",
@@ -239,7 +184,6 @@ const courses = [
         cover: "images/books/personal-finance.jpg",
         url: "https://YOUR-PERSONAL-FINANCE-COURSE.vercel.app"
     },
-
     {
         title: "Financial Literacy",
         level: "Beginner",
@@ -249,11 +193,7 @@ const courses = [
         url: "https://YOUR-FINANCIAL-LITERACY-COURSE.vercel.app"
     },
 
-
-    /* ======================================================
-       PERSONAL DEVELOPMENT
-    ====================================================== */
-
+    // PERSONAL DEVELOPMENT
     {
         title: "Communication Skills",
         level: "Beginner",
@@ -262,7 +202,6 @@ const courses = [
         cover: "images/books/communication.jpg",
         url: "https://YOUR-COMMUNICATION-COURSE.vercel.app"
     },
-
     {
         title: "Time Management",
         level: "Beginner",
@@ -271,119 +210,83 @@ const courses = [
         cover: "images/books/time-management.jpg",
         url: "https://YOUR-TIME-MANAGEMENT-COURSE.vercel.app"
     }
-
 ];
 
 
-
 /* ==========================================================
-   ELEMENTS
+   START
 ========================================================== */
 
-const sidebar =
-    document.getElementById("sidebar");
+document.addEventListener("DOMContentLoaded", () => {
 
-const main =
-    document.getElementById("main");
+    const sidebar = document.getElementById("sidebar");
+    const menuButton = document.getElementById("menuButton");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    const bookGrid = document.getElementById("bookGrid");
+    const noResults = document.getElementById("noResults");
+    const searchInput = document.getElementById("searchInput");
+    const libraryTitle = document.getElementById("libraryTitle");
+    const year = document.getElementById("year");
 
-const menuButton =
-    document.getElementById("menuButton");
+    const navigationButtons =
+        document.querySelectorAll(".navigation-button");
 
-const backdrop =
-    document.getElementById("sidebarBackdrop");
-
-const bookGrid =
-    document.getElementById("bookGrid");
-
-const noResults =
-    document.getElementById("noResults");
-
-const searchInput =
-    document.getElementById("searchInput");
-
-const libraryTitle =
-    document.getElementById("libraryTitle");
-
-const navigationButtons =
-    document.querySelectorAll(
-        ".navigation-button"
-    );
-
-const filterButtons =
-    document.querySelectorAll(
-        ".filter-button"
-    );
-
-const year =
-    document.getElementById("year");
+    const filterButtons =
+        document.querySelectorAll(".filter-button");
 
 
-
-/* ==========================================================
-   STATE
-========================================================== */
-
-let activeFilter = "all";
-
-let searchTerm = "";
+    if (year) {
+        year.textContent = new Date().getFullYear();
+    }
 
 
-
-/* ==========================================================
-   YEAR
-========================================================== */
-
-if (year) {
-
-    year.textContent =
-        new Date().getFullYear();
-
-}
+    let activeFilter = "all";
+    let searchTerm = "";
 
 
-
-/* ==========================================================
-   CREATE COURSE CARDS
-========================================================== */
-
-function createCourseCards() {
-
-    if (!bookGrid) return;
-
-    bookGrid.innerHTML = "";
-
-
-    courses.forEach(
-        course => {
-
-            const article =
-                document.createElement("article");
+    const titles = {
+        all: "All Courses",
+        language: "Language",
+        "ms-office": "MS Office",
+        trading: "Trading",
+        business: "Business",
+        technology: "Technology",
+        finance: "Finance",
+        "personal-development": "Personal Development"
+    };
 
 
-            article.className =
-                "book-card";
+    /* ======================================================
+       CREATE COURSE CARDS
+    ====================================================== */
 
+    function createCourseCards() {
 
-            article.dataset.category =
-                course.categoryKey;
+        if (!bookGrid) return;
 
+        bookGrid.innerHTML = "";
 
-            article.dataset.search =
-                (
-                    course.title +
-                    " " +
-                    course.level +
-                    " " +
-                    course.category
-                ).toLowerCase();
+        courses.forEach(course => {
+
+            const article = document.createElement("article");
+
+            article.className = "book-card";
+
+            article.dataset.category = course.categoryKey;
+
+            article.dataset.search = (
+                course.title +
+                " " +
+                course.level +
+                " " +
+                course.category
+            ).toLowerCase();
 
 
             article.innerHTML = `
-
                 <a
                     href="${course.url}"
                     class="book-card-link"
-                    target="_self"
                     aria-label="Open ${course.title}"
                 >
 
@@ -396,188 +299,96 @@ function createCourseCards() {
                             loading="lazy"
                         >
 
-
                         <div class="book-hover">
 
                             <div class="open-button">
-
-                                <span>
-                                    OPEN COURSE
-                                </span>
-
-                                <span class="open-arrow">
-                                    →
-                                </span>
-
+                                <span>OPEN COURSE</span>
+                                <span class="open-arrow">→</span>
                             </div>
 
                         </div>
 
                     </div>
 
-
                     <div class="book-information">
 
                         <div class="book-language">
-
                             ${course.category.toUpperCase()}
-
                         </div>
-
 
                         <div class="book-title">
-
                             ${course.title}
-
                         </div>
 
-
                         <div class="book-level">
-
                             ${course.level}
-
                         </div>
 
                     </div>
 
                 </a>
-
             `;
 
-
             bookGrid.appendChild(article);
+        });
 
-        }
-    );
-
-
-    observeCards();
-
-}
+        filterBooks();
+    }
 
 
+    /* ======================================================
+       FILTER COURSES
+    ====================================================== */
 
-/* ==========================================================
-   FILTER COURSES
-========================================================== */
+    function filterBooks() {
 
-function filterBooks() {
+        if (!bookGrid) return;
 
-    if (!bookGrid) return;
+        const cards =
+            bookGrid.querySelectorAll(".book-card");
 
-
-    const cards =
-        document.querySelectorAll(
-            ".book-card"
-        );
+        let visibleCount = 0;
 
 
-    let visibleCount = 0;
-
-
-    cards.forEach(
-        card => {
+        cards.forEach(card => {
 
             const category =
                 card.dataset.category;
-
 
             const searchableText =
                 card.dataset.search;
 
 
-            let matchesFilter = false;
+            const matchesFilter =
+                activeFilter === "all" ||
+                category === activeFilter;
 
-
-            /*
-                ALL COURSES
-            */
-
-            if (
-                activeFilter === "all"
-            ) {
-
-                matchesFilter = true;
-
-            }
-
-
-            /*
-                CATEGORY
-            */
-
-            else {
-
-                matchesFilter =
-                    category === activeFilter;
-
-            }
-
-
-            /*
-                SEARCH
-            */
 
             const matchesSearch =
                 searchTerm === "" ||
-                searchableText.includes(
-                    searchTerm
-                );
+                searchableText.includes(searchTerm);
 
-
-            /*
-                FINAL RESULT
-            */
 
             const visible =
-                matchesFilter &&
-                matchesSearch;
+                matchesFilter && matchesSearch;
+
+
+            card.classList.toggle("hide", !visible);
+            card.classList.toggle("show", visible);
 
 
             if (visible) {
-
-                card.classList.remove(
-                    "hide"
-                );
-
                 visibleCount++;
-
             }
 
-            else {
-
-                card.classList.add(
-                    "hide"
-                );
-
-                card.classList.remove(
-                    "show"
-                );
-
-            }
-
-        }
-    );
+        });
 
 
-    /*
-        NO RESULTS
-    */
+        if (noResults) {
 
-    if (noResults) {
-
-        if (visibleCount === 0) {
-
-            noResults.classList.add(
-                "visible"
-            );
-
-        }
-
-        else {
-
-            noResults.classList.remove(
-                "visible"
+            noResults.classList.toggle(
+                "visible",
+                visibleCount === 0
             );
 
         }
@@ -585,432 +396,204 @@ function filterBooks() {
     }
 
 
-    /*
-        Animate visible cards
-    */
+    /* ======================================================
+       SET FILTER
+    ====================================================== */
 
-    requestAnimationFrame(
-        () => {
+    function setFilter(filter) {
 
-            document
-                .querySelectorAll(
-                    ".book-card:not(.hide)"
-                )
-                .forEach(
-                    (card, index) => {
+        activeFilter = filter;
 
-                        card.style.transitionDelay =
-                            `${index * 0.045}s`;
-
-
-                        requestAnimationFrame(
-                            () => {
-
-                                card.classList.add(
-                                    "show"
-                                );
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-    );
-
-}
-
-
-
-/* ==========================================================
-   CATEGORY TITLES
-========================================================== */
-
-const titles = {
-
-    all:
-        "All Courses",
-
-    language:
-        "Language",
-
-    "ms-office":
-        "MS Office",
-
-    trading:
-        "Trading",
-
-    business:
-        "Business",
-
-    technology:
-        "Technology",
-
-    finance:
-        "Finance",
-
-    "personal-development":
-        "Personal Development"
-
-};
-
-
-
-/* ==========================================================
-   CHANGE TITLE
-========================================================== */
-
-function changeTitle(
-    filter
-) {
-
-    if (!libraryTitle) return;
-
-
-    libraryTitle.textContent =
-        titles[filter] ||
-        "All Courses";
-
-}
-
-
-
-/* ==========================================================
-   SET ACTIVE FILTER
-========================================================== */
-
-function setFilter(
-    filter
-) {
-
-    activeFilter =
-        filter;
-
-
-    /*
-        Sidebar navigation
-    */
-
-    navigationButtons.forEach(
-        button => {
+        navigationButtons.forEach(button => {
 
             button.classList.toggle(
                 "active",
                 button.dataset.filter === filter
             );
 
-        }
-    );
+        });
 
 
-    /*
-        Filter buttons
-    */
-
-    filterButtons.forEach(
-        button => {
+        filterButtons.forEach(button => {
 
             button.classList.toggle(
                 "active",
                 button.dataset.filter === filter
             );
 
+        });
+
+
+        if (libraryTitle) {
+            libraryTitle.textContent =
+                titles[filter] || "All Courses";
         }
-    );
 
 
-    changeTitle(filter);
-
-    filterBooks();
-
-}
-
-
-
-/* ==========================================================
-   SIDEBAR NAVIGATION
-========================================================== */
-
-navigationButtons.forEach(
-    button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                setFilter(
-                    button.dataset.filter
-                );
-
-
-                /*
-                    Close mobile sidebar
-                */
-
-                if (
-                    window.innerWidth <= 768
-                ) {
-
-                    closeMobileSidebar();
-
-                }
-
-            }
-        );
-
+        filterBooks();
     }
-);
 
 
+    /* ======================================================
+       SIDEBAR
+    ====================================================== */
 
-/* ==========================================================
-   FILTER BUTTONS
-========================================================== */
+    function openMobileSidebar() {
 
-filterButtons.forEach(
-    button => {
+        if (!sidebar) return;
 
-        button.addEventListener(
-            "click",
-            () => {
+        sidebar.classList.add("mobile-open");
 
-                setFilter(
-                    button.dataset.filter
-                );
-
-            }
-        );
-
+        if (backdrop) {
+            backdrop.classList.add("active");
+        }
     }
-);
 
 
+    function closeMobileSidebar() {
 
-/* ==========================================================
-   SEARCH
-========================================================== */
+        if (!sidebar) return;
 
-if (searchInput) {
+        sidebar.classList.remove("mobile-open");
 
-    searchInput.addEventListener(
-        "input",
-        event => {
-
-            searchTerm =
-                event.target.value
-                    .toLowerCase()
-                    .trim();
-
-
-            filterBooks();
-
+        if (backdrop) {
+            backdrop.classList.remove("active");
         }
-    );
-
-}
+    }
 
 
+    function toggleSidebar() {
 
-/* ==========================================================
-   SIDEBAR TOGGLE
-========================================================== */
+        if (!sidebar) return;
 
-if (menuButton) {
 
-    menuButton.addEventListener(
-        "click",
-        () => {
+        if (window.innerWidth <= 768) {
 
-            /*
-                DESKTOP
-            */
-
-            if (
-                window.innerWidth > 768
-            ) {
-
-                sidebar.classList.toggle(
-                    "collapsed"
-                );
-
+            if (sidebar.classList.contains("mobile-open")) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
             }
 
-
-            /*
-                MOBILE
-            */
-
-            else {
-
-                sidebar.classList.toggle(
-                    "mobile-open"
-                );
-
-
-                backdrop.classList.toggle(
-                    "active"
-                );
-
-            }
-
+            return;
         }
-    );
-
-}
 
 
+        /* Desktop */
 
-/* ==========================================================
-   CLOSE MOBILE SIDEBAR
-========================================================== */
+        sidebar.classList.toggle("collapsed");
 
-function closeMobileSidebar() {
-
-    if (sidebar) {
-
-        sidebar.classList.remove(
-            "mobile-open"
+        document.body.classList.toggle(
+            "sidebar-collapsed",
+            sidebar.classList.contains("collapsed")
         );
+    }
 
+
+    if (menuButton) {
+        menuButton.addEventListener(
+            "click",
+            toggleSidebar
+        );
     }
 
 
     if (backdrop) {
-
-        backdrop.classList.remove(
-            "active"
+        backdrop.addEventListener(
+            "click",
+            closeMobileSidebar
         );
-
     }
 
-}
 
+    document.addEventListener(
+        "keydown",
+        event => {
 
-
-if (backdrop) {
-
-    backdrop.addEventListener(
-        "click",
-        closeMobileSidebar
-    );
-
-}
-
-
-
-/* ==========================================================
-   ESCAPE KEY
-========================================================== */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeMobileSidebar();
+            if (event.key === "Escape") {
+                closeMobileSidebar();
+            }
 
         }
-
-    }
-);
+    );
 
 
+    /* ======================================================
+       SIDEBAR NAVIGATION
+    ====================================================== */
 
-/* ==========================================================
-   SCROLL ANIMATION
-========================================================== */
+    navigationButtons.forEach(button => {
 
-let cardObserver;
+        button.addEventListener("click", () => {
 
+            setFilter(button.dataset.filter);
 
-function observeCards() {
+            if (window.innerWidth <= 768) {
+                closeMobileSidebar();
+            }
 
-    /*
-        Disconnect previous observer
-    */
+        });
 
-    if (cardObserver) {
-
-        cardObserver.disconnect();
-
-    }
+    });
 
 
-    /*
-        Intersection Observer
-    */
+    /* ======================================================
+       FILTER BUTTONS
+    ====================================================== */
 
-    if (
-        !("IntersectionObserver" in window)
-    ) {
+    filterButtons.forEach(button => {
 
-        document
-            .querySelectorAll(
-                ".book-card"
-            )
-            .forEach(
-                card => {
+        button.addEventListener("click", () => {
 
-                    card.classList.add(
-                        "show"
-                    );
+            setFilter(button.dataset.filter);
 
-                }
-            );
+        });
 
-        return;
-
-    }
+    });
 
 
-    cardObserver =
-        new IntersectionObserver(
-            entries => {
+    /* ======================================================
+       SEARCH
+    ====================================================== */
 
-                entries.forEach(
-                    entry => {
+    if (searchInput) {
 
-                        if (
-                            entry.isIntersecting
-                        ) {
+        searchInput.addEventListener(
+            "input",
+            event => {
 
-                            entry.target.classList.add(
-                                "show"
-                            );
+                searchTerm =
+                    event.target.value
+                        .toLowerCase()
+                        .trim();
 
+                filterBooks();
 
-                            cardObserver.unobserve(
-                                entry.target
-                            );
-
-                        }
-
-                    }
-                );
-
-            },
-            {
-                threshold: 0.12,
-
-                rootMargin:
-                    "0px 0px -50px 0px"
             }
         );
 
+    }
 
-    document
-        .querySelectorAll(
-            ".book-card:not(.hide)"
-        )
-        .forEach(
-            card => {
 
-                cardObserver.observe(
-                    card
-                );
+    /* ======================================================
+       HANDLE RESIZE
+    ====================================================== */
 
-  
+    window.addEventListener("resize", () => {
+
+        if (window.innerWidth > 768) {
+            closeMobileSidebar();
+        }
+
+    });
+
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    createCourseCards();
+
+    setFilter("all");
+
+});
