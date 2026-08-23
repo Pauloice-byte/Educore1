@@ -1,5 +1,6 @@
 // ============================================================
 // EduCore — Admin Dashboard
+// Phase 3 — Admin Dashboard
 // ============================================================
 
 
@@ -7,38 +8,43 @@
 // INITIALIZE ADMIN APPLICATION
 // ============================================================
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    /*
-     * The admin dashboard must only be accessible to:
-     *
-     * 1. Authenticated users
-     * 2. Users with role = admin
-     * 3. Active users
-     */
+        /*
+         * The existing authentication system
+         * remains responsible for authorization.
+         *
+         * We do not recreate authentication here.
+         */
 
-    const authorized = await requireAdmin();
+        const authorized =
+            await requireAdmin();
 
-    if (!authorized) {
-        return;
+
+        if (!authorized) {
+            return;
+        }
+
+
+        /*
+         * Authentication and admin role
+         * verification have passed.
+         */
+
+        initializeAdminNavigation();
+
+        initializeSidebar();
+
+        initializeLogout();
+
+        await initializeAdminUser();
+
+        await initializeDashboard();
+
     }
-
-
-    /*
-     * Authentication has passed.
-     */
-
-    initializeAdminNavigation();
-
-    initializeSidebar();
-
-    initializeLogout();
-
-    await initializeAdminUser();
-
-    await initializeDashboard();
-
-});
+);
 
 
 // ============================================================
@@ -48,104 +54,157 @@ document.addEventListener("DOMContentLoaded", async () => {
 function initializeAdminNavigation() {
 
     const navigationItems =
-        document.querySelectorAll(".nav-item");
+        document.querySelectorAll(
+            ".nav-item"
+        );
+
 
     const sections =
-        document.querySelectorAll(".admin-section");
+        document.querySelectorAll(
+            ".admin-section"
+        );
+
 
     const pageTitle =
-        document.getElementById("page-title");
+        document.getElementById(
+            "page-title"
+        );
 
 
     navigationItems.forEach(item => {
 
-        item.addEventListener("click", () => {
+        item.addEventListener(
+            "click",
+            () => {
 
-            const targetSection =
-                item.dataset.section;
-
-
-            if (!targetSection) {
-                return;
-            }
+                const targetSection =
+                    item.dataset.section;
 
 
-            /*
-             * Remove active state
-             * from all navigation items.
-             */
-
-            navigationItems.forEach(navItem => {
-
-                navItem.classList.remove("active");
-
-            });
+                if (!targetSection) {
+                    return;
+                }
 
 
-            /*
-             * Activate selected navigation item.
-             */
+                /*
+                 * Remove active state
+                 */
 
-            item.classList.add("active");
+                navigationItems.forEach(
+                    navItem => {
 
+                        navItem.classList.remove(
+                            "active"
+                        );
 
-            /*
-             * Hide all sections.
-             */
-
-            sections.forEach(section => {
-
-                section.classList.remove("active");
-
-            });
-
-
-            /*
-             * Find selected section.
-             */
-
-            const target =
-                document.getElementById(
-                    `section-${targetSection}`
+                    }
                 );
 
 
-            /*
-             * Show selected section.
-             */
+                /*
+                 * Activate selected item
+                 */
 
-            if (target) {
+                item.classList.add(
+                    "active"
+                );
 
-                target.classList.add("active");
+
+                /*
+                 * Hide all sections
+                 */
+
+                sections.forEach(
+                    section => {
+
+                        section.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Find target section
+                 */
+
+                const target =
+                    document.getElementById(
+                        `section-${targetSection}`
+                    );
+
+
+                /*
+                 * Display target section
+                 */
+
+                if (target) {
+
+                    target.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                /*
+                 * Update page title
+                 */
+
+                const label =
+                    item.querySelector(
+                        ".nav-label"
+                    );
+
+
+                if (
+                    label &&
+                    pageTitle
+                ) {
+
+                    pageTitle.textContent =
+                        label.textContent.trim();
+
+                }
+
+
+                /*
+                 * Close mobile sidebar
+                 */
+
+                const app =
+                    document.getElementById(
+                        "admin-app"
+                    );
+
+
+                if (app) {
+
+                    app.classList.remove(
+                        "sidebar-open"
+                    );
+
+                }
+
+
+                const toggle =
+                    document.getElementById(
+                        "sidebar-toggle"
+                    );
+
+
+                if (toggle) {
+
+                    toggle.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
 
             }
-
-
-            /*
-             * Update header title.
-             */
-
-            const label =
-                item.querySelector(".nav-label");
-
-
-            if (label && pageTitle) {
-
-                pageTitle.textContent =
-                    label.textContent.trim();
-
-            }
-
-
-            /*
-             * Close mobile sidebar.
-             */
-
-            document
-                .getElementById("admin-app")
-                ?.classList.remove("sidebar-open");
-
-        });
+        );
 
     });
 
@@ -153,28 +212,142 @@ function initializeAdminNavigation() {
 
 
 // ============================================================
-// MOBILE SIDEBAR
+// SIDEBAR
 // ============================================================
 
 function initializeSidebar() {
 
     const toggle =
-        document.getElementById("sidebar-toggle");
+        document.getElementById(
+            "sidebar-toggle"
+        );
+
 
     const app =
-        document.getElementById("admin-app");
+        document.getElementById(
+            "admin-app"
+        );
 
 
-    if (!toggle || !app) {
+    if (
+        !toggle ||
+        !app
+    ) {
         return;
     }
 
 
-    toggle.addEventListener("click", () => {
+    toggle.addEventListener(
+        "click",
+        () => {
 
-        app.classList.toggle("sidebar-open");
+            const opened =
+                app.classList.toggle(
+                    "sidebar-open"
+                );
 
-    });
+
+            toggle.setAttribute(
+                "aria-expanded",
+                opened
+            );
+
+        }
+    );
+
+
+    /*
+     * Close sidebar when clicking outside
+     * on mobile.
+     */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            if (
+                window.innerWidth > 760
+            ) {
+                return;
+            }
+
+
+            const sidebar =
+                document.querySelector(
+                    ".admin-sidebar"
+                );
+
+
+            if (
+                !sidebar ||
+                !app.classList.contains(
+                    "sidebar-open"
+                )
+            ) {
+                return;
+            }
+
+
+            const clickedInsideSidebar =
+                sidebar.contains(
+                    event.target
+                );
+
+
+            const clickedToggle =
+                toggle.contains(
+                    event.target
+                );
+
+
+            if (
+                !clickedInsideSidebar &&
+                !clickedToggle
+            ) {
+
+                app.classList.remove(
+                    "sidebar-open"
+                );
+
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Escape closes mobile sidebar.
+     */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !== "Escape"
+            ) {
+                return;
+            }
+
+
+            app.classList.remove(
+                "sidebar-open"
+            );
+
+
+            toggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+    );
 
 }
 
@@ -186,48 +359,81 @@ function initializeSidebar() {
 async function initializeAdminUser() {
 
     const nameElement =
-        document.getElementById("admin-name");
+        document.getElementById(
+            "admin-name"
+        );
+
 
     const avatarElement =
-        document.getElementById("admin-avatar");
+        document.getElementById(
+            "admin-avatar"
+        );
 
 
-    if (!nameElement || !avatarElement) {
+    if (
+        !nameElement ||
+        !avatarElement
+    ) {
         return;
     }
 
 
-    const profile =
-        await getCurrentProfile();
+    try {
+
+        /*
+         * Use the existing authentication
+         * / profile system.
+         */
+
+        const profile =
+            await getCurrentProfile();
 
 
-    if (!profile) {
-        return;
+        if (!profile) {
+            return;
+        }
+
+
+        const fullName =
+            profile.full_name?.trim();
+
+
+        if (fullName) {
+
+            nameElement.textContent =
+                fullName;
+
+
+            avatarElement.textContent =
+                fullName
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+        else {
+
+            nameElement.textContent =
+                profile.email ||
+                "Admin";
+
+
+            avatarElement.textContent =
+                (
+                    profile.email ||
+                    "A"
+                )
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+
     }
+    catch (error) {
 
-
-    const fullName =
-        profile.full_name?.trim();
-
-
-    if (fullName) {
-
-        nameElement.textContent =
-            fullName;
-
-
-        avatarElement.textContent =
-            fullName
-                .charAt(0)
-                .toUpperCase();
-
-    } else {
-
-        nameElement.textContent =
-            "Admin";
-
-        avatarElement.textContent =
-            "A";
+        console.error(
+            "Unable to load admin profile:",
+            error
+        );
 
     }
 
@@ -240,13 +446,10 @@ async function initializeAdminUser() {
 
 async function initializeDashboard() {
 
-    /*
-     * Only load dashboard data when
-     * the Overview section exists.
-     */
-
     const overview =
-        document.getElementById("section-overview");
+        document.getElementById(
+            "section-overview"
+        );
 
 
     if (!overview) {
@@ -272,19 +475,33 @@ async function initializeDashboard() {
 async function loadDashboardStatistics() {
 
     const coursesElement =
-        document.getElementById("stat-courses");
+        document.getElementById(
+            "stat-courses"
+        );
+
 
     const unitsElement =
-        document.getElementById("stat-units");
+        document.getElementById(
+            "stat-units"
+        );
+
 
     const lessonsElement =
-        document.getElementById("stat-lessons");
+        document.getElementById(
+            "stat-lessons"
+        );
+
 
     const studentsElement =
-        document.getElementById("stat-students");
+        document.getElementById(
+            "stat-students"
+        );
+
 
     const publishedElement =
-        document.getElementById("stat-published");
+        document.getElementById(
+            "stat-published"
+        );
 
 
     try {
@@ -296,14 +513,19 @@ async function loadDashboardStatistics() {
         const coursesResult =
             await supabaseClient
                 .from("courses")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                });
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
 
 
         if (coursesResult.error) {
+
             throw coursesResult.error;
+
         }
 
 
@@ -314,14 +536,19 @@ async function loadDashboardStatistics() {
         const unitsResult =
             await supabaseClient
                 .from("units")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                });
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
 
 
         if (unitsResult.error) {
+
             throw unitsResult.error;
+
         }
 
 
@@ -332,34 +559,50 @@ async function loadDashboardStatistics() {
         const lessonsResult =
             await supabaseClient
                 .from("lessons")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                });
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                );
 
 
         if (lessonsResult.error) {
+
             throw lessonsResult.error;
+
         }
 
 
         /*
-         * STUDENTS
+         * ACTIVE STUDENTS
          */
 
         const studentsResult =
             await supabaseClient
                 .from("profiles")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("role", "student")
-                .eq("active", true);
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                )
+                .eq(
+                    "role",
+                    "student"
+                )
+                .eq(
+                    "active",
+                    true
+                );
 
 
         if (studentsResult.error) {
+
             throw studentsResult.error;
+
         }
 
 
@@ -370,15 +613,23 @@ async function loadDashboardStatistics() {
         const publishedResult =
             await supabaseClient
                 .from("courses")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "published");
+                .select(
+                    "id",
+                    {
+                        count: "exact",
+                        head: true
+                    }
+                )
+                .eq(
+                    "status",
+                    "published"
+                );
 
 
         if (publishedResult.error) {
+
             throw publishedResult.error;
+
         }
 
 
@@ -425,8 +676,8 @@ async function loadDashboardStatistics() {
 
         }
 
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
             "Unable to load dashboard statistics:",
@@ -435,28 +686,31 @@ async function loadDashboardStatistics() {
 
 
         /*
-         * Show an error state instead of
-         * leaving the dashboard looking broken.
+         * Error state
          */
 
         if (coursesElement) {
             coursesElement.textContent = "!";
         }
 
+
         if (unitsElement) {
             unitsElement.textContent = "!";
         }
+
 
         if (lessonsElement) {
             lessonsElement.textContent = "!";
         }
 
+
         if (studentsElement) {
             studentsElement.textContent = "!";
         }
 
+
         if (publishedElement) {
-            publishedElement.textContent = "!"; 
+            publishedElement.textContent = "!";
         }
 
     }
@@ -471,7 +725,9 @@ async function loadDashboardStatistics() {
 async function loadRecentActivity() {
 
     const activityContainer =
-        document.getElementById("recent-activity");
+        document.getElementById(
+            "recent-activity"
+        );
 
 
     if (!activityContainer) {
@@ -482,13 +738,12 @@ async function loadRecentActivity() {
     try {
 
         /*
-         * We currently don't need a separate
+         * Phase 3 does not create a separate
          * activity table.
          *
-         * Phase 3 can build the activity feed
-         * from recently created platform records.
+         * Activity is derived from existing
+         * records created in the platform.
          */
-
 
         const [
             coursesResult,
@@ -499,75 +754,101 @@ async function loadRecentActivity() {
 
 
             /*
-             * Recent courses
+             * COURSES
              */
 
             supabaseClient
                 .from("courses")
-                .select("id, title, created_at")
-                .order("created_at", {
-                    ascending: false
-                })
+                .select(
+                    "id, title, created_at"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
                 .limit(5),
 
 
             /*
-             * Recent units
+             * UNITS
              */
 
             supabaseClient
                 .from("units")
-                .select("id, title, created_at")
-                .order("created_at", {
-                    ascending: false
-                })
+                .select(
+                    "id, title, created_at"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
                 .limit(5),
 
 
             /*
-             * Recent lessons
+             * LESSONS
              */
 
             supabaseClient
                 .from("lessons")
-                .select("id, title, created_at")
-                .order("created_at", {
-                    ascending: false
-                })
+                .select(
+                    "id, title, created_at"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
                 .limit(5),
 
 
             /*
-             * Recently registered students
+             * STUDENTS
              */
 
             supabaseClient
                 .from("profiles")
-                .select("id, full_name, created_at")
-                .eq("role", "student")
-                .order("created_at", {
-                    ascending: false
-                })
+                .select(
+                    "id, full_name, created_at"
+                )
+                .eq(
+                    "role",
+                    "student"
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
                 .limit(5)
 
         ]);
 
 
         /*
-         * Check for database errors.
+         * Check errors.
          */
 
         if (coursesResult.error) {
             throw coursesResult.error;
         }
 
+
         if (unitsResult.error) {
             throw unitsResult.error;
         }
 
+
         if (lessonsResult.error) {
             throw lessonsResult.error;
         }
+
 
         if (studentsResult.error) {
             throw studentsResult.error;
@@ -575,7 +856,7 @@ async function loadRecentActivity() {
 
 
         /*
-         * Build a single activity array.
+         * Build activity list.
          */
 
         const activities = [];
@@ -585,7 +866,9 @@ async function loadRecentActivity() {
          * COURSES
          */
 
-        (coursesResult.data || []).forEach(course => {
+        (
+            coursesResult.data || []
+        ).forEach(course => {
 
             activities.push({
 
@@ -608,7 +891,9 @@ async function loadRecentActivity() {
          * UNITS
          */
 
-        (unitsResult.data || []).forEach(unit => {
+        (
+            unitsResult.data || []
+        ).forEach(unit => {
 
             activities.push({
 
@@ -631,7 +916,9 @@ async function loadRecentActivity() {
          * LESSONS
          */
 
-        (lessonsResult.data || []).forEach(lesson => {
+        (
+            lessonsResult.data || []
+        ).forEach(lesson => {
 
             activities.push({
 
@@ -654,14 +941,19 @@ async function loadRecentActivity() {
          * STUDENTS
          */
 
-        (studentsResult.data || []).forEach(student => {
+        (
+            studentsResult.data || []
+        ).forEach(student => {
 
             activities.push({
 
                 type: "student",
 
                 title:
-                    `Student registered: ${student.full_name || "New student"}`,
+                    `Student registered: ${
+                        student.full_name ||
+                        "New student"
+                    }`,
 
                 date:
                     student.created_at,
@@ -674,19 +966,23 @@ async function loadRecentActivity() {
 
 
         /*
-         * Sort everything by date.
+         * Sort newest first.
          */
 
-        activities.sort((a, b) => {
+        activities.sort(
+            (a, b) => {
 
-            return new Date(b.date) -
-                   new Date(a.date);
+                return (
+                    new Date(b.date) -
+                    new Date(a.date)
+                );
 
-        });
+            }
+        );
 
 
         /*
-         * Only show the five most recent.
+         * Only display five.
          */
 
         const recentActivities =
@@ -694,17 +990,17 @@ async function loadRecentActivity() {
 
 
         /*
-         * Nothing exists yet.
+         * No activity.
          */
 
-        if (recentActivities.length === 0) {
+        if (
+            recentActivities.length === 0
+        ) {
 
             activityContainer.innerHTML = `
 
                 <div class="activity-empty">
-
                     No recent activity yet.
-
                 </div>
 
             `;
@@ -715,48 +1011,58 @@ async function loadRecentActivity() {
 
 
         /*
-         * Render activities.
+         * Render activity.
          */
 
         activityContainer.innerHTML =
             recentActivities
-                .map(activity => {
+                .map(
+                    activity => {
 
-                    return `
+                        return `
 
-                        <div class="activity-item">
+                            <div class="activity-item">
 
-                            <div class="activity-icon">
+                                <div class="activity-icon">
 
-                                ${escapeHtml(activity.icon)}
-
-                            </div>
-
-                            <div class="activity-content">
-
-                                <div class="activity-title">
-
-                                    ${escapeHtml(activity.title)}
+                                    ${escapeHtml(
+                                        activity.icon
+                                    )}
 
                                 </div>
 
-                                <div class="activity-meta">
 
-                                    ${formatActivityDate(activity.date)}
+                                <div class="activity-content">
+
+                                    <div class="activity-title">
+
+                                        ${escapeHtml(
+                                            activity.title
+                                        )}
+
+                                    </div>
+
+
+                                    <div class="activity-meta">
+
+                                        ${formatActivityDate(
+                                            activity.date
+                                        )}
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                        </div>
+                        `;
 
-                    `;
-
-                })
+                    }
+                )
                 .join("");
 
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
             "Unable to load recent activity:",
@@ -767,9 +1073,7 @@ async function loadRecentActivity() {
         activityContainer.innerHTML = `
 
             <div class="activity-empty">
-
                 Unable to load recent activity.
-
             </div>
 
         `;
@@ -794,77 +1098,8 @@ function formatActivityDate(dateValue) {
         new Date(dateValue);
 
 
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-
-    return date.toLocaleString(
-        undefined,
-        {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }
-    );
-
-}
-
-
-// ============================================================
-// ESCAPE HTML
-// ============================================================
-
-function escapeHtml(value) {
-
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-// ============================================================
-// LOGOUT
-// ============================================================
-
-function initializeLogout() {
-
-    const logoutButton =
-        document.getElementById("admin-logout");
-
-
-    if (!logoutButton) {
-        return;
-    }
-
-
-    logoutButton.addEventListener(
-        "click",
-        async () => {
-
-            logoutButton.disabled = true;
-
-
-            try {
-
-                await logoutUser();
-
-            } catch (error) {
-
-                console.error(
-                    "Admin logout failed:",
-                    error
-                );
-
-
-                logoutButton.disabled = false;
-
-            }
-
-        }
-    );
-
-}
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    )
