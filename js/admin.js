@@ -25,113 +25,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // ============================================================
-// NAVIGATION
-// ============================================================
-
-function initializeAdminNavigation() {
-
-    const navigationItems =
-        document.querySelectorAll(".nav-item");
-
-    const sections =
-        document.querySelectorAll(".admin-section");
-
-    const pageTitle =
-        document.getElementById("page-title");
-
-    const app =
-        document.getElementById("admin-app");
-
-
-    navigationItems.forEach(item => {
-
-        item.addEventListener("click", () => {
-
-            const targetSection =
-                item.dataset.section;
-
-            if (!targetSection) {
-                return;
-            }
-
-
-            navigationItems.forEach(navItem => {
-                navItem.classList.remove("active");
-            });
-
-
-            item.classList.add("active");
-
-
-            sections.forEach(section => {
-                section.classList.remove("active");
-            });
-
-
-            const target =
-                document.getElementById(
-                    `section-${targetSection}`
-                );
-
-
-            if (target) {
-                target.classList.add("active");
-            }
-
-
-            const label =
-                item.querySelector(".nav-label");
-
-
-            if (label && pageTitle) {
-                pageTitle.textContent =
-                    label.textContent.trim();
-            }
-
-
-            /*
-             * Close sidebar after selecting
-             * an item on mobile.
-             */
-
-            if (
-                window.innerWidth <= 768 &&
-                app
-            ) {
-                app.classList.remove("sidebar-open");
-            }
-
-        });
-
-    });
-
-}
-
-
-// ============================================================
 // SIDEBAR
 // ============================================================
 
 function initializeSidebar() {
 
-    const toggle =
-        document.getElementById("sidebar-toggle");
-
     const app =
         document.getElementById("admin-app");
 
+    const toggle =
+        document.getElementById("sidebar-toggle");
 
-    if (!toggle || !app) {
+    const sidebar =
+        document.getElementById("admin-sidebar");
+
+
+    if (!app || !toggle || !sidebar) {
 
         console.error(
-            "Admin sidebar could not initialize."
+            "Admin sidebar elements not found."
         );
 
         return;
     }
 
 
-    toggle.addEventListener("click", () => {
+    toggle.addEventListener("click", function () {
 
         /*
          * MOBILE
@@ -141,12 +60,14 @@ function initializeSidebar() {
 
             app.classList.toggle("sidebar-open");
 
-            const isOpen =
-                app.classList.contains("sidebar-open");
+            const open =
+                app.classList.contains(
+                    "sidebar-open"
+                );
 
             toggle.setAttribute(
                 "aria-expanded",
-                String(isOpen)
+                String(open)
             );
 
             return;
@@ -157,33 +78,209 @@ function initializeSidebar() {
          * DESKTOP
          */
 
-        app.classList.toggle("sidebar-collapsed");
+        app.classList.toggle(
+            "sidebar-collapsed"
+        );
 
-        const isCollapsed =
+
+        const collapsed =
             app.classList.contains(
                 "sidebar-collapsed"
             );
 
+
         toggle.setAttribute(
             "aria-expanded",
-            String(!isCollapsed)
+            String(!collapsed)
         );
 
     });
 
 
     /*
-     * Reset mobile state when the
-     * browser is resized.
+     * When the window becomes desktop
+     * remove mobile-only state.
      */
 
-    window.addEventListener("resize", () => {
+    window.addEventListener(
+        "resize",
+        function () {
 
-        if (window.innerWidth > 768) {
+            if (window.innerWidth > 768) {
 
-            app.classList.remove("sidebar-open");
+                app.classList.remove(
+                    "sidebar-open"
+                );
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    String(
+                        !app.classList.contains(
+                            "sidebar-collapsed"
+                        )
+                    )
+                );
+
+            }
 
         }
+    );
+
+}
+
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+function initializeAdminNavigation() {
+
+    const navigationItems =
+        document.querySelectorAll(
+            ".nav-item"
+        );
+
+
+    const sections =
+        document.querySelectorAll(
+            ".admin-section"
+        );
+
+
+    const pageTitle =
+        document.getElementById(
+            "page-title"
+        );
+
+
+    const app =
+        document.getElementById(
+            "admin-app"
+        );
+
+
+    navigationItems.forEach(item => {
+
+        item.addEventListener(
+            "click",
+            function () {
+
+                const targetSection =
+                    this.dataset.section;
+
+
+                if (!targetSection) {
+                    return;
+                }
+
+
+                /*
+                 * Remove active state
+                 * from all navigation items.
+                 */
+
+                navigationItems.forEach(
+                    navItem => {
+
+                        navItem.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Activate clicked item.
+                 */
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                /*
+                 * Hide all sections.
+                 */
+
+                sections.forEach(section => {
+
+                    section.classList.remove(
+                        "active"
+                    );
+
+                });
+
+
+                /*
+                 * Show selected section.
+                 */
+
+                const target =
+                    document.getElementById(
+                        "section-" +
+                        targetSection
+                    );
+
+
+                if (target) {
+
+                    target.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                /*
+                 * Update page title.
+                 */
+
+                const label =
+                    this.querySelector(
+                        ".nav-label"
+                    );
+
+
+                if (label && pageTitle) {
+
+                    pageTitle.textContent =
+                        label.textContent.trim();
+
+                }
+
+
+                /*
+                 * Close sidebar on mobile.
+                 */
+
+                if (
+                    window.innerWidth <= 768 &&
+                    app
+                ) {
+
+                    app.classList.remove(
+                        "sidebar-open"
+                    );
+
+                    const toggle =
+                        document.getElementById(
+                            "sidebar-toggle"
+                        );
+
+                    if (toggle) {
+
+                        toggle.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+
+                    }
+
+                }
+
+            }
+        );
 
     });
 
@@ -197,10 +294,15 @@ function initializeSidebar() {
 async function initializeAdminUser() {
 
     const nameElement =
-        document.getElementById("admin-name");
+        document.getElementById(
+            "admin-name"
+        );
+
 
     const avatarElement =
-        document.getElementById("admin-avatar");
+        document.getElementById(
+            "admin-avatar"
+        );
 
 
     if (!nameElement || !avatarElement) {
@@ -226,6 +328,7 @@ async function initializeAdminUser() {
         nameElement.textContent =
             fullName;
 
+
         avatarElement.textContent =
             fullName
                 .charAt(0)
@@ -250,20 +353,12 @@ async function initializeAdminUser() {
 
 async function initializeDashboard() {
 
-    const overview =
-        document.getElementById(
-            "section-overview"
-        );
-
-
-    if (!overview) {
-        return;
-    }
-
-
     await Promise.all([
+
         loadDashboardStatistics(),
+
         loadRecentActivity()
+
     ]);
 
 }
@@ -276,30 +371,51 @@ async function initializeDashboard() {
 async function loadDashboardStatistics() {
 
     const coursesElement =
-        document.getElementById("stat-courses");
+        document.getElementById(
+            "stat-courses"
+        );
+
 
     const unitsElement =
-        document.getElementById("stat-units");
+        document.getElementById(
+            "stat-units"
+        );
+
 
     const lessonsElement =
-        document.getElementById("stat-lessons");
+        document.getElementById(
+            "stat-lessons"
+        );
+
 
     const studentsElement =
-        document.getElementById("stat-students");
+        document.getElementById(
+            "stat-students"
+        );
+
 
     const publishedElement =
-        document.getElementById("stat-published");
+        document.getElementById(
+            "stat-published"
+        );
 
 
     try {
 
         const [
+
             coursesResult,
+
             unitsResult,
+
             lessonsResult,
+
             studentsResult,
+
             publishedResult
+
         ] = await Promise.all([
+
 
             supabaseClient
                 .from("courses")
@@ -307,6 +423,7 @@ async function loadDashboardStatistics() {
                     count: "exact",
                     head: true
                 }),
+
 
             supabaseClient
                 .from("units")
@@ -315,6 +432,7 @@ async function loadDashboardStatistics() {
                     head: true
                 }),
 
+
             supabaseClient
                 .from("lessons")
                 .select("id", {
@@ -322,14 +440,22 @@ async function loadDashboardStatistics() {
                     head: true
                 }),
 
+
             supabaseClient
                 .from("profiles")
                 .select("id", {
                     count: "exact",
                     head: true
                 })
-                .eq("role", "student")
-                .eq("active", true),
+                .eq(
+                    "role",
+                    "student"
+                )
+                .eq(
+                    "active",
+                    true
+                ),
+
 
             supabaseClient
                 .from("courses")
@@ -337,55 +463,67 @@ async function loadDashboardStatistics() {
                     count: "exact",
                     head: true
                 })
-                .eq("status", "published")
+                .eq(
+                    "status",
+                    "published"
+                )
 
         ]);
 
 
-        if (coursesResult.error) {
+        if (coursesResult.error)
             throw coursesResult.error;
-        }
 
-        if (unitsResult.error) {
+        if (unitsResult.error)
             throw unitsResult.error;
-        }
 
-        if (lessonsResult.error) {
+        if (lessonsResult.error)
             throw lessonsResult.error;
-        }
 
-        if (studentsResult.error) {
+        if (studentsResult.error)
             throw studentsResult.error;
-        }
 
-        if (publishedResult.error) {
+        if (publishedResult.error)
             throw publishedResult.error;
-        }
 
 
         if (coursesElement) {
+
             coursesElement.textContent =
                 coursesResult.count ?? 0;
+
         }
+
 
         if (unitsElement) {
+
             unitsElement.textContent =
                 unitsResult.count ?? 0;
+
         }
+
 
         if (lessonsElement) {
+
             lessonsElement.textContent =
                 lessonsResult.count ?? 0;
+
         }
+
 
         if (studentsElement) {
+
             studentsElement.textContent =
                 studentsResult.count ?? 0;
+
         }
 
+
         if (publishedElement) {
+
             publishedElement.textContent =
                 publishedResult.count ?? 0;
+
         }
 
 
@@ -396,16 +534,21 @@ async function loadDashboardStatistics() {
             error
         );
 
+
         [
             coursesElement,
             unitsElement,
             lessonsElement,
             studentsElement,
             publishedElement
+
         ].forEach(element => {
 
             if (element) {
-                element.textContent = "!";
+
+                element.textContent =
+                    "!";
+
             }
 
         });
@@ -435,11 +578,17 @@ async function loadRecentActivity() {
     try {
 
         const [
+
             coursesResult,
+
             unitsResult,
+
             lessonsResult,
+
             studentsResult
+
         ] = await Promise.all([
+
 
             supabaseClient
                 .from("courses")
@@ -448,9 +597,12 @@ async function loadRecentActivity() {
                 )
                 .order(
                     "created_at",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 )
                 .limit(5),
+
 
             supabaseClient
                 .from("units")
@@ -459,9 +611,12 @@ async function loadRecentActivity() {
                 )
                 .order(
                     "created_at",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 )
                 .limit(5),
+
 
             supabaseClient
                 .from("lessons")
@@ -470,9 +625,12 @@ async function loadRecentActivity() {
                 )
                 .order(
                     "created_at",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 )
                 .limit(5),
+
 
             supabaseClient
                 .from("profiles")
@@ -485,86 +643,108 @@ async function loadRecentActivity() {
                 )
                 .order(
                     "created_at",
-                    { ascending: false }
+                    {
+                        ascending: false
+                    }
                 )
                 .limit(5)
 
         ]);
 
 
-        if (coursesResult.error) {
+        if (coursesResult.error)
             throw coursesResult.error;
-        }
 
-        if (unitsResult.error) {
+        if (unitsResult.error)
             throw unitsResult.error;
-        }
 
-        if (lessonsResult.error) {
+        if (lessonsResult.error)
             throw lessonsResult.error;
-        }
 
-        if (studentsResult.error) {
+        if (studentsResult.error)
             throw studentsResult.error;
-        }
 
 
         const activities = [];
 
 
-        (coursesResult.data || []).forEach(course => {
+        (coursesResult.data || [])
+            .forEach(course => {
 
-            activities.push({
-                title:
-                    `Course created: ${course.title}`,
-                date:
-                    course.created_at,
-                icon: "▣"
+                activities.push({
+
+                    title:
+                        `Course created: ${course.title}`,
+
+                    date:
+                        course.created_at,
+
+                    icon:
+                        "▣"
+
+                });
+
             });
 
-        });
 
+        (unitsResult.data || [])
+            .forEach(unit => {
 
-        (unitsResult.data || []).forEach(unit => {
+                activities.push({
 
-            activities.push({
-                title:
-                    `Unit created: ${unit.title}`,
-                date:
-                    unit.created_at,
-                icon: "◫"
+                    title:
+                        `Unit created: ${unit.title}`,
+
+                    date:
+                        unit.created_at,
+
+                    icon:
+                        "◫"
+
+                });
+
             });
 
-        });
 
+        (lessonsResult.data || [])
+            .forEach(lesson => {
 
-        (lessonsResult.data || []).forEach(lesson => {
+                activities.push({
 
-            activities.push({
-                title:
-                    `Lesson created: ${lesson.title}`,
-                date:
-                    lesson.created_at,
-                icon: "▤"
+                    title:
+                        `Lesson created: ${lesson.title}`,
+
+                    date:
+                        lesson.created_at,
+
+                    icon:
+                        "▤"
+
+                });
+
             });
 
-        });
 
+        (studentsResult.data || [])
+            .forEach(student => {
 
-        (studentsResult.data || []).forEach(student => {
+                activities.push({
 
-            activities.push({
-                title:
-                    `Student registered: ${
-                        student.full_name ||
-                        "New student"
-                    }`,
-                date:
-                    student.created_at,
-                icon: "♙"
+                    title:
+                        `Student registered: ${
+                            student.full_name ||
+                            "New student"
+                        }`,
+
+                    date:
+                        student.created_at,
+
+                    icon:
+                        "♙"
+
+                });
+
             });
-
-        });
 
 
         activities.sort((a, b) => {
@@ -594,31 +774,39 @@ async function loadRecentActivity() {
 
 
         container.innerHTML =
-            recent.map(activity => {
+            recent
+                .map(activity => {
 
-                return `
-                    <div class="activity-item">
+                    return `
+                        <div class="activity-item">
 
-                        <div class="activity-icon">
-                            ${escapeHtml(activity.icon)}
-                        </div>
-
-                        <div class="activity-content">
-
-                            <div class="activity-title">
-                                ${escapeHtml(activity.title)}
+                            <div class="activity-icon">
+                                ${escapeHtml(
+                                    activity.icon
+                                )}
                             </div>
 
-                            <div class="activity-meta">
-                                ${formatActivityDate(activity.date)}
+                            <div class="activity-content">
+
+                                <div class="activity-title">
+                                    ${escapeHtml(
+                                        activity.title
+                                    )}
+                                </div>
+
+                                <div class="activity-meta">
+                                    ${formatActivityDate(
+                                        activity.date
+                                    )}
+                                </div>
+
                             </div>
 
                         </div>
+                    `;
 
-                    </div>
-                `;
-
-            }).join("");
+                })
+                .join("");
 
 
     } catch (error) {
@@ -627,6 +815,7 @@ async function loadRecentActivity() {
             "Unable to load recent activity:",
             error
         );
+
 
         container.innerHTML = `
             <div class="activity-empty">
@@ -677,11 +866,31 @@ function formatActivityDate(value) {
 function escapeHtml(value) {
 
     return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
@@ -705,13 +914,15 @@ function initializeLogout() {
 
     button.addEventListener(
         "click",
-        async () => {
+        async function () {
 
             button.disabled = true;
+
 
             try {
 
                 await logoutUser();
+
 
             } catch (error) {
 
@@ -720,6 +931,7 @@ function initializeLogout() {
                     error
                 );
 
+
                 button.disabled = false;
 
             }
@@ -727,4 +939,4 @@ function initializeLogout() {
         }
     );
 
-                        }
+    }
