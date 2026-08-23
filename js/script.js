@@ -6,6 +6,7 @@
 const courses = [
 
     // LANGUAGE
+
     {
         title: "English A1",
         level: "Beginner",
@@ -14,6 +15,7 @@ const courses = [
         cover: "images/books/english-a1.jpg",
         url: "https://hwa1.vercel.app"
     },
+
     {
         title: "English A2",
         level: "Elementary",
@@ -22,6 +24,7 @@ const courses = [
         cover: "images/books/english-a2.jpg",
         url: "https://hwa2.vercel.app"
     },
+
     {
         title: "English B1",
         level: "Pre-Intermediate",
@@ -30,6 +33,7 @@ const courses = [
         cover: "images/books/english-b1.jpg",
         url: "https://YOUR-ENGLISH-B1-SITE.vercel.app"
     },
+
     {
         title: "English B2",
         level: "Intermediate",
@@ -38,6 +42,7 @@ const courses = [
         cover: "images/books/english-b1plus.jpg",
         url: "https://test1965.vercel.app"
     },
+
     {
         title: "French A1",
         level: "Beginner",
@@ -46,6 +51,7 @@ const courses = [
         cover: "images/books/french-a1.jpg",
         url: "https://YOUR-FRENCH-A1-SITE.vercel.app"
     },
+
     {
         title: "French A2",
         level: "Elementary",
@@ -54,6 +60,7 @@ const courses = [
         cover: "images/books/french-a2.jpg",
         url: "https://YOUR-FRENCH-A2-SITE.vercel.app"
     },
+
     {
         title: "Portuguese A1",
         level: "Beginner",
@@ -62,6 +69,7 @@ const courses = [
         cover: "images/books/portuguese-a1.jpg",
         url: "https://YOUR-PORTUGUESE-A1-SITE.vercel.app"
     },
+
     {
         title: "Spanish A1",
         level: "Beginner",
@@ -71,7 +79,9 @@ const courses = [
         url: "https://YOUR-SPANISH-A1-SITE.vercel.app"
     },
 
+
     // MS OFFICE
+
     {
         title: "Microsoft Word",
         level: "Beginner",
@@ -80,6 +90,7 @@ const courses = [
         cover: "images/books/ms-word.jpg",
         url: "https://YOUR-WORD-COURSE.vercel.app"
     },
+
     {
         title: "Microsoft Excel",
         level: "Beginner",
@@ -88,6 +99,7 @@ const courses = [
         cover: "images/books/ms-excel.jpg",
         url: "https://YOUR-EXCEL-COURSE.vercel.app"
     },
+
     {
         title: "Microsoft Excel Advanced",
         level: "Advanced",
@@ -96,6 +108,7 @@ const courses = [
         cover: "images/books/ms-excel-advanced.jpg",
         url: "https://YOUR-EXCEL-ADVANCED-COURSE.vercel.app"
     },
+
     {
         title: "Microsoft PowerPoint",
         level: "Beginner",
@@ -105,7 +118,9 @@ const courses = [
         url: "https://YOUR-POWERPOINT-COURSE.vercel.app"
     },
 
+
     // TRADING
+
     {
         title: "Trading Fundamentals",
         level: "Beginner",
@@ -114,6 +129,7 @@ const courses = [
         cover: "images/books/trading-fundamentals.jpg",
         url: "https://YOUR-TRADING-FUNDAMENTALS.vercel.app"
     },
+
     {
         title: "Technical Analysis",
         level: "Intermediate",
@@ -122,6 +138,7 @@ const courses = [
         cover: "images/books/technical-analysis.jpg",
         url: "https://YOUR-TECHNICAL-ANALYSIS.vercel.app"
     },
+
     {
         title: "Risk Management",
         level: "Intermediate",
@@ -131,7 +148,9 @@ const courses = [
         url: "https://YOUR-RISK-MANAGEMENT.vercel.app"
     },
 
+
     // BUSINESS
+
     {
         title: "Business Fundamentals",
         level: "Beginner",
@@ -140,6 +159,7 @@ const courses = [
         cover: "images/books/business-fundamentals.jpg",
         url: "https://YOUR-BUSINESS-COURSE.vercel.app"
     },
+
     {
         title: "Entrepreneurship",
         level: "Beginner",
@@ -149,7 +169,9 @@ const courses = [
         url: "https://YOUR-ENTREPRENEURSHIP-COURSE.vercel.app"
     },
 
+
     // TECHNOLOGY
+
     {
         title: "Computer Fundamentals",
         level: "Beginner",
@@ -158,6 +180,7 @@ const courses = [
         cover: "images/books/computer-fundamentals.jpg",
         url: "https://YOUR-COMPUTER-COURSE.vercel.app"
     },
+
     {
         title: "Web Development",
         level: "Beginner",
@@ -166,6 +189,7 @@ const courses = [
         cover: "images/books/web-development.jpg",
         url: "https://YOUR-WEB-DEVELOPMENT-COURSE.vercel.app"
     },
+
     {
         title: "Artificial Intelligence",
         level: "Beginner",
@@ -175,7 +199,9 @@ const courses = [
         url: "https://YOUR-AI-COURSE.vercel.app"
     },
 
+
     // FINANCE
+
     {
         title: "Personal Finance",
         level: "Beginner",
@@ -184,6 +210,7 @@ const courses = [
         cover: "images/books/personal-finance.jpg",
         url: "https://YOUR-PERSONAL-FINANCE-COURSE.vercel.app"
     },
+
     {
         title: "Financial Literacy",
         level: "Beginner",
@@ -193,7 +220,9 @@ const courses = [
         url: "https://YOUR-FINANCIAL-LITERACY-COURSE.vercel.app"
     },
 
+
     // PERSONAL DEVELOPMENT
+
     {
         title: "Communication Skills",
         level: "Beginner",
@@ -202,6 +231,7 @@ const courses = [
         cover: "images/books/communication.jpg",
         url: "https://YOUR-COMMUNICATION-COURSE.vercel.app"
     },
+
     {
         title: "Time Management",
         level: "Beginner",
@@ -210,50 +240,95 @@ const courses = [
         cover: "images/books/time-management.jpg",
         url: "https://YOUR-TIME-MANAGEMENT-COURSE.vercel.app"
     }
+
 ];
 
 
 /* ==========================================================
-   START
+   INITIALIZE
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const sidebar = document.getElementById("sidebar");
-    const menuButton = document.getElementById("menuButton");
-    const backdrop = document.getElementById("sidebarBackdrop");
-    const bookGrid = document.getElementById("bookGrid");
-    const noResults = document.getElementById("noResults");
-    const searchInput = document.getElementById("searchInput");
-    const libraryTitle = document.getElementById("libraryTitle");
-    const year = document.getElementById("year");
+    const sidebar =
+        document.getElementById("sidebar");
+
+    const menuButton =
+        document.getElementById("menuButton");
+
+    const backdrop =
+        document.getElementById("sidebarBackdrop");
+
+    const bookGrid =
+        document.getElementById("bookGrid");
+
+    const noResults =
+        document.getElementById("noResults");
+
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const libraryTitle =
+        document.getElementById("libraryTitle");
+
+    const year =
+        document.getElementById("year");
 
     const navigationButtons =
-        document.querySelectorAll(".navigation-button");
+        document.querySelectorAll(
+            ".navigation-button"
+        );
 
     const filterButtons =
-        document.querySelectorAll(".filter-button");
+        document.querySelectorAll(
+            ".filter-button"
+        );
 
 
-    if (year) {
-        year.textContent = new Date().getFullYear();
-    }
-
+    /* ======================================================
+       STATE
+    ====================================================== */
 
     let activeFilter = "all";
     let searchTerm = "";
 
 
+    /* ======================================================
+       TITLES
+    ====================================================== */
+
     const titles = {
+
         all: "All Courses",
+
         language: "Language",
+
         "ms-office": "MS Office",
+
         trading: "Trading",
+
         business: "Business",
+
         technology: "Technology",
+
         finance: "Finance",
-        "personal-development": "Personal Development"
+
+        "personal-development":
+            "Personal Development"
+
     };
+
+
+    /* ======================================================
+       YEAR
+    ====================================================== */
+
+    if (year) {
+
+        year.textContent =
+            new Date().getFullYear();
+
+    }
 
 
     /* ======================================================
@@ -266,24 +341,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         bookGrid.innerHTML = "";
 
+
         courses.forEach(course => {
 
-            const article = document.createElement("article");
+            const article =
+                document.createElement("article");
 
-            article.className = "book-card";
 
-            article.dataset.category = course.categoryKey;
+            article.className =
+                "book-card";
+
+
+            article.dataset.category =
+                course.categoryKey;
+
 
             article.dataset.search = (
+
                 course.title +
                 " " +
                 course.level +
                 " " +
                 course.category
+
             ).toLowerCase();
 
 
             article.innerHTML = `
+
                 <a
                     href="${course.url}"
                     class="book-card-link"
@@ -302,13 +387,21 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="book-hover">
 
                             <div class="open-button">
-                                <span>OPEN COURSE</span>
-                                <span class="open-arrow">→</span>
+
+                                <span>
+                                    OPEN COURSE
+                                </span>
+
+                                <span class="open-arrow">
+                                    →
+                                </span>
+
                             </div>
 
                         </div>
 
                     </div>
+
 
                     <div class="book-information">
 
@@ -329,10 +422,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 </a>
             `;
 
+
             bookGrid.appendChild(article);
+
         });
 
+
         filterBooks();
+
     }
 
 
@@ -344,8 +441,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!bookGrid) return;
 
+
         const cards =
-            bookGrid.querySelectorAll(".book-card");
+            bookGrid.querySelectorAll(
+                ".book-card"
+            );
+
 
         let visibleCount = 0;
 
@@ -354,6 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const category =
                 card.dataset.category;
+
 
             const searchableText =
                 card.dataset.search;
@@ -366,15 +468,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const matchesSearch =
                 searchTerm === "" ||
-                searchableText.includes(searchTerm);
+                searchableText.includes(
+                    searchTerm
+                );
 
 
             const visible =
-                matchesFilter && matchesSearch;
+                matchesFilter &&
+                matchesSearch;
 
 
-            card.classList.toggle("hide", !visible);
-            card.classList.toggle("show", visible);
+            card.classList.toggle(
+                "hide",
+                !visible
+            );
 
 
             if (visible) {
@@ -402,7 +509,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setFilter(filter) {
 
-        activeFilter = filter;
+        activeFilter =
+            filter;
+
 
         navigationButtons.forEach(button => {
 
@@ -425,93 +534,184 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (libraryTitle) {
+
             libraryTitle.textContent =
-                titles[filter] || "All Courses";
+                titles[filter] ||
+                "All Courses";
+
         }
 
 
         filterBooks();
+
     }
 
 
     /* ======================================================
-       SIDEBAR
+       MOBILE SIDEBAR
     ====================================================== */
 
     function openMobileSidebar() {
 
         if (!sidebar) return;
 
-        sidebar.classList.add("mobile-open");
+
+        sidebar.classList.add(
+            "mobile-open"
+        );
+
 
         if (backdrop) {
-            backdrop.classList.add("active");
+
+            backdrop.classList.add(
+                "active"
+            );
+
         }
+
+
+        if (menuButton) {
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+        }
+
     }
 
 
     function closeMobileSidebar() {
 
-        if (!sidebar) return;
+        if (sidebar) {
 
-        sidebar.classList.remove("mobile-open");
+            sidebar.classList.remove(
+                "mobile-open"
+            );
+
+        }
+
 
         if (backdrop) {
-            backdrop.classList.remove("active");
+
+            backdrop.classList.remove(
+                "active"
+            );
+
         }
+
+
+        if (menuButton) {
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
     }
 
+
+    /* ======================================================
+       SIDEBAR TOGGLE
+    ====================================================== */
 
     function toggleSidebar() {
 
         if (!sidebar) return;
 
 
+        /* MOBILE */
+
         if (window.innerWidth <= 768) {
 
-            if (sidebar.classList.contains("mobile-open")) {
+            if (
+                sidebar.classList.contains(
+                    "mobile-open"
+                )
+            ) {
+
                 closeMobileSidebar();
-            } else {
+
+            }
+
+            else {
+
                 openMobileSidebar();
+
             }
 
             return;
+
         }
 
 
-        /* Desktop */
+        /* DESKTOP */
 
-        sidebar.classList.toggle("collapsed");
+        const collapsed =
+            sidebar.classList.toggle(
+                "collapsed"
+            );
+
 
         document.body.classList.toggle(
             "sidebar-collapsed",
-            sidebar.classList.contains("collapsed")
+            collapsed
         );
+
+
+        if (menuButton) {
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                String(!collapsed)
+            );
+
+        }
+
     }
 
 
     if (menuButton) {
+
         menuButton.addEventListener(
             "click",
             toggleSidebar
         );
+
     }
 
 
+    /* ======================================================
+       BACKDROP
+    ====================================================== */
+
     if (backdrop) {
+
         backdrop.addEventListener(
             "click",
             closeMobileSidebar
         );
+
     }
 
+
+    /* ======================================================
+       ESCAPE
+    ====================================================== */
 
     document.addEventListener(
         "keydown",
         event => {
 
-            if (event.key === "Escape") {
+            if (
+                event.key === "Escape"
+            ) {
+
                 closeMobileSidebar();
+
             }
 
         }
@@ -524,15 +724,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navigationButtons.forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            setFilter(button.dataset.filter);
+                setFilter(
+                    button.dataset.filter
+                );
 
-            if (window.innerWidth <= 768) {
-                closeMobileSidebar();
+
+                if (
+                    window.innerWidth <= 768
+                ) {
+
+                    closeMobileSidebar();
+
+                }
+
             }
-
-        });
+        );
 
     });
 
@@ -543,11 +753,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterButtons.forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            setFilter(button.dataset.filter);
+                setFilter(
+                    button.dataset.filter
+                );
 
-        });
+            }
+        );
 
     });
 
@@ -567,6 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         .toLowerCase()
                         .trim();
 
+
                 filterBooks();
 
             }
@@ -576,20 +792,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ======================================================
-       HANDLE RESIZE
+       WINDOW RESIZE
     ====================================================== */
 
-    window.addEventListener("resize", () => {
+    window.addEventListener(
+        "resize",
+        () => {
 
-        if (window.innerWidth > 768) {
-            closeMobileSidebar();
+            if (
+                window.innerWidth > 768
+            ) {
+
+                closeMobileSidebar();
+
+            }
+
         }
-
-    });
+    );
 
 
     /* ======================================================
-       INITIALIZE
+       START PLATFORM
     ====================================================== */
 
     createCourseCards();
