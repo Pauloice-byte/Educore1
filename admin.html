@@ -2,41 +2,63 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>EduCore Admin</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="css/admin.css">
+    <title>EduCore | Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/admin.css"
+    >
+
 </head>
 
 <body>
 
 <div id="admin-app">
 
-    <!-- SIDEBAR -->
-    <aside class="admin-sidebar" id="admin-sidebar">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside
+        class="admin-sidebar"
+        id="admin-sidebar"
+    >
+
+        <!-- BRAND -->
 
         <div class="sidebar-brand">
 
-            <div class="brand-mark">
-                E
-            </div>
+            <img
+                src="images/logo.jpg"
+                alt="EduCore"
+                class="brand-mark"
+            >
 
             <div class="brand-information">
 
                 <div class="brand-name">
-                    EduCore
+                    EduCore Admin
                 </div>
 
                 <div class="brand-subtitle">
-                    Admin
+                    Administration
                 </div>
 
             </div>
 
         </div>
 
+
+        <!-- NAVIGATION -->
 
         <nav class="admin-navigation">
 
@@ -45,8 +67,13 @@
                 class="nav-item active"
                 data-section="overview"
             >
+
                 <span class="nav-icon">◈</span>
-                <span class="nav-label">Overview</span>
+
+                <span class="nav-label">
+                    Overview
+                </span>
+
             </button>
 
 
@@ -55,8 +82,13 @@
                 class="nav-item"
                 data-section="courses"
             >
+
                 <span class="nav-icon">▣</span>
-                <span class="nav-label">Courses</span>
+
+                <span class="nav-label">
+                    Courses
+                </span>
+
             </button>
 
 
@@ -65,8 +97,13 @@
                 class="nav-item"
                 data-section="students"
             >
+
                 <span class="nav-icon">♙</span>
-                <span class="nav-label">Students</span>
+
+                <span class="nav-label">
+                    Students
+                </span>
+
             </button>
 
 
@@ -75,8 +112,13 @@
                 class="nav-item"
                 data-section="progress"
             >
+
                 <span class="nav-icon">◫</span>
-                <span class="nav-label">Progress</span>
+
+                <span class="nav-label">
+                    Progress
+                </span>
+
             </button>
 
 
@@ -85,8 +127,13 @@
                 class="nav-item"
                 data-section="media"
             >
-                <span class="nav-icon">▤</span>
-                <span class="nav-label">Media</span>
+
+                <span class="nav-icon">▶</span>
+
+                <span class="nav-label">
+                    Media
+                </span>
+
             </button>
 
 
@@ -95,12 +142,19 @@
                 class="nav-item"
                 data-section="settings"
             >
+
                 <span class="nav-icon">⚙</span>
-                <span class="nav-label">Settings</span>
+
+                <span class="nav-label">
+                    Settings
+                </span>
+
             </button>
 
         </nav>
 
+
+        <!-- SIDEBAR FOOTER -->
 
         <div class="sidebar-footer">
 
@@ -109,8 +163,15 @@
                 class="logout-button"
                 id="admin-logout"
             >
-                <span class="nav-icon">↪</span>
-                <span>Log out</span>
+
+                <span class="nav-icon">
+                    ↪
+                </span>
+
+                <span>
+                    Log out
+                </span>
+
             </button>
 
         </div>
@@ -118,11 +179,18 @@
     </aside>
 
 
-    <!-- MAIN -->
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
     <main class="admin-main">
 
+
         <!-- HEADER -->
+
         <header class="admin-header">
+
 
             <div class="header-left">
 
@@ -131,11 +199,14 @@
                     class="sidebar-toggle"
                     id="sidebar-toggle"
                     aria-label="Toggle sidebar"
+                    aria-controls="admin-sidebar"
                     aria-expanded="true"
                 >
+
                     <span></span>
                     <span></span>
                     <span></span>
+
                 </button>
 
 
@@ -153,6 +224,8 @@
 
             </div>
 
+
+            <!-- ADMIN USER -->
 
             <div class="admin-user">
 
@@ -183,11 +256,18 @@
         </header>
 
 
-        <!-- CONTENT -->
+
+        <!-- =================================================
+             CONTENT
+        ================================================== -->
+
         <div class="admin-content">
 
 
-            <!-- OVERVIEW -->
+            <!-- =================================================
+                 OVERVIEW
+            ================================================== -->
+
             <section
                 class="admin-section active"
                 id="section-overview"
@@ -195,21 +275,18 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            DASHBOARD
-                        </div>
-
-                        <h2>
-                            Welcome to EduCore Admin
-                        </h2>
-
-                        <p>
-                            Manage the learning platform from one place.
-                        </p>
-
+                    <div class="section-kicker">
+                        DASHBOARD
                     </div>
+
+                    <h2>
+                        Welcome to EduCore Admin
+                    </h2>
+
+                    <p>
+                        Manage your learning platform,
+                        courses, students and content.
+                    </p>
 
                 </div>
 
@@ -218,6 +295,8 @@
 
                 <div class="statistics-grid">
 
+
+                    <!-- COURSES -->
 
                     <div class="stat-card">
 
@@ -247,6 +326,8 @@
                     </div>
 
 
+                    <!-- UNITS -->
+
                     <div class="stat-card">
 
                         <div class="stat-card-top">
@@ -269,11 +350,13 @@
                         </strong>
 
                         <span class="stat-description">
-                            Learning units
+                            Total learning units
                         </span>
 
                     </div>
 
+
+                    <!-- LESSONS -->
 
                     <div class="stat-card">
 
@@ -303,6 +386,8 @@
                     </div>
 
 
+                    <!-- STUDENTS -->
+
                     <div class="stat-card">
 
                         <div class="stat-card-top">
@@ -331,12 +416,14 @@
                     </div>
 
 
+                    <!-- PUBLISHED -->
+
                     <div class="stat-card stat-card-wide">
 
                         <div class="stat-card-top">
 
                             <span class="stat-label">
-                                Published content
+                                Published Content
                             </span>
 
                             <span class="stat-icon">
@@ -361,6 +448,7 @@
                 </div>
 
 
+
                 <!-- RECENT ACTIVITY -->
 
                 <div class="dashboard-panel">
@@ -368,11 +456,11 @@
                     <div class="panel-header">
 
                         <div class="panel-kicker">
-                            PLATFORM
+                            ACTIVITY
                         </div>
 
                         <h3>
-                            Recent activity
+                            Recent Activity
                         </h3>
 
                     </div>
@@ -384,7 +472,7 @@
                     >
 
                         <div class="activity-loading">
-                            Loading recent activity...
+                            Loading activity...
                         </div>
 
                     </div>
@@ -394,7 +482,10 @@
             </section>
 
 
-            <!-- COURSES -->
+
+            <!-- =================================================
+                 COURSES
+            ================================================== -->
 
             <section
                 class="admin-section"
@@ -403,21 +494,17 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            CONTENT
-                        </div>
-
-                        <h2>
-                            Courses
-                        </h2>
-
-                        <p>
-                            Manage courses and learning content.
-                        </p>
-
+                    <div class="section-kicker">
+                        CONTENT
                     </div>
+
+                    <h2>
+                        Courses
+                    </h2>
+
+                    <p>
+                        Create, edit and manage EduCore courses.
+                    </p>
 
                 </div>
 
@@ -428,11 +515,11 @@
                     </div>
 
                     <h2>
-                        Course management
+                        Course Management
                     </h2>
 
                     <p>
-                        Course management will appear here.
+                        Course management tools will appear here.
                     </p>
 
                 </div>
@@ -440,7 +527,10 @@
             </section>
 
 
-            <!-- STUDENTS -->
+
+            <!-- =================================================
+                 STUDENTS
+            ================================================== -->
 
             <section
                 class="admin-section"
@@ -449,21 +539,17 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            USERS
-                        </div>
-
-                        <h2>
-                            Students
-                        </h2>
-
-                        <p>
-                            Manage registered students.
-                        </p>
-
+                    <div class="section-kicker">
+                        USERS
                     </div>
+
+                    <h2>
+                        Students
+                    </h2>
+
+                    <p>
+                        View and manage registered students.
+                    </p>
 
                 </div>
 
@@ -474,11 +560,11 @@
                     </div>
 
                     <h2>
-                        Student management
+                        Student Management
                     </h2>
 
                     <p>
-                        Student management will appear here.
+                        Student management tools will appear here.
                     </p>
 
                 </div>
@@ -486,7 +572,10 @@
             </section>
 
 
-            <!-- PROGRESS -->
+
+            <!-- =================================================
+                 PROGRESS
+            ================================================== -->
 
             <section
                 class="admin-section"
@@ -495,21 +584,17 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            ANALYTICS
-                        </div>
-
-                        <h2>
-                            Progress
-                        </h2>
-
-                        <p>
-                            Monitor student learning progress.
-                        </p>
-
+                    <div class="section-kicker">
+                        ANALYTICS
                     </div>
+
+                    <h2>
+                        Progress
+                    </h2>
+
+                    <p>
+                        Monitor student learning progress.
+                    </p>
 
                 </div>
 
@@ -520,11 +605,11 @@
                     </div>
 
                     <h2>
-                        Learning progress
+                        Progress Analytics
                     </h2>
 
                     <p>
-                        Progress analytics will appear here.
+                        Student progress information will appear here.
                     </p>
 
                 </div>
@@ -532,7 +617,10 @@
             </section>
 
 
-            <!-- MEDIA -->
+
+            <!-- =================================================
+                 MEDIA
+            ================================================== -->
 
             <section
                 class="admin-section"
@@ -541,36 +629,32 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            PLATFORM
-                        </div>
-
-                        <h2>
-                            Media
-                        </h2>
-
-                        <p>
-                            Manage images, audio and other media.
-                        </p>
-
+                    <div class="section-kicker">
+                        LIBRARY
                     </div>
+
+                    <h2>
+                        Media
+                    </h2>
+
+                    <p>
+                        Manage images, audio and other course media.
+                    </p>
 
                 </div>
 
                 <div class="empty-section">
 
                     <div class="empty-section-icon">
-                        ▤
+                        ▶
                     </div>
 
                     <h2>
-                        Media library
+                        Media Library
                     </h2>
 
                     <p>
-                        Media management will appear here.
+                        Media management tools will appear here.
                     </p>
 
                 </div>
@@ -578,7 +662,10 @@
             </section>
 
 
-            <!-- SETTINGS -->
+
+            <!-- =================================================
+                 SETTINGS
+            ================================================== -->
 
             <section
                 class="admin-section"
@@ -587,21 +674,17 @@
 
                 <div class="section-introduction">
 
-                    <div>
-
-                        <div class="section-kicker">
-                            SYSTEM
-                        </div>
-
-                        <h2>
-                            Settings
-                        </h2>
-
-                        <p>
-                            Configure EduCore platform settings.
-                        </p>
-
+                    <div class="section-kicker">
+                        SYSTEM
                     </div>
+
+                    <h2>
+                        Settings
+                    </h2>
+
+                    <p>
+                        Configure EduCore platform settings.
+                    </p>
 
                 </div>
 
@@ -612,16 +695,17 @@
                     </div>
 
                     <h2>
-                        Platform settings
+                        Platform Settings
                     </h2>
 
                     <p>
-                        Settings will appear here.
+                        Configuration options will appear here.
                     </p>
 
                 </div>
 
             </section>
+
 
         </div>
 
@@ -630,14 +714,23 @@
 </div>
 
 
-<!-- IMPORTANT:
-     These two files must load before admin.js.
-     Use the SAME files you already use for authentication.
+<!-- =========================================================
+     SUPABASE
+========================================================= -->
+
+<!--
+     Keep your existing Supabase configuration
+     script here, before auth.js.
 -->
 
+
 <script src="js/supabase.js"></script>
+
 <script src="js/auth.js"></script>
+
 <script src="js/admin.js"></script>
 
+
 </body>
-    </html>
+
+                </html>
