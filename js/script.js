@@ -1,11 +1,11 @@
 /* ==========================================================
    EDUCORE
-   COURSE DATABASE
+   MAIN JAVASCRIPT
 ========================================================== */
 
 const courses = [
 
-    // LANGUAGE
+    /* LANGUAGE */
 
     {
         title: "English A1",
@@ -80,7 +80,7 @@ const courses = [
     },
 
 
-    // MS OFFICE
+    /* MS OFFICE */
 
     {
         title: "Microsoft Word",
@@ -119,7 +119,7 @@ const courses = [
     },
 
 
-    // TRADING
+    /* TRADING */
 
     {
         title: "Trading Fundamentals",
@@ -149,7 +149,7 @@ const courses = [
     },
 
 
-    // BUSINESS
+    /* BUSINESS */
 
     {
         title: "Business Fundamentals",
@@ -170,7 +170,7 @@ const courses = [
     },
 
 
-    // TECHNOLOGY
+    /* TECHNOLOGY */
 
     {
         title: "Computer Fundamentals",
@@ -200,7 +200,7 @@ const courses = [
     },
 
 
-    // FINANCE
+    /* FINANCE */
 
     {
         title: "Personal Finance",
@@ -221,7 +221,7 @@ const courses = [
     },
 
 
-    // PERSONAL DEVELOPMENT
+    /* PERSONAL DEVELOPMENT */
 
     {
         title: "Communication Skills",
@@ -245,78 +245,30 @@ const courses = [
 
 
 /* ==========================================================
-   INITIALIZE
+   WAIT FOR PAGE
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const sidebar =
-        document.getElementById("sidebar");
+    const sidebar = document.getElementById("sidebar");
+    const menuButton = document.getElementById("menuButton");
+    const backdrop = document.getElementById("sidebarBackdrop");
 
-    const menuButton =
-        document.getElementById("menuButton");
-
-    const backdrop =
-        document.getElementById("sidebarBackdrop");
-
-    const bookGrid =
-        document.getElementById("bookGrid");
-
-    const noResults =
-        document.getElementById("noResults");
-
-    const searchInput =
-        document.getElementById("searchInput");
-
-    const libraryTitle =
-        document.getElementById("libraryTitle");
-
-    const year =
-        document.getElementById("year");
+    const bookGrid = document.getElementById("bookGrid");
+    const noResults = document.getElementById("noResults");
+    const searchInput = document.getElementById("searchInput");
+    const libraryTitle = document.getElementById("libraryTitle");
+    const year = document.getElementById("year");
 
     const navigationButtons =
-        document.querySelectorAll(
-            ".navigation-button"
-        );
+        document.querySelectorAll(".navigation-button");
 
     const filterButtons =
-        document.querySelectorAll(
-            ".filter-button"
-        );
+        document.querySelectorAll(".filter-button");
 
-
-    /* ======================================================
-       STATE
-    ====================================================== */
 
     let activeFilter = "all";
     let searchTerm = "";
-
-
-    /* ======================================================
-       TITLES
-    ====================================================== */
-
-    const titles = {
-
-        all: "All Courses",
-
-        language: "Language",
-
-        "ms-office": "MS Office",
-
-        trading: "Trading",
-
-        business: "Business",
-
-        technology: "Technology",
-
-        finance: "Finance",
-
-        "personal-development":
-            "Personal Development"
-
-    };
 
 
     /* ======================================================
@@ -324,15 +276,101 @@ document.addEventListener("DOMContentLoaded", () => {
     ====================================================== */
 
     if (year) {
+        year.textContent = new Date().getFullYear();
+    }
 
-        year.textContent =
-            new Date().getFullYear();
+
+    /* ======================================================
+       SIDEBAR
+    ====================================================== */
+
+    if (menuButton && sidebar) {
+
+        menuButton.addEventListener("click", () => {
+
+            if (window.innerWidth <= 768) {
+
+                const isOpen =
+                    sidebar.classList.toggle("mobile-open");
+
+                if (backdrop) {
+                    backdrop.classList.toggle(
+                        "active",
+                        isOpen
+                    );
+                }
+
+                menuButton.setAttribute(
+                    "aria-expanded",
+                    isOpen
+                );
+
+            } else {
+
+                sidebar.classList.toggle("collapsed");
+
+                const isCollapsed =
+                    sidebar.classList.contains("collapsed");
+
+                menuButton.setAttribute(
+                    "aria-expanded",
+                    !isCollapsed
+                );
+
+            }
+
+        });
 
     }
 
 
     /* ======================================================
-       CREATE COURSE CARDS
+       CLOSE MOBILE SIDEBAR
+    ====================================================== */
+
+    function closeMobileSidebar() {
+
+        if (sidebar) {
+            sidebar.classList.remove("mobile-open");
+        }
+
+        if (backdrop) {
+            backdrop.classList.remove("active");
+        }
+
+        if (menuButton) {
+            menuButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+        }
+
+    }
+
+
+    if (backdrop) {
+        backdrop.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
+    }
+
+
+    /* ======================================================
+       ESCAPE KEY
+    ====================================================== */
+
+    document.addEventListener("keydown", event => {
+
+        if (event.key === "Escape") {
+            closeMobileSidebar();
+        }
+
+    });
+
+
+    /* ======================================================
+       COURSE CARDS
     ====================================================== */
 
     function createCourseCards() {
@@ -341,34 +379,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         bookGrid.innerHTML = "";
 
-
         courses.forEach(course => {
 
-            const article =
-                document.createElement("article");
+            const card = document.createElement("article");
 
+            card.className = "book-card";
 
-            article.className =
-                "book-card";
-
-
-            article.dataset.category =
+            card.dataset.category =
                 course.categoryKey;
 
+            card.dataset.search =
+                `${course.title} ${course.level} ${course.category}`
+                .toLowerCase();
 
-            article.dataset.search = (
-
-                course.title +
-                " " +
-                course.level +
-                " " +
-                course.category
-
-            ).toLowerCase();
-
-
-            article.innerHTML = `
-
+            card.innerHTML = `
                 <a
                     href="${course.url}"
                     class="book-card-link"
@@ -388,9 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             <div class="open-button">
 
-                                <span>
-                                    OPEN COURSE
-                                </span>
+                                <span>OPEN COURSE</span>
 
                                 <span class="open-arrow">
                                     →
@@ -401,7 +423,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
 
                     </div>
-
 
                     <div class="book-information">
 
@@ -422,11 +443,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </a>
             `;
 
-
-            bookGrid.appendChild(article);
+            bookGrid.appendChild(card);
 
         });
-
 
         filterBooks();
 
@@ -441,51 +460,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!bookGrid) return;
 
-
         const cards =
-            bookGrid.querySelectorAll(
-                ".book-card"
-            );
-
+            bookGrid.querySelectorAll(".book-card");
 
         let visibleCount = 0;
-
 
         cards.forEach(card => {
 
             const category =
                 card.dataset.category;
 
-
-            const searchableText =
+            const text =
                 card.dataset.search;
 
-
-            const matchesFilter =
+            const categoryMatch =
                 activeFilter === "all" ||
                 category === activeFilter;
 
-
-            const matchesSearch =
-                searchTerm === "" ||
-                searchableText.includes(
-                    searchTerm
-                );
-
+            const searchMatch =
+                !searchTerm ||
+                text.includes(searchTerm);
 
             const visible =
-                matchesFilter &&
-                matchesSearch;
-
+                categoryMatch && searchMatch;
 
             card.classList.toggle(
                 "hide",
                 !visible
             );
 
-
             if (visible) {
                 visibleCount++;
+
+                requestAnimationFrame(() => {
+                    card.classList.add("show");
+                });
+            } else {
+                card.classList.remove("show");
             }
 
         });
@@ -504,14 +515,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ======================================================
+       TITLES
+    ====================================================== */
+
+    const titles = {
+
+        all: "All Courses",
+        language: "Language",
+        "ms-office": "MS Office",
+        trading: "Trading",
+        business: "Business",
+        technology: "Technology",
+        finance: "Finance",
+        "personal-development": "Personal Development"
+
+    };
+
+
+    /* ======================================================
        SET FILTER
     ====================================================== */
 
     function setFilter(filter) {
 
-        activeFilter =
-            filter;
-
+        activeFilter = filter;
 
         navigationButtons.forEach(button => {
 
@@ -522,7 +549,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-
         filterButtons.forEach(button => {
 
             button.classList.toggle(
@@ -532,190 +558,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-
         if (libraryTitle) {
 
             libraryTitle.textContent =
-                titles[filter] ||
-                "All Courses";
+                titles[filter] || "All Courses";
 
         }
-
 
         filterBooks();
 
-    }
 
-
-    /* ======================================================
-       MOBILE SIDEBAR
-    ====================================================== */
-
-    function openMobileSidebar() {
-
-        if (!sidebar) return;
-
-
-        sidebar.classList.add(
-            "mobile-open"
-        );
-
-
-        if (backdrop) {
-
-            backdrop.classList.add(
-                "active"
-            );
-
-        }
-
-
-        if (menuButton) {
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-        }
-
-    }
-
-
-    function closeMobileSidebar() {
-
-        if (sidebar) {
-
-            sidebar.classList.remove(
-                "mobile-open"
-            );
-
-        }
-
-
-        if (backdrop) {
-
-            backdrop.classList.remove(
-                "active"
-            );
-
-        }
-
-
-        if (menuButton) {
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-        }
-
-    }
-
-
-    /* ======================================================
-       SIDEBAR TOGGLE
-    ====================================================== */
-
-    function toggleSidebar() {
-
-        if (!sidebar) return;
-
-
-        /* MOBILE */
+        /* Close mobile sidebar */
 
         if (window.innerWidth <= 768) {
-
-            if (
-                sidebar.classList.contains(
-                    "mobile-open"
-                )
-            ) {
-
-                closeMobileSidebar();
-
-            }
-
-            else {
-
-                openMobileSidebar();
-
-            }
-
-            return;
-
-        }
-
-
-        /* DESKTOP */
-
-        const collapsed =
-            sidebar.classList.toggle(
-                "collapsed"
-            );
-
-
-        document.body.classList.toggle(
-            "sidebar-collapsed",
-            collapsed
-        );
-
-
-        if (menuButton) {
-
-            menuButton.setAttribute(
-                "aria-expanded",
-                String(!collapsed)
-            );
-
+            closeMobileSidebar();
         }
 
     }
-
-
-    if (menuButton) {
-
-        menuButton.addEventListener(
-            "click",
-            toggleSidebar
-        );
-
-    }
-
-
-    /* ======================================================
-       BACKDROP
-    ====================================================== */
-
-    if (backdrop) {
-
-        backdrop.addEventListener(
-            "click",
-            closeMobileSidebar
-        );
-
-    }
-
-
-    /* ======================================================
-       ESCAPE
-    ====================================================== */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-
-                closeMobileSidebar();
-
-            }
-
-        }
-    );
 
 
     /* ======================================================
@@ -724,25 +583,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navigationButtons.forEach(button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+        button.addEventListener("click", () => {
 
-                setFilter(
-                    button.dataset.filter
-                );
+            const filter =
+                button.dataset.filter;
 
+            /*
+             * The three learning-mode buttons do not
+             * currently have courses assigned to them.
+             * Therefore they are ignored rather than
+             * making the entire library disappear.
+             */
 
-                if (
-                    window.innerWidth <= 768
-                ) {
-
-                    closeMobileSidebar();
-
-                }
-
+            if (
+                filter === "autonomous" ||
+                filter === "blended" ||
+                filter === "guided"
+            ) {
+                return;
             }
-        );
+
+            setFilter(filter);
+
+        });
 
     });
 
@@ -753,16 +616,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterButtons.forEach(button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+        button.addEventListener("click", () => {
 
-                setFilter(
-                    button.dataset.filter
-                );
+            setFilter(
+                button.dataset.filter
+            );
 
-            }
-        );
+        });
 
     });
 
@@ -782,7 +642,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         .toLowerCase()
                         .trim();
 
-
                 filterBooks();
 
             }
@@ -792,31 +651,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ======================================================
-       WINDOW RESIZE
-    ====================================================== */
-
-    window.addEventListener(
-        "resize",
-        () => {
-
-            if (
-                window.innerWidth > 768
-            ) {
-
-                closeMobileSidebar();
-
-            }
-
-        }
-    );
-
-
-    /* ======================================================
-       START PLATFORM
+       START
     ====================================================== */
 
     createCourseCards();
-
-    setFilter("all");
 
 });
