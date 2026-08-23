@@ -2,66 +2,56 @@
    EDUCORE ADMIN DASHBOARD
    STANDALONE INTERFACE JAVASCRIPT
 
-   NO SUPABASE
-   NO AUTHENTICATION
-   NO BACKEND
+   No Supabase
+   No authentication
+   No backend
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
-       ELEMENTS
+       APP
     ===================================================== */
 
-    const app =
-        document.getElementById("admin-app");
+    const app = document.getElementById("admin-app");
 
     if (!app) {
-        console.error(
-            "EduCore Admin: #admin-app not found."
-        );
+        console.error("EduCore Admin: #admin-app not found.");
         return;
     }
 
 
-    const sidebar =
-        app.querySelector(".admin-sidebar");
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
-    const sidebarToggle =
-        app.querySelector(".sidebar-toggle");
+    const sidebar = app.querySelector(".admin-sidebar");
+    const sidebarToggle = app.querySelector(".sidebar-toggle");
+    const sidebarClose = app.querySelector(".mobile-sidebar-close");
+    const sidebarOverlay = app.querySelector(".sidebar-overlay");
 
-    const sidebarClose =
-        app.querySelector(".mobile-sidebar-close");
+    const navItems = app.querySelectorAll(".nav-item");
+    const sections = app.querySelectorAll(".admin-section");
 
-    const sidebarOverlay =
-        app.querySelector(".sidebar-overlay");
+    const headerTitle = app.querySelector(".header-title h1");
 
-    const navItems =
-        app.querySelectorAll(".nav-item");
+    const modalOverlay = document.getElementById(
+        "course-modal-overlay"
+    );
 
-    const sections =
-        app.querySelectorAll(".admin-section");
+    const modalClose = modalOverlay
+        ? modalOverlay.querySelector(".modal-close")
+        : null;
 
-    const headerTitle =
-        app.querySelector(".header-title h1");
+    const courseForm = document.getElementById(
+        "course-form"
+    );
 
-    const modalOverlay =
-        document.getElementById(
-            "course-modal-overlay"
-        );
-
-    const modalClose =
-        app.querySelector(".modal-close");
-
-    const courseForm =
-        document.getElementById("course-form");
-
-    const cancelButton =
-        courseForm
-            ? courseForm.querySelector(
-                ".modal-footer .secondary-button"
-            )
-            : null;
+    const cancelButton = courseForm
+        ? courseForm.querySelector(
+            ".modal-footer .secondary-button"
+        )
+        : null;
 
     const createCourseButton =
         document.getElementById(
@@ -72,24 +62,48 @@ document.addEventListener("DOMContentLoaded", () => {
         app.querySelector(".logout-button");
 
     const coursesList =
-        document.getElementById(
-            "courses-list"
-        );
+        document.getElementById("courses-list");
 
     const courseSearch =
-        document.getElementById(
-            "course-search"
-        );
+        document.getElementById("course-search");
 
     const courseFilter =
-        document.getElementById(
-            "course-filter"
-        );
+        document.getElementById("course-filter");
 
-    const courseCount =
-        document.getElementById(
-            "course-count"
-        );
+
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let courses = [
+        {
+            id: 1,
+            title: "English Beginner",
+            description: "English language course for beginners.",
+            category: "Language",
+            level: "Beginner",
+            status: "published",
+            updated: "Today"
+        },
+        {
+            id: 2,
+            title: "English Intermediate",
+            description: "Develop your English communication skills.",
+            category: "Language",
+            level: "Intermediate",
+            status: "published",
+            updated: "Yesterday"
+        },
+        {
+            id: 3,
+            title: "Business English",
+            description: "Professional English for the workplace.",
+            category: "Business",
+            level: "Upper-Intermediate",
+            status: "draft",
+            updated: "2 days ago"
+        }
+    ];
 
 
     /* =====================================================
@@ -97,9 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function isMobile() {
-
         return window.innerWidth <= 768;
-
     }
 
 
@@ -110,22 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function openSidebar() {
 
         if (isMobile()) {
-
-            app.classList.add(
-                "sidebar-open"
-            );
-
+            app.classList.add("sidebar-open");
         }
-
     }
 
 
     function closeSidebar() {
 
-        app.classList.remove(
-            "sidebar-open"
-        );
-
+        app.classList.remove("sidebar-open");
     }
 
 
@@ -133,131 +137,128 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (isMobile()) {
 
-            app.classList.toggle(
-                "sidebar-open"
-            );
+            app.classList.toggle("sidebar-open");
 
             return;
         }
 
-
-        app.classList.toggle(
-            "sidebar-collapsed"
-        );
-
+        app.classList.toggle("sidebar-collapsed");
     }
 
 
     if (sidebarToggle) {
 
-        sidebarToggle.addEventListener(
-            "click",
-            event => {
+        sidebarToggle.addEventListener("click", (event) => {
 
-                event.preventDefault();
+            event.preventDefault();
 
-                toggleSidebar();
-
-            }
-        );
-
+            toggleSidebar();
+        });
     }
 
 
     if (sidebarClose) {
 
-        sidebarClose.addEventListener(
-            "click",
-            event => {
+        sidebarClose.addEventListener("click", (event) => {
 
-                event.preventDefault();
+            event.preventDefault();
 
-                closeSidebar();
-
-            }
-        );
-
+            closeSidebar();
+        });
     }
 
 
     if (sidebarOverlay) {
 
-        sidebarOverlay.addEventListener(
-            "click",
-            () => {
+        sidebarOverlay.addEventListener("click", () => {
 
-                closeSidebar();
-
-            }
-        );
-
+            closeSidebar();
+        });
     }
 
 
     /* =====================================================
-       PAGE TITLES
+       NAVIGATION
     ===================================================== */
 
     const pageTitles = {
-
         overview: "Overview",
         courses: "Courses",
         students: "Students",
         progress: "Progress",
         media: "Media",
         settings: "Settings"
-
     };
 
 
-    /* =====================================================
-       NAVIGATION KEY
-    ===================================================== */
-
     function getNavigationKey(item) {
 
-        if (item.dataset.section) {
+        if (!item) {
+            return "";
+        }
 
-            return item.dataset.section
-                .trim()
-                .toLowerCase();
+        const dataSection =
+            item.getAttribute("data-section");
 
+        if (dataSection) {
+            return dataSection.toLowerCase();
         }
 
 
-        if (item.dataset.page) {
+        const dataPage =
+            item.getAttribute("data-page");
 
-            return item.dataset.page
-                .trim()
-                .toLowerCase();
-
+        if (dataPage) {
+            return dataPage.toLowerCase();
         }
 
 
         const href =
             item.getAttribute("href");
 
-        if (
-            href &&
-            href.startsWith("#")
-        ) {
+        if (href && href.startsWith("#")) {
 
             return href
                 .substring(1)
                 .replace("-section", "")
                 .toLowerCase();
-
         }
 
 
         return "";
-
     }
 
 
-    /* =====================================================
-       SHOW SECTION
-    ===================================================== */
+    function getSectionKey(section) {
+
+        if (!section) {
+            return "";
+        }
+
+        const dataSection =
+            section.getAttribute("data-section");
+
+        if (dataSection) {
+            return dataSection.toLowerCase();
+        }
+
+
+        const dataPage =
+            section.getAttribute("data-page");
+
+        if (dataPage) {
+            return dataPage.toLowerCase();
+        }
+
+
+        const id =
+            section.getAttribute("id") || "";
+
+        return id
+            .replace("-section", "")
+            .toLowerCase();
+    }
+
 
     function showSection(sectionKey) {
 
@@ -267,91 +268,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         sectionKey =
-            sectionKey
-                .trim()
-                .toLowerCase();
+            sectionKey.toLowerCase();
 
 
-        /*
-           Hide ALL sections
-        */
+        let foundSection = false;
+
+
+        /* ---------------------------------------------
+           Show correct section
+        --------------------------------------------- */
 
         sections.forEach(section => {
 
-            section.classList.remove(
-                "active"
+            const sectionKeyFromHTML =
+                getSectionKey(section);
+
+            const isTarget =
+                sectionKeyFromHTML === sectionKey;
+
+            section.classList.toggle(
+                "active",
+                isTarget
             );
 
+            if (isTarget) {
+                foundSection = true;
+            }
         });
 
 
-        /*
-           Find requested section
-        */
-
-        let targetSection =
-            document.getElementById(
-                `${sectionKey}-section`
-            );
-
-
-        /*
-           Fallback: data-section
-        */
-
-        if (!targetSection) {
-
-            targetSection =
-                app.querySelector(
-                    `.admin-section[data-section="${sectionKey}"]`
-                );
-
-        }
-
-
-        /*
-           Fallback: data-page
-        */
-
-        if (!targetSection) {
-
-            targetSection =
-                app.querySelector(
-                    `.admin-section[data-page="${sectionKey}"]`
-                );
-
-        }
-
-
-        /*
-           If section doesn't exist,
-           stop here.
-        */
-
-        if (!targetSection) {
-
-            console.error(
-                "EduCore Admin: section not found:",
-                sectionKey
-            );
-
-            return;
-
-        }
-
-
-        /*
-           Show section
-        */
-
-        targetSection.classList.add(
-            "active"
-        );
-
-
-        /*
-           Update sidebar active state
-        */
+        /* ---------------------------------------------
+           Active sidebar item
+        --------------------------------------------- */
 
         navItems.forEach(item => {
 
@@ -362,73 +310,66 @@ document.addEventListener("DOMContentLoaded", () => {
                 "active",
                 itemKey === sectionKey
             );
-
         });
 
 
-        /*
-           Update title
-        */
+        /* ---------------------------------------------
+           Header title
+        --------------------------------------------- */
 
         if (headerTitle) {
 
             headerTitle.textContent =
                 pageTitles[sectionKey] ||
-                "EduCore Admin";
-
+                sectionKey;
         }
 
 
-        /*
+        /* ---------------------------------------------
            Close mobile sidebar
-        */
+        --------------------------------------------- */
 
         if (isMobile()) {
-
             closeSidebar();
-
         }
 
 
-        /*
+        /* ---------------------------------------------
            Scroll content to top
-        */
+        --------------------------------------------- */
 
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
 
+
+        if (!foundSection) {
+
+            console.warn(
+                "EduCore Admin: No section found for:",
+                sectionKey
+            );
+        }
     }
 
 
-    /* =====================================================
-       SIDEBAR NAVIGATION
-    ===================================================== */
-
     navItems.forEach(item => {
 
-        item.addEventListener(
-            "click",
-            event => {
+        item.addEventListener("click", event => {
 
-                event.preventDefault();
+            event.preventDefault();
 
-                const sectionKey =
-                    getNavigationKey(item);
+            const sectionKey =
+                getNavigationKey(item);
 
-                showSection(
-                    sectionKey
-                );
-
-            }
-        );
-
+            showSection(sectionKey);
+        });
     });
 
 
     /* =====================================================
-       INITIAL SECTION
+       INITIAL PAGE
     ===================================================== */
 
     const activeNav =
@@ -437,76 +378,251 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    let initialSection =
-        "overview";
-
-
     if (activeNav) {
 
-        const detected =
-            getNavigationKey(
-                activeNav
-            );
+        showSection(
+            getNavigationKey(activeNav)
+        );
 
-        if (detected) {
+    } else {
 
-            initialSection =
-                detected;
-
-        }
-
+        showSection("overview");
     }
 
 
-    showSection(
-        initialSection
-    );
-
-
     /* =====================================================
-       COURSE DATA
+       COURSE MODAL
     ===================================================== */
 
-    let courses = [
+    function openCourseModal() {
 
-        {
-            id: 1,
-            title: "English Beginner",
-            description:
-                "English language course for beginners.",
-            category: "Language",
-            level: "Beginner",
-            status: "published",
-            updated: "Today"
-        },
-
-        {
-            id: 2,
-            title: "English Intermediate",
-            description:
-                "Develop your English communication skills.",
-            category: "Language",
-            level: "Intermediate",
-            status: "published",
-            updated: "Yesterday"
-        },
-
-        {
-            id: 3,
-            title: "Business English",
-            description:
-                "Professional English for the workplace.",
-            category: "Business",
-            level: "Upper-Intermediate",
-            status: "draft",
-            updated: "3 days ago"
+        if (!modalOverlay) {
+            return;
         }
 
-    ];
+        modalOverlay.classList.add("open");
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+
+        const firstField =
+            courseForm
+                ? courseForm.querySelector(
+                    "input:not([type='hidden']), textarea, select"
+                )
+                : null;
+
+
+        if (firstField) {
+
+            setTimeout(() => {
+
+                firstField.focus();
+
+            }, 100);
+        }
+    }
+
+
+    function closeCourseModal() {
+
+        if (!modalOverlay) {
+            return;
+        }
+
+        modalOverlay.classList.remove("open");
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+    }
+
+
+    if (createCourseButton) {
+
+        createCourseButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                openCourseModal();
+            }
+        );
+    }
+
+
+    if (modalClose) {
+
+        modalClose.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                closeCourseModal();
+            }
+        );
+    }
+
+
+    if (cancelButton) {
+
+        cancelButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                closeCourseModal();
+            }
+        );
+    }
 
 
     /* =====================================================
-       RENDER COURSES
+       CLICK OUTSIDE COURSE MODAL
+    ===================================================== */
+
+    if (modalOverlay) {
+
+        modalOverlay.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === modalOverlay
+                ) {
+
+                    closeCourseModal();
+                }
+            }
+        );
+    }
+
+
+    /* =====================================================
+       COURSE FORM
+    ===================================================== */
+
+    if (courseForm) {
+
+        courseForm.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+
+                const formError =
+                    courseForm.querySelector(
+                        ".form-error"
+                    );
+
+
+                if (formError) {
+                    formError.classList.remove(
+                        "visible"
+                    );
+                }
+
+
+                const formData =
+                    new FormData(courseForm);
+
+
+                const title =
+                    String(
+                        formData.get("title") || ""
+                    ).trim();
+
+
+                if (!title) {
+
+                    if (formError) {
+
+                        formError.textContent =
+                            "Please enter a course title.";
+
+                        formError.classList.add(
+                            "visible"
+                        );
+                    }
+
+                    return;
+                }
+
+
+                const newCourse = {
+
+                    id:
+                        Date.now(),
+
+                    title:
+                        title,
+
+                    description:
+                        String(
+                            formData.get(
+                                "description"
+                            ) || ""
+                        ),
+
+                    category:
+                        String(
+                            formData.get(
+                                "category"
+                            ) || "Language"
+                        ),
+
+                    level:
+                        String(
+                            formData.get(
+                                "level"
+                            ) || "Beginner"
+                        ),
+
+                    status:
+                        String(
+                            formData.get(
+                                "status"
+                            ) || "draft"
+                        ),
+
+                    updated:
+                        "Just now"
+                };
+
+
+                courses.unshift(
+                    newCourse
+                );
+
+
+                renderCourses();
+
+
+                updateStatistics();
+
+
+                courseForm.reset();
+
+
+                closeCourseModal();
+
+
+                showNotification(
+                    "Course created successfully."
+                );
+            }
+        );
+    }
+
+
+    /* =====================================================
+       COURSE RENDERING
     ===================================================== */
 
     function renderCourses() {
@@ -533,13 +649,15 @@ document.addEventListener("DOMContentLoaded", () => {
         let filteredCourses =
             courses.filter(course => {
 
-
                 const matchesSearch =
                     !searchValue ||
                     course.title
                         .toLowerCase()
                         .includes(searchValue) ||
                     course.description
+                        .toLowerCase()
+                        .includes(searchValue) ||
+                    course.category
                         .toLowerCase()
                         .includes(searchValue);
 
@@ -553,17 +671,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     matchesSearch &&
                     matchesFilter
                 );
-
             });
 
 
-        /*
-           Empty state
-        */
-
-        if (
-            filteredCourses.length === 0
-        ) {
+        if (filteredCourses.length === 0) {
 
             coursesList.innerHTML = `
 
@@ -578,14 +689,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     </h3>
 
                     <p>
-                        There are no courses matching your search.
+                        There are no courses matching your current search or filter.
                     </p>
 
                     <button
                         type="button"
-                        class="primary-button"
-                        data-action="create-course"
+                        class="primary-button create-course-button"
                     >
+                        <span class="button-plus">+</span>
                         Create Course
                     </button>
 
@@ -596,7 +707,6 @@ document.addEventListener("DOMContentLoaded", () => {
             updateCourseCount(0);
 
             return;
-
         }
 
 
@@ -611,13 +721,8 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCourseCount(
             filteredCourses.length
         );
-
     }
 
-
-    /* =====================================================
-       COURSE ROW
-    ===================================================== */
 
     function createCourseRow(course) {
 
@@ -639,6 +744,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 course.level
             );
 
+        const safeUpdated =
+            escapeHTML(
+                course.updated
+            );
+
 
         return `
 
@@ -651,9 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <div class="course-cover">
 
-                        <div
-                            class="course-cover-placeholder"
-                        >
+                        <div class="course-cover-placeholder">
                             ▣
                         </div>
 
@@ -686,18 +794,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 <div>
-
-                    <span
-                        class="course-status ${course.status}"
-                    >
-                        ${course.status}
+                    <span class="course-status ${course.status}">
+                        ${escapeHTML(course.status)}
                     </span>
-
                 </div>
 
 
                 <div class="course-updated">
-                    ${escapeHTML(course.updated)}
+                    ${safeUpdated}
                 </div>
 
 
@@ -706,16 +810,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     <button
                         type="button"
                         class="course-action"
-                        data-action="edit-course"
+                        data-action="edit"
                         data-course-id="${course.id}"
                     >
                         Edit
                     </button>
 
+
                     <button
                         type="button"
                         class="course-action danger"
-                        data-action="delete-course"
+                        data-action="delete"
                         data-course-id="${course.id}"
                     >
                         Delete
@@ -726,44 +831,39 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
         `;
-
     }
 
-
-    /* =====================================================
-       ESCAPE HTML
-    ===================================================== */
 
     function escapeHTML(value) {
 
         return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 
-    /* =====================================================
-       COURSE COUNT
-    ===================================================== */
-
     function updateCourseCount(count) {
 
-        if (!courseCount) {
+        const element =
+            document.getElementById(
+                "course-count"
+            );
+
+
+        if (!element) {
             return;
         }
 
 
-        courseCount.textContent =
+        element.textContent =
             `${count} ${
                 count === 1
                     ? "course"
                     : "courses"
             }`;
-
     }
 
 
@@ -777,7 +877,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "input",
             renderCourses
         );
-
     }
 
 
@@ -787,80 +886,12 @@ document.addEventListener("DOMContentLoaded", () => {
             "change",
             renderCourses
         );
-
-    }
-
-
-    /* =====================================================
-       INITIAL COURSES
-    ===================================================== */
-
-    renderCourses();
-
-
-    /* =====================================================
-       CREATE COURSE MODAL
-    ===================================================== */
-
-    function openCourseModal() {
-
-        if (!modalOverlay) {
-            return;
-        }
-
-
-        modalOverlay.classList.add(
-            "open"
-        );
-
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-
-        const firstField =
-            courseForm
-                ? courseForm.querySelector(
-                    "input:not([type='hidden']), textarea, select"
-                )
-                : null;
-
-
-        if (firstField) {
-
-            setTimeout(() => {
-
-                firstField.focus();
-
-            }, 100);
-
-        }
-
-    }
-
-
-    function closeCourseModal() {
-
-        if (!modalOverlay) {
-            return;
-        }
-
-
-        modalOverlay.classList.remove(
-            "open"
-        );
-
-
-        document.body.classList.remove(
-            "modal-open"
-        );
-
     }
 
 
     /* =====================================================
        CREATE COURSE BUTTONS
+       Including dynamically-created empty-state button
     ===================================================== */
 
     document.addEventListener(
@@ -869,8 +900,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const button =
                 event.target.closest(
-                    "#create-course-btn, " +
-                    "[data-action='create-course']"
+                    ".create-course-button"
                 );
 
 
@@ -882,212 +912,12 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
 
             openCourseModal();
-
         }
     );
 
 
     /* =====================================================
-       CLOSE COURSE MODAL
-    ===================================================== */
-
-    if (modalClose) {
-
-        modalClose.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                closeCourseModal();
-
-            }
-        );
-
-    }
-
-
-    if (cancelButton) {
-
-        cancelButton.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                closeCourseModal();
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       CLICK OUTSIDE COURSE MODAL
-    ===================================================== */
-
-    if (modalOverlay) {
-
-        modalOverlay.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target ===
-                    modalOverlay
-                ) {
-
-                    closeCourseModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       COURSE FORM
-    ===================================================== */
-
-    if (courseForm) {
-
-        courseForm.addEventListener(
-            "submit",
-            event => {
-
-                event.preventDefault();
-
-
-                const formData =
-                    new FormData(
-                        courseForm
-                    );
-
-
-                const title =
-                    formData
-                        .get("title")
-                        .trim();
-
-
-                const description =
-                    formData
-                        .get("description")
-                        .trim();
-
-
-                const category =
-                    formData.get(
-                        "category"
-                    );
-
-
-                const level =
-                    formData.get(
-                        "level"
-                    );
-
-
-                const status =
-                    formData.get(
-                        "status"
-                    );
-
-
-                const error =
-                    document.getElementById(
-                        "course-form-error"
-                    );
-
-
-                if (
-                    !title ||
-                    !description ||
-                    !category ||
-                    !level
-                ) {
-
-                    if (error) {
-
-                        error.textContent =
-                            "Please complete all required fields.";
-
-                        error.classList.add(
-                            "visible"
-                        );
-
-                    }
-
-                    return;
-
-                }
-
-
-                if (error) {
-
-                    error.classList.remove(
-                        "visible"
-                    );
-
-                }
-
-
-                const newCourse = {
-
-                    id:
-                        Date.now(),
-
-                    title:
-                        title,
-
-                    description:
-                        description,
-
-                    category:
-                        category,
-
-                    level:
-                        level,
-
-                    status:
-                        status,
-
-                    updated:
-                        "Just now"
-
-                };
-
-
-                courses.unshift(
-                    newCourse
-                );
-
-
-                renderCourses();
-
-                updateDashboardStats();
-
-
-                courseForm.reset();
-
-                closeCourseModal();
-
-
-                showNotification(
-                    "Course created successfully."
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       COURSE ACTIONS
+       DELETE COURSE
     ===================================================== */
 
     document.addEventListener(
@@ -1096,7 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const button =
                 event.target.closest(
-                    ".course-action"
+                    '[data-action="delete"]'
                 );
 
 
@@ -1111,70 +941,118 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
 
-            if (
-                button.dataset.action ===
-                "delete-course"
-            ) {
-
-                const course =
-                    courses.find(
-                        item =>
-                            item.id === courseId
-                    );
+            const course =
+                courses.find(
+                    item =>
+                        item.id === courseId
+                );
 
 
-                if (!course) {
-                    return;
-                }
+            if (!course) {
+                return;
+            }
 
 
-                showConfirmation(
-                    `Are you sure you want to delete "${course.title}"?`,
-                    () => {
+            showConfirmation(
+                `Are you sure you want to delete "${course.title}"?`,
+                () => {
 
-                        courses =
-                            courses.filter(
-                                item =>
-                                    item.id !== courseId
-                            );
-
-
-                        renderCourses();
-
-                        updateDashboardStats();
-
-
-                        showNotification(
-                            "Course deleted."
+                    courses =
+                        courses.filter(
+                            item =>
+                                item.id !== courseId
                         );
 
-                    }
-                );
 
-            }
+                    renderCourses();
+
+                    updateStatistics();
 
 
-            if (
-                button.dataset.action ===
-                "edit-course"
-            ) {
-
-                showNotification(
-                    "Course editing is not connected yet."
-                );
-
-            }
-
+                    showNotification(
+                        "Course deleted."
+                    );
+                }
+            );
         }
     );
+
+
+    /* =====================================================
+       EDIT COURSE
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    '[data-action="edit"]'
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            showNotification(
+                "Course editing will be available here."
+            );
+        }
+    );
+
+
+    /* =====================================================
+       STATISTICS
+    ===================================================== */
+
+    function updateStatistics() {
+
+        const total =
+            courses.length;
+
+
+        const published =
+            courses.filter(
+                course =>
+                    course.status === "published"
+            ).length;
+
+
+        const totalElement =
+            document.getElementById(
+                "stat-courses"
+            );
+
+
+        const activeElement =
+            document.getElementById(
+                "stat-active"
+            );
+
+
+        if (totalElement) {
+
+            totalElement.textContent =
+                total;
+        }
+
+
+        if (activeElement) {
+
+            activeElement.textContent =
+                published;
+        }
+    }
 
 
     /* =====================================================
        CONFIRMATION MODAL
     ===================================================== */
 
-    let confirmationCallback =
-        null;
+    let confirmationCallback = null;
 
 
     function createConfirmationModal() {
@@ -1191,9 +1069,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         modal =
-            document.createElement(
-                "div"
-            );
+            document.createElement("div");
 
 
         modal.id =
@@ -1210,6 +1086,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 class="course-modal"
                 role="dialog"
                 aria-modal="true"
+                aria-labelledby="confirmation-title"
                 style="max-width:430px;"
             >
 
@@ -1221,7 +1098,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             CONFIRMATION
                         </div>
 
-                        <h2>
+                        <h2 id="confirmation-title">
                             Are you sure?
                         </h2>
 
@@ -1248,7 +1125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 >
 
                     <p id="confirmation-message">
-                        Are you sure?
+                        Are you sure you want to continue?
                     </p>
 
 
@@ -1287,7 +1164,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         return modal;
-
     }
 
 
@@ -1310,7 +1186,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             messageElement.textContent =
                 message;
-
         }
 
 
@@ -1326,7 +1201,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add(
             "modal-open"
         );
-
     }
 
 
@@ -1348,10 +1222,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        confirmationCallback =
-            null;
-
-
         if (
             !modalOverlay ||
             !modalOverlay.classList.contains(
@@ -1362,9 +1232,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.remove(
                 "modal-open"
             );
-
         }
 
+
+        confirmationCallback =
+            null;
     }
 
 
@@ -1372,29 +1244,24 @@ document.addEventListener("DOMContentLoaded", () => {
         "click",
         event => {
 
-            const target =
-                event.target;
-
-
             if (
-                target.classList.contains(
-                    "confirmation-cancel"
+                event.target.closest(
+                    ".confirmation-cancel"
                 ) ||
-                target.classList.contains(
-                    "confirmation-close"
+                event.target.closest(
+                    ".confirmation-close"
                 )
             ) {
 
                 closeConfirmation();
 
                 return;
-
             }
 
 
             if (
-                target.classList.contains(
-                    "confirmation-confirm"
+                event.target.closest(
+                    ".confirmation-confirm"
                 )
             ) {
 
@@ -1411,11 +1278,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 ) {
 
                     callback();
-
                 }
-
             }
-
         }
     );
 
@@ -1444,13 +1308,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         showNotification(
                             "Logged out."
                         );
-
                     }
                 );
-
             }
         );
-
     }
 
 
@@ -1466,15 +1327,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.key !==
                 "Escape"
             ) {
-
                 return;
-
             }
 
-
-            /*
-               Confirmation first
-            */
 
             const confirmation =
                 document.getElementById(
@@ -1492,13 +1347,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 closeConfirmation();
 
                 return;
-
             }
 
-
-            /*
-               Course modal
-            */
 
             if (
                 modalOverlay &&
@@ -1510,13 +1360,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 closeCourseModal();
 
                 return;
-
             }
 
-
-            /*
-               Mobile sidebar
-            */
 
             if (
                 app.classList.contains(
@@ -1525,81 +1370,16 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 closeSidebar();
-
             }
-
         }
     );
-
-
-    /* =====================================================
-       DASHBOARD STATISTICS
-    ===================================================== */
-
-    function updateDashboardStats() {
-
-        const totalCourses =
-            document.getElementById(
-                "total-courses"
-            );
-
-
-        const publishedCourses =
-            document.getElementById(
-                "published-courses"
-            );
-
-
-        const draftCourses =
-            document.getElementById(
-                "draft-courses"
-            );
-
-
-        if (totalCourses) {
-
-            totalCourses.textContent =
-                courses.length;
-
-        }
-
-
-        if (publishedCourses) {
-
-            publishedCourses.textContent =
-                courses.filter(
-                    course =>
-                        course.status ===
-                        "published"
-                ).length;
-
-        }
-
-
-        if (draftCourses) {
-
-            draftCourses.textContent =
-                courses.filter(
-                    course =>
-                        course.status ===
-                        "draft"
-                ).length;
-
-        }
-
-    }
-
-
-    updateDashboardStats();
 
 
     /* =====================================================
        NOTIFICATION
     ===================================================== */
 
-    function showNotification(
-        message
-    ) {
+    function showNotification(message) {
 
         let notification =
             document.getElementById(
@@ -1620,46 +1400,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             notification.style.cssText = `
-
                 position:fixed;
-
                 right:24px;
                 bottom:24px;
-
                 z-index:5000;
-
                 max-width:320px;
-
                 padding:13px 17px;
-
                 border-radius:10px;
-
                 background:#20242c;
-
                 color:white;
-
                 font-size:11px;
-
                 font-weight:600;
-
-                box-shadow:
-                    0 12px 30px rgba(0,0,0,.18);
-
+                box-shadow:0 12px 30px rgba(0,0,0,.18);
                 opacity:0;
-
                 transform:translateY(10px);
-
                 transition:
                     opacity .2s ease,
                     transform .2s ease;
-
             `;
 
 
             document.body.appendChild(
                 notification
             );
-
         }
 
 
@@ -1667,17 +1430,14 @@ document.addEventListener("DOMContentLoaded", () => {
             message;
 
 
-        requestAnimationFrame(
-            () => {
+        requestAnimationFrame(() => {
 
-                notification.style.opacity =
-                    "1";
+            notification.style.opacity =
+                "1";
 
-                notification.style.transform =
-                    "translateY(0)";
-
-            }
-        );
+            notification.style.transform =
+                "translateY(0)";
+        });
 
 
         clearTimeout(
@@ -1686,19 +1446,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         notification._timeout =
-            setTimeout(
-                () => {
+            setTimeout(() => {
 
-                    notification.style.opacity =
-                        "0";
+                notification.style.opacity =
+                    "0";
 
-                    notification.style.transform =
-                        "translateY(10px)";
+                notification.style.transform =
+                    "translateY(10px)";
 
-                },
-                3000
-            );
-
+            }, 3000);
     }
 
 
@@ -1712,23 +1468,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!isMobile()) {
 
-                closeSidebar();
-
+                app.classList.remove(
+                    "sidebar-open"
+                );
             }
-
         }
     );
 
 
     /* =====================================================
-       INITIAL STATE
+       INITIAL RENDER
     ===================================================== */
 
-    closeSidebar();
-
-    updateDashboardStats();
-
     renderCourses();
+
+    updateStatistics();
+
+    closeSidebar();
 
 
     console.log(
@@ -1736,4 +1492,5 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 });
-                        
+
+                          
