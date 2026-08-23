@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Language",
             category: "Language",
             categoryKey: "language",
-            cover: "images/books/english.jpg",
+            cover: "images/english.jpg",
             url: "#"
         },
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Language",
             category: "Language",
             categoryKey: "language",
-            cover: "images/books/french.jpg",
+            cover: "images/french.jpg",
             url: "#"
         },
 
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Language",
             category: "Language",
             categoryKey: "language",
-            cover: "images/books/portuguese.jpg",
+            cover: "images/portuguese.jpg",
             url: "#"
         },
 
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "MS Office",
             category: "MS Office",
             categoryKey: "ms-office",
-            cover: "images/books/ms-word.jpg",
+            cover: "images/ms-word.jpg",
             url: "#"
         },
 
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "MS Office",
             category: "MS Office",
             categoryKey: "ms-office",
-            cover: "images/books/ms-excel.jpg",
+            cover: "images/ms-excel.jpg",
             url: "#"
         },
 
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "MS Office",
             category: "MS Office",
             categoryKey: "ms-office",
-            cover: "images/books/ms-powerpoint.jpg",
+            cover: "images/ms-powerpoint.jpg",
             url: "#"
         },
 
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Trading",
             category: "Trading",
             categoryKey: "trading",
-            cover: "images/books/trading-fundamentals.jpg",
+            cover: "images/trading-fundamentals.jpg",
             url: "#"
         },
 
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Trading",
             category: "Trading",
             categoryKey: "trading",
-            cover: "images/books/technical-analysis.jpg",
+            cover: "images/technical-analysis.jpg",
             url: "#"
         },
 
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Business",
             category: "Business",
             categoryKey: "business",
-            cover: "images/books/business-fundamentals.jpg",
+            cover: "images/business-fundamentals.jpg",
             url: "#"
         },
 
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Business",
             category: "Business",
             categoryKey: "business",
-            cover: "images/books/entrepreneurship.jpg",
+            cover: "images/entrepreneurship.jpg",
             url: "#"
         },
 
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Technology",
             category: "Technology",
             categoryKey: "technology",
-            cover: "images/books/web-development.jpg",
+            cover: "images/web-development.jpg",
             url: "#"
         },
 
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Technology",
             category: "Technology",
             categoryKey: "technology",
-            cover: "images/books/artificial-intelligence.jpg",
+            cover: "images/artificial-intelligence.jpg",
             url: "#"
         },
 
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Finance",
             category: "Finance",
             categoryKey: "finance",
-            cover: "images/books/personal-finance.jpg",
+            cover: "images/personal-finance.jpg",
             url: "#"
         },
 
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Finance",
             category: "Finance",
             categoryKey: "finance",
-            cover: "images/books/financial-literacy.jpg",
+            cover: "images/financial-literacy.jpg",
             url: "#"
         },
 
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Personal Development",
             category: "Personal Development",
             categoryKey: "personal-development",
-            cover: "images/books/communication.jpg",
+            cover: "images/communication.jpg",
             url: "#"
         },
 
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             level: "Personal Development",
             category: "Personal Development",
             categoryKey: "personal-development",
-            cover: "images/books/time-management.jpg",
+            cover: "images/time-management.jpg",
             url: "#"
         }
 
