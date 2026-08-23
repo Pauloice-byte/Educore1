@@ -9,7 +9,7 @@
 
     <meta
         name="description"
-        content="EduCore autonomous learning platform. Learn through structured courses, AI support and expert teaching."
+        content="EduCore autonomous learning platform."
     >
 
     <link rel="stylesheet" href="css/style.css">
@@ -17,9 +17,9 @@
 
 <body>
 
-    <!-- =====================================================
-         MOBILE BACKDROP
-    ====================================================== -->
+    <!-- =========================================
+         MOBILE SIDEBAR BACKDROP
+    ========================================== -->
 
     <div
         class="sidebar-backdrop"
@@ -27,9 +27,9 @@
     ></div>
 
 
-    <!-- =====================================================
+    <!-- =========================================
          SIDEBAR
-    ====================================================== -->
+    ========================================== -->
 
     <aside
         class="sidebar"
@@ -52,10 +52,6 @@
                     EduCore
                 </div>
 
-                <div class="brand-name">
-                    Learning
-                </div>
-
                 <div class="brand-subtitle">
                     Autonomous Learning
                 </div>
@@ -72,127 +68,87 @@
             <div class="navigation-section">
 
                 <div class="navigation-heading">
-                    COURSES
+                    COURSE AREAS
                 </div>
 
 
                 <button
+                    type="button"
                     class="navigation-button active"
                     data-filter="all"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        ◈
-                    </span>
-
-                    <span>
-                        All Courses
-                    </span>
+                    <span class="navigation-symbol">◈</span>
+                    <span>All Areas</span>
                 </button>
 
 
                 <button
+                    type="button"
                     class="navigation-button"
                     data-filter="language"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        A
-                    </span>
-
-                    <span>
-                        Language
-                    </span>
+                    <span class="navigation-symbol">A</span>
+                    <span>Language</span>
                 </button>
 
 
                 <button
+                    type="button"
                     class="navigation-button"
                     data-filter="ms-office"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        ▣
-                    </span>
-
-                    <span>
-                        MS Office
-                    </span>
+                    <span class="navigation-symbol">▣</span>
+                    <span>MS Office</span>
                 </button>
 
 
                 <button
+                    type="button"
                     class="navigation-button"
                     data-filter="trading"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        ◇
-                    </span>
-
-                    <span>
-                        Trading
-                    </span>
+                    <span class="navigation-symbol">◇</span>
+                    <span>Trading</span>
                 </button>
 
 
                 <button
-                    class="navigation-button"
-                    data-filter="technology"
                     type="button"
-                >
-                    <span class="navigation-symbol">
-                        ◉
-                    </span>
-
-                    <span>
-                        Technology
-                    </span>
-                </button>
-
-
-                <button
                     class="navigation-button"
                     data-filter="business"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        ◆
-                    </span>
-
-                    <span>
-                        Business
-                    </span>
+                    <span class="navigation-symbol">◆</span>
+                    <span>Business</span>
                 </button>
 
 
                 <button
+                    type="button"
+                    class="navigation-button"
+                    data-filter="technology"
+                >
+                    <span class="navigation-symbol">◉</span>
+                    <span>Technology</span>
+                </button>
+
+
+                <button
+                    type="button"
                     class="navigation-button"
                     data-filter="finance"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        $
-                    </span>
-
-                    <span>
-                        Finance
-                    </span>
+                    <span class="navigation-symbol">$</span>
+                    <span>Finance</span>
                 </button>
 
 
                 <button
+                    type="button"
                     class="navigation-button"
                     data-filter="personal-development"
-                    type="button"
                 >
-                    <span class="navigation-symbol">
-                        +
-                    </span>
-
-                    <span>
-                        Personal Development
-                    </span>
+                    <span class="navigation-symbol">+</span>
+                    <span>Personal Development</span>
                 </button>
 
             </div>
@@ -206,9 +162,7 @@
 
             <div class="sidebar-footer-line"></div>
 
-            <div>
-                EDUCORE
-            </div>
+            <div>EDUCORE</div>
 
             <small>
                 Autonomous Learning Platform
@@ -219,25 +173,23 @@
     </aside>
 
 
-    <!-- =====================================================
+    <!-- =========================================
          MAIN CONTENT
-    ====================================================== -->
+    ========================================== -->
 
     <main
         class="main"
         id="main"
     >
 
-        <!-- =================================================
-             HEADER
-        ================================================== -->
+        <!-- HEADER -->
 
         <header class="top-header">
 
             <button
+                type="button"
                 class="menu-button"
                 id="menuButton"
-                type="button"
                 aria-label="Toggle navigation"
                 aria-controls="sidebar"
                 aria-expanded="true"
@@ -250,9 +202,7 @@
 
             <div class="header-title">
 
-                <span>
-                    EDUCORE
-                </span>
+                <span>EDUCORE</span>
 
                 <strong>
                     Autonomous Learning
@@ -282,19 +232,14 @@
         </header>
 
 
-        <!-- =================================================
+        <!-- =========================================
              HERO
-        ================================================== -->
+        ========================================== -->
 
         <section class="hero">
 
-            <div
-                class="hero-background-circle circle-one"
-            ></div>
-
-            <div
-                class="hero-background-circle circle-two"
-            ></div>
+            <div class="hero-background-circle circle-one"></div>
+            <div class="hero-background-circle circle-two"></div>
 
 
             <div class="hero-content">
@@ -304,15 +249,14 @@
                 </div>
 
                 <h1>
-                    Learn.
-                    <span>Build. Grow.</span>
+                    Learn without
+                    <span>limits.</span>
                 </h1>
 
                 <p>
-                    Explore structured courses designed to help
-                    you develop practical knowledge and skills
-                    across languages, technology, business,
-                    finance and more.
+                    Explore structured learning areas designed
+                    to help you build practical knowledge,
+                    develop new skills and learn at your own pace.
                 </p>
 
             </div>
@@ -320,22 +264,22 @@
         </section>
 
 
-        <!-- =================================================
-             LIBRARY
-        ================================================== -->
+        <!-- =========================================
+             COURSE AREAS
+        ========================================== -->
 
-        <section class="library">
+        <section class="library" id="library">
 
             <div class="library-header">
 
                 <div>
 
                     <div class="library-label">
-                        YOUR LEARNING LIBRARY
+                        EXPLORE
                     </div>
 
                     <h2 id="libraryTitle">
-                        All Courses
+                        All Areas
                     </h2>
 
                 </div>
@@ -351,7 +295,7 @@
                         type="search"
                         id="searchInput"
                         placeholder="Search courses..."
-                        aria-label="Search courses"
+                        autocomplete="off"
                     >
 
                 </div>
@@ -359,70 +303,70 @@
             </div>
 
 
-            <!-- FILTERS -->
+            <!-- FILTER BUTTONS -->
 
             <div class="filter-bar">
 
                 <button
+                    type="button"
                     class="filter-button active"
                     data-filter="all"
-                    type="button"
                 >
                     All
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="language"
-                    type="button"
                 >
                     Language
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="ms-office"
-                    type="button"
                 >
                     MS Office
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="trading"
-                    type="button"
                 >
                     Trading
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="business"
-                    type="button"
                 >
                     Business
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="technology"
-                    type="button"
                 >
                     Technology
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="finance"
-                    type="button"
                 >
                     Finance
                 </button>
 
                 <button
+                    type="button"
                     class="filter-button"
                     data-filter="personal-development"
-                    type="button"
                 >
                     Personal Development
                 </button>
@@ -430,7 +374,7 @@
             </div>
 
 
-            <!-- COURSE GRID -->
+            <!-- COURSE CARDS -->
 
             <div
                 class="book-grid"
@@ -441,4 +385,50 @@
             <!-- NO RESULTS -->
 
             <div
-                class="
+                class="no-results"
+                id="noResults"
+            >
+
+                <div class="no-results-circle">
+                    ⌕
+                </div>
+
+                <h3>
+                    No courses found
+                </h3>
+
+                <p>
+                    Try another search or category.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             FOOTER
+        ========================================== -->
+
+        <footer class="footer">
+
+            <span>
+                © <span id="year"></span> EduCore
+            </span>
+
+            <span>
+                Autonomous Learning Platform
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="js/script.js"></script>
+
+</body>
+
+                                   </html>
