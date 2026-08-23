@@ -3,7 +3,6 @@
    STANDALONE INTERFACE JAVASCRIPT
    No Supabase
    No authentication
-   No backend dependency
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("admin-app");
 
     if (!app) {
-        console.error("EduCore Admin: #admin-app was not found.");
+        console.error("EduCore Admin: #admin-app not found.");
         return;
     }
 
@@ -31,8 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const headerTitle = app.querySelector(".header-title h1");
 
     const modalOverlay = app.querySelector(".modal-overlay");
-    const courseModal = app.querySelector(".course-modal");
-
     const modalClose = app.querySelector(".modal-close");
 
     const courseForm = document.getElementById("course-form");
@@ -51,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       MOBILE CHECK
+       MOBILE
     ===================================================== */
 
     function isMobile() {
@@ -64,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function openSidebar() {
-
         if (isMobile()) {
             app.classList.add("sidebar-open");
         }
@@ -72,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function closeSidebar() {
-
         app.classList.remove("sidebar-open");
     }
 
@@ -80,13 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function toggleSidebar() {
 
         if (isMobile()) {
-
             app.classList.toggle("sidebar-open");
-
-            return;
+        } else {
+            app.classList.toggle("sidebar-collapsed");
         }
-
-        app.classList.toggle("sidebar-collapsed");
     }
 
 
@@ -112,10 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
-       CLICK OUTSIDE SIDEBAR
-    ===================================================== */
-
     if (sidebarOverlay) {
 
         sidebarOverlay.addEventListener("click", () => {
@@ -130,7 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     const pageTitles = {
-
         overview: "Overview",
         courses: "Courses",
         students: "Students",
@@ -140,27 +127,70 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 
+    /*
+       IMPORTANT:
+       This is the actual mapping between the sidebar
+       buttons and the content sections.
+    */
+
+    const navigationMap = {
+
+        overview: "overview-section",
+
+        courses: "courses-section",
+
+        students: "students-section",
+
+        progress: "progress-section",
+
+        media: "media-section",
+
+        settings: "settings-section"
+
+    };
+
+
+    /*
+       Convert any sidebar button into a navigation key.
+    */
+
     function getNavigationKey(item) {
 
-        /*
-           Supports:
-
-           data-section="overview"
-
-           data-page="overview"
-
-           href="#overview"
-
-           id="overview-btn"
-        */
-
-        let key = item.dataset.section ||
-                  item.dataset.page;
-
-        if (key) {
-            return key.toLowerCase();
+        if (!item) {
+            return null;
         }
 
+
+        /*
+           Preferred:
+           data-section="courses"
+        */
+
+        if (item.dataset.section) {
+
+            return item.dataset.section
+                .trim()
+                .toLowerCase();
+        }
+
+
+        /*
+           Alternative:
+           data-page="courses"
+        */
+
+        if (item.dataset.page) {
+
+            return item.dataset.page
+                .trim()
+                .toLowerCase();
+        }
+
+
+        /*
+           Alternative:
+           href="#courses"
+        */
 
         const href = item.getAttribute("href");
 
@@ -169,70 +199,164 @@ document.addEventListener("DOMContentLoaded", () => {
             return href
                 .substring(1)
                 .replace("-section", "")
+                .trim()
                 .toLowerCase();
         }
 
 
-        const id = item.id || "";
+        /*
+           Alternative:
+           id="courses-btn"
+        */
 
-        return id
-            .replace("-btn", "")
-            .replace("-button", "")
-            .toLowerCase();
+        if (item.id) {
+
+            return item.id
+                .replace("-btn", "")
+                .replace("-button", "")
+                .replace("-nav", "")
+                .trim()
+                .toLowerCase();
+        }
+
+
+        return null;
     }
 
+
+    /*
+       Find the actual content section.
+    */
+
+    function getSectionForKey(key) {
+
+        if (!key) {
+            return null;
+        }
+
+
+        const expectedId =
+            navigationMap[key];
+
+
+        if (expectedId) {
+
+            const section =
+                document.getElementById(expectedId);
+
+            if (section) {
+                return section;
+            }
+        }
+
+
+        /*
+           Fallback for sections using:
+           data-section="courses"
+        */
+
+        const matchingSection =
+            app.querySelector(
+                `.admin-section[data-section="${key}"]`
+            );
+
+        if (matchingSection) {
+            return matchingSection;
+        }
+
+
+        /*
+           Fallback for:
+           data-page="courses"
+        */
+
+        const matchingPage =
+            app.querySelector(
+                `.admin-section[data-page="${key}"]`
+            );
+
+        if (matchingPage) {
+            return matchingPage;
+        }
+
+
+        return null;
+    }
+
+
+    /*
+       SHOW SECTION
+    */
 
     function showSection(sectionKey) {
 
         if (!sectionKey) {
+            sectionKey = "overview";
+        }
+
+
+        sectionKey =
+            sectionKey.toLowerCase();
+
+
+        /*
+           If an unknown navigation item was clicked,
+           don't destroy the current page.
+        */
+
+        if (!pageTitles[sectionKey]) {
+
+            console.warn(
+                "EduCore Admin: Unknown section:",
+                sectionKey
+            );
+
             return;
         }
 
 
-        let targetSection = null;
+        const targetSection =
+            getSectionForKey(sectionKey);
 
+
+        /*
+           Remove active from ALL sections first.
+        */
 
         sections.forEach(section => {
 
-            const sectionId = (
-                section.dataset.section ||
-                section.dataset.page ||
-                section.id
-            )
-                .replace("-section", "")
-                .toLowerCase();
+            section.classList.remove("active");
 
-
-            if (sectionId === sectionKey) {
-
-                targetSection = section;
-            }
+            section.setAttribute(
+                "aria-hidden",
+                "true"
+            );
         });
 
 
         /*
-           If no matching section exists,
-           don't break the navigation.
+           Activate requested section.
         */
 
         if (targetSection) {
 
-            sections.forEach(section => {
-
-                section.classList.remove("active");
-            });
-
             targetSection.classList.add("active");
+
+            targetSection.setAttribute(
+                "aria-hidden",
+                "false"
+            );
         }
 
 
         /*
-           Active navigation item
+           Update sidebar active state.
         */
 
         navItems.forEach(item => {
 
-            const itemKey = getNavigationKey(item);
+            const itemKey =
+                getNavigationKey(item);
 
             item.classList.toggle(
                 "active",
@@ -242,38 +366,63 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Header title
+           Update header title.
         */
 
         if (headerTitle) {
 
             headerTitle.textContent =
-                pageTitles[sectionKey] ||
-                sectionKey.charAt(0).toUpperCase() +
-                sectionKey.slice(1);
+                pageTitles[sectionKey];
         }
 
 
         /*
-           Close mobile sidebar after navigation
+           Update browser URL hash.
+           This does NOT reload the page.
+        */
+
+        if (
+            window.location.hash !==
+            "#" + sectionKey
+        ) {
+
+            history.replaceState(
+                null,
+                "",
+                "#" + sectionKey
+            );
+        }
+
+
+        /*
+           Close mobile sidebar.
         */
 
         if (isMobile()) {
-
             closeSidebar();
         }
 
 
         /*
-           Scroll page back to top
+           Scroll to top.
         */
 
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
+
+
+        console.log(
+            "EduCore Admin section:",
+            sectionKey
+        );
     }
 
+
+    /*
+       SIDEBAR NAVIGATION CLICK
+    */
 
     navItems.forEach(item => {
 
@@ -281,7 +430,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             event.preventDefault();
 
-            const sectionKey = getNavigationKey(item);
+            const sectionKey =
+                getNavigationKey(item);
 
             showSection(sectionKey);
         });
@@ -294,12 +444,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let initialSection = "overview";
 
-    const activeNav = app.querySelector(".nav-item.active");
 
-    if (activeNav) {
+    /*
+       If URL is:
+       admin.html#courses
 
-        initialSection = getNavigationKey(activeNav);
+       open Courses automatically.
+    */
+
+    const hash =
+        window.location.hash
+            .replace("#", "")
+            .trim()
+            .toLowerCase();
+
+
+    if (hash && pageTitles[hash]) {
+
+        initialSection = hash;
+
+    } else {
+
+        /*
+           Otherwise use whichever sidebar item
+           is marked active in the HTML.
+        */
+
+        const activeNav =
+            app.querySelector(
+                ".nav-item.active"
+            );
+
+        if (activeNav) {
+
+            const activeKey =
+                getNavigationKey(activeNav);
+
+            if (activeKey && pageTitles[activeKey]) {
+
+                initialSection = activeKey;
+            }
+        }
     }
+
 
     showSection(initialSection);
 
@@ -314,12 +501,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+
         modalOverlay.classList.add("open");
 
-        document.body.classList.add("modal-open");
+        document.body.classList.add(
+            "modal-open"
+        );
+
 
         /*
-           Put focus on first form field
+           Focus first form field.
         */
 
         if (courseForm) {
@@ -347,11 +538,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+
         modalOverlay.classList.remove("open");
 
-        document.body.classList.remove("modal-open");
+        document.body.classList.remove(
+            "modal-open"
+        );
     }
 
+
+    /*
+       CREATE COURSE BUTTONS
+    */
 
     createCourseButtons.forEach(button => {
 
@@ -364,6 +562,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
+    /*
+       MODAL CLOSE BUTTON
+    */
+
     if (modalClose) {
 
         modalClose.addEventListener("click", (event) => {
@@ -374,6 +576,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+    /*
+       CANCEL
+    */
 
     if (cancelButton) {
 
@@ -386,18 +592,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
-       CLICK MODAL BACKGROUND TO CLOSE
-    ===================================================== */
+    /*
+       CLICK OUTSIDE MODAL
+    */
 
     if (modalOverlay) {
 
         modalOverlay.addEventListener("click", (event) => {
-
-            /*
-               Only close when clicking the dark overlay,
-               not the actual modal.
-            */
 
             if (event.target === modalOverlay) {
 
@@ -419,7 +620,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Close course modal first
+           Close confirmation first.
+        */
+
+        const confirmation =
+            document.getElementById(
+                "admin-confirmation-modal"
+            );
+
+
+        if (
+            confirmation &&
+            confirmation.classList.contains("open")
+        ) {
+
+            closeConfirmation();
+
+            return;
+        }
+
+
+        /*
+           Then course modal.
         */
 
         if (
@@ -434,10 +656,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Otherwise close mobile sidebar
+           Finally mobile sidebar.
         */
 
-        if (app.classList.contains("sidebar-open")) {
+        if (
+            app.classList.contains(
+                "sidebar-open"
+            )
+        ) {
 
             closeSidebar();
         }
@@ -450,79 +676,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (courseForm) {
 
-        courseForm.addEventListener("submit", (event) => {
+        courseForm.addEventListener(
+            "submit",
+            (event) => {
 
-            event.preventDefault();
+                event.preventDefault();
 
-            /*
-               Interface only.
 
-               No Supabase.
-               No API.
-               No authentication.
+                const formError =
+                    courseForm.querySelector(
+                        ".form-error"
+                    );
 
-               The form simply demonstrates successful
-               frontend submission.
-            */
 
-            const formError =
-                courseForm.querySelector(".form-error");
+                if (formError) {
 
-            if (formError) {
+                    formError.classList.remove(
+                        "visible"
+                    );
+                }
 
-                formError.classList.remove("visible");
+
+                const formData =
+                    new FormData(courseForm);
+
+
+                const course = {};
+
+
+                formData.forEach(
+                    (value, key) => {
+
+                        course[key] = value;
+                    }
+                );
+
+
+                console.log(
+                    "Course created locally:",
+                    course
+                );
+
+
+                closeCourseModal();
+
+                courseForm.reset();
+
+
+                showNotification(
+                    "Course created successfully."
+                );
             }
-
-
-            /*
-               Collect form values
-            */
-
-            const formData =
-                new FormData(courseForm);
-
-            const course = {};
-
-            formData.forEach((value, key) => {
-
-                course[key] = value;
-            });
-
-
-            console.log(
-                "Course created locally:",
-                course
-            );
-
-
-            /*
-               Close modal
-            */
-
-            closeCourseModal();
-
-
-            /*
-               Reset form
-            */
-
-            courseForm.reset();
-
-
-            /*
-               Optional visual feedback
-            */
-
-            showNotification(
-                "Course created successfully."
-            );
-        });
+        );
     }
 
 
     /* =====================================================
        CONFIRMATION MODAL
     ===================================================== */
+
+    let confirmationCallback = null;
+
 
     function createConfirmationModal() {
 
@@ -533,7 +747,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (confirmation) {
-
             return confirmation;
         }
 
@@ -555,7 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="confirmation-title"
-                style="max-width: 430px;"
+                style="max-width:430px;"
             >
 
                 <div class="modal-header">
@@ -582,22 +795,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
-
                 <div style="
-                    padding: 24px;
-                    color: #7d8089;
-                    font-size: 12px;
-                    line-height: 1.6;
+                    padding:24px;
+                    color:#7d8089;
+                    font-size:12px;
+                    line-height:1.6;
                 ">
 
                     <p id="confirmation-message">
                         Are you sure you want to continue?
                     </p>
 
-
                     <div
                         class="modal-footer"
-                        style="margin-top: 20px;"
+                        style="margin-top:20px;"
                     >
 
                         <button
@@ -622,13 +833,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
 
-        document.body.appendChild(confirmation);
+        document.body.appendChild(
+            confirmation
+        );
+
 
         return confirmation;
     }
-
-
-    let confirmationCallback = null;
 
 
     function showConfirmation(
@@ -659,7 +870,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         confirmation.classList.add("open");
 
-        document.body.classList.add("modal-open");
+        document.body.classList.add(
+            "modal-open"
+        );
     }
 
 
@@ -676,12 +889,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        confirmation.classList.remove("open");
+        confirmation.classList.remove(
+            "open"
+        );
 
-        /*
-           Only remove modal-open if the
-           course modal isn't also open.
-        */
 
         if (
             !modalOverlay ||
@@ -699,108 +910,149 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /*
-       Confirmation buttons
+       Confirmation controls.
     */
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener(
+        "click",
+        (event) => {
 
-        const target =
-            event.target;
-
-
-        if (
-            target.classList.contains(
-                "confirmation-cancel"
-            ) ||
-            target.classList.contains(
-                "confirmation-close"
-            )
-        ) {
-
-            closeConfirmation();
-
-            return;
-        }
+            const target =
+                event.target;
 
 
-        if (
-            target.classList.contains(
-                "confirmation-confirm"
-            )
-        ) {
+            if (
+                target.classList.contains(
+                    "confirmation-cancel"
+                ) ||
+                target.classList.contains(
+                    "confirmation-close"
+                )
+            ) {
 
-            const callback =
-                confirmationCallback;
+                closeConfirmation();
 
-            closeConfirmation();
+                return;
+            }
 
-            if (typeof callback === "function") {
 
-                callback();
+            if (
+                target.classList.contains(
+                    "confirmation-confirm"
+                )
+            ) {
+
+                const callback =
+                    confirmationCallback;
+
+
+                closeConfirmation();
+
+
+                if (
+                    typeof callback ===
+                    "function"
+                ) {
+
+                    callback();
+                }
             }
         }
-    });
+    );
 
 
-    /* =====================================================
-       DELETE / DANGER ACTIONS
-    ===================================================== */
+    /*
+       Close confirmation by clicking background.
+    */
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener(
+        "click",
+        (event) => {
 
-        const button =
-            event.target.closest(
-                ".course-action.danger"
-            );
-
-
-        if (!button) {
-            return;
-        }
-
-
-        event.preventDefault();
-
-
-        const row =
-            button.closest(".course-row");
-
-
-        let courseName =
-            "this course";
-
-
-        if (row) {
-
-            const title =
-                row.querySelector(
-                    ".course-title"
+            const confirmation =
+                document.getElementById(
+                    "admin-confirmation-modal"
                 );
 
 
-            if (title && title.textContent.trim()) {
+            if (
+                confirmation &&
+                event.target === confirmation
+            ) {
 
-                courseName =
-                    `"${title.textContent.trim()}"`;
+                closeConfirmation();
             }
         }
+    );
 
 
-        showConfirmation(
-            `Are you sure you want to delete ${courseName}?`,
-            () => {
+    /* =====================================================
+       DELETE COURSE
+    ===================================================== */
 
-                if (row) {
+    document.addEventListener(
+        "click",
+        (event) => {
 
-                    row.remove();
+            const button =
+                event.target.closest(
+                    ".course-action.danger"
+                );
 
-                    showNotification(
-                        "Course deleted."
+
+            if (!button) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            const row =
+                button.closest(
+                    ".course-row"
+                );
+
+
+            let courseName =
+                "this course";
+
+
+            if (row) {
+
+                const title =
+                    row.querySelector(
+                        ".course-title"
                     );
+
+
+                if (
+                    title &&
+                    title.textContent.trim()
+                ) {
+
+                    courseName =
+                        `"${title.textContent.trim()}"`;
                 }
             }
-        );
-    });
+
+
+            showConfirmation(
+                `Are you sure you want to delete ${courseName}?`,
+                () => {
+
+                    if (row) {
+
+                        row.remove();
+
+                        showNotification(
+                            "Course deleted."
+                        );
+                    }
+                }
+            );
+        }
+    );
 
 
     /* =====================================================
@@ -820,22 +1072,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Are you sure you want to log out?",
                     () => {
 
-                        /*
-                           Interface-only logout.
-
-                           No authentication system is
-                           involved.
-
-                           We simply return the interface
-                           to its initial state.
-                        */
-
                         closeSidebar();
+
                         closeCourseModal();
 
                         showNotification(
                             "Logged out."
                         );
+
 
                         console.log(
                             "EduCore interface logout."
@@ -862,29 +1106,35 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!notification) {
 
             notification =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             notification.id =
                 "admin-notification";
 
+
             notification.style.cssText = `
-                position: fixed;
-                right: 24px;
-                bottom: 24px;
-                z-index: 5000;
-                max-width: 320px;
-                padding: 13px 17px;
-                border-radius: 10px;
-                background: #20242c;
-                color: white;
-                font-size: 11px;
-                font-weight: 600;
-                box-shadow: 0 12px 30px rgba(0,0,0,.18);
-                opacity: 0;
-                transform: translateY(10px);
-                transition: opacity .2s ease,
-                            transform .2s ease;
+                position:fixed;
+                right:24px;
+                bottom:24px;
+                z-index:5000;
+                max-width:320px;
+                padding:13px 17px;
+                border-radius:10px;
+                background:#20242c;
+                color:white;
+                font-size:11px;
+                font-weight:600;
+                box-shadow:0 12px 30px rgba(0,0,0,.18);
+                opacity:0;
+                transform:translateY(10px);
+                transition:
+                    opacity .2s ease,
+                    transform .2s ease;
             `;
+
 
             document.body.appendChild(
                 notification
@@ -898,7 +1148,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         requestAnimationFrame(() => {
 
-            notification.style.opacity = "1";
+            notification.style.opacity =
+                "1";
 
             notification.style.transform =
                 "translateY(0)";
@@ -913,7 +1164,8 @@ document.addEventListener("DOMContentLoaded", () => {
         notification._timeout =
             setTimeout(() => {
 
-                notification.style.opacity = "0";
+                notification.style.opacity =
+                    "0";
 
                 notification.style.transform =
                     "translateY(10px)";
@@ -923,23 +1175,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       RESIZE SAFETY
+       RESIZE
     ===================================================== */
 
-    window.addEventListener("resize", () => {
+    window.addEventListener(
+        "resize",
+        () => {
 
-        /*
-           If we leave mobile while the sidebar
-           is open, clean up the mobile state.
-        */
+            if (!isMobile()) {
 
-        if (!isMobile()) {
-
-            app.classList.remove(
-                "sidebar-open"
-            );
+                app.classList.remove(
+                    "sidebar-open"
+                );
+            }
         }
-    });
+    );
 
 
     /* =====================================================
