@@ -17,116 +17,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     initializeLogout();
 
+    initializeCourseManagement();
+
     await initializeAdminUser();
 
     await initializeDashboard();
 
 });
-
-
-// ============================================================
-// SIDEBAR
-// ============================================================
-
-function initializeSidebar() {
-
-    const app =
-        document.getElementById("admin-app");
-
-    const toggle =
-        document.getElementById("sidebar-toggle");
-
-    const sidebar =
-        document.getElementById("admin-sidebar");
-
-
-    if (!app || !toggle || !sidebar) {
-
-        console.error(
-            "Admin sidebar elements not found."
-        );
-
-        return;
-    }
-
-
-    toggle.addEventListener("click", function () {
-
-        /*
-         * MOBILE
-         */
-
-        if (window.innerWidth <= 768) {
-
-            app.classList.toggle("sidebar-open");
-
-            const open =
-                app.classList.contains(
-                    "sidebar-open"
-                );
-
-            toggle.setAttribute(
-                "aria-expanded",
-                String(open)
-            );
-
-            return;
-        }
-
-
-        /*
-         * DESKTOP
-         */
-
-        app.classList.toggle(
-            "sidebar-collapsed"
-        );
-
-
-        const collapsed =
-            app.classList.contains(
-                "sidebar-collapsed"
-            );
-
-
-        toggle.setAttribute(
-            "aria-expanded",
-            String(!collapsed)
-        );
-
-    });
-
-
-    /*
-     * When the window becomes desktop
-     * remove mobile-only state.
-     */
-
-    window.addEventListener(
-        "resize",
-        function () {
-
-            if (window.innerWidth > 768) {
-
-                app.classList.remove(
-                    "sidebar-open"
-                );
-
-                toggle.setAttribute(
-                    "aria-expanded",
-                    String(
-                        !app.classList.contains(
-                            "sidebar-collapsed"
-                        )
-                    )
-                );
-
-            }
-
-        }
-    );
-
-}
 
 
 // ============================================================
@@ -136,151 +33,148 @@ function initializeSidebar() {
 function initializeAdminNavigation() {
 
     const navigationItems =
-        document.querySelectorAll(
-            ".nav-item"
-        );
-
+        document.querySelectorAll(".nav-item");
 
     const sections =
-        document.querySelectorAll(
-            ".admin-section"
-        );
-
+        document.querySelectorAll(".admin-section");
 
     const pageTitle =
-        document.getElementById(
-            "page-title"
-        );
-
+        document.getElementById("page-title");
 
     const app =
-        document.getElementById(
-            "admin-app"
-        );
+        document.getElementById("admin-app");
 
 
     navigationItems.forEach(item => {
 
-        item.addEventListener(
-            "click",
-            function () {
+        item.addEventListener("click", () => {
 
-                const targetSection =
-                    this.dataset.section;
+            const targetSection =
+                item.dataset.section;
 
-
-                if (!targetSection) {
-                    return;
-                }
-
-
-                /*
-                 * Remove active state
-                 * from all navigation items.
-                 */
-
-                navigationItems.forEach(
-                    navItem => {
-
-                        navItem.classList.remove(
-                            "active"
-                        );
-
-                    }
-                );
-
-
-                /*
-                 * Activate clicked item.
-                 */
-
-                this.classList.add(
-                    "active"
-                );
-
-
-                /*
-                 * Hide all sections.
-                 */
-
-                sections.forEach(section => {
-
-                    section.classList.remove(
-                        "active"
-                    );
-
-                });
-
-
-                /*
-                 * Show selected section.
-                 */
-
-                const target =
-                    document.getElementById(
-                        "section-" +
-                        targetSection
-                    );
-
-
-                if (target) {
-
-                    target.classList.add(
-                        "active"
-                    );
-
-                }
-
-
-                /*
-                 * Update page title.
-                 */
-
-                const label =
-                    this.querySelector(
-                        ".nav-label"
-                    );
-
-
-                if (label && pageTitle) {
-
-                    pageTitle.textContent =
-                        label.textContent.trim();
-
-                }
-
-
-                /*
-                 * Close sidebar on mobile.
-                 */
-
-                if (
-                    window.innerWidth <= 768 &&
-                    app
-                ) {
-
-                    app.classList.remove(
-                        "sidebar-open"
-                    );
-
-                    const toggle =
-                        document.getElementById(
-                            "sidebar-toggle"
-                        );
-
-                    if (toggle) {
-
-                        toggle.setAttribute(
-                            "aria-expanded",
-                            "false"
-                        );
-
-                    }
-
-                }
-
+            if (!targetSection) {
+                return;
             }
+
+
+            navigationItems.forEach(navItem => {
+                navItem.classList.remove("active");
+            });
+
+
+            item.classList.add("active");
+
+
+            sections.forEach(section => {
+                section.classList.remove("active");
+            });
+
+
+            const target =
+                document.getElementById(
+                    `section-${targetSection}`
+                );
+
+
+            if (target) {
+                target.classList.add("active");
+            }
+
+
+            const label =
+                item.querySelector(".nav-label");
+
+
+            if (label && pageTitle) {
+                pageTitle.textContent =
+                    label.textContent.trim();
+            }
+
+
+            if (
+                targetSection === "courses"
+            ) {
+                loadCourses();
+            }
+
+
+            if (
+                window.innerWidth <= 768 &&
+                app
+            ) {
+                app.classList.remove("sidebar-open");
+            }
+
+        });
+
+    });
+
+}
+
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+
+function initializeSidebar() {
+
+    const toggle =
+        document.getElementById("sidebar-toggle");
+
+    const app =
+        document.getElementById("admin-app");
+
+
+    if (!toggle || !app) {
+
+        console.error(
+            "Admin sidebar could not initialize."
         );
+
+        return;
+    }
+
+
+    toggle.addEventListener("click", () => {
+
+        if (window.innerWidth <= 768) {
+
+            app.classList.toggle("sidebar-open");
+
+            const isOpen =
+                app.classList.contains("sidebar-open");
+
+            toggle.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+            return;
+        }
+
+
+        app.classList.toggle("sidebar-collapsed");
+
+        const isCollapsed =
+            app.classList.contains(
+                "sidebar-collapsed"
+            );
+
+        toggle.setAttribute(
+            "aria-expanded",
+            String(!isCollapsed)
+        );
+
+    });
+
+
+    window.addEventListener("resize", () => {
+
+        if (window.innerWidth > 768) {
+
+            app.classList.remove("sidebar-open");
+
+        }
 
     });
 
@@ -294,15 +188,10 @@ function initializeAdminNavigation() {
 async function initializeAdminUser() {
 
     const nameElement =
-        document.getElementById(
-            "admin-name"
-        );
-
+        document.getElementById("admin-name");
 
     const avatarElement =
-        document.getElementById(
-            "admin-avatar"
-        );
+        document.getElementById("admin-avatar");
 
 
     if (!nameElement || !avatarElement) {
@@ -327,7 +216,6 @@ async function initializeAdminUser() {
 
         nameElement.textContent =
             fullName;
-
 
         avatarElement.textContent =
             fullName
@@ -354,11 +242,8 @@ async function initializeAdminUser() {
 async function initializeDashboard() {
 
     await Promise.all([
-
         loadDashboardStatistics(),
-
         loadRecentActivity()
-
     ]);
 
 }
@@ -371,59 +256,38 @@ async function initializeDashboard() {
 async function loadDashboardStatistics() {
 
     const coursesElement =
-        document.getElementById(
-            "stat-courses"
-        );
-
+        document.getElementById("stat-courses");
 
     const unitsElement =
-        document.getElementById(
-            "stat-units"
-        );
-
+        document.getElementById("stat-units");
 
     const lessonsElement =
-        document.getElementById(
-            "stat-lessons"
-        );
-
+        document.getElementById("stat-lessons");
 
     const studentsElement =
-        document.getElementById(
-            "stat-students"
-        );
-
+        document.getElementById("stat-students");
 
     const publishedElement =
-        document.getElementById(
-            "stat-published"
-        );
+        document.getElementById("stat-published");
 
 
     try {
 
         const [
-
             coursesResult,
-
             unitsResult,
-
             lessonsResult,
-
             studentsResult,
-
             publishedResult
-
         ] = await Promise.all([
-
 
             supabaseClient
                 .from("courses")
                 .select("id", {
                     count: "exact",
                     head: true
-                }),
-
+                })
+                .is("archived_at", null),
 
             supabaseClient
                 .from("units")
@@ -432,7 +296,6 @@ async function loadDashboardStatistics() {
                     head: true
                 }),
 
-
             supabaseClient
                 .from("lessons")
                 .select("id", {
@@ -440,22 +303,14 @@ async function loadDashboardStatistics() {
                     head: true
                 }),
 
-
             supabaseClient
                 .from("profiles")
                 .select("id", {
                     count: "exact",
                     head: true
                 })
-                .eq(
-                    "role",
-                    "student"
-                )
-                .eq(
-                    "active",
-                    true
-                ),
-
+                .eq("role", "student")
+                .eq("active", true),
 
             supabaseClient
                 .from("courses")
@@ -463,10 +318,8 @@ async function loadDashboardStatistics() {
                     count: "exact",
                     head: true
                 })
-                .eq(
-                    "status",
-                    "published"
-                )
+                .eq("status", "published")
+                .is("archived_at", null)
 
         ]);
 
@@ -487,44 +340,25 @@ async function loadDashboardStatistics() {
             throw publishedResult.error;
 
 
-        if (coursesElement) {
-
+        if (coursesElement)
             coursesElement.textContent =
                 coursesResult.count ?? 0;
 
-        }
-
-
-        if (unitsElement) {
-
+        if (unitsElement)
             unitsElement.textContent =
                 unitsResult.count ?? 0;
 
-        }
-
-
-        if (lessonsElement) {
-
+        if (lessonsElement)
             lessonsElement.textContent =
                 lessonsResult.count ?? 0;
 
-        }
-
-
-        if (studentsElement) {
-
+        if (studentsElement)
             studentsElement.textContent =
                 studentsResult.count ?? 0;
 
-        }
-
-
-        if (publishedElement) {
-
+        if (publishedElement)
             publishedElement.textContent =
                 publishedResult.count ?? 0;
-
-        }
 
 
     } catch (error) {
@@ -534,39 +368,101 @@ async function loadDashboardStatistics() {
             error
         );
 
-
-        [
-            coursesElement,
-            unitsElement,
-            lessonsElement,
-            studentsElement,
-            publishedElement
-
-        ].forEach(element => {
-
-            if (element) {
-
-                element.textContent =
-                    "!";
-
-            }
-
-        });
-
     }
 
 }
 
 
 // ============================================================
-// RECENT ACTIVITY
+// COURSE MANAGEMENT
 // ============================================================
 
-async function loadRecentActivity() {
+let adminCourses = [];
+
+let adminCategories = [];
+
+
+// ============================================================
+// INITIALIZE COURSE MANAGEMENT
+// ============================================================
+
+function initializeCourseManagement() {
+
+    const createButton =
+        document.getElementById(
+            "create-course-button"
+        );
+
+    const search =
+        document.getElementById(
+            "course-search"
+        );
+
+    const categoryFilter =
+        document.getElementById(
+            "course-category-filter"
+        );
+
+    const statusFilter =
+        document.getElementById(
+            "course-status-filter"
+        );
+
+
+    if (createButton) {
+
+        createButton.addEventListener(
+            "click",
+            () => openCourseModal()
+        );
+
+    }
+
+
+    if (search) {
+
+        search.addEventListener(
+            "input",
+            renderCourses
+        );
+
+    }
+
+
+    if (categoryFilter) {
+
+        categoryFilter.addEventListener(
+            "change",
+            renderCourses
+        );
+
+    }
+
+
+    if (statusFilter) {
+
+        statusFilter.addEventListener(
+            "change",
+            renderCourses
+        );
+
+    }
+
+
+    initializeCourseModal();
+
+}
+
+
+// ============================================================
+// LOAD COURSES
+// ============================================================
+
+async function loadCourses() {
 
     const container =
         document.getElementById(
-            "recent-activity"
+            "course-list"
         );
 
 
@@ -575,79 +471,56 @@ async function loadRecentActivity() {
     }
 
 
+    container.innerHTML = `
+        <div class="course-loading">
+            Loading courses...
+        </div>
+    `;
+
+
     try {
 
         const [
-
             coursesResult,
-
-            unitsResult,
-
-            lessonsResult,
-
-            studentsResult
-
+            categoriesResult
         ] = await Promise.all([
-
 
             supabaseClient
                 .from("courses")
-                .select(
-                    "id, title, created_at"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(5),
-
-
-            supabaseClient
-                .from("units")
-                .select(
-                    "id, title, created_at"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(5),
-
+                .select(`
+                    id,
+                    title,
+                    description,
+                    category,
+                    level,
+                    cover_image,
+                    status,
+                    sort_order,
+                    created_at,
+                    updated_at,
+                    slug
+                `)
+                .is("archived_at", null)
+                .order("sort_order", {
+                    ascending: true
+                })
+                .order("created_at", {
+                    ascending: false
+                }),
 
             supabaseClient
-                .from("lessons")
-                .select(
-                    "id, title, created_at"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(5),
-
-
-            supabaseClient
-                .from("profiles")
-                .select(
-                    "id, full_name, created_at"
-                )
-                .eq(
-                    "role",
-                    "student"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(5)
+                .from("categories")
+                .select(`
+                    id,
+                    name,
+                    slug,
+                    active,
+                    sort_order
+                `)
+                .eq("active", true)
+                .order("sort_order", {
+                    ascending: true
+                })
 
         ]);
 
@@ -655,171 +528,32 @@ async function loadRecentActivity() {
         if (coursesResult.error)
             throw coursesResult.error;
 
-        if (unitsResult.error)
-            throw unitsResult.error;
-
-        if (lessonsResult.error)
-            throw lessonsResult.error;
-
-        if (studentsResult.error)
-            throw studentsResult.error;
+        if (categoriesResult.error)
+            throw categoriesResult.error;
 
 
-        const activities = [];
+        adminCourses =
+            coursesResult.data || [];
+
+        adminCategories =
+            categoriesResult.data || [];
 
 
-        (coursesResult.data || [])
-            .forEach(course => {
+        populateCategoryControls();
 
-                activities.push({
-
-                    title:
-                        `Course created: ${course.title}`,
-
-                    date:
-                        course.created_at,
-
-                    icon:
-                        "▣"
-
-                });
-
-            });
-
-
-        (unitsResult.data || [])
-            .forEach(unit => {
-
-                activities.push({
-
-                    title:
-                        `Unit created: ${unit.title}`,
-
-                    date:
-                        unit.created_at,
-
-                    icon:
-                        "◫"
-
-                });
-
-            });
-
-
-        (lessonsResult.data || [])
-            .forEach(lesson => {
-
-                activities.push({
-
-                    title:
-                        `Lesson created: ${lesson.title}`,
-
-                    date:
-                        lesson.created_at,
-
-                    icon:
-                        "▤"
-
-                });
-
-            });
-
-
-        (studentsResult.data || [])
-            .forEach(student => {
-
-                activities.push({
-
-                    title:
-                        `Student registered: ${
-                            student.full_name ||
-                            "New student"
-                        }`,
-
-                    date:
-                        student.created_at,
-
-                    icon:
-                        "♙"
-
-                });
-
-            });
-
-
-        activities.sort((a, b) => {
-
-            return (
-                new Date(b.date) -
-                new Date(a.date)
-            );
-
-        });
-
-
-        const recent =
-            activities.slice(0, 5);
-
-
-        if (!recent.length) {
-
-            container.innerHTML = `
-                <div class="activity-empty">
-                    No recent activity yet.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        container.innerHTML =
-            recent
-                .map(activity => {
-
-                    return `
-                        <div class="activity-item">
-
-                            <div class="activity-icon">
-                                ${escapeHtml(
-                                    activity.icon
-                                )}
-                            </div>
-
-                            <div class="activity-content">
-
-                                <div class="activity-title">
-                                    ${escapeHtml(
-                                        activity.title
-                                    )}
-                                </div>
-
-                                <div class="activity-meta">
-                                    ${formatActivityDate(
-                                        activity.date
-                                    )}
-                                </div>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                })
-                .join("");
+        renderCourses();
 
 
     } catch (error) {
 
         console.error(
-            "Unable to load recent activity:",
+            "Unable to load courses:",
             error
         );
 
-
         container.innerHTML = `
-            <div class="activity-empty">
-                Unable to load recent activity.
+            <div class="course-empty">
+                Unable to load courses.
             </div>
         `;
 
@@ -829,114 +563,402 @@ async function loadRecentActivity() {
 
 
 // ============================================================
-// DATE
+// CATEGORY CONTROLS
 // ============================================================
 
-function formatActivityDate(value) {
+function populateCategoryControls() {
 
-    if (!value) {
-        return "";
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-
-    return date.toLocaleString(
-        undefined,
-        {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }
-    );
-
-}
-
-
-// ============================================================
-// ESCAPE HTML
-// ============================================================
-
-function escapeHtml(value) {
-
-    return String(value ?? "")
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-// ============================================================
-// LOGOUT
-// ============================================================
-
-function initializeLogout() {
-
-    const button =
+    const filter =
         document.getElementById(
-            "admin-logout"
+            "course-category-filter"
+        );
+
+    const select =
+        document.getElementById(
+            "course-category"
         );
 
 
-    if (!button) {
+    if (filter) {
+
+        filter.innerHTML = `
+            <option value="all">
+                All categories
+            </option>
+        `;
+
+
+        adminCategories.forEach(category => {
+
+            filter.insertAdjacentHTML(
+                "beforeend",
+                `
+                    <option value="${escapeHtml(category.name)}">
+                        ${escapeHtml(category.name)}
+                    </option>
+                `
+            );
+
+        });
+
+    }
+
+
+    if (select) {
+
+        select.innerHTML = `
+            <option value="">
+                Select category
+            </option>
+        `;
+
+
+        adminCategories.forEach(category => {
+
+            select.insertAdjacentHTML(
+                "beforeend",
+                `
+                    <option value="${escapeHtml(category.name)}">
+                        ${escapeHtml(category.name)}
+                    </option>
+                `
+            );
+
+        });
+
+    }
+
+}
+
+
+// ============================================================
+// RENDER COURSES
+// ============================================================
+
+function renderCourses() {
+
+    const container =
+        document.getElementById(
+            "course-list"
+        );
+
+    const countElement =
+        document.getElementById(
+            "course-count"
+        );
+
+
+    if (!container) {
         return;
     }
 
 
-    button.addEventListener(
-        "click",
-        async function () {
-
-            button.disabled = true;
-
-
-            try {
-
-                await logoutUser();
+    const search =
+        document.getElementById(
+            "course-search"
+        )?.value
+            .trim()
+            .toLowerCase() || "";
 
 
-            } catch (error) {
-
-                console.error(
-                    "Admin logout failed:",
-                    error
-                );
+    const category =
+        document.getElementById(
+            "course-category-filter"
+        )?.value || "all";
 
 
-                button.disabled = false;
+    const status =
+        document.getElementById(
+            "course-status-filter"
+        )?.value || "all";
 
-            }
 
-        }
-    );
+    const filtered =
+        adminCourses.filter(course => {
+
+            const matchesSearch =
+                !search ||
+                course.title
+                    ?.toLowerCase()
+                    .includes(search) ||
+                course.description
+                    ?.toLowerCase()
+                    .includes(search);
+
+
+            const matchesCategory =
+                category === "all" ||
+                course.category === category;
+
+
+            const matchesStatus =
+                status === "all" ||
+                course.status === status;
+
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesStatus
+            );
+
+        });
+
+
+    if (countElement) {
+
+        countElement.textContent =
+            `${filtered.length} ${
+                filtered.length === 1
+                    ? "course"
+                    : "courses"
+            }`;
 
     }
+
+
+    if (!filtered.length) {
+
+        container.innerHTML = `
+            <div class="course-empty">
+                No courses found.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        filtered.map(course => {
+
+            const image =
+                course.cover_image
+                    ? `
+                        <img
+                            src="${escapeHtml(course.cover_image)}"
+                            alt=""
+                            loading="lazy"
+                        >
+                    `
+                    : `
+                        <div class="course-cover-placeholder">
+                            ▣
+                        </div>
+                    `;
+
+
+            const publishButton =
+                course.status === "published"
+                    ? `
+                        <button
+                            class="course-action"
+                            data-action="unpublish"
+                            data-id="${course.id}"
+                        >
+                            Unpublish
+                        </button>
+                    `
+                    : `
+                        <button
+                            class="course-action"
+                            data-action="publish"
+                            data-id="${course.id}"
+                        >
+                            Publish
+                        </button>
+                    `;
+
+
+            return `
+                <div class="course-row">
+
+                    <div class="course-cover">
+                        ${image}
+                    </div>
+
+
+                    <div class="course-info">
+
+                        <div class="course-title">
+                            ${escapeHtml(course.title)}
+                        </div>
+
+                        <div class="course-description">
+                            ${escapeHtml(
+                                course.description ||
+                                "No description"
+                            )}
+                        </div>
+
+                    </div>
+
+
+                    <div class="course-category">
+                        ${escapeHtml(
+                            course.category ||
+                            "Uncategorized"
+                        )}
+                    </div>
+
+
+                    <div>
+
+                        <div class="course-level">
+                            ${escapeHtml(
+                                course.level ||
+                                "No level"
+                            )}
+                        </div>
+
+                        <div
+                            class="course-status ${
+                                course.status === "published"
+                                    ? "published"
+                                    : "draft"
+                            }"
+                        >
+                            ${escapeHtml(
+                                course.status ||
+                                "draft"
+                            )}
+                        </div>
+
+                    </div>
+
+
+                    <div class="course-actions">
+
+                        <button
+                            class="course-action"
+                            data-action="edit"
+                            data-id="${course.id}"
+                        >
+                            Edit
+                        </button>
+
+                        ${publishButton}
+
+                        <button
+                            class="course-action"
+                            data-action="duplicate"
+                            data-id="${course.id}"
+                        >
+                            Duplicate
+                        </button>
+
+                        <button
+                            class="course-action danger"
+                            data-action="archive"
+                            data-id="${course.id}"
+                        >
+                            Archive
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+
+
+    container
+        .querySelectorAll(".course-action")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                handleCourseAction
+            );
+
+        });
+
+}
+
+
+// ============================================================
+// COURSE ACTIONS
+// ============================================================
+
+async function handleCourseAction(event) {
+
+    const button =
+        event.currentTarget;
+
+    const action =
+        button.dataset.action;
+
+    const id =
+        button.dataset.id;
+
+
+    const course =
+        adminCourses.find(
+            item => item.id === id
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    if (action === "edit") {
+
+        openCourseModal(course);
+
+        return;
+    }
+
+
+    if (action === "publish") {
+
+        await updateCourseStatus(
+            course,
+            "published"
+        );
+
+        return;
+    }
+
+
+    if (action === "unpublish") {
+
+        await updateCourseStatus(
+            course,
+            "draft"
+        );
+
+        return;
+    }
+
+
+    if (action === "duplicate") {
+
+        await duplicateCourse(course);
+
+        return;
+    }
+
+
+    if (action === "archive") {
+
+        await archiveCourse(course);
+
+    }
+
+}
+
+
+// ============================================================
+// UPDATE STATUS
+// ============================================================
+
+async function updateCourseStatus(
+    course,
+    status
+) {
+
+    const action =
+        status === "published
