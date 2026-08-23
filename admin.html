@@ -492,35 +492,212 @@
                 id="section-courses"
             >
 
-                <div class="section-introduction">
+                <!-- COURSE HEADER -->
 
-                    <div class="section-kicker">
-                        CONTENT
+                <div class="courses-header">
+
+                    <div class="section-introduction">
+
+                        <div class="section-kicker">
+                            CONTENT MANAGEMENT
+                        </div>
+
+                        <h2>
+                            Courses
+                        </h2>
+
+                        <p>
+                            Create, organize and manage every
+                            type of course available on EduCore.
+                        </p>
+
                     </div>
 
-                    <h2>
-                        Courses
-                    </h2>
 
-                    <p>
-                        Create, edit and manage EduCore courses.
-                    </p>
+                    <button
+                        type="button"
+                        class="primary-button"
+                        id="create-course-button"
+                    >
+
+                        <span>
+                            +
+                        </span>
+
+                        Create Course
+
+                    </button>
 
                 </div>
 
-                <div class="empty-section">
 
-                    <div class="empty-section-icon">
-                        ▣
+
+                <!-- COURSE TOOLBAR -->
+
+                <div class="course-toolbar">
+
+
+                    <!-- SEARCH -->
+
+                    <div class="course-search">
+
+                        <span>
+                            ⌕
+                        </span>
+
+                        <input
+                            type="search"
+                            id="course-search"
+                            placeholder="Search courses..."
+                            autocomplete="off"
+                        >
+
                     </div>
 
-                    <h2>
-                        Course Management
-                    </h2>
 
-                    <p>
-                        Course management tools will appear here.
-                    </p>
+                    <!-- STATUS FILTER -->
+
+                    <select
+                        id="course-status-filter"
+                        class="course-filter"
+                    >
+
+                        <option value="all">
+                            All Status
+                        </option>
+
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                        <option value="published">
+                            Published
+                        </option>
+
+                        <option value="archived">
+                            Archived
+                        </option>
+
+                    </select>
+
+
+                    <!-- SORT -->
+
+                    <select
+                        id="course-sort"
+                        class="course-filter"
+                    >
+
+                        <option value="newest">
+                            Newest first
+                        </option>
+
+                        <option value="oldest">
+                            Oldest first
+                        </option>
+
+                        <option value="title">
+                            Title A–Z
+                        </option>
+
+                        <option value="sort_order">
+                            Custom order
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- COURSE LIST -->
+
+                <div class="courses-panel">
+
+
+                    <!-- TABLE HEADER -->
+
+                    <div class="courses-table-header">
+
+                        <div>
+                            Course
+                        </div>
+
+                        <div>
+                            Type
+                        </div>
+
+                        <div>
+                            Level
+                        </div>
+
+                        <div>
+                            Status
+                        </div>
+
+                        <div>
+                            Updated
+                        </div>
+
+                        <div>
+                            Actions
+                        </div>
+
+                    </div>
+
+
+                    <!-- COURSES -->
+
+                    <div
+                        id="courses-list"
+                        class="courses-list"
+                    >
+
+                        <div class="courses-loading">
+
+                            <div class="courses-loading-icon">
+                                ◌
+                            </div>
+
+                            <p>
+                                Loading courses...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMPTY STATE -->
+
+                    <div
+                        id="courses-empty"
+                        class="courses-empty"
+                        hidden
+                    >
+
+                        <div class="courses-empty-icon">
+                            ▣
+                        </div>
+
+                        <h3>
+                            No courses found
+                        </h3>
+
+                        <p>
+                            Create your first course or
+                            change your search filters.
+                        </p>
+
+                        <button
+                            type="button"
+                            class="primary-button"
+                            id="create-course-empty-button"
+                        >
+                            + Create Course
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -678,59 +855,4 @@
                         SYSTEM
                     </div>
 
-                    <h2>
-                        Settings
-                    </h2>
-
-                    <p>
-                        Configure EduCore platform settings.
-                    </p>
-
-                </div>
-
-                <div class="empty-section">
-
-                    <div class="empty-section-icon">
-                        ⚙
-                    </div>
-
-                    <h2>
-                        Platform Settings
-                    </h2>
-
-                    <p>
-                        Configuration options will appear here.
-                    </p>
-
-                </div>
-
-            </section>
-
-
-        </div>
-
-    </main>
-
-</div>
-
-
-<!-- =========================================================
-     SUPABASE
-========================================================= -->
-
-<!--
-     Keep your existing Supabase configuration
-     script here, before auth.js.
--->
-
-
-<script src="js/supabase.js"></script>
-
-<script src="js/auth.js"></script>
-
-<script src="js/admin.js"></script>
-
-
-</body>
-
-                </html>
+                    <
