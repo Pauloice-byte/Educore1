@@ -1,7 +1,6 @@
 /* =========================================================
    EDUCORE ADMIN DASHBOARD
    COMPLETE ADMIN.CSS
-   PART 1 OF 6
 ========================================================= */
 
 * {
@@ -138,9 +137,6 @@ img {
         transform 0.3s ease;
 }
 
-
-/* Desktop collapsed */
-
 #admin-app.sidebar-collapsed .admin-sidebar {
     width: var(--sidebar-collapsed);
 }
@@ -175,6 +171,8 @@ img {
     border-radius: 12px;
 
     flex-shrink: 0;
+
+    display: block;
 }
 
 .brand-information {
@@ -622,6 +620,8 @@ img {
     display: block;
     opacity: 1;
 }
+
+
 /* =========================================================
    CONTENT
 ========================================================= */
@@ -954,7 +954,7 @@ img {
 
 
 /* =========================================================
-   PRIMARY / SECONDARY BUTTONS
+   BUTTONS
 ========================================================= */
 
 .primary-button,
@@ -1024,7 +1024,6 @@ img {
 
 /* =========================================================
    COURSE TOOLBAR
-   IMPORTANT: MATCHES admin.html
 ========================================================= */
 
 .course-toolbar {
@@ -1254,6 +1253,7 @@ img {
 }
 
 @keyframes coursesSpin {
+
     from {
         transform: rotate(0deg);
     }
@@ -1261,6 +1261,7 @@ img {
     to {
         transform: rotate(360deg);
     }
+
 }
 
 
@@ -1395,6 +1396,8 @@ img {
 
     font-size: 10px;
 }
+
+
 /* =========================================================
    COURSE STATUS
 ========================================================= */
@@ -1439,7 +1442,7 @@ img {
 
 
 /* =========================================================
-   COURSE UPDATED DATE
+   COURSE UPDATED
 ========================================================= */
 
 .course-updated {
@@ -1621,6 +1624,7 @@ img {
 }
 
 @keyframes modalAppear {
+
     from {
         opacity: 0;
 
@@ -1636,6 +1640,7 @@ img {
             translateY(0)
             scale(1);
     }
+
 }
 
 
@@ -1843,7 +1848,9 @@ img {
 
     border-top:
         1px solid var(--border);
-    }
+}
+
+
 /* =========================================================
    TABLET
 ========================================================= */
@@ -1942,6 +1949,7 @@ img {
 
     .course-actions {
         grid-column: 3 / 5;
+
         justify-content: flex-start;
     }
 }
@@ -1953,10 +1961,6 @@ img {
 
 @media (max-width: 768px) {
 
-    /* -----------------------------------------
-       SIDEBAR
-    ----------------------------------------- */
-
     .admin-sidebar {
         width: 270px;
 
@@ -1965,11 +1969,6 @@ img {
         box-shadow:
             12px 0 40px rgba(0, 0, 0, 0.18);
     }
-
-    /*
-       Mobile does NOT use the desktop
-       collapsed width.
-    */
 
     #admin-app.sidebar-collapsed .admin-sidebar {
         width: 270px;
@@ -1985,20 +1984,10 @@ img {
         display: flex;
     }
 
-
-    /* -----------------------------------------
-       MAIN
-    ----------------------------------------- */
-
     .admin-main,
     #admin-app.sidebar-collapsed .admin-main {
         margin-left: 0;
     }
-
-
-    /* -----------------------------------------
-       HEADER
-    ----------------------------------------- */
 
     .admin-header {
         height: 68px;
@@ -2023,11 +2012,6 @@ img {
         display: none;
     }
 
-
-    /* -----------------------------------------
-       CONTENT
-    ----------------------------------------- */
-
     .admin-content {
         padding:
             35px 20px 60px;
@@ -2040,11 +2024,6 @@ img {
     .section-introduction p {
         font-size: 12px;
     }
-
-
-    /* -----------------------------------------
-       STATISTICS
-    ----------------------------------------- */
 
     .statistics-grid {
         grid-template-columns: 1fr;
@@ -2062,11 +2041,6 @@ img {
         padding: 18px;
     }
 
-
-    /* -----------------------------------------
-       COURSES HEADER
-    ----------------------------------------- */
-
     .courses-header {
         flex-direction: column;
 
@@ -2078,11 +2052,6 @@ img {
     .courses-header .primary-button {
         width: 100%;
     }
-
-
-    /* -----------------------------------------
-       COURSE TOOLBAR
-    ----------------------------------------- */
 
     .course-toolbar {
         flex-direction: column;
@@ -2099,11 +2068,6 @@ img {
     .course-filter {
         width: 100%;
     }
-
-
-    /* -----------------------------------------
-       COURSE PANEL
-    ----------------------------------------- */
 
     .courses-panel {
         overflow: visible;
@@ -2130,11 +2094,6 @@ img {
     .courses-panel-top > div {
         gap: 8px;
     }
-
-
-    /* -----------------------------------------
-       COURSE LIST
-    ----------------------------------------- */
 
     .courses-list {
         display: flex;
@@ -2262,11 +2221,6 @@ img {
         justify-content: flex-start;
     }
 
-
-    /* -----------------------------------------
-       EMPTY COURSES
-    ----------------------------------------- */
-
     .courses-empty {
         min-height: 260px;
 
@@ -2281,11 +2235,6 @@ img {
         box-shadow: var(--shadow);
     }
 
-
-    /* -----------------------------------------
-       ACTIVITY
-    ----------------------------------------- */
-
     .activity-item {
         padding:
             15px 18px;
@@ -2296,21 +2245,11 @@ img {
             18px;
     }
 
-
-    /* -----------------------------------------
-       EMPTY SECTIONS
-    ----------------------------------------- */
-
     .empty-section {
         min-height: 320px;
 
         padding: 30px 20px;
     }
-
-
-    /* -----------------------------------------
-       MODAL
-    ----------------------------------------- */
 
     .modal-overlay {
         padding: 12px;
@@ -2348,7 +2287,18 @@ img {
     .modal-footer button {
         width: 100%;
     }
-            }
+
+    #admin-app.sidebar-open {
+        overflow: hidden;
+    }
+
+    #admin-app.sidebar-collapsed:not(.sidebar-open)
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+}
+
+
 /* =========================================================
    SMALL MOBILE
 ========================================================= */
@@ -2397,9 +2347,6 @@ img {
         font-size: 28px;
     }
 
-
-    /* COURSE CARDS */
-
     .course-row {
         padding: 15px;
 
@@ -2438,9 +2385,6 @@ img {
         font-size: 8px;
     }
 
-
-    /* ACTIVITY */
-
     .activity-item {
         align-items: flex-start;
 
@@ -2456,15 +2400,9 @@ img {
         font-size: 9px;
     }
 
-
-    /* EMPTY SECTION */
-
     .empty-section {
         min-height: 280px;
     }
-
-
-    /* MODAL */
 
     .modal-header h2 {
         font-size: 18px;
@@ -2527,33 +2465,6 @@ img {
 
 
 /* =========================================================
-   SIDEBAR MOBILE SAFETY
-========================================================= */
-
-@media (max-width: 768px) {
-
-    /*
-       When the mobile sidebar is open,
-       prevent the page underneath from scrolling.
-    */
-
-    #admin-app.sidebar-open {
-        overflow: hidden;
-    }
-
-    /*
-       The desktop collapsed state must never
-       leave the mobile sidebar visible.
-    */
-
-    #admin-app.sidebar-collapsed:not(.sidebar-open)
-    .admin-sidebar {
-        transform: translateX(-100%);
-    }
-}
-
-
-/* =========================================================
    REDUCED MOTION
 ========================================================= */
 
@@ -2569,9 +2480,11 @@ img {
 
         transition-duration: 0.01ms !important;
     }
-    }
+}
+
+
 /* =========================================================
-   ACCESSIBILITY / INTERACTION POLISH
+   ACCESSIBILITY / INTERACTION
 ========================================================= */
 
 .nav-item:disabled,
@@ -2621,20 +2534,30 @@ img {
 ========================================================= */
 
 ::selection {
-    background: rgba(115, 123, 212, 0.18);
+    background:
+        rgba(115, 123, 212, 0.18);
 
     color: var(--text);
 }
+
 
 /* =========================================================
    COURSE IMAGE FALLBACK
 ========================================================= */
 
+.course-cover img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
 .course-cover img[src=""],
 .course-cover img:not([src]) {
     display: none;
 }
-
 
 
 /* =========================================================
