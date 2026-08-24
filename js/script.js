@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Language",
             categoryKey: "language",
             cover: "images/portuguese.jpg",
-            url: "#"
+            url: "#",
         },
 
         {
@@ -364,7 +364,8 @@ const courseBackButton =
             `;
 
             bookGrid.appendChild(card);
-            const cardLink =
+
+const cardLink =
     card.querySelector(".book-card-link");
 
 if (cardLink) {
@@ -372,10 +373,13 @@ if (cardLink) {
     cardLink.addEventListener("click", event => {
 
         event.preventDefault();
+        event.stopPropagation();
 
         openCourseDetails(course);
 
     });
+
+}
 
 }
 
@@ -404,19 +408,19 @@ function openCourseDetails(course) {
         course.level;
 
     courseDetailsDescription.textContent =
-        course.description;
+        course.description || "";
 
     courseDetailsDuration.textContent =
-        course.duration;
+        course.duration || "";
 
     courseDetailsTime.textContent =
-        course.time;
+        course.time || "";
 
     courseDetailsBasic.textContent =
-        course.basic;
+        course.basic || "";
 
     courseDetailsPlatinum.textContent =
-        course.platinum;
+        course.platinum || "";
 
     courseDetails.classList.add("visible");
 
@@ -425,12 +429,14 @@ function openCourseDetails(course) {
         "false"
     );
 
-    document
-        .getElementById("library")
-        .scrollIntoView({
+    setTimeout(() => {
+
+        courseDetails.scrollIntoView({
             behavior: "smooth",
             block: "start"
         });
+
+    }, 50);
 }
     /* =========================================
        FILTER COURSES
