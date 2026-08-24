@@ -815,7 +815,13 @@ a {
 
 .book-card-link {
     display: block;
-
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
 }
 
