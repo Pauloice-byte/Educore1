@@ -309,10 +309,10 @@ const courseBackButton =
 
             card.innerHTML = `
 
-                <a
-                    href="${course.url}"
-                    class="book-card-link"
-                    aria-label="Open ${course.title}"
+                <button
+                type="button"
+                class="book-card-link"
+                aria-label="Open ${course.title}"
                 >
 
                     <div class="book-cover-wrapper">
@@ -359,8 +359,7 @@ const courseBackButton =
 
                     </div>
 
-                </a>
-
+            </button>
             `;
 
             bookGrid.appendChild(card);
@@ -370,10 +369,7 @@ const cardLink =
 
 if (cardLink) {
 
-    cardLink.addEventListener("click", event => {
-
-        event.preventDefault();
-        event.stopPropagation();
+    cardLink.addEventListener("click", () => {
 
         openCourseDetails(course);
 
