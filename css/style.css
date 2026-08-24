@@ -1401,3 +1401,20 @@ a {
     }
 
 }
+/* =========================================
+   COURSE VIEW SWITCH
+========================================= */
+
+#bookGrid.course-open,
+.filter-bar.course-open,
+.library-header.course-open {
+    display: none;
+}
+
+.course-details {
+    display: none;
+}
+
+.course-details.visible {
+    display: block;
+}
