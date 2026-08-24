@@ -395,6 +395,8 @@ function openCourseDetails(course) {
 
     if (!courseDetails) return;
 
+    /* Populate course details */
+
     courseDetailsCover.src = course.cover;
     courseDetailsCover.alt = course.title;
 
@@ -408,19 +410,46 @@ function openCourseDetails(course) {
         course.level;
 
     courseDetailsDescription.textContent =
-        course.description;
+        course.description ||
+        "Course information will be available soon.";
 
     courseDetailsDuration.textContent =
-        course.duration;
+        course.duration ||
+        "To be announced";
 
     courseDetailsTime.textContent =
-        course.time;
+        course.time ||
+        "25 minutes per lesson";
 
     courseDetailsBasic.textContent =
-        course.basic;
+        course.basic ||
+        "Autonomous learning with AI assistance";
 
     courseDetailsPlatinum.textContent =
-        course.platinum;
+        course.platinum ||
+        "Autonomous learning + live teacher classes twice a week";
+
+
+    /* Hide course catalogue */
+
+    bookGrid.classList.add("course-open");
+
+    const filterBar =
+        document.querySelector(".filter-bar");
+
+    const libraryHeader =
+        document.querySelector(".library-header");
+
+    if (filterBar) {
+        filterBar.classList.add("course-open");
+    }
+
+    if (libraryHeader) {
+        libraryHeader.classList.add("course-open");
+    }
+
+
+    /* Show course details */
 
     courseDetails.classList.add("visible");
 
@@ -429,10 +458,18 @@ function openCourseDetails(course) {
         "false"
     );
 
-    courseDetails.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+
+    /* Scroll to the actual course details */
+
+    requestAnimationFrame(() => {
+
+        courseDetails.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
     });
+
 }
     /* =========================================
        FILTER COURSES
@@ -764,6 +801,8 @@ if (courseBackButton) {
         "click",
         () => {
 
+            /* Hide details */
+
             courseDetails.classList.remove(
                 "visible"
             );
@@ -773,12 +812,42 @@ if (courseBackButton) {
                 "true"
             );
 
-            document
-                .getElementById("library")
-                .scrollIntoView({
+
+            /* Show catalogue again */
+
+            bookGrid.classList.remove(
+                "course-open"
+            );
+
+            const filterBar =
+                document.querySelector(".filter-bar");
+
+            const libraryHeader =
+                document.querySelector(".library-header");
+
+            if (filterBar) {
+                filterBar.classList.remove(
+                    "course-open"
+                );
+            }
+
+            if (libraryHeader) {
+                libraryHeader.classList.remove(
+                    "course-open"
+                );
+            }
+
+
+            /* Return to course grid */
+
+            requestAnimationFrame(() => {
+
+                bookGrid.scrollIntoView({
                     behavior: "smooth",
                     block: "start"
                 });
+
+            });
 
         }
     );
