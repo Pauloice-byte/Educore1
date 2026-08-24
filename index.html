@@ -3,7 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>EduCore | Autonomous Learning Platform</title>
 
@@ -12,7 +16,10 @@
         content="EduCore autonomous learning platform."
     >
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 </head>
 
 <body>
@@ -173,6 +180,7 @@
     </aside>
 
 
+
     <!-- =========================================
          MAIN CONTENT
     ========================================== -->
@@ -182,7 +190,9 @@
         id="main"
     >
 
-        <!-- HEADER -->
+        <!-- =========================================
+             HEADER
+        ========================================== -->
 
         <header class="top-header">
 
@@ -232,285 +242,398 @@
         </header>
 
 
-        <!-- =========================================
-             HERO
-        ========================================== -->
-
-        <section class="hero">
-
-            <div class="hero-background-circle circle-one"></div>
-            <div class="hero-background-circle circle-two"></div>
-
-
-            <div class="hero-content">
-
-                <div class="hero-label">
-                    AUTONOMOUS LEARNING PLATFORM
-                </div>
-
-                <h1>
-                    Learn without
-                    <span>limits.</span>
-                </h1>
-
-                <p>
-                    Explore structured learning areas designed
-                    to help you build practical knowledge,
-                    develop new skills and learn at your own pace.
-                </p>
-
-            </div>
-
-        </section>
-
 
         <!-- =========================================
-             COURSE AREAS
+             HOME PAGE
         ========================================== -->
 
-        <section class="library" id="library">
+        <div id="homeContent">
 
-            <div class="library-header">
+            <!-- HERO -->
 
-                <div>
+            <section class="hero">
 
-                    <div class="library-label">
-                        EXPLORE
+                <div class="hero-background-circle circle-one"></div>
+
+                <div class="hero-background-circle circle-two"></div>
+
+
+                <div class="hero-content">
+
+                    <div class="hero-label">
+                        AUTONOMOUS LEARNING PLATFORM
                     </div>
 
-                    <h2 id="libraryTitle">
-                        All Areas
-                    </h2>
+                    <h1>
+                        Learn without
+                        <span>limits.</span>
+                    </h1>
+
+                    <p>
+                        Explore structured learning areas designed
+                        to help you build practical knowledge,
+                        develop new skills and learn at your own pace.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =========================================
+                 COURSE AREAS
+            ========================================== -->
+
+            <section
+                class="library"
+                id="library"
+            >
+
+                <div class="library-header">
+
+                    <div>
+
+                        <div class="library-label">
+                            EXPLORE
+                        </div>
+
+                        <h2 id="libraryTitle">
+                            All Areas
+                        </h2>
+
+                    </div>
+
+
+                    <div class="search-box">
+
+                        <span class="search-symbol">
+                            ⌕
+                        </span>
+
+                        <input
+                            type="search"
+                            id="searchInput"
+                            placeholder="Search courses..."
+                            autocomplete="off"
+                        >
+
+                    </div>
 
                 </div>
 
 
-                <div class="search-box">
 
-                    <span class="search-symbol">
-                        ⌕
-                    </span>
+                <!-- FILTER BUTTONS -->
 
-                    <input
-                        type="search"
-                        id="searchInput"
-                        placeholder="Search courses..."
-                        autocomplete="off"
+                <div class="filter-bar">
+
+                    <button
+                        type="button"
+                        class="filter-button active"
+                        data-filter="all"
                     >
+                        All
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="language"
+                    >
+                        Language
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="ms-office"
+                    >
+                        MS Office
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="trading"
+                    >
+                        Trading
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="business"
+                    >
+                        Business
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="technology"
+                    >
+                        Technology
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="finance"
+                    >
+                        Finance
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="personal-development"
+                    >
+                        Personal Development
+                    </button>
 
                 </div>
 
-            </div>
 
 
-            <!-- FILTER BUTTONS -->
+                <!-- COURSE CARDS -->
 
-            <div class="filter-bar">
+                <div
+                    class="book-grid"
+                    id="bookGrid"
+                ></div>
 
-                <button
-                    type="button"
-                    class="filter-button active"
-                    data-filter="all"
+
+                <!-- NO RESULTS -->
+
+                <div
+                    class="no-results"
+                    id="noResults"
                 >
-                    All
-                </button>
 
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="language"
-                >
-                    Language
-                </button>
+                    <div class="no-results-circle">
+                        ⌕
+                    </div>
 
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="ms-office"
-                >
-                    MS Office
-                </button>
+                    <h3>
+                        No courses found
+                    </h3>
 
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="trading"
-                >
-                    Trading
-                </button>
+                    <p>
+                        Try another search or category.
+                    </p>
 
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="business"
-                >
-                    Business
-                </button>
+                </div>
 
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="technology"
-                >
-                    Technology
-                </button>
-
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="finance"
-                >
-                    Finance
-                </button>
-
-                <button
-                    type="button"
-                    class="filter-button"
-                    data-filter="personal-development"
-                >
-                    Personal Development
-                </button>
-
-            </div>
+            </section>
 
 
-            <!-- COURSE CARDS -->
 
-            <div
-                class="book-grid"
-                id="bookGrid"
-            ></div>
-            <!-- COURSE DETAILS -->
+            <!-- =========================================
+                 FOOTER
+            ========================================== -->
 
-<section
-    class="course-details"
-    id="courseDetails"
-    aria-hidden="true"
->
+            <footer class="footer">
 
-    <div class="course-details-card">
+                <span>
+                    © <span id="year"></span> EduCore
+                </span>
 
-        <div class="course-details-left">
+                <span>
+                    Autonomous Learning Platform
+                </span>
 
-            <img
-                id="courseDetailsCover"
-                src=""
-                alt=""
-                class="course-details-cover"
-            >
+            </footer>
 
         </div>
 
-        <div class="course-details-right">
 
-            <div
-                class="course-details-category"
-                id="courseDetailsCategory"
-            ></div>
 
-            <h2 id="courseDetailsTitle"></h2>
+        <!-- =========================================
+             COURSE DETAILS VIEW
+        ========================================== -->
 
-            <div
-                class="course-details-level"
-                id="courseDetailsLevel"
-            ></div>
+        <section
+            class="course-details"
+            id="courseDetails"
+            aria-hidden="true"
+        >
 
-            <p
-                class="course-details-description"
-                id="courseDetailsDescription"
-            ></p>
+            <div class="course-details-inner">
 
-            <div class="course-details-meta">
+                <!-- BACK BUTTON -->
 
-                <div class="course-meta-item">
-                    <span class="course-meta-label">COURSE DURATION</span>
-                    <strong id="courseDetailsDuration"></strong>
-                </div>
+                <button
+                    type="button"
+                    class="course-back-button"
+                    id="courseBackButton"
+                >
+                    <span>←</span>
+                    Back to courses
+                </button>
 
-                <div class="course-meta-item">
-                    <span class="course-meta-label">LESSON TIME</span>
-                    <strong id="courseDetailsTime"></strong>
-                </div>
 
-            </div>
+                <!-- COURSE CONTENT -->
 
-            <div class="course-plans">
+                <div class="course-details-layout">
 
-                <div class="course-plan">
+                    <!-- LEFT: COVER -->
 
-                    <div class="course-plan-name">
-                        BASIC
+                    <div class="course-details-cover-column">
+
+                        <div class="course-details-cover-wrapper">
+
+                            <img
+                                id="courseDetailsCover"
+                                class="course-details-cover"
+                                src=""
+                                alt=""
+                            >
+
+                        </div>
+
                     </div>
 
-                    <p id="courseDetailsBasic"></p>
 
-                </div>
 
-                <div class="course-plan platinum">
+                    <!-- RIGHT: INFORMATION -->
 
-                    <div class="course-plan-name">
-                        PLATINUM
+                    <div class="course-details-information">
+
+                        <div
+                            class="course-details-category"
+                            id="courseDetailsCategory"
+                        ></div>
+
+
+                        <h1
+                            class="course-details-title"
+                            id="courseDetailsTitle"
+                        ></h1>
+
+
+                        <div
+                            class="course-details-level"
+                            id="courseDetailsLevel"
+                        ></div>
+
+
+                        <p
+                            class="course-details-description"
+                            id="courseDetailsDescription"
+                        ></p>
+
+
+
+                        <!-- COURSE STATS -->
+
+                        <div class="course-details-stats">
+
+                            <div class="course-stat">
+
+                                <span>
+                                    COURSE LEVEL
+                                </span>
+
+                                <strong
+                                    id="courseDetailsStatLevel"
+                                ></strong>
+
+                            </div>
+
+
+                            <div class="course-stat">
+
+                                <span>
+                                    LESSON LENGTH
+                                </span>
+
+                                <strong
+                                    id="courseDetailsTime"
+                                ></strong>
+
+                            </div>
+
+
+                            <div class="course-stat">
+
+                                <span>
+                                    COURSE TYPE
+                                </span>
+
+                                <strong>
+                                    Autonomous
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- WHAT YOU WILL LEARN -->
+
+                        <div class="course-details-section">
+
+                            <div class="details-section-label">
+                                WHAT YOU WILL LEARN
+                            </div>
+
+                            <p
+                                id="courseDetailsLearning"
+                                class="course-details-learning"
+                            ></p>
+
+                        </div>
+
+
+
+                        <!-- COURSE STRUCTURE -->
+
+                        <div class="course-details-section">
+
+                            <div class="details-section-label">
+                                COURSE STRUCTURE
+                            </div>
+
+                            <p
+                                id="courseDetailsStructure"
+                                class="course-details-structure"
+                            ></p>
+
+                        </div>
+
+
+
+                        <!-- ACTION -->
+
+                        <div class="course-details-action">
+
+                            <button
+                                type="button"
+                                class="course-start-button"
+                                id="courseStartButton"
+                            >
+                                Explore Course
+                                <span>→</span>
+                            </button>
+
+                        </div>
+
                     </div>
 
-                    <p id="courseDetailsPlatinum"></p>
-
                 </div>
-
-            </div>
-
-            <button
-                type="button"
-                class="course-back-button"
-                id="courseBackButton"
-            >
-                ← Back to courses
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
-            <!-- NO RESULTS -->
-
-            <div
-                class="no-results"
-                id="noResults"
-            >
-
-                <div class="no-results-circle">
-                    ⌕
-                </div>
-
-                <h3>
-                    No courses found
-                </h3>
-
-                <p>
-                    Try another search or category.
-                </p>
 
             </div>
 
         </section>
-
-
-        <!-- =========================================
-             FOOTER
-        ========================================== -->
-
-        <footer class="footer">
-
-            <span>
-                © <span id="year"></span> EduCore
-            </span>
-
-            <span>
-                Autonomous Learning Platform
-            </span>
-
-        </footer>
 
     </main>
 
@@ -521,4 +644,4 @@
 
 </body>
 
-                                   </html>
+</html>
