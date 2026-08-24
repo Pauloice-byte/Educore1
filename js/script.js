@@ -13,26 +13,32 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryKey: "language",
             cover: "images/english.jpg",
             url: "#",
-            description: "Learn English independently through structured lessons, practical activities and guided practice.",
-            duration: "75 hours",
-            time: "25 minutes per lesson",
-            basic: "Autonomous learning with AI assistance",
-            platinum: "Autonomous learning + live teacher classes twice a week"
+            description:
+                "Build practical English skills through structured lessons designed for independent learning. Develop your vocabulary, grammar, listening, speaking and communication skills step by step.",
+            time: "25 minutes",
+            learning:
+                "Vocabulary, grammar, listening, speaking, pronunciation, reading and practical communication.",
+            structure:
+                "Short structured lessons, practice activities, repeated practice and immediate feedback."
         },
 
-      {
-    title: "French",
-    level: "Language",
-    category: "Language",
-    categoryKey: "language",
-    cover: "images/french.jpg",
-    url: "#",
-    description: "Learn French independently through structured lessons, practical activities and guided practice.",
-    duration: "75 hours",
-    time: "25 minutes per lesson",
-    basic: "Autonomous learning with AI assistance",
-    platinum: "Autonomous learning + live teacher classes twice a week"
-},
+
+        {
+            title: "French",
+            level: "Language",
+            category: "Language",
+            categoryKey: "language",
+            cover: "images/french.jpg",
+            url: "#",
+            description:
+                "Develop useful French communication skills through structured autonomous lessons. Learn progressively while practising vocabulary, grammar, pronunciation and real-world communication.",
+            time: "25 minutes",
+            learning:
+                "Vocabulary, grammar, pronunciation, listening, speaking, reading and everyday communication.",
+            structure:
+                "Progressive lessons with explanations, guided practice, activities and continuous review."
+        },
+
 
         {
             title: "Portuguese",
@@ -41,7 +47,15 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryKey: "language",
             cover: "images/portuguese.jpg",
             url: "#",
+            description:
+                "Learn Portuguese through a practical and structured learning path designed to help you communicate confidently in everyday situations.",
+            time: "25 minutes",
+            learning:
+                "Vocabulary, grammar, pronunciation, listening, speaking, reading and practical communication.",
+            structure:
+                "Structured lessons followed by practice, activities, review and immediate feedback."
         },
+
 
         {
             title: "Microsoft Word",
@@ -49,8 +63,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "MS Office",
             categoryKey: "ms-office",
             cover: "images/ms-word.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Learn how to use Microsoft Word effectively to create professional documents, organise information and work confidently with essential document tools.",
+            time: "25 minutes",
+            learning:
+                "Document creation, formatting, page layout, tables, images, styles and professional documents.",
+            structure:
+                "Practical demonstrations followed by guided exercises and independent practice."
         },
+
 
         {
             title: "Microsoft Excel",
@@ -58,8 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "MS Office",
             categoryKey: "ms-office",
             cover: "images/ms-excel.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Develop practical Excel skills for organising information, working with data, using formulas and creating useful spreadsheets.",
+            time: "25 minutes",
+            learning:
+                "Spreadsheets, formulas, functions, formatting, data organisation, charts and practical analysis.",
+            structure:
+                "Step-by-step lessons with demonstrations, exercises and repeated practice."
         },
+
 
         {
             title: "Microsoft PowerPoint",
@@ -67,8 +97,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "MS Office",
             categoryKey: "ms-office",
             cover: "images/ms-powerpoint.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Learn to create clear, professional and engaging presentations using Microsoft PowerPoint and its most important presentation tools.",
+            time: "25 minutes",
+            learning:
+                "Slides, layouts, text, images, charts, animations, transitions and presentation design.",
+            structure:
+                "Practical lessons combining demonstrations, guided activities and presentation projects."
         },
+
 
         {
             title: "Trading Fundamentals",
@@ -76,8 +114,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Trading",
             categoryKey: "trading",
             cover: "images/trading-fundamentals.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Build a solid foundation in financial markets and trading concepts before moving into more advanced market analysis and strategies.",
+            time: "25 minutes",
+            learning:
+                "Markets, financial instruments, orders, risk, trading terminology and fundamental concepts.",
+            structure:
+                "Concept-based lessons followed by examples, practice and knowledge checks."
         },
+
 
         {
             title: "Technical Analysis",
@@ -85,8 +131,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Trading",
             categoryKey: "trading",
             cover: "images/technical-analysis.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Learn the principles of technical analysis and how traders study price movements, charts and market behaviour.",
+            time: "25 minutes",
+            learning:
+                "Charts, trends, support and resistance, indicators, patterns and technical analysis concepts.",
+            structure:
+                "Visual explanations, chart examples, guided analysis and repeated practice."
         },
+
 
         {
             title: "Business Fundamentals",
@@ -94,8 +148,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Business",
             categoryKey: "business",
             cover: "images/business-fundamentals.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Understand the essential concepts behind modern business and develop a practical foundation for working in business environments.",
+            time: "25 minutes",
+            learning:
+                "Business models, customers, markets, operations, strategy and essential business concepts.",
+            structure:
+                "Short lessons with practical examples, activities and knowledge checks."
         },
+
 
         {
             title: "Entrepreneurship",
@@ -103,8 +165,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Business",
             categoryKey: "business",
             cover: "images/entrepreneurship.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Explore the principles of entrepreneurship and learn how ideas can be developed into practical business opportunities.",
+            time: "25 minutes",
+            learning:
+                "Business ideas, opportunity identification, customers, business models, planning and execution.",
+            structure:
+                "Progressive lessons supported by practical activities and real-world examples."
         },
+
 
         {
             title: "Web Development",
@@ -112,8 +182,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Technology",
             categoryKey: "technology",
             cover: "images/web-development.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Build a practical foundation in web development and understand how modern websites are structured, designed and developed.",
+            time: "25 minutes",
+            learning:
+                "HTML, CSS, JavaScript, web structure, styling, interaction and development fundamentals.",
+            structure:
+                "Concept explanations followed by coding demonstrations, exercises and projects."
         },
+
 
         {
             title: "Artificial Intelligence",
@@ -121,8 +199,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Technology",
             categoryKey: "technology",
             cover: "images/artificial-intelligence.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Explore the fundamentals of artificial intelligence and understand how AI systems are changing technology, business and everyday life.",
+            time: "25 minutes",
+            learning:
+                "AI concepts, machine learning, generative AI, applications, limitations and practical use.",
+            structure:
+                "Conceptual lessons, demonstrations, examples and practical activities."
         },
+
 
         {
             title: "Personal Finance",
@@ -130,8 +216,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Finance",
             categoryKey: "finance",
             cover: "images/personal-finance.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Develop practical knowledge for managing personal money, making informed financial decisions and building stronger financial habits.",
+            time: "25 minutes",
+            learning:
+                "Budgeting, saving, spending, debt, financial planning and responsible money management.",
+            structure:
+                "Practical lessons with examples, activities and financial decision-making exercises."
         },
+
 
         {
             title: "Financial Literacy",
@@ -139,8 +233,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Finance",
             categoryKey: "finance",
             cover: "images/financial-literacy.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Build the knowledge needed to understand money, financial products, economic concepts and everyday financial decisions.",
+            time: "25 minutes",
+            learning:
+                "Money, banking, interest, credit, investing, risk and essential financial concepts.",
+            structure:
+                "Structured lessons with explanations, examples, activities and regular review."
         },
+
 
         {
             title: "Communication Skills",
@@ -148,8 +250,16 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Personal Development",
             categoryKey: "personal-development",
             cover: "images/communication.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Improve the way you communicate in professional and everyday situations by developing practical communication skills and greater confidence.",
+            time: "25 minutes",
+            learning:
+                "Speaking, listening, clarity, confidence, professional communication and interpersonal skills.",
+            structure:
+                "Short lessons with examples, practical exercises, reflection and repeated practice."
         },
+
 
         {
             title: "Time Management",
@@ -157,10 +267,18 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Personal Development",
             categoryKey: "personal-development",
             cover: "images/time-management.jpg",
-            url: "#"
+            url: "#",
+            description:
+                "Learn practical methods for organising your time, prioritising important tasks and creating more effective working and learning habits.",
+            time: "25 minutes",
+            learning:
+                "Priorities, planning, organisation, productivity, routines and effective time use.",
+            structure:
+                "Practical lessons supported by planning activities and real-world exercises."
         }
 
     ];
+
 
 
     /* =========================================
@@ -178,38 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const bookGrid =
         document.getElementById("bookGrid");
-    const courseDetails =
-    document.getElementById("courseDetails");
-
-const courseDetailsCover =
-    document.getElementById("courseDetailsCover");
-
-const courseDetailsCategory =
-    document.getElementById("courseDetailsCategory");
-
-const courseDetailsTitle =
-    document.getElementById("courseDetailsTitle");
-
-const courseDetailsLevel =
-    document.getElementById("courseDetailsLevel");
-
-const courseDetailsDescription =
-    document.getElementById("courseDetailsDescription");
-
-const courseDetailsDuration =
-    document.getElementById("courseDetailsDuration");
-
-const courseDetailsTime =
-    document.getElementById("courseDetailsTime");
-
-const courseDetailsBasic =
-    document.getElementById("courseDetailsBasic");
-
-const courseDetailsPlatinum =
-    document.getElementById("courseDetailsPlatinum");
-
-const courseBackButton =
-    document.getElementById("courseBackButton");
 
     const noResults =
         document.getElementById("noResults");
@@ -234,12 +320,59 @@ const courseBackButton =
         );
 
 
+    /* COURSE DETAILS */
+
+    const homeContent =
+        document.getElementById("homeContent");
+
+    const courseDetails =
+        document.getElementById("courseDetails");
+
+    const courseBackButton =
+        document.getElementById("courseBackButton");
+
+    const courseDetailsCover =
+        document.getElementById("courseDetailsCover");
+
+    const courseDetailsCategory =
+        document.getElementById("courseDetailsCategory");
+
+    const courseDetailsTitle =
+        document.getElementById("courseDetailsTitle");
+
+    const courseDetailsLevel =
+        document.getElementById("courseDetailsLevel");
+
+    const courseDetailsDescription =
+        document.getElementById("courseDetailsDescription");
+
+    const courseDetailsStatLevel =
+        document.getElementById("courseDetailsStatLevel");
+
+    const courseDetailsTime =
+        document.getElementById("courseDetailsTime");
+
+    const courseDetailsLearning =
+        document.getElementById("courseDetailsLearning");
+
+    const courseDetailsStructure =
+        document.getElementById("courseDetailsStructure");
+
+    const courseStartButton =
+        document.getElementById("courseStartButton");
+
+
+
     /* =========================================
        STATE
     ========================================== */
 
     let activeFilter = "all";
+
     let searchTerm = "";
+
+    let activeCourse = null;
+
 
 
     /* =========================================
@@ -247,9 +380,12 @@ const courseBackButton =
     ========================================== */
 
     if (year) {
+
         year.textContent =
             new Date().getFullYear();
+
     }
+
 
 
     /* =========================================
@@ -278,6 +414,7 @@ const courseBackButton =
     };
 
 
+
     /* =========================================
        CREATE COURSE CARDS
     ========================================== */
@@ -288,31 +425,38 @@ const courseBackButton =
 
         bookGrid.innerHTML = "";
 
+
         courses.forEach(course => {
 
             const card =
                 document.createElement("article");
 
-            card.className = "book-card";
+
+            card.className =
+                "book-card";
+
 
             card.dataset.category =
                 course.categoryKey;
 
+
             card.dataset.search = (
+
                 course.title +
                 " " +
                 course.category +
                 " " +
                 course.level
+
             ).toLowerCase();
 
 
             card.innerHTML = `
 
-                <button
-                type="button"
-                class="book-card-link"
-                aria-label="Open ${course.title}"
+                <a
+                    href="#"
+                    class="book-card-link"
+                    aria-label="Open ${course.title}"
                 >
 
                     <div class="book-cover-wrapper">
@@ -359,114 +503,41 @@ const courseBackButton =
 
                     </div>
 
-            </button>
+                </a>
+
             `;
+
+
+            const cardLink =
+                card.querySelector(
+                    ".book-card-link"
+                );
+
+
+            if (cardLink) {
+
+                cardLink.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        openCourseDetails(course);
+
+                    }
+                );
+
+            }
+
 
             bookGrid.appendChild(card);
 
-const cardLink =
-    card.querySelector(".book-card-link");
-
-if (cardLink) {
-
-    cardLink.addEventListener("click", () => {
-
-        openCourseDetails(course);
-
-    });
-
-}
-
-}
-
-        });
-        
-    }
-
-        /* =========================================
-   OPEN COURSE DETAILS
-========================================== */
-
-function openCourseDetails(course) {
-
-    if (!courseDetails) return;
-
-    /* Populate course details */
-
-    courseDetailsCover.src = course.cover;
-    courseDetailsCover.alt = course.title;
-
-    courseDetailsCategory.textContent =
-        course.category.toUpperCase();
-
-    courseDetailsTitle.textContent =
-        course.title;
-
-    courseDetailsLevel.textContent =
-        course.level;
-
-    courseDetailsDescription.textContent =
-        course.description ||
-        "Course information will be available soon.";
-
-    courseDetailsDuration.textContent =
-        course.duration ||
-        "To be announced";
-
-    courseDetailsTime.textContent =
-        course.time ||
-        "25 minutes per lesson";
-
-    courseDetailsBasic.textContent =
-        course.basic ||
-        "Autonomous learning with AI assistance";
-
-    courseDetailsPlatinum.textContent =
-        course.platinum ||
-        "Autonomous learning + live teacher classes twice a week";
-
-
-    /* Hide course catalogue */
-
-    bookGrid.classList.add("course-open");
-
-    const filterBar =
-        document.querySelector(".filter-bar");
-
-    const libraryHeader =
-        document.querySelector(".library-header");
-
-    if (filterBar) {
-        filterBar.classList.add("course-open");
-    }
-
-    if (libraryHeader) {
-        libraryHeader.classList.add("course-open");
-    }
-
-
-    /* Show course details */
-
-    courseDetails.classList.add("visible");
-
-    courseDetails.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-
-    /* Scroll to the actual course details */
-
-    requestAnimationFrame(() => {
-
-        courseDetails.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
         });
 
-    });
+    }
 
-}
+
+
     /* =========================================
        FILTER COURSES
     ========================================== */
@@ -478,6 +549,7 @@ function openCourseDetails(course) {
                 ".book-card"
             );
 
+
         let visibleCount = 0;
 
 
@@ -485,6 +557,7 @@ function openCourseDetails(course) {
 
             const category =
                 card.dataset.category;
+
 
             const text =
                 card.dataset.search;
@@ -511,13 +584,19 @@ function openCourseDetails(course) {
 
                 visibleCount++;
 
+
                 setTimeout(() => {
+
                     card.classList.add("show");
+
                 }, 30);
 
-            } else {
+            }
+
+            else {
 
                 card.classList.remove("show");
+
                 card.classList.add("hide");
 
             }
@@ -535,6 +614,7 @@ function openCourseDetails(course) {
         }
 
     }
+
 
 
     /* =========================================
@@ -588,22 +668,27 @@ function openCourseDetails(course) {
     }
 
 
+
     /* =========================================
        SIDEBAR NAVIGATION
     ========================================== */
 
     navigationButtons.forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const filter =
-                button.dataset.filter;
+                const filter =
+                    button.dataset.filter;
 
-            setFilter(filter);
+                setFilter(filter);
 
-        });
+            }
+        );
 
     });
+
 
 
     /* =========================================
@@ -612,16 +697,20 @@ function openCourseDetails(course) {
 
     filterButtons.forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const filter =
-                button.dataset.filter;
+                const filter =
+                    button.dataset.filter;
 
-            setFilter(filter);
+                setFilter(filter);
 
-        });
+            }
+        );
 
     });
+
 
 
     /* =========================================
@@ -647,6 +736,236 @@ function openCourseDetails(course) {
     }
 
 
+
+    /* =========================================
+       OPEN COURSE DETAILS
+    ========================================== */
+
+    function openCourseDetails(course) {
+
+        if (
+            !courseDetails ||
+            !homeContent
+        ) {
+            return;
+        }
+
+
+        activeCourse = course;
+
+
+        /* -------------------------------------
+           COURSE COVER
+        ------------------------------------- */
+
+        if (courseDetailsCover) {
+
+            courseDetailsCover.src =
+                course.cover;
+
+            courseDetailsCover.alt =
+                course.title;
+
+        }
+
+
+        /* -------------------------------------
+           COURSE INFORMATION
+        ------------------------------------- */
+
+        if (courseDetailsCategory) {
+
+            courseDetailsCategory.textContent =
+                course.category.toUpperCase();
+
+        }
+
+
+        if (courseDetailsTitle) {
+
+            courseDetailsTitle.textContent =
+                course.title;
+
+        }
+
+
+        if (courseDetailsLevel) {
+
+            courseDetailsLevel.textContent =
+                course.level;
+
+        }
+
+
+        if (courseDetailsDescription) {
+
+            courseDetailsDescription.textContent =
+                course.description;
+
+        }
+
+
+        if (courseDetailsStatLevel) {
+
+            courseDetailsStatLevel.textContent =
+                course.level;
+
+        }
+
+
+        if (courseDetailsTime) {
+
+            courseDetailsTime.textContent =
+                course.time;
+
+        }
+
+
+        if (courseDetailsLearning) {
+
+            courseDetailsLearning.textContent =
+                course.learning;
+
+        }
+
+
+        if (courseDetailsStructure) {
+
+            courseDetailsStructure.textContent =
+                course.structure;
+
+        }
+
+
+        /* -------------------------------------
+           HIDE HOME
+        ------------------------------------- */
+
+        homeContent.classList.add(
+            "home-hidden"
+        );
+
+
+        /* -------------------------------------
+           SHOW DETAILS
+        ------------------------------------- */
+
+        courseDetails.classList.add(
+            "visible"
+        );
+
+
+        courseDetails.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+        /* -------------------------------------
+           CLOSE MOBILE SIDEBAR
+        ------------------------------------- */
+
+        closeMobileSidebar();
+
+
+        /* -------------------------------------
+           MOVE TO TOP
+        ------------------------------------- */
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+
+
+    /* =========================================
+       CLOSE COURSE DETAILS
+    ========================================== */
+
+    function closeCourseDetails() {
+
+        if (
+            !courseDetails ||
+            !homeContent
+        ) {
+            return;
+        }
+
+
+        courseDetails.classList.remove(
+            "visible"
+        );
+
+
+        courseDetails.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        homeContent.classList.remove(
+            "home-hidden"
+        );
+
+
+        activeCourse = null;
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+
+
+    /* =========================================
+       BACK BUTTON
+    ========================================== */
+
+    if (courseBackButton) {
+
+        courseBackButton.addEventListener(
+            "click",
+            closeCourseDetails
+        );
+
+    }
+
+
+
+    /* =========================================
+       COURSE START BUTTON
+    ========================================== */
+
+    if (courseStartButton) {
+
+        courseStartButton.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    activeCourse &&
+                    activeCourse.url &&
+                    activeCourse.url !== "#"
+                ) {
+
+                    window.location.href =
+                        activeCourse.url;
+
+                }
+
+            }
+        );
+
+    }
+
+
+
     /* =========================================
        SIDEBAR TOGGLE
     ========================================== */
@@ -668,6 +987,7 @@ function openCourseDetails(course) {
                             "mobile-open"
                         );
 
+
                     if (backdrop) {
 
                         backdrop.classList.toggle(
@@ -677,6 +997,7 @@ function openCourseDetails(course) {
 
                     }
 
+
                     menuButton.setAttribute(
                         "aria-expanded",
                         opened
@@ -684,12 +1005,14 @@ function openCourseDetails(course) {
 
                 }
 
+
                 else {
 
                     const collapsed =
                         sidebar.classList.toggle(
                             "collapsed"
                         );
+
 
                     menuButton.setAttribute(
                         "aria-expanded",
@@ -702,6 +1025,7 @@ function openCourseDetails(course) {
         );
 
     }
+
 
 
     /* =========================================
@@ -718,6 +1042,7 @@ function openCourseDetails(course) {
 
         }
 
+
         if (backdrop) {
 
             backdrop.classList.remove(
@@ -725,6 +1050,7 @@ function openCourseDetails(course) {
             );
 
         }
+
 
         if (menuButton) {
 
@@ -736,6 +1062,7 @@ function openCourseDetails(course) {
         }
 
     }
+
 
 
     /* =========================================
@@ -752,6 +1079,7 @@ function openCourseDetails(course) {
     }
 
 
+
     /* =========================================
        ESCAPE
     ========================================== */
@@ -762,12 +1090,28 @@ function openCourseDetails(course) {
 
             if (event.key === "Escape") {
 
-                closeMobileSidebar();
+                if (
+                    courseDetails &&
+                    courseDetails.classList.contains(
+                        "visible"
+                    )
+                ) {
+
+                    closeCourseDetails();
+
+                }
+
+                else {
+
+                    closeMobileSidebar();
+
+                }
 
             }
 
         }
     );
+
 
 
     /* =========================================
@@ -787,68 +1131,8 @@ function openCourseDetails(course) {
         }
     );
 
-    /* =========================================
-   CLOSE COURSE DETAILS
-========================================== */
-
-if (courseBackButton) {
-
-    courseBackButton.addEventListener(
-        "click",
-        () => {
-
-            /* Hide details */
-
-            courseDetails.classList.remove(
-                "visible"
-            );
-
-            courseDetails.setAttribute(
-                "aria-hidden",
-                "true"
-            );
 
 
-            /* Show catalogue again */
-
-            bookGrid.classList.remove(
-                "course-open"
-            );
-
-            const filterBar =
-                document.querySelector(".filter-bar");
-
-            const libraryHeader =
-                document.querySelector(".library-header");
-
-            if (filterBar) {
-                filterBar.classList.remove(
-                    "course-open"
-                );
-            }
-
-            if (libraryHeader) {
-                libraryHeader.classList.remove(
-                    "course-open"
-                );
-            }
-
-
-            /* Return to course grid */
-
-            requestAnimationFrame(() => {
-
-                bookGrid.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-
-            });
-
-        }
-    );
-
-}
     /* =========================================
        INITIALIZE
     ========================================== */
