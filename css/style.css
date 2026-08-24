@@ -1411,8 +1411,12 @@ a {
     display: none;
 }
 
+
+/* COURSE DETAILS */
+
 .course-details {
     display: none;
+    margin-top: 40px;
 }
 
 .course-details.visible {
