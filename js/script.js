@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Language",
             categoryKey: "language",
             cover: "images/english.jpg",
-            url: "#"
+            url: "#",
             description: "Learn English independently through structured lessons, practical activities and guided practice.",
             duration: "75 hours",
             time: "25 minutes per lesson",
@@ -20,14 +20,19 @@ document.addEventListener("DOMContentLoaded", () => {
             platinum: "Autonomous learning + live teacher classes twice a week"
         },
 
-        {
-            title: "French",
-            level: "Language",
-            category: "Language",
-            categoryKey: "language",
-            cover: "images/french.jpg",
-            url: "#"
-        },
+      {
+    title: "French",
+    level: "Language",
+    category: "Language",
+    categoryKey: "language",
+    cover: "images/french.jpg",
+    url: "#",
+    description: "Learn French independently through structured lessons, practical activities and guided practice.",
+    duration: "75 hours",
+    time: "25 minutes per lesson",
+    basic: "Autonomous learning with AI assistance",
+    platinum: "Autonomous learning + live teacher classes twice a week"
+},
 
         {
             title: "Portuguese",
@@ -362,13 +367,17 @@ const courseBackButton =
             const cardLink =
     card.querySelector(".book-card-link");
 
-cardLink.addEventListener("click", event => {
+if (cardLink) {
 
-    event.preventDefault();
+    cardLink.addEventListener("click", event => {
 
-    openCourseDetails(course);
+        event.preventDefault();
 
-});
+        openCourseDetails(course);
+
+    });
+
+}
 
         });
         
