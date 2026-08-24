@@ -1209,26 +1209,6 @@ a {
     }
 
 }
-
-
-/* =========================================
-   REDUCED MOTION
-========================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        animation: none !important;
-
-        transition: none !important;
-
-        scroll-behavior: auto !important;
-    }
-
-    }
 /* =========================================
    COURSE DETAILS
 ========================================== */
@@ -1369,6 +1349,26 @@ a {
 .course-back-button:hover {
     opacity: 0.9;
 }
+
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation: none !important;
+
+        transition: none !important;
+
+        scroll-behavior: auto !important;
+    }
+
+    }
 
 
 /* =========================================
