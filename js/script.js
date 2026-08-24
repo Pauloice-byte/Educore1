@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
             categoryKey: "language",
             cover: "images/english.jpg",
             url: "#"
+            description: "Learn English independently through structured lessons, practical activities and guided practice.",
+            duration: "75 hours",
+            time: "25 minutes per lesson",
+            basic: "Autonomous learning with AI assistance",
+            platinum: "Autonomous learning + live teacher classes twice a week"
         },
 
         {
