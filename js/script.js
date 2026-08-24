@@ -173,6 +173,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const bookGrid =
         document.getElementById("bookGrid");
+    const courseDetails =
+    document.getElementById("courseDetails");
+
+const courseDetailsCover =
+    document.getElementById("courseDetailsCover");
+
+const courseDetailsCategory =
+    document.getElementById("courseDetailsCategory");
+
+const courseDetailsTitle =
+    document.getElementById("courseDetailsTitle");
+
+const courseDetailsLevel =
+    document.getElementById("courseDetailsLevel");
+
+const courseDetailsDescription =
+    document.getElementById("courseDetailsDescription");
+
+const courseDetailsDuration =
+    document.getElementById("courseDetailsDuration");
+
+const courseDetailsTime =
+    document.getElementById("courseDetailsTime");
+
+const courseDetailsBasic =
+    document.getElementById("courseDetailsBasic");
+
+const courseDetailsPlatinum =
+    document.getElementById("courseDetailsPlatinum");
+
+const courseBackButton =
+    document.getElementById("courseBackButton");
 
     const noResults =
         document.getElementById("noResults");
@@ -327,12 +359,70 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             bookGrid.appendChild(card);
+            const cardLink =
+    card.querySelector(".book-card-link");
+
+cardLink.addEventListener("click", event => {
+
+    event.preventDefault();
+
+    openCourseDetails(course);
+
+});
 
         });
-
+        
     }
 
+        /* =========================================
+   OPEN COURSE DETAILS
+========================================== */
 
+function openCourseDetails(course) {
+
+    if (!courseDetails) return;
+
+    courseDetailsCover.src = course.cover;
+    courseDetailsCover.alt = course.title;
+
+    courseDetailsCategory.textContent =
+        course.category.toUpperCase();
+
+    courseDetailsTitle.textContent =
+        course.title;
+
+    courseDetailsLevel.textContent =
+        course.level;
+
+    courseDetailsDescription.textContent =
+        course.description;
+
+    courseDetailsDuration.textContent =
+        course.duration;
+
+    courseDetailsTime.textContent =
+        course.time;
+
+    courseDetailsBasic.textContent =
+        course.basic;
+
+    courseDetailsPlatinum.textContent =
+        course.platinum;
+
+    courseDetails.classList.add("visible");
+
+    courseDetails.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document
+        .getElementById("library")
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
     /* =========================================
        FILTER COURSES
     ========================================== */
@@ -653,7 +743,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
+    /* =========================================
+   CLOSE COURSE DETAILS
+========================================== */
 
+if (courseBackButton) {
+
+    courseBackButton.addEventListener(
+        "click",
+        () => {
+
+            courseDetails.classList.remove(
+                "visible"
+            );
+
+            courseDetails.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            document
+                .getElementById("library")
+                .scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+        }
+    );
+
+}
     /* =========================================
        INITIALIZE
     ========================================== */
