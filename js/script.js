@@ -408,19 +408,19 @@ function openCourseDetails(course) {
         course.level;
 
     courseDetailsDescription.textContent =
-        course.description || "";
+        course.description;
 
     courseDetailsDuration.textContent =
-        course.duration || "";
+        course.duration;
 
     courseDetailsTime.textContent =
-        course.time || "";
+        course.time;
 
     courseDetailsBasic.textContent =
-        course.basic || "";
+        course.basic;
 
     courseDetailsPlatinum.textContent =
-        course.platinum || "";
+        course.platinum;
 
     courseDetails.classList.add("visible");
 
@@ -429,14 +429,10 @@ function openCourseDetails(course) {
         "false"
     );
 
-    setTimeout(() => {
-
-        courseDetails.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-
-    }, 50);
+    courseDetails.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
 }
     /* =========================================
        FILTER COURSES
