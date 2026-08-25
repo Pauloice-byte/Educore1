@@ -578,160 +578,161 @@
 
 
             <!-- =================================================
-                 COURSES
-            ================================================== -->
+     COURSES
+================================================== -->
 
-            <section
-                id="courses-section"
-                class="admin-section"
-            >
+<section
+    id="courses-section"
+    class="admin-section"
+>
 
-             <div class="courses-header">
+    <div class="courses-header">
 
-    <div class="section-introduction">
+        <div class="section-introduction">
 
-        <div class="section-kicker">
-            CATALOGUE
+            <div class="section-kicker">
+                CATALOGUE
+            </div>
+
+            <h2>
+                Courses
+            </h2>
+
+            <p>
+                Create, edit and manage the courses available on the EduCore platform.
+            </p>
+
         </div>
 
-        <h2>
-            Courses
-        </h2>
-
-        <p>
-            Create, edit and manage the courses available on the EduCore platform.
-        </p>
+        <button
+            type="button"
+            class="primary-button"
+            id="create-course-button"
+        >
+            <span>+</span>
+            Create Course
+        </button>
 
     </div>
 
-</div>  
 
-    <button
-        type="button"
-        class="primary-button"
-        id="create-course-button"
-    >
-        <span>+</span>
-        Create Course
-    </button>
+    <!-- =================================================
+         SEARCH / FILTER
+    ================================================== -->
 
-</div>
+    <div class="course-toolbar">
 
+        <div class="course-search">
 
-                <!-- SEARCH / FILTER -->
+            <span class="search-icon">
+                ⌕
+            </span>
 
-                <div class="course-toolbar">
+            <input
+                type="search"
+                id="course-search"
+                placeholder="Search courses..."
+                aria-label="Search courses"
+            >
 
-                    <div class="course-search">
-
-                        <span class="search-icon">
-                            ⌕
-                        </span>
-
-                        <input
-                            type="search"
-                            id="course-search"
-                            placeholder="Search courses..."
-                            aria-label="Search courses"
-                        >
-
-                    </div>
+        </div>
 
 
-                    <select
-                        id="course-filter"
-                        class="course-filter"
-                        aria-label="Filter courses"
-                    >
+        <select
+            id="course-filter"
+            class="course-filter"
+            aria-label="Filter courses"
+        >
 
-                        <option value="all">
-                            All courses
-                        </option>
+            <option value="all">
+                All courses
+            </option>
 
-                        <option value="published">
-                            Published
-                        </option>
+            <option value="published">
+                Published
+            </option>
 
-                        <option value="draft">
-                            Draft
-                        </option>
+            <option value="draft">
+                Draft
+            </option>
 
-                        <option value="archived">
-                            Archived
-                        </option>
+            <option value="archived">
+                Archived
+            </option>
 
-                    </select>
+        </select>
 
+    </div>
+
+
+    <!-- =================================================
+         COURSES PANEL
+    ================================================== -->
+
+    <div class="courses-panel">
+
+        <div class="courses-panel-top">
+
+            <div>
+
+                <strong>
+                    Course List
+                </strong>
+
+                <span id="course-count">
+                    Loading...
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="courses-table-header">
+
+            <span>
+                Course
+            </span>
+
+            <span>
+                Type
+            </span>
+
+            <span>
+                Level
+            </span>
+
+            <span>
+                Status
+            </span>
+
+            <span>
+                Updated
+            </span>
+
+        </div>
+
+
+        <div
+            class="courses-list"
+            id="courses-list"
+        >
+
+            <div class="courses-loading">
+
+                <div class="courses-loading-icon">
+                    ◌
                 </div>
 
+                Loading courses...
 
-                <!-- COURSES PANEL -->
+            </div>
 
-                <div class="courses-panel">
+        </div>
 
-                    <div class="courses-panel-top">
+    </div>
 
-                        <div>
-
-                            <strong>
-                                Course List
-                            </strong>
-
-                            <span id="course-count">
-                                Loading...
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="courses-table-header">
-
-                        <span>
-                            Course
-                        </span>
-
-                        <span>
-                            Type
-                        </span>
-
-                        <span>
-                            Level
-                        </span>
-
-                        <span>
-                            Status
-                        </span>
-
-                        <span>
-                            Updated
-                        </span>
-
-                    </div>
-
-
-                    <div
-                        class="courses-list"
-                        id="courses-list"
-                    >
-
-                        <div class="courses-loading">
-
-                            <div class="courses-loading-icon">
-                                ◌
-                            </div>
-
-                            Loading courses...
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
+</section>
 
             <!-- =================================================
                  STUDENTS
