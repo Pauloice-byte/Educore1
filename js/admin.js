@@ -1473,6 +1473,348 @@ function openCourseModal(course = null) {
     }, 50);
 
 }
+   /* =====================================================
+   GET / CREATE COURSE MODAL
+===================================================== */
+
+function getCourseModal() {
+
+    let modal =
+        $("#course-modal");
+
+
+    if (modal) {
+
+        return modal;
+
+    }
+
+
+    modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "course-modal";
+
+    modal.className =
+        "course-modal";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="course-modal-backdrop"
+            data-close-modal="true"
+        ></div>
+
+
+        <div
+            class="course-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="course-modal-title"
+        >
+
+            <div class="course-modal-header">
+
+                <div>
+
+                    <div class="course-modal-kicker">
+                        COURSE MANAGEMENT
+                    </div>
+
+                    <h2 id="course-modal-title">
+                        Create Course
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="course-modal-close"
+                    id="course-modal-close"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form
+                id="course-form"
+                class="course-form"
+            >
+
+                <!-- TITLE -->
+
+                <div class="course-form-field">
+
+                    <label for="course-title-input">
+                        Course title
+                    </label>
+
+                    <input
+                        id="course-title-input"
+                        name="title"
+                        type="text"
+                        required
+                        maxlength="200"
+                        placeholder="Enter course title"
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="course-form-field">
+
+                    <label for="course-description-input">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="course-description-input"
+                        name="description"
+                        rows="4"
+                        maxlength="5000"
+                        placeholder="Describe this course..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- CATEGORY + LEVEL -->
+
+                <div class="course-form-grid">
+
+                    <div class="course-form-field">
+
+                        <label for="course-category-input">
+                            Category
+                        </label>
+
+                        <input
+                            id="course-category-input"
+                            name="category"
+                            type="text"
+                            maxlength="100"
+                            placeholder="e.g. Science, Business, Programming"
+                        >
+
+                    </div>
+
+
+                    <div class="course-form-field">
+
+                        <label for="course-level-input">
+                            Level
+                        </label>
+
+                        <input
+                            id="course-level-input"
+                            name="level"
+                            type="text"
+                            maxlength="100"
+                            placeholder="e.g. Beginner, Intermediate, Advanced"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- COVER -->
+
+                <div class="course-form-field">
+
+                    <label for="course-cover-input">
+                        Cover image URL
+                    </label>
+
+                    <input
+                        id="course-cover-input"
+                        name="cover_image"
+                        type="url"
+                        placeholder="https://..."
+                    >
+
+                    <small>
+                        Optional.
+                    </small>
+
+                </div>
+
+
+                <!-- SORT ORDER -->
+
+                <div class="course-form-field">
+
+                    <label for="course-sort-input">
+                        Display order
+                    </label>
+
+                    <input
+                        id="course-sort-input"
+                        name="sort_order"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="0"
+                    >
+
+                </div>
+
+
+                <!-- ERROR -->
+
+                <div
+                    id="course-form-error"
+                    class="course-form-error"
+                    hidden
+                    role="alert"
+                ></div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="course-form-actions">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="course-cancel-button"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                        id="course-save-button"
+                    >
+                        Save Course
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    /* =================================================
+       FORM
+    ================================================= */
+
+    const form =
+        modal.querySelector(
+            "#course-form"
+        );
+
+
+    form.addEventListener(
+        "submit",
+        saveCourse
+    );
+
+
+    /* =================================================
+       CLOSE BUTTON
+    ================================================= */
+
+    modal
+        .querySelector(
+            "#course-modal-close"
+        )
+        .addEventListener(
+            "click",
+            closeCourseModal
+        );
+
+
+    /* =================================================
+       CANCEL
+    ================================================= */
+
+    modal
+        .querySelector(
+            "#course-cancel-button"
+        )
+        .addEventListener(
+            "click",
+            closeCourseModal
+        );
+
+
+    /* =================================================
+       BACKDROP
+    ================================================= */
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.dataset.closeModal ===
+                "true"
+            ) {
+
+                closeCourseModal();
+
+            }
+
+        }
+    );
+
+
+    /* =================================================
+       ESCAPE
+    ================================================= */
+
+    if (!window.__eduCoreCourseModalEscapeHandler) {
+
+        window.__eduCoreCourseModalEscapeHandler =
+            event => {
+
+                const currentModal =
+                    $("#course-modal");
+
+                if (
+                    event.key === "Escape" &&
+                    currentModal &&
+                    currentModal.classList.contains("open")
+                ) {
+
+                    closeCourseModal();
+
+                }
+
+            };
+
+
+        document.addEventListener(
+            "keydown",
+            window.__eduCoreCourseModalEscapeHandler
+        );
+
+    }
+
+
+    return modal;
+
+}
 
     /* =====================================================
        SAVE COURSE
