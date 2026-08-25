@@ -3,9 +3,42 @@
    PHASE 3 — ADMIN.JS
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
     "use strict";
+
+
+    /* =====================================================
+       ADMIN ACCESS PROTECTION
+       
+       Phase 2 authentication verifies that the current
+       user is authenticated and has administrator access.
+
+       The dashboard does not initialize unless the user
+       passes this check.
+    ====================================================== */
+
+    if (typeof requireAdmin !== "function") {
+
+        console.error(
+            "EduCore: requireAdmin() is not available. Make sure auth.js is loaded before admin.js."
+        );
+
+        window.location.href = "index.html";
+
+        return;
+    }
+
+
+    const authorised =
+        await requireAdmin();
+
+
+    if (!authorised) {
+
+        return;
+
+    }
 
 
     /* =====================================================
@@ -214,20 +247,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
             window.supabaseClient &&
-            typeof window.supabaseClient
-                .from === "function"
+            typeof window.supabaseClient.from === "function"
         ) {
+
             return window.supabaseClient;
+
         }
+
 
         if (
             window.supabase &&
             typeof window.supabase.from === "function"
         ) {
+
             return window.supabase;
+
         }
 
+
         return null;
+
     }
 
 
@@ -241,15 +280,24 @@ document.addEventListener("DOMContentLoaded", () => {
             value === null ||
             value === undefined
         ) {
+
             return "";
+
         }
 
+
         return String(value)
+
             .replaceAll("&", "&amp;")
+
             .replaceAll("<", "&lt;")
+
             .replaceAll(">", "&gt;")
+
             .replaceAll('"', "&quot;")
+
             .replaceAll("'", "&#039;");
+
     }
 
 
@@ -262,13 +310,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const number =
             Number(value);
 
+
         if (
             !Number.isFinite(number)
         ) {
+
             return "0";
+
         }
 
+
         return number.toLocaleString();
+
     }
 
 
@@ -279,19 +332,26 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatDate(value) {
 
         if (!value) {
+
             return "—";
+
         }
+
 
         const date =
             new Date(value);
+
 
         if (
             Number.isNaN(
                 date.getTime()
             )
         ) {
+
             return "—";
+
         }
+
 
         return date.toLocaleDateString(
             undefined,
@@ -301,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 year: "numeric"
             }
         );
+
     }
 
 
@@ -311,64 +372,90 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatRelativeTime(value) {
 
         if (!value) {
+
             return "Unknown time";
+
         }
+
 
         const date =
             new Date(value);
+
 
         if (
             Number.isNaN(
                 date.getTime()
             )
         ) {
+
             return "Unknown time";
+
         }
+
 
         const now =
             new Date();
 
+
         const difference =
             now.getTime() -
             date.getTime();
+
 
         const seconds =
             Math.floor(
                 difference / 1000
             );
 
+
         if (seconds < 60) {
+
             return "Just now";
+
         }
+
 
         const minutes =
             Math.floor(
                 seconds / 60
             );
 
+
         if (minutes < 60) {
+
             return `${minutes} min ago`;
+
         }
+
 
         const hours =
             Math.floor(
                 minutes / 60
             );
 
+
         if (hours < 24) {
+
             return `${hours} hr ago`;
+
         }
+
 
         const days =
             Math.floor(
                 hours / 24
             );
 
+
         if (days < 7) {
+
             return `${days} day${days === 1 ? "" : "s"} ago`;
+
         }
 
+
         return formatDate(value);
+
     }
 
 
@@ -379,31 +466,44 @@ document.addEventListener("DOMContentLoaded", () => {
     function getStatus(record) {
 
         if (!record) {
+
             return "draft";
+
         }
+
 
         if (
             typeof record.status === "string"
         ) {
+
             return record.status
                 .toLowerCase();
+
         }
+
 
         if (
             record.published === true ||
             record.is_published === true
         ) {
+
             return "published";
+
         }
+
 
         if (
             record.archived === true ||
             record.is_archived === true
         ) {
+
             return "archived";
+
         }
 
+
         return "draft";
+
     }
 
 
@@ -414,14 +514,21 @@ document.addEventListener("DOMContentLoaded", () => {
     function getStatusLabel(status) {
 
         if (status === "published") {
+
             return "Published";
+
         }
+
 
         if (status === "archived") {
+
             return "Archived";
+
         }
 
+
         return "Draft";
+
     }
 
 
@@ -436,10 +543,14 @@ document.addEventListener("DOMContentLoaded", () => {
             status === "archived" ||
             status === "draft"
         ) {
+
             return status;
+
         }
 
+
         return "draft";
+
     }
 
 
@@ -450,22 +561,30 @@ document.addEventListener("DOMContentLoaded", () => {
     function showDashboardError(message) {
 
         if (!dashboardError) {
+
             return;
+
         }
+
 
         const span =
             dashboardError.querySelector(
                 "span"
             );
 
+
         if (span) {
+
             span.textContent =
                 message;
+
         }
+
 
         dashboardError.classList.remove(
             "admin-hidden"
         );
+
     }
 
 
@@ -476,12 +595,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function hideDashboardError() {
 
         if (!dashboardError) {
+
             return;
+
         }
+
 
         dashboardError.classList.add(
             "admin-hidden"
         );
+
     }
 
 
@@ -506,6 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     head: true
                 });
 
+
         if (
             filter &&
             filter.column &&
@@ -517,16 +641,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     filter.column,
                     filter.value
                 );
+
         }
+
 
         const result =
             await query;
 
+
         if (result.error) {
+
             throw result.error;
+
         }
 
+
         return result.count || 0;
+
     }
 
 
@@ -575,11 +706,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ]);
 
+
         return counts.reduce(
             (total, count) =>
                 total + count,
             0
         );
+
     }
 
 
@@ -623,11 +756,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ]);
 
+
         return counts.reduce(
             (total, count) =>
                 total + count,
             0
         );
+
     }
 
 
@@ -650,6 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 value: "student"
             }
         );
+
     }
 
 
@@ -662,6 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const client =
             getSupabaseClient();
 
+
         if (!client) {
 
             showDashboardError(
@@ -669,6 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
+
         }
 
 
@@ -718,22 +856,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const results =
             await Promise.allSettled([
+
                 requests.courses,
+
                 requests.units,
+
                 requests.lessons,
+
                 requests.students,
+
                 requests.published,
+
                 requests.drafts
+
             ]);
 
 
         const values = [
 
             totalCourses,
+
             totalUnits,
+
             totalLessons,
+
             totalStudents,
+
             publishedContent,
+
             draftContent
 
         ];
@@ -745,9 +895,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const element =
                     values[index];
 
+
                 if (!element) {
+
                     return;
+
                 }
+
 
                 if (
                     result.status ===
@@ -760,14 +914,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         );
 
                 }
+
                 else {
 
                     element.textContent =
                         "—";
 
+
                     state.dashboardErrors.push(
                         result.reason
                     );
+
                 }
 
             }
@@ -783,13 +940,16 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
         }
+
         else {
 
             hideDashboardError();
 
         }
 
+
         state.dashboardLoaded = true;
+
     }
 
 
@@ -802,23 +962,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const elements = [
 
             totalCourses,
+
             totalUnits,
+
             totalLessons,
+
             totalStudents,
+
             publishedContent,
+
             draftContent
 
         ];
+
 
         elements.forEach(
             element => {
 
                 if (!element) {
+
                     return;
+
                 }
+
 
                 element.textContent =
                     "—";
+
 
                 element.classList.add(
                     "dashboard-loading"
@@ -834,8 +1004,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 element => {
 
                     if (!element) {
+
                         return;
+
                     }
+
 
                     element.classList.remove(
                         "dashboard-loading"
@@ -845,6 +1018,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
         }, 150);
+
     }
 
 
@@ -855,11 +1029,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadCourses() {
 
         if (!coursesList) {
+
             return;
+
         }
+
 
         const client =
             getSupabaseClient();
+
 
         if (!client) {
 
@@ -868,6 +1046,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
+
         }
 
 
@@ -896,7 +1075,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (result.error) {
+
                 throw result.error;
+
             }
 
 
@@ -910,8 +1091,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             applyCourseFilters();
 
-
         }
+
         catch (error) {
 
             console.error(
@@ -919,7 +1100,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 error
             );
 
+
             state.courses = [];
+
 
             renderCoursesError(
                 "Courses could not be loaded from the database."
@@ -939,13 +1122,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
 
         if (!coursesList) {
+
             return;
+
         }
 
+
         if (courseCount) {
+
             courseCount.textContent =
                 "Unavailable";
+
         }
+
 
         coursesList.innerHTML = `
             <div class="courses-empty">
@@ -964,6 +1153,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
         `;
+
     }
 
 
@@ -975,6 +1165,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const search =
             state.searchTerm;
+
 
         const status =
             state.statusFilter;
@@ -1031,6 +1222,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         renderCourses();
+
     }
 
 
@@ -1041,7 +1233,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderCourses() {
 
         if (!coursesList) {
+
             return;
+
         }
 
 
@@ -1053,6 +1247,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const count =
                 courses.length;
+
 
             courseCount.textContent =
                 `${count} course${count === 1 ? "" : "s"}`;
@@ -1081,6 +1276,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             return;
+
         }
 
 
@@ -1093,6 +1289,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         )
                 )
                 .join("");
+
     }
 
 
@@ -1233,6 +1430,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </article>
         `;
+
     }
 
 
@@ -1250,6 +1448,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     event.target.value
                         .toLowerCase()
                         .trim();
+
 
                 applyCourseFilters();
 
@@ -1272,6 +1471,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.statusFilter =
                     event.target.value;
 
+
                 applyCourseFilters();
 
             }
@@ -1292,12 +1492,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadRecentActivity() {
 
         if (!activityList) {
+
             return;
+
         }
 
 
         const client =
             getSupabaseClient();
+
 
         if (!client) {
 
@@ -1306,6 +1509,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
+
         }
 
 
@@ -1344,27 +1548,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
                 return;
+
             }
 
-
-            /*
-             * If the activities table is not an
-             * admin audit table or contains no records,
-             * create the dashboard activity feed from
-             * recently updated educational content.
-             */
 
             await loadContentActivity(
                 client
             );
 
         }
+
         catch (error) {
 
             console.warn(
                 "EduCore: activities table unavailable, using content activity fallback.",
                 error
             );
+
 
             try {
 
@@ -1373,12 +1573,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
             }
+
             catch (fallbackError) {
 
                 console.error(
                     "EduCore: recent activity failed",
                     fallbackError
                 );
+
 
                 renderActivityEmpty(
                     "No recent activity is available."
@@ -1400,7 +1602,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
 
         if (!activityList) {
+
             return;
+
         }
 
 
@@ -1411,6 +1615,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
+
         }
 
 
@@ -1432,6 +1637,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         )
                 )
                 .join("");
+
     }
 
 
@@ -1447,9 +1653,11 @@ document.addEventListener("DOMContentLoaded", () => {
             activity.title &&
             String(activity.title).trim()
         ) {
+
             return String(
                 activity.title
             );
+
         }
 
 
@@ -1465,6 +1673,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         return "Activity recorded";
+
     }
 
 
@@ -1482,13 +1691,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (!date) {
+
             return "Recent activity";
+
         }
 
 
         return formatRelativeTime(
             date
         );
+
     }
 
 
@@ -1510,31 +1722,44 @@ document.addEventListener("DOMContentLoaded", () => {
         if (
             type.includes("publish")
         ) {
+
             return "✓";
+
         }
+
 
         if (
             type.includes("create") ||
             type.includes("add")
         ) {
+
             return "+";
+
         }
+
 
         if (
             type.includes("delete") ||
             type.includes("archive")
         ) {
+
             return "−";
+
         }
+
 
         if (
             type.includes("update") ||
             type.includes("edit")
         ) {
+
             return "↗";
+
         }
 
+
         return "•";
+
     }
 
 
@@ -1554,6 +1779,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 character =>
                     character.toUpperCase()
             );
+
     }
 
 
@@ -1569,18 +1795,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const tables = [
+
             {
                 table: "courses",
                 label: "Course"
             },
+
             {
                 table: "units",
                 label: "Unit"
             },
+
             {
                 table: "lessons",
                 label: "Lesson"
             }
+
         ];
 
 
@@ -1610,7 +1840,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (
                     result.error
                 ) {
+
                     continue;
+
                 }
 
 
@@ -1646,6 +1878,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
             }
+
             catch (error) {
 
                 console.warn(
@@ -1666,12 +1899,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         a.date || 0
                     ).getTime();
 
+
                 const bDate =
                     new Date(
                         b.date || 0
                     ).getTime();
 
+
                 return bDate - aDate;
+
             }
         );
 
@@ -1683,6 +1919,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
+
         }
 
 
@@ -1700,6 +1937,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         )
                 )
                 .join("");
+
     }
 
 
@@ -1734,6 +1972,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
         `;
+
     }
 
 
@@ -1746,14 +1985,18 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
 
         if (!activityList) {
+
             return;
+
         }
+
 
         activityList.innerHTML = `
             <div class="activity-empty">
                 ${escapeHTML(message)}
             </div>
         `;
+
     }
 
 
@@ -1770,7 +2013,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 sectionName
             ]
         ) {
+
             return;
+
         }
 
 
@@ -1818,8 +2063,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
 
 
@@ -1874,6 +2122,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     toggleMobileSidebar();
 
                 }
+
                 else {
 
                     toggleDesktopSidebar();
@@ -1893,7 +2142,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function toggleDesktopSidebar() {
 
         if (!app) {
+
             return;
+
         }
 
 
@@ -1919,6 +2170,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? "true"
                 : "false"
         );
+
     }
 
 
@@ -1932,7 +2184,9 @@ document.addEventListener("DOMContentLoaded", () => {
             !app ||
             window.innerWidth <= 768
         ) {
+
             return;
+
         }
 
 
@@ -1960,7 +2214,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function toggleMobileSidebar() {
 
         if (!app) {
+
             return;
+
         }
 
 
@@ -1989,7 +2245,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function closeMobileSidebar() {
 
         if (!app) {
+
             return;
+
         }
 
 
@@ -2092,8 +2350,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const client =
             getSupabaseClient();
 
+
         if (!client) {
+
             return;
+
         }
 
 
@@ -2108,7 +2369,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (!user) {
+
                 return;
+
             }
 
 
@@ -2147,20 +2410,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (
                         profileResult.data.name
                     ) {
+
                         name =
                             profileResult.data.name;
+
                     }
+
 
                     if (
                         profileResult.data.role
                     ) {
+
                         role =
                             profileResult.data.role;
+
                     }
 
                 }
 
             }
+
             catch (profileError) {
 
                 console.warn(
@@ -2209,6 +2478,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
 
                 }
+
                 else {
 
                     adminAvatar.textContent =
@@ -2221,6 +2491,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
         }
+
         catch (error) {
 
             console.warn(
@@ -2249,7 +2520,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (!words.length) {
+
             return "A";
+
         }
 
 
@@ -2267,6 +2540,7 @@ document.addEventListener("DOMContentLoaded", () => {
             words[words.length - 1]
                 .charAt(0)
         ).toUpperCase();
+
     }
 
 
@@ -2274,7 +2548,7 @@ document.addEventListener("DOMContentLoaded", () => {
        LOGOUT
        
        Uses the existing Supabase authentication session.
-       Phase 2 remains responsible for protecting the route.
+       Phase 2 remains responsible for authentication.
     ====================================================== */
 
     if (logoutButton) {
@@ -2308,6 +2582,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                 }
+
                 catch (error) {
 
                     console.error(
@@ -2316,13 +2591,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                 }
-                finally {
 
-                    /*
-                     * Keep the redirect compatible with
-                     * the existing Phase 2 authentication
-                     * route.
-                     */
+                finally {
 
                     window.location.href =
                         "index.html";
@@ -2347,10 +2617,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 hideDashboardError();
 
+
                 await Promise.all([
+
                     loadDashboardStatistics(),
+
                     loadRecentActivity(),
+
                     loadCourses()
+
                 ]);
 
             }
@@ -2367,19 +2642,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
         restoreDesktopSidebar();
 
+
         openSection(
             "overview"
         );
 
+
         await Promise.all([
+
             loadDashboardStatistics(),
+
             loadRecentActivity(),
+
             loadCourses(),
+
             loadAdminProfile()
+
         ]);
 
     }
 
+
+    /* =====================================================
+       START ADMIN DASHBOARD
+       
+       This is reached only after requireAdmin()
+       successfully authorizes the current user.
+    ====================================================== */
 
     initializeAdminDashboard();
 
