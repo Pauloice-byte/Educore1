@@ -2134,5 +2134,537 @@ img {
 }
 
 /* =========================================================
-   END OF EDUCORE ADMIN.CSS
+   PHASE 4 — COURSE MANAGEMENT
 ========================================================= */
+
+/* =========================================================
+   CREATE BUTTON
+========================================================= */
+
+.primary-button {
+    min-height: 42px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 16px;
+
+    border-radius: 9px;
+
+    background: var(--accent);
+
+    color: #ffffff;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.primary-button:hover {
+    background: var(--accent-dark);
+
+    box-shadow:
+        0 6px 18px rgba(115, 123, 212, 0.20);
+
+    transform: translateY(-1px);
+}
+
+.primary-button:active {
+    transform: translateY(0);
+}
+
+.primary-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================================================
+   COURSE ACTIONS
+========================================================= */
+
+.course-actions {
+    grid-column: 1 / -1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    padding-top: 11px;
+
+    border-top: 1px solid var(--border);
+
+    flex-wrap: wrap;
+}
+
+.course-action {
+    min-height: 31px;
+
+    padding: 0 10px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #5e636e;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.course-action:hover {
+    background: #f5f6f8;
+
+    border-color: #d4d6dc;
+}
+
+.course-action.edit:hover {
+    color: var(--accent-dark);
+}
+
+.course-action.publish {
+    background: #eaf7f0;
+
+    border-color: #d2ebdd;
+
+    color: var(--success);
+}
+
+.course-action.publish:hover {
+    background: #ddf2e6;
+}
+
+.course-action.danger {
+    color: var(--danger);
+}
+
+.course-action.danger:hover {
+    background: #fff3f3;
+
+    border-color: #efd0d0;
+}
+
+.course-action.restore {
+    color: var(--success);
+}
+
+
+/* =========================================================
+   COURSE MODAL
+========================================================= */
+
+.course-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 5000;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px;
+}
+
+.course-modal-backdrop {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(12, 15, 21, 0.62);
+
+    backdrop-filter: blur(4px);
+}
+
+.course-modal-dialog {
+    position: relative;
+
+    width: 100%;
+
+    max-width: 680px;
+
+    max-height:
+        calc(100vh - 50px);
+
+    overflow-y: auto;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.25);
+
+    animation:
+        courseModalIn 0.2s ease;
+}
+
+@keyframes courseModalIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(12px)
+            scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* =========================================================
+   MODAL HEADER
+========================================================= */
+
+.course-modal-header {
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 24px 25px 20px;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.course-modal-kicker {
+    margin-bottom: 5px;
+
+    color: #999ca4;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+.course-modal-header h2 {
+    font-size: 20px;
+
+    letter-spacing: -0.5px;
+}
+
+.course-modal-close {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #f1f2f5;
+
+    color: #666b75;
+
+    font-size: 21px;
+
+    cursor: pointer;
+}
+
+.course-modal-close:hover {
+    background: #e7e8ec;
+
+    color: #252933;
+}
+
+
+/* =========================================================
+   COURSE FORM
+========================================================= */
+
+.course-form {
+    padding: 24px 25px 25px;
+}
+
+.course-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+.course-field {
+    min-width: 0;
+}
+
+.course-field.full {
+    grid-column: 1 / -1;
+}
+
+.course-field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #555a65;
+
+    font-size: 10px;
+
+    font-weight: 750;
+}
+
+.course-field input,
+.course-field textarea,
+.course-field select {
+    width: 100%;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: var(--text);
+
+    font-size: 11px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.course-field input,
+.course-field select {
+    height: 42px;
+
+    padding: 0 12px;
+}
+
+.course-field textarea {
+    padding: 11px 12px;
+
+    resize: vertical;
+
+    min-height: 105px;
+
+    line-height: 1.5;
+}
+
+.course-field input::placeholder,
+.course-field textarea::placeholder {
+    color: #aaaeb6;
+}
+
+.course-field input:focus,
+.course-field textarea:focus,
+.course-field select:focus {
+    border-color: #a8ade4;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(115, 123, 212, 0.08);
+}
+
+
+/* =========================================================
+   FORM ERROR
+========================================================= */
+
+.course-form-error {
+    margin-top: 18px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #f0cccc;
+
+    border-radius: 8px;
+
+    background: #fff3f3;
+
+    color: #9c4c4c;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   MODAL FOOTER
+========================================================= */
+
+.course-modal-footer {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 9px;
+
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid var(--border);
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+#admin-toast {
+    position: fixed;
+
+    right: 25px;
+    bottom: 25px;
+
+    z-index: 7000;
+
+    max-width: 360px;
+
+    padding: 13px 17px;
+
+    border-radius: 10px;
+
+    background: #171a21;
+
+    color: #ffffff;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.20);
+
+    opacity: 0;
+
+    transform:
+        translateY(10px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+#admin-toast.show {
+    opacity: 1;
+
+    transform:
+        translateY(0);
+}
+
+
+/* =========================================================
+   MOBILE COURSE MANAGEMENT
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .courses-header {
+        flex-direction: column;
+    }
+
+    .courses-header .primary-button {
+        width: 100%;
+    }
+
+    .course-actions {
+        justify-content: flex-start;
+    }
+
+    .course-modal {
+        padding: 12px;
+    }
+
+    .course-modal-dialog {
+        max-height:
+            calc(100vh - 24px);
+
+        border-radius: 13px;
+    }
+
+    .course-modal-header {
+        padding: 20px;
+    }
+
+    .course-form {
+        padding: 20px;
+    }
+
+    .course-form-grid {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+    }
+
+    .course-field.full {
+        grid-column: auto;
+    }
+
+    .course-modal-footer {
+        flex-direction: column-reverse;
+
+        align-items: stretch;
+    }
+
+    .course-modal-footer button {
+        width: 100%;
+    }
+
+    #admin-toast {
+        right: 15px;
+        bottom: 15px;
+
+        left: 15px;
+
+        max-width: none;
+
+        text-align: center;
+    }
+}
