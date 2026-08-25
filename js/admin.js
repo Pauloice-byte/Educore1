@@ -755,95 +755,73 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+   /* =====================================================
+   COURSE CONTROLS
+===================================================== */
 
-    /* =====================================================
-       COURSE MANAGEMENT
-    ===================================================== */
+function setupCourseControls() {
 
-    function setupCourseControls() {
+    const search =
+        $("#course-search");
 
-        const search =
-            $("#course-search");
+    const filter =
+        $("#course-filter");
 
-        const filter =
-            $("#course-filter");
-
-
-        if (search) {
-
-            search.addEventListener(
-                "input",
-                renderCourses
-            );
-        }
+    const createButton =
+        $("#create-course-button");
 
 
-        if (filter) {
+    /* ---------------------------------------------
+       SEARCH
+    --------------------------------------------- */
 
-            filter.addEventListener(
-                "change",
-                renderCourses
-            );
-        }
+    if (search) {
 
-
-        addCreateButton();
-    }
-
-
-    /* =====================================================
-       CREATE BUTTON
-    ===================================================== */
-
-    function addCreateButton() {
-
-        const header =
-            document.querySelector(
-                ".courses-header"
-            );
-
-
-        if (!header) return;
-
-
-        if (
-            document.getElementById(
-                "create-course-button"
-            )
-        ) {
-            return;
-        }
-
-
-        const button =
-            document.createElement("button");
-
-
-        button.type = "button";
-
-        button.id =
-            "create-course-button";
-
-        button.className =
-            "primary-button";
-
-
-        button.innerHTML = `
-            <span>+</span>
-            Create Course
-        `;
-
-
-        button.addEventListener(
-            "click",
-            () => openCourseModal()
+        search.addEventListener(
+            "input",
+            renderCourses
         );
 
-
-        header.appendChild(button);
     }
 
 
+    /* ---------------------------------------------
+       FILTER
+    --------------------------------------------- */
+
+    if (filter) {
+
+        filter.addEventListener(
+            "change",
+            renderCourses
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       CREATE COURSE
+    --------------------------------------------- */
+
+    if (createButton) {
+
+        createButton.addEventListener(
+            "click",
+            () => {
+
+                console.log(
+                    "Create Course button clicked."
+                );
+
+                openCourseModal();
+
+            }
+        );
+
+    }
+
+}
+  
     /* =====================================================
        LOAD COURSES
     ===================================================== */
@@ -1366,390 +1344,135 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
-       COURSE MODAL
-    ===================================================== */
+ /* =====================================================
+   COURSE MODAL
+===================================================== */
 
-    function openCourseModal(
-        course = null
-    ) {
+function openCourseModal(course = null) {
 
-        editingCourseId =
-            course?.id || null;
+    editingCourseId =
+        course?.id || null;
 
 
-        const modal =
-            getCourseModal();
+    const modal =
+        getCourseModal();
 
 
-        const title =
-            modal.querySelector(
-                "#course-modal-title"
-            );
+    const title =
+        modal.querySelector(
+            "#course-modal-title"
+        );
 
 
-        const form =
-            modal.querySelector(
-                "#course-form"
-            );
+    const form =
+        modal.querySelector(
+            "#course-form"
+        );
 
 
-        title.textContent =
-            course
-                ? "Edit Course"
-                : "Create Course";
+    if (!form) {
+
+        console.error(
+            "Course form could not be created."
+        );
+
+        return;
+    }
 
 
-        form.reset();
+    /* ---------------------------------------------
+       TITLE
+    --------------------------------------------- */
 
+    title.textContent =
+        course
+            ? "Edit Course"
+            : "Create Course";
+
+
+    /* ---------------------------------------------
+       RESET
+    --------------------------------------------- */
+
+    form.reset();
+
+
+    /* ---------------------------------------------
+       POPULATE EDIT DATA
+    --------------------------------------------- */
+
+    if (course) {
 
         form.elements.title.value =
-            course?.title || "";
-
+            course.title || "";
 
         form.elements.description.value =
-            course?.description || "";
-
+            course.description || "";
 
         form.elements.category.value =
-            course?.category || "";
-
+            course.category || "";
 
         form.elements.level.value =
-            course?.level || "";
-
+            course.level || "";
 
         form.elements.cover_image.value =
-            course?.cover_image || "";
-
+            course.cover_image || "";
 
         form.elements.sort_order.value =
-            course?.sort_order ?? "";
+            course.sort_order ?? "";
 
-
-        modal.classList.add(
-            "open"
-        );
-
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-
-        setTimeout(() => {
-
-            form.elements.title.focus();
-
-        }, 50);
     }
 
 
-    function closeCourseModal() {
+    /* ---------------------------------------------
+       CLEAR ERROR
+    --------------------------------------------- */
 
-        const modal =
-            $("#course-modal");
-
-        if (!modal) return;
-
-
-        modal.classList.remove(
-            "open"
+    const errorElement =
+        modal.querySelector(
+            "#course-form-error"
         );
 
+    if (errorElement) {
 
-        document.body.classList.remove(
-            "modal-open"
-        );
+        errorElement.hidden = true;
 
+        errorElement.textContent = "";
 
-        editingCourseId =
-            null;
     }
 
 
-    function getCourseModal() {
+    /* ---------------------------------------------
+       OPEN
+    --------------------------------------------- */
 
-        let modal =
-            $("#course-modal");
+    modal.classList.add(
+        "open"
+    );
 
+    document.body.classList.add(
+        "modal-open"
+    );
 
-        if (modal) return modal;
 
+    /* ---------------------------------------------
+       FOCUS
+    --------------------------------------------- */
 
-        modal =
-            document.createElement("div");
+    setTimeout(() => {
 
+        const titleInput =
+            form.elements.title;
 
-        modal.id =
-            "course-modal";
+        if (titleInput) {
 
-        modal.className =
-            "course-modal";
+            titleInput.focus();
 
+        }
 
-        modal.innerHTML = `
+    }, 50);
 
-            <div
-                class="course-modal-backdrop"
-                data-close-modal="true"
-            ></div>
-
-
-            <div
-                class="course-modal-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="course-modal-title"
-            >
-
-                <div class="course-modal-header">
-
-                    <div>
-
-                        <div class="course-modal-kicker">
-                            COURSE MANAGEMENT
-                        </div>
-
-                        <h2 id="course-modal-title">
-                            Create Course
-                        </h2>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="course-modal-close"
-                        id="course-modal-close"
-                        aria-label="Close"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form
-                    id="course-form"
-                    class="course-form"
-                >
-
-                    <div class="course-form-field">
-
-                        <label for="course-title-input">
-                            Course title
-                        </label>
-
-                        <input
-                            id="course-title-input"
-                            name="title"
-                            type="text"
-                            required
-                            maxlength="200"
-                            placeholder="Enter course title"
-                        >
-
-                    </div>
-
-
-                    <div class="course-form-field">
-
-                        <label for="course-description-input">
-                            Description
-                        </label>
-
-                        <textarea
-                            id="course-description-input"
-                            name="description"
-                            rows="4"
-                            maxlength="5000"
-                            placeholder="Describe this course..."
-                        ></textarea>
-
-                    </div>
-
-
-                    <div class="course-form-grid">
-
-                        <div class="course-form-field">
-
-                            <label for="course-category-input">
-                                Category
-                            </label>
-
-                            <input
-                                id="course-category-input"
-                                name="category"
-                                type="text"
-                                maxlength="100"
-                                placeholder="e.g. Business, Science, Language"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label for="course-level-input">
-                                Level
-                            </label>
-
-                            <input
-                                id="course-level-input"
-                                name="level"
-                                type="text"
-                                maxlength="100"
-                                placeholder="e.g. Beginner, Intermediate"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="course-form-field">
-
-                        <label for="course-cover-input">
-                            Cover image URL
-                        </label>
-
-                        <input
-                            id="course-cover-input"
-                            name="cover_image"
-                            type="url"
-                            placeholder="https://..."
-                        >
-
-                        <small>
-                            Optional. You can add the image URL now.
-                        </small>
-
-                    </div>
-
-
-                    <div class="course-form-field">
-
-                        <label for="course-sort-input">
-                            Display order
-                        </label>
-
-                        <input
-                            id="course-sort-input"
-                            name="sort_order"
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                        >
-
-                    </div>
-
-
-                    <div
-                        id="course-form-error"
-                        class="course-form-error"
-                        hidden
-                    ></div>
-
-
-                    <div class="course-form-actions">
-
-                        <button
-                            type="button"
-                            class="secondary-button"
-                            id="course-cancel-button"
-                        >
-                            Cancel
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            class="primary-button"
-                            id="course-save-button"
-                        >
-                            Save Course
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-        `;
-
-
-        document.body.appendChild(
-            modal
-        );
-
-
-        const form =
-            modal.querySelector(
-                "#course-form"
-            );
-
-
-        form.addEventListener(
-            "submit",
-            saveCourse
-        );
-
-
-        modal
-            .querySelector(
-                "#course-modal-close"
-            )
-            .addEventListener(
-                "click",
-                closeCourseModal
-            );
-
-
-        modal
-            .querySelector(
-                "#course-cancel-button"
-            )
-            .addEventListener(
-                "click",
-                closeCourseModal
-            );
-
-
-        modal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target.dataset
-                        .closeModal === "true"
-                ) {
-
-                    closeCourseModal();
-                }
-            }
-        );
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Escape" &&
-                    modal.classList.contains("open")
-                ) {
-
-                    closeCourseModal();
-                }
-            }
-        );
-
-
-        return modal;
-    }
-
+}
 
     /* =====================================================
        SAVE COURSE
