@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     "use strict";
 
+
     /* =====================================================
        SUPABASE
     ===================================================== */
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.supabaseClient ||
         window.supabase ||
         null;
+
 
     if (!client || typeof client.from !== "function") {
 
@@ -34,17 +36,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let editingCourseId = null;
 
-    let currentCourseAction = null;
+    let courseModal = null;
 
 
     /* =====================================================
        DOM HELPERS
     ===================================================== */
 
-    const $ = (selector) =>
+    const $ = selector =>
         document.querySelector(selector);
 
-    const $$ = (selector) =>
+
+    const $$ = selector =>
         document.querySelectorAll(selector);
 
 
@@ -94,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 closeMobileSidebar();
             });
+
         });
     }
 
@@ -106,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "active",
                 button.dataset.section === section
             );
+
         });
 
 
@@ -115,20 +120,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 "active",
                 element.id === `${section}-section`
             );
+
         });
 
-
-        const title =
-            section.charAt(0).toUpperCase() +
-            section.slice(1);
 
         const pageTitle =
             $("#page-title");
 
+
         if (pageTitle) {
 
             pageTitle.textContent =
-                title;
+                section.charAt(0).toUpperCase() +
+                section.slice(1);
         }
 
 
@@ -160,59 +164,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (toggle) {
 
-            toggle.addEventListener(
-                "click",
-                () => {
+            toggle.addEventListener("click", () => {
 
-                    if (
-                        window.innerWidth <= 768
-                    ) {
+                if (window.innerWidth <= 768) {
 
-                        app.classList.toggle(
-                            "sidebar-open"
-                        );
+                    app?.classList.toggle(
+                        "sidebar-open"
+                    );
 
-                    } else {
+                } else {
 
-                        app.classList.toggle(
-                            "sidebar-collapsed"
-                        );
-                    }
+                    app?.classList.toggle(
+                        "sidebar-collapsed"
+                    );
                 }
-            );
+
+            });
         }
 
 
-        if (close) {
-
-            close.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-        }
+        close?.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
 
 
-        if (overlay) {
-
-            overlay.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-        }
+        overlay?.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
 
 
         window.addEventListener(
             "resize",
             () => {
 
-                if (
-                    window.innerWidth > 768
-                ) {
+                if (window.innerWidth > 768) {
 
-                    app.classList.remove(
+                    app?.classList.remove(
                         "sidebar-open"
                     );
                 }
+
             }
         );
     }
@@ -220,15 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function closeMobileSidebar() {
 
-        const app =
-            $("#admin-app");
-
-        if (app) {
-
-            app.classList.remove(
-                "sidebar-open"
-            );
-        }
+        $("#admin-app")
+            ?.classList.remove("sidebar-open");
     }
 
 
@@ -273,6 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         error
                     );
                 }
+
             }
         );
     }
@@ -293,10 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await client.auth.getUser();
 
 
-            if (error || !data?.user) {
-
-                return;
-            }
+            if (error || !data?.user) return;
 
 
             const user =
@@ -315,37 +299,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Administrator";
 
 
-            const nameElement =
-                $("#admin-name");
-
-            const roleElement =
-                $("#admin-role");
-
-            const avatarElement =
-                $("#admin-avatar");
+            $("#admin-name") &&
+                ($("#admin-name").textContent = name);
 
 
-            if (nameElement) {
-
-                nameElement.textContent =
-                    name;
-            }
+            $("#admin-role") &&
+                ($("#admin-role").textContent = "Admin");
 
 
-            if (roleElement) {
-
-                roleElement.textContent =
-                    "Admin";
-            }
-
-
-            if (avatarElement) {
-
-                avatarElement.textContent =
-                    name
-                        .charAt(0)
-                        .toUpperCase();
-            }
+            $("#admin-avatar") &&
+                ($("#admin-avatar").textContent =
+                    name.charAt(0).toUpperCase());
 
         } catch (error) {
 
@@ -409,6 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const element =
             $("#total-courses");
 
+
         if (element) {
 
             element.textContent =
@@ -440,6 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (error) throw error;
+
 
             element.textContent =
                 count ?? 0;
@@ -479,6 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             if (error) throw error;
+
 
             element.textContent =
                 count ?? 0;
@@ -520,6 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (error) throw error;
 
+
             element.textContent =
                 count ?? 0;
 
@@ -547,8 +515,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             const [
-                publishedCourses,
-                draftCourses
+                publishedResult,
+                draftResult
             ] =
                 await Promise.all([
 
@@ -558,7 +526,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             count: "exact",
                             head: true
                         })
-                        .eq("status", "published"),
+                        .eq(
+                            "status",
+                            "published"
+                        ),
 
                     client
                         .from("courses")
@@ -566,35 +537,32 @@ document.addEventListener("DOMContentLoaded", () => {
                             count: "exact",
                             head: true
                         })
-                        .eq("status", "draft")
+                        .eq(
+                            "status",
+                            "draft"
+                        )
                 ]);
 
 
-            if (
-                publishedCourses.error
-            ) {
-                throw publishedCourses.error;
-            }
+            if (publishedResult.error)
+                throw publishedResult.error;
 
 
-            if (
-                draftCourses.error
-            ) {
-                throw draftCourses.error;
-            }
+            if (draftResult.error)
+                throw draftResult.error;
 
 
             if (published) {
 
                 published.textContent =
-                    publishedCourses.count ?? 0;
+                    publishedResult.count ?? 0;
             }
 
 
             if (draft) {
 
                 draft.textContent =
-                    draftCourses.count ?? 0;
+                    draftResult.count ?? 0;
             }
 
         } catch (error) {
@@ -630,7 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await client
                     .from("courses")
                     .select(
-                        "id,title,status,created_at,updated_at"
+                        "id,title,status,created_at"
                     )
                     .order(
                         "created_at",
@@ -644,7 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (error) throw error;
 
 
-            if (!data || !data.length) {
+            if (!data?.length) {
 
                 list.innerHTML = `
                     <div class="activity-empty">
@@ -659,14 +627,25 @@ document.addEventListener("DOMContentLoaded", () => {
             list.innerHTML =
                 data.map(course => {
 
-                    const action =
+                    let action =
+                        "Course created";
+
+                    if (
                         course.status ===
                         "published"
-                            ? "Course published"
-                            : course.status ===
-                              "archived"
-                                ? "Course archived"
-                                : "Course created";
+                    ) {
+
+                        action =
+                            "Course published";
+
+                    } else if (
+                        course.status ===
+                        "archived"
+                    ) {
+
+                        action =
+                            "Course archived";
+                    }
 
 
                     return `
@@ -685,9 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <div class="activity-meta">
                                     ${escapeHTML(course.title)}
                                     ·
-                                    ${formatDate(
-                                        course.created_at
-                                    )}
+                                    ${formatDate(course.created_at)}
                                 </div>
 
                             </div>
@@ -696,6 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
 
                 }).join("");
+
 
         } catch (error) {
 
@@ -715,113 +693,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupDashboardRetry() {
 
-        const button =
-            $("#dashboard-retry");
-
-        if (!button) return;
-
-
-        button.addEventListener(
-            "click",
-            loadDashboard
-        );
+        $("#dashboard-retry")
+            ?.addEventListener(
+                "click",
+                loadDashboard
+            );
     }
 
 
     function showDashboardError() {
 
-        const element =
-            $("#dashboard-error");
-
-        if (element) {
-
-            element.classList.remove(
-                "admin-hidden"
-            );
-        }
+        $("#dashboard-error")
+            ?.classList.remove("admin-hidden");
     }
 
 
     function hideDashboardError() {
 
-        const element =
-            $("#dashboard-error");
+        $("#dashboard-error")
+            ?.classList.add("admin-hidden");
+    }
 
-        if (element) {
 
-            element.classList.add(
-                "admin-hidden"
+    /* =====================================================
+       COURSE CONTROLS
+    ===================================================== */
+
+    function setupCourseControls() {
+
+        $("#course-search")
+            ?.addEventListener(
+                "input",
+                renderCourses
             );
-        }
-    }
-
-   /* =====================================================
-   COURSE CONTROLS
-===================================================== */
-
-function setupCourseControls() {
-
-    const search =
-        $("#course-search");
-
-    const filter =
-        $("#course-filter");
-
-    const createButton =
-        $("#create-course-button");
 
 
-    /* ---------------------------------------------
-       SEARCH
-    --------------------------------------------- */
+        $("#course-filter")
+            ?.addEventListener(
+                "change",
+                renderCourses
+            );
 
-    if (search) {
 
-        search.addEventListener(
-            "input",
-            renderCourses
-        );
+        /*
+            IMPORTANT:
+            We use the button already present in HTML.
+            We do NOT create another button.
+        */
 
+        $("#create-course-button")
+            ?.addEventListener(
+                "click",
+                () => openCourseModal()
+            );
     }
 
 
-    /* ---------------------------------------------
-       FILTER
-    --------------------------------------------- */
-
-    if (filter) {
-
-        filter.addEventListener(
-            "change",
-            renderCourses
-        );
-
-    }
-
-
-    /* ---------------------------------------------
-       CREATE COURSE
-    --------------------------------------------- */
-
-    if (createButton) {
-
-        createButton.addEventListener(
-            "click",
-            () => {
-
-                console.log(
-                    "Create Course button clicked."
-                );
-
-                openCourseModal();
-
-            }
-        );
-
-    }
-
-}
-  
     /* =====================================================
        LOAD COURSES
     ===================================================== */
@@ -836,13 +763,7 @@ function setupCourseControls() {
 
         list.innerHTML = `
             <div class="courses-loading">
-
-                <div class="courses-loading-icon">
-                    ◌
-                </div>
-
                 Loading courses...
-
             </div>
         `;
 
@@ -892,7 +813,6 @@ function setupCourseControls() {
 
             renderCourses();
 
-
         } catch (error) {
 
             console.error(
@@ -903,10 +823,6 @@ function setupCourseControls() {
 
             list.innerHTML = `
                 <div class="courses-empty">
-
-                    <div class="courses-empty-icon">
-                        !
-                    </div>
 
                     <h3>
                         Could not load courses
@@ -937,14 +853,12 @@ function setupCourseControls() {
         const count =
             $("#course-count");
 
+
         if (!list) return;
 
 
         const search =
-            (
-                $("#course-search")?.value ||
-                ""
-            )
+            ($("#course-search")?.value || "")
                 .trim()
                 .toLowerCase();
 
@@ -963,9 +877,8 @@ function setupCourseControls() {
             courses =
                 courses.filter(
                     course =>
-                        (
-                            course.status ||
-                            "draft"
+                        normalizeStatus(
+                            course.status
                         ) === filter
                 );
         }
@@ -1067,7 +980,10 @@ function setupCourseControls() {
                             course.title ||
                             "Course cover"
                         )}"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='flex';
+                        "
                     >
 
                     <div
@@ -1087,9 +1003,7 @@ function setupCourseControls() {
         return `
             <div
                 class="course-row"
-                data-course-id="${escapeAttribute(
-                    course.id
-                )}"
+                data-course-id="${escapeAttribute(course.id)}"
             >
 
                 <div class="course-main">
@@ -1139,9 +1053,7 @@ function setupCourseControls() {
                     <span
                         class="course-status ${status}"
                     >
-                        ${escapeHTML(
-                            status
-                        )}
+                        ${escapeHTML(status)}
                     </span>
                 </div>
 
@@ -1159,9 +1071,7 @@ function setupCourseControls() {
                         type="button"
                         class="course-action-button"
                         data-action="edit"
-                        data-id="${escapeAttribute(
-                            course.id
-                        )}"
+                        data-id="${escapeAttribute(course.id)}"
                     >
                         Edit
                     </button>
@@ -1174,9 +1084,7 @@ function setupCourseControls() {
                                     type="button"
                                     class="course-action-button"
                                     data-action="publish"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
+                                    data-id="${escapeAttribute(course.id)}"
                                 >
                                     Publish
                                 </button>
@@ -1192,9 +1100,7 @@ function setupCourseControls() {
                                     type="button"
                                     class="course-action-button"
                                     data-action="unpublish"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
+                                    data-id="${escapeAttribute(course.id)}"
                                 >
                                     Unpublish
                                 </button>
@@ -1203,27 +1109,24 @@ function setupCourseControls() {
                     }
 
 
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-action="duplicate"
+                        data-id="${escapeAttribute(course.id)}"
+                    >
+                        Duplicate
+                    </button>
+
+
                     ${
                         status !== "archived"
                             ? `
                                 <button
                                     type="button"
-                                    class="course-action-button"
-                                    data-action="duplicate"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
-                                >
-                                    Duplicate
-                                </button>
-
-                                <button
-                                    type="button"
                                     class="course-action-button danger"
                                     data-action="archive"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
+                                    data-id="${escapeAttribute(course.id)}"
                                 >
                                     Archive
                                 </button>
@@ -1233,22 +1136,9 @@ function setupCourseControls() {
                                     type="button"
                                     class="course-action-button"
                                     data-action="restore"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
+                                    data-id="${escapeAttribute(course.id)}"
                                 >
                                     Restore
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="course-action-button"
-                                    data-action="duplicate"
-                                    data-id="${escapeAttribute(
-                                        course.id
-                                    )}"
-                                >
-                                    Duplicate
                                 </button>
                             `
                     }
@@ -1298,523 +1188,789 @@ function setupCourseControls() {
                         switch (action) {
 
                             case "edit":
-                                openCourseModal(
-                                    course
-                                );
+                                openCourseModal(course);
                                 break;
-
 
                             case "publish":
-                                await publishCourse(
-                                    course
-                                );
+                                await publishCourse(course);
                                 break;
-
 
                             case "unpublish":
-                                await unpublishCourse(
-                                    course
-                                );
+                                await unpublishCourse(course);
                                 break;
-
 
                             case "archive":
-                                await archiveCourse(
-                                    course
-                                );
+                                await archiveCourse(course);
                                 break;
-
 
                             case "restore":
-                                await restoreCourse(
-                                    course
-                                );
+                                await restoreCourse(course);
                                 break;
-
 
                             case "duplicate":
-                                await duplicateCourse(
-                                    course
-                                );
+                                await duplicateCourse(course);
                                 break;
                         }
+
                     }
                 );
+
             });
     }
 
 
- /* =====================================================
-   COURSE MODAL
-===================================================== */
+    /* =====================================================
+       COURSE MODAL
+    ===================================================== */
 
-function openCourseModal(course = null) {
+    function getCourseModal() {
 
-    editingCourseId =
-        course?.id || null;
+        if (courseModal) {
 
-
-    const modal =
-        getCourseModal();
-
-
-    const title =
-        modal.querySelector(
-            "#course-modal-title"
-        );
-
-
-    const form =
-        modal.querySelector(
-            "#course-form"
-        );
-
-
-    if (!form) {
-
-        console.error(
-            "Course form could not be created."
-        );
-
-        return;
-    }
-
-
-    /* ---------------------------------------------
-       TITLE
-    --------------------------------------------- */
-
-    title.textContent =
-        course
-            ? "Edit Course"
-            : "Create Course";
-
-
-    /* ---------------------------------------------
-       RESET
-    --------------------------------------------- */
-
-    form.reset();
-
-
-    /* ---------------------------------------------
-       POPULATE EDIT DATA
-    --------------------------------------------- */
-
-    if (course) {
-
-        form.elements.title.value =
-            course.title || "";
-
-        form.elements.description.value =
-            course.description || "";
-
-        form.elements.category.value =
-            course.category || "";
-
-        form.elements.level.value =
-            course.level || "";
-
-        form.elements.cover_image.value =
-            course.cover_image || "";
-
-        form.elements.sort_order.value =
-            course.sort_order ?? "";
-
-    }
-
-
-    /* ---------------------------------------------
-       CLEAR ERROR
-    --------------------------------------------- */
-
-    const errorElement =
-        modal.querySelector(
-            "#course-form-error"
-        );
-
-    if (errorElement) {
-
-        errorElement.hidden = true;
-
-        errorElement.textContent = "";
-
-    }
-
-
-    /* ---------------------------------------------
-       OPEN
-    --------------------------------------------- */
-
-    modal.classList.add(
-        "open"
-    );
-
-    document.body.classList.add(
-        "modal-open"
-    );
-
-
-    /* ---------------------------------------------
-       FOCUS
-    --------------------------------------------- */
-
-    setTimeout(() => {
-
-        const titleInput =
-            form.elements.title;
-
-        if (titleInput) {
-
-            titleInput.focus();
-
+            return courseModal;
         }
 
-    }, 50);
 
-}
-   /* =====================================================
-   GET / CREATE COURSE MODAL
-===================================================== */
-
-function getCourseModal() {
-
-    let modal =
-        $("#course-modal");
+        courseModal =
+            document.createElement("div");
 
 
-    if (modal) {
-
-        return modal;
-
-    }
+        courseModal.id =
+            "course-modal";
 
 
-    modal =
-        document.createElement("div");
+        courseModal.className =
+            "course-modal";
 
 
-    modal.id =
-        "course-modal";
+        courseModal.innerHTML = `
 
-    modal.className =
-        "course-modal";
-
-
-    modal.innerHTML = `
-
-        <div
-            class="course-modal-backdrop"
-            data-close-modal="true"
-        ></div>
+            <div
+                class="course-modal-backdrop"
+                data-close-modal="true"
+            ></div>
 
 
-        <div
-            class="course-modal-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="course-modal-title"
-        >
-
-            <div class="course-modal-header">
-
-                <div>
-
-                    <div class="course-modal-kicker">
-                        COURSE MANAGEMENT
-                    </div>
-
-                    <h2 id="course-modal-title">
-                        Create Course
-                    </h2>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="course-modal-close"
-                    id="course-modal-close"
-                    aria-label="Close"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <form
-                id="course-form"
-                class="course-form"
+            <div
+                class="course-modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="course-modal-title"
             >
 
-                <!-- TITLE -->
+                <div class="course-modal-header">
 
-                <div class="course-form-field">
+                    <div>
 
-                    <label for="course-title-input">
-                        Course title
-                    </label>
+                        <div class="course-modal-kicker">
+                            COURSE MANAGEMENT
+                        </div>
 
-                    <input
-                        id="course-title-input"
-                        name="title"
-                        type="text"
-                        required
-                        maxlength="200"
-                        placeholder="Enter course title"
-                    >
-
-                </div>
-
-
-                <!-- DESCRIPTION -->
-
-                <div class="course-form-field">
-
-                    <label for="course-description-input">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="course-description-input"
-                        name="description"
-                        rows="4"
-                        maxlength="5000"
-                        placeholder="Describe this course..."
-                    ></textarea>
-
-                </div>
-
-
-                <!-- CATEGORY + LEVEL -->
-
-                <div class="course-form-grid">
-
-                    <div class="course-form-field">
-
-                        <label for="course-category-input">
-                            Category
-                        </label>
-
-                        <input
-                            id="course-category-input"
-                            name="category"
-                            type="text"
-                            maxlength="100"
-                            placeholder="e.g. Science, Business, Programming"
-                        >
+                        <h2 id="course-modal-title">
+                            Create Course
+                        </h2>
 
                     </div>
 
-
-                    <div class="course-form-field">
-
-                        <label for="course-level-input">
-                            Level
-                        </label>
-
-                        <input
-                            id="course-level-input"
-                            name="level"
-                            type="text"
-                            maxlength="100"
-                            placeholder="e.g. Beginner, Intermediate, Advanced"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <!-- COVER -->
-
-                <div class="course-form-field">
-
-                    <label for="course-cover-input">
-                        Cover image URL
-                    </label>
-
-                    <input
-                        id="course-cover-input"
-                        name="cover_image"
-                        type="url"
-                        placeholder="https://..."
-                    >
-
-                    <small>
-                        Optional.
-                    </small>
-
-                </div>
-
-
-                <!-- SORT ORDER -->
-
-                <div class="course-form-field">
-
-                    <label for="course-sort-input">
-                        Display order
-                    </label>
-
-                    <input
-                        id="course-sort-input"
-                        name="sort_order"
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="0"
-                    >
-
-                </div>
-
-
-                <!-- ERROR -->
-
-                <div
-                    id="course-form-error"
-                    class="course-form-error"
-                    hidden
-                    role="alert"
-                ></div>
-
-
-                <!-- ACTIONS -->
-
-                <div class="course-form-actions">
 
                     <button
                         type="button"
-                        class="secondary-button"
-                        id="course-cancel-button"
+                        class="course-modal-close"
+                        id="course-modal-close"
+                        aria-label="Close"
                     >
-                        Cancel
-                    </button>
-
-
-                    <button
-                        type="submit"
-                        class="primary-button"
-                        id="course-save-button"
-                    >
-                        Save Course
+                        ×
                     </button>
 
                 </div>
 
-            </form>
 
-        </div>
+                <form
+                    id="course-form"
+                    class="course-form"
+                    novalidate
+                >
 
-    `;
+                    <div class="course-form-field">
+
+                        <label for="course-title-input">
+                            Course title *
+                        </label>
+
+                        <input
+                            id="course-title-input"
+                            name="title"
+                            type="text"
+                            required
+                            maxlength="200"
+                            placeholder="Enter course title"
+                        >
+
+                    </div>
 
 
-    document.body.appendChild(
-        modal
-    );
+                    <div class="course-form-field">
+
+                        <label for="course-description-input">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="course-description-input"
+                            name="description"
+                            rows="4"
+                            maxlength="5000"
+                            placeholder="Describe this course..."
+                        ></textarea>
+
+                    </div>
 
 
-    /* =================================================
-       FORM
-    ================================================= */
+                    <div class="course-form-grid">
 
-    const form =
-        modal.querySelector(
-            "#course-form"
+                        <div class="course-form-field">
+
+                            <label for="course-category-input">
+                                Category
+                            </label>
+
+                            <input
+                                id="course-category-input"
+                                name="category"
+                                type="text"
+                                maxlength="100"
+                                placeholder="e.g. Business, Science, Language"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label for="course-level-input">
+                                Level
+                            </label>
+
+                            <input
+                                id="course-level-input"
+                                name="level"
+                                type="text"
+                                maxlength="100"
+                                placeholder="e.g. Beginner, Intermediate"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COVER IMAGE -->
+                    <div class="course-form-field">
+
+                        <label>
+                            Course cover
+                        </label>
+
+
+                        <div class="course-cover-tabs">
+
+                            <button
+                                type="button"
+                                class="cover-tab active"
+                                data-cover-tab="upload"
+                            >
+                                Upload from computer
+                            </button>
+
+                            <button
+                                type="button"
+                                class="cover-tab"
+                                data-cover-tab="url"
+                            >
+                                Use image URL
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="cover-tab-panel active"
+                            data-cover-panel="upload"
+                        >
+
+                            <label
+                                for="course-cover-file"
+                                class="course-upload-area"
+                                id="course-upload-area"
+                            >
+
+                                <div class="upload-icon">
+                                    ↑
+                                </div>
+
+                                <strong>
+                                    Choose an image
+                                </strong>
+
+                                <span>
+                                    JPG, JPEG, PNG or WebP
+                                </span>
+
+                            </label>
+
+                            <input
+                                id="course-cover-file"
+                                name="cover_file"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+                        </div>
+
+
+                        <div
+                            class="cover-tab-panel"
+                            data-cover-panel="url"
+                        >
+
+                            <input
+                                id="course-cover-url"
+                                name="cover_url"
+                                type="url"
+                                placeholder="https://example.com/course-cover.jpg"
+                            >
+
+                            <small>
+                                Enter a publicly accessible image URL.
+                            </small>
+
+                        </div>
+
+
+                        <div
+                            id="course-cover-preview"
+                            class="course-cover-preview"
+                            hidden
+                        >
+
+                            <img
+                                id="course-cover-preview-image"
+                                alt="Course cover preview"
+                            >
+
+                            <button
+                                type="button"
+                                id="course-remove-cover"
+                                class="course-remove-cover"
+                            >
+                                Remove image
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="course-form-field">
+
+                        <label for="course-sort-input">
+                            Display order
+                        </label>
+
+                        <input
+                            id="course-sort-input"
+                            name="sort_order"
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="course-form-error"
+                        class="course-form-error"
+                        hidden
+                    ></div>
+
+
+                    <div class="course-form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="course-cancel-button"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="course-save-button"
+                        >
+                            Save Course
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        `;
+
+
+        document.body.appendChild(
+            courseModal
         );
 
 
-    form.addEventListener(
-        "submit",
-        saveCourse
-    );
+        /* =================================================
+           MODAL EVENTS — ATTACHED ONCE
+        ================================================= */
+
+        courseModal
+            .querySelector("#course-form")
+            .addEventListener(
+                "submit",
+                saveCourse
+            );
 
 
-    /* =================================================
-       CLOSE BUTTON
-    ================================================= */
+        courseModal
+            .querySelector("#course-modal-close")
+            .addEventListener(
+                "click",
+                closeCourseModal
+            );
 
-    modal
-        .querySelector(
-            "#course-modal-close"
-        )
-        .addEventListener(
+
+        courseModal
+            .querySelector("#course-cancel-button")
+            .addEventListener(
+                "click",
+                closeCourseModal
+            );
+
+
+        courseModal.addEventListener(
             "click",
-            closeCourseModal
+            event => {
+
+                if (
+                    event.target.dataset
+                        .closeModal === "true"
+                ) {
+
+                    closeCourseModal();
+                }
+            }
         );
 
 
-    /* =================================================
-       CANCEL
-    ================================================= */
+        courseModal
+            .querySelectorAll(".cover-tab")
+            .forEach(tab => {
 
-    modal
-        .querySelector(
-            "#course-cancel-button"
-        )
-        .addEventListener(
-            "click",
-            closeCourseModal
+                tab.addEventListener(
+                    "click",
+                    () => {
+
+                        switchCoverTab(
+                            tab.dataset.coverTab
+                        );
+                    }
+                );
+
+            });
+
+
+        courseModal
+            .querySelector("#course-cover-file")
+            .addEventListener(
+                "change",
+                handleCoverFile
+            );
+
+
+        courseModal
+            .querySelector("#course-cover-url")
+            .addEventListener(
+                "input",
+                handleCoverUrl
+            );
+
+
+        courseModal
+            .querySelector("#course-remove-cover")
+            .addEventListener(
+                "click",
+                removeCover
+            );
+
+
+        return courseModal;
+    }
+
+
+    /* =====================================================
+       OPEN MODAL
+    ===================================================== */
+
+    function openCourseModal(course = null) {
+
+        editingCourseId =
+            course?.id || null;
+
+
+        const modal =
+            getCourseModal();
+
+
+        const form =
+            modal.querySelector("#course-form");
+
+
+        const title =
+            modal.querySelector(
+                "#course-modal-title"
+            );
+
+
+        form.reset();
+
+
+        clearFormError();
+
+        clearCoverPreview();
+
+
+        title.textContent =
+            course
+                ? "Edit Course"
+                : "Create Course";
+
+
+        form.elements.title.value =
+            course?.title || "";
+
+
+        form.elements.description.value =
+            course?.description || "";
+
+
+        form.elements.category.value =
+            course?.category || "";
+
+
+        form.elements.level.value =
+            course?.level || "";
+
+
+        form.elements.sort_order.value =
+            course?.sort_order ?? "";
+
+
+        /*
+            If the existing course has an image,
+            use URL mode for the existing image.
+        */
+
+        if (course?.cover_image) {
+
+            switchCoverTab("url");
+
+            form.elements.cover_url.value =
+                course.cover_image;
+
+            showCoverPreview(
+                course.cover_image
+            );
+
+        } else {
+
+            switchCoverTab("upload");
+        }
+
+
+        modal.classList.add("open");
+
+        document.body.classList.add(
+            "modal-open"
         );
 
 
-    /* =================================================
-       BACKDROP
-    ================================================= */
+        setTimeout(() => {
 
-    modal.addEventListener(
-        "click",
+            form.elements.title.focus();
+
+        }, 50);
+    }
+
+
+    /* =====================================================
+       CLOSE MODAL
+    ===================================================== */
+
+    function closeCourseModal() {
+
+        if (!courseModal) return;
+
+
+        courseModal.classList.remove(
+            "open"
+        );
+
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+
+        editingCourseId =
+            null;
+
+
+        clearFormError();
+    }
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
         event => {
 
             if (
-                event.target.dataset.closeModal ===
-                "true"
+                event.key === "Escape" &&
+                courseModal &&
+                courseModal.classList.contains("open")
             ) {
 
                 closeCourseModal();
-
             }
 
         }
     );
 
 
-    /* =================================================
-       ESCAPE
-    ================================================= */
+    /* =====================================================
+       COVER TABS
+    ===================================================== */
 
-    if (!window.__eduCoreCourseModalEscapeHandler) {
+    function switchCoverTab(tabName) {
 
-        window.__eduCoreCourseModalEscapeHandler =
-            event => {
-
-                const currentModal =
-                    $("#course-modal");
-
-                if (
-                    event.key === "Escape" &&
-                    currentModal &&
-                    currentModal.classList.contains("open")
-                ) {
-
-                    closeCourseModal();
-
-                }
-
-            };
+        if (!courseModal) return;
 
 
-        document.addEventListener(
-            "keydown",
-            window.__eduCoreCourseModalEscapeHandler
-        );
+        courseModal
+            .querySelectorAll(".cover-tab")
+            .forEach(tab => {
 
+                tab.classList.toggle(
+                    "active",
+                    tab.dataset.coverTab ===
+                    tabName
+                );
+            });
+
+
+        courseModal
+            .querySelectorAll(".cover-tab-panel")
+            .forEach(panel => {
+
+                panel.classList.toggle(
+                    "active",
+                    panel.dataset.coverPanel ===
+                    tabName
+                );
+            });
     }
 
 
-    return modal;
+    /* =====================================================
+       COVER FILE
+    ===================================================== */
 
-}
+    function handleCoverFile(event) {
+
+        const file =
+            event.target.files?.[0];
+
+
+        if (!file) return;
+
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (!allowedTypes.includes(file.type)) {
+
+            showFormError(
+                "Please select a JPG, PNG or WebP image."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        /*
+            Limit: 5 MB
+        */
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            showFormError(
+                "The cover image must be smaller than 5 MB."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        clearFormError();
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = () => {
+
+            showCoverPreview(
+                reader.result
+            );
+        };
+
+
+        reader.readAsDataURL(file);
+    }
+
+
+    /* =====================================================
+       COVER URL
+    ===================================================== */
+
+    function handleCoverUrl(event) {
+
+        const url =
+            event.target.value.trim();
+
+
+        if (!url) {
+
+            clearCoverPreview();
+
+            return;
+        }
+
+
+        showCoverPreview(url);
+    }
+
+
+    /* =====================================================
+       COVER PREVIEW
+    ===================================================== */
+
+    function showCoverPreview(src) {
+
+        if (!courseModal) return;
+
+
+        const preview =
+            courseModal.querySelector(
+                "#course-cover-preview"
+            );
+
+
+        const image =
+            courseModal.querySelector(
+                "#course-cover-preview-image"
+            );
+
+
+        if (!src) {
+
+            clearCoverPreview();
+
+            return;
+        }
+
+
+        image.src =
+            src;
+
+
+        preview.hidden =
+            false;
+    }
+
+
+    function clearCoverPreview() {
+
+        if (!courseModal) return;
+
+
+        const preview =
+            courseModal.querySelector(
+                "#course-cover-preview"
+            );
+
+
+        const image =
+            courseModal.querySelector(
+                "#course-cover-preview-image"
+            );
+
+
+        preview.hidden =
+            true;
+
+
+        image.removeAttribute("src");
+    }
+
+
+    function removeCover() {
+
+        if (!courseModal) return;
+
+
+        const fileInput =
+            courseModal.querySelector(
+                "#course-cover-file"
+            );
+
+
+        const urlInput =
+            courseModal.querySelector(
+                "#course-cover-url"
+            );
+
+
+        fileInput.value = "";
+
+        urlInput.value = "";
+
+
+        clearCoverPreview();
+    }
+
 
     /* =====================================================
        SAVE COURSE
@@ -1833,18 +1989,7 @@ function getCourseModal() {
             $("#course-save-button");
 
 
-        const errorElement =
-            $("#course-form-error");
-
-
-        if (errorElement) {
-
-            errorElement.hidden =
-                true;
-
-            errorElement.textContent =
-                "";
-        }
+        clearFormError();
 
 
         const formData =
@@ -1875,10 +2020,14 @@ function getCourseModal() {
             ).trim();
 
 
-        const coverImage =
+        const coverUrl =
             String(
-                formData.get("cover_image") || ""
+                formData.get("cover_url") || ""
             ).trim();
+
+
+        const coverFile =
+            formData.get("cover_file");
 
 
         const sortOrderRaw =
@@ -1909,7 +2058,7 @@ function getCourseModal() {
         ) {
 
             showFormError(
-                "Display order must be a valid positive number."
+                "Display order must be a valid number."
             );
 
             return;
@@ -1930,6 +2079,28 @@ function getCourseModal() {
 
         try {
 
+            let finalCoverUrl =
+                coverUrl || null;
+
+
+            /*
+                If a new file was selected,
+                upload it first.
+            */
+
+            if (
+                coverFile &&
+                coverFile instanceof File &&
+                coverFile.size > 0
+            ) {
+
+                finalCoverUrl =
+                    await uploadCourseCover(
+                        coverFile
+                    );
+            }
+
+
             const courseData = {
 
                 title,
@@ -1944,7 +2115,7 @@ function getCourseModal() {
                     level || null,
 
                 cover_image:
-                    coverImage || null,
+                    finalCoverUrl,
 
                 sort_order:
                     sortOrder
@@ -1972,6 +2143,7 @@ function getCourseModal() {
                 courseData.status =
                     "draft";
 
+
                 courseData.slug =
                     await createUniqueSlug(
                         title
@@ -1993,6 +2165,7 @@ function getCourseModal() {
 
 
             closeCourseModal();
+
 
             await refreshCoursesAndDashboard();
 
@@ -2025,20 +2198,83 @@ function getCourseModal() {
 
 
     /* =====================================================
+       UPLOAD COURSE COVER
+    ===================================================== */
+
+    async function uploadCourseCover(file) {
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+        const randomName =
+            `${crypto.randomUUID()}.${extension}`;
+
+
+        const filePath =
+            `course-covers/${randomName}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await client.storage
+                .from("course-covers")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        cacheControl: "3600",
+                        upsert: false,
+                        contentType: file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            throw new Error(
+                `Cover upload failed: ${uploadError.message}`
+            );
+        }
+
+
+        const {
+            data
+        } =
+            client.storage
+                .from("course-covers")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        if (!data?.publicUrl) {
+
+            throw new Error(
+                "The cover was uploaded but its public URL could not be generated."
+            );
+        }
+
+
+        return data.publicUrl;
+    }
+
+
+    /* =====================================================
        PUBLISH
     ===================================================== */
 
-    async function publishCourse(
-        course
-    ) {
+    async function publishCourse(course) {
 
         if (
             !confirm(
                 `Publish "${course.title}"?`
             )
-        ) {
-            return;
-        }
+        ) return;
 
 
         await updateCourseStatus(
@@ -2052,17 +2288,13 @@ function getCourseModal() {
        UNPUBLISH
     ===================================================== */
 
-    async function unpublishCourse(
-        course
-    ) {
+    async function unpublishCourse(course) {
 
         if (
             !confirm(
                 `Unpublish "${course.title}" and return it to Draft?`
             )
-        ) {
-            return;
-        }
+        ) return;
 
 
         await updateCourseStatus(
@@ -2076,17 +2308,13 @@ function getCourseModal() {
        ARCHIVE
     ===================================================== */
 
-    async function archiveCourse(
-        course
-    ) {
+    async function archiveCourse(course) {
 
         if (
             !confirm(
                 `Archive "${course.title}"?\n\nThe course will not be permanently deleted.`
             )
-        ) {
-            return;
-        }
+        ) return;
 
 
         try {
@@ -2097,14 +2325,9 @@ function getCourseModal() {
                 await client
                     .from("courses")
                     .update({
-
-                        status:
-                            "archived",
-
+                        status: "archived",
                         archived_at:
-                            new Date()
-                                .toISOString()
-
+                            new Date().toISOString()
                     })
                     .eq(
                         "id",
@@ -2138,17 +2361,13 @@ function getCourseModal() {
        RESTORE
     ===================================================== */
 
-    async function restoreCourse(
-        course
-    ) {
+    async function restoreCourse(course) {
 
         if (
             !confirm(
                 `Restore "${course.title}" to Draft?`
             )
-        ) {
-            return;
-        }
+        ) return;
 
 
         try {
@@ -2159,13 +2378,8 @@ function getCourseModal() {
                 await client
                     .from("courses")
                     .update({
-
-                        status:
-                            "draft",
-
-                        archived_at:
-                            null
-
+                        status: "draft",
+                        archived_at: null
                     })
                     .eq(
                         "id",
@@ -2196,7 +2410,7 @@ function getCourseModal() {
 
 
     /* =====================================================
-       UPDATE STATUS
+       STATUS
     ===================================================== */
 
     async function updateCourseStatus(
@@ -2212,16 +2426,11 @@ function getCourseModal() {
                 await client
                     .from("courses")
                     .update({
-
                         status,
-
                         archived_at:
-                            status ===
-                            "archived"
-                                ? new Date()
-                                    .toISOString()
+                            status === "archived"
+                                ? new Date().toISOString()
                                 : null
-
                     })
                     .eq(
                         "id",
@@ -2255,17 +2464,13 @@ function getCourseModal() {
        DUPLICATE
     ===================================================== */
 
-    async function duplicateCourse(
-        course
-    ) {
+    async function duplicateCourse(course) {
 
         if (
             !confirm(
                 `Duplicate "${course.title}"?\n\nThe duplicate will be created as a Draft.`
             )
-        ) {
-            return;
-        }
+        ) return;
 
 
         try {
@@ -2343,9 +2548,7 @@ function getCourseModal() {
        SLUG
     ===================================================== */
 
-    async function createUniqueSlug(
-        title
-    ) {
+    async function createUniqueSlug(title) {
 
         const base =
             slugify(title) ||
@@ -2356,7 +2559,8 @@ function getCourseModal() {
             base;
 
 
-        let counter = 1;
+        let counter =
+            1;
 
 
         while (true) {
@@ -2439,9 +2643,7 @@ function getCourseModal() {
        FORM ERROR
     ===================================================== */
 
-    function showFormError(
-        message
-    ) {
+    function showFormError(message) {
 
         const element =
             $("#course-form-error");
@@ -2459,13 +2661,29 @@ function getCourseModal() {
     }
 
 
+    function clearFormError() {
+
+        const element =
+            $("#course-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+            "";
+
+
+        element.hidden =
+            true;
+    }
+
+
     /* =====================================================
        UTILITIES
     ===================================================== */
 
-    function normalizeStatus(
-        status
-    ) {
+    function normalizeStatus(status) {
 
         if (
             status === "published" ||
@@ -2480,14 +2698,10 @@ function getCourseModal() {
     }
 
 
-    function formatDate(
-        value
-    ) {
+    function formatDate(value) {
 
-        if (!value) {
-
+        if (!value)
             return "—";
-        }
 
 
         const date =
@@ -2515,27 +2729,30 @@ function getCourseModal() {
     }
 
 
-    function escapeHTML(
-        value
-    ) {
+    function escapeHTML(value) {
 
         return String(value ?? "")
+
             .replace(
                 /&/g,
                 "&amp;"
             )
+
             .replace(
                 /</g,
                 "&lt;"
             )
+
             .replace(
                 />/g,
                 "&gt;"
             )
+
             .replace(
                 /"/g,
                 "&quot;"
             )
+
             .replace(
                 /'/g,
                 "&#039;"
@@ -2543,9 +2760,7 @@ function getCourseModal() {
     }
 
 
-    function escapeAttribute(
-        value
-    ) {
+    function escapeAttribute(value) {
 
         return escapeHTML(value);
     }
