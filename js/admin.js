@@ -9,35 +9,68 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       ADMIN ACCESS PROTECTION
-       
-       Phase 2 authentication verifies that the current
-       user is authenticated and has administrator access.
-
-       The dashboard does not initialize unless the user
-       passes this check.
+       ADMIN AUTHENTICATION
     ====================================================== */
+
+    /*
+     * Phase 2 authentication must expose requireAdmin().
+     *
+     * IMPORTANT:
+     * We wait for the authentication system before
+     * initializing the dashboard.
+     */
 
     if (typeof requireAdmin !== "function") {
 
         console.error(
-            "EduCore: requireAdmin() is not available. Make sure auth.js is loaded before admin.js."
+            "EduCore: requireAdmin() is not available."
         );
 
-        window.location.href = "index.html";
+        document.body.innerHTML = `
+            <div style="
+                min-height:100vh;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:30px;
+                font-family:Arial,sans-serif;
+                text-align:center;
+            ">
+                <div>
+                    <h2>Authentication system unavailable</h2>
+                    <p>
+                        Phase 2 authentication has not been loaded.
+                    </p>
+                </div>
+            </div>
+        `;
 
         return;
     }
 
 
-    const authorised =
-        await requireAdmin();
+    let authorised = false;
 
+    try {
 
-    if (!authorised) {
+        authorised =
+            await requireAdmin();
+
+    }
+    catch (error) {
+
+        console.error(
+            "EduCore: admin authorization failed.",
+            error
+        );
 
         return;
 
+    }
+
+
+    if (!authorised) {
+        return;
     }
 
 
@@ -71,19 +104,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     ====================================================== */
 
     const navigationItems =
-        document.querySelectorAll(
-            ".nav-item"
-        );
+        document.querySelectorAll(".nav-item");
 
     const sections =
-        document.querySelectorAll(
-            ".admin-section"
-        );
+        document.querySelectorAll(".admin-section");
 
     const pageTitle =
-        document.getElementById(
-            "page-title"
-        );
+        document.getElementById("page-title");
 
 
     /* =====================================================
@@ -91,49 +118,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     ====================================================== */
 
     const totalCourses =
-        document.getElementById(
-            "total-courses"
-        );
+        document.getElementById("total-courses");
 
     const totalUnits =
-        document.getElementById(
-            "total-units"
-        );
+        document.getElementById("total-units");
 
     const totalLessons =
-        document.getElementById(
-            "total-lessons"
-        );
+        document.getElementById("total-lessons");
 
     const totalStudents =
-        document.getElementById(
-            "total-students"
-        );
+        document.getElementById("total-students");
 
     const publishedContent =
-        document.getElementById(
-            "published-content"
-        );
+        document.getElementById("published-content");
 
     const draftContent =
-        document.getElementById(
-            "draft-content"
-        );
+        document.getElementById("draft-content");
 
     const activityList =
-        document.getElementById(
-            "activity-list"
-        );
+        document.getElementById("activity-list");
 
     const dashboardError =
-        document.getElementById(
-            "dashboard-error"
-        );
+        document.getElementById("dashboard-error");
 
     const dashboardRetry =
-        document.getElementById(
-            "dashboard-retry"
-        );
+        document.getElementById("dashboard-retry");
 
 
     /* =====================================================
@@ -141,24 +150,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     ====================================================== */
 
     const coursesList =
-        document.getElementById(
-            "courses-list"
-        );
+        document.getElementById("courses-list");
 
     const courseSearch =
-        document.getElementById(
-            "course-search"
-        );
+        document.getElementById("course-search");
 
     const courseFilter =
-        document.getElementById(
-            "course-filter"
-        );
+        document.getElementById("course-filter");
 
     const courseCount =
-        document.getElementById(
-            "course-count"
-        );
+        document.getElementById("course-count");
 
 
     /* =====================================================
@@ -166,19 +167,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     ====================================================== */
 
     const adminName =
-        document.getElementById(
-            "admin-name"
-        );
+        document.getElementById("admin-name");
 
     const adminRole =
-        document.getElementById(
-            "admin-role"
-        );
+        document.getElementById("admin-role");
 
     const adminAvatar =
-        document.getElementById(
-            "admin-avatar"
-        );
+        document.getElementById("admin-avatar");
 
 
     /* =====================================================
@@ -186,9 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ====================================================== */
 
     const logoutButton =
-        document.getElementById(
-            "logout-button"
-        );
+        document.getElementById("logout-button");
 
 
     /* =====================================================
@@ -237,37 +230,151 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        SUPABASE CLIENT
-       
-       Phase 2 should expose the existing client globally.
-       We deliberately do not create another Supabase client
-       here because credentials belong to the Phase 2 setup.
     ====================================================== */
 
     function getSupabaseClient() {
+
+        /*
+         * First check the preferred global.
+         */
 
         if (
             window.supabaseClient &&
             typeof window.supabaseClient.from === "function"
         ) {
-
             return window.supabaseClient;
-
         }
 
+
+        /*
+         * Some Phase 2 implementations expose the client
+         * as window.supabase.
+         */
 
         if (
             window.supabase &&
             typeof window.supabase.from === "function"
         ) {
-
             return window.supabase;
+        }
 
+
+        /*
+         * Some classic scripts declare:
+         *
+         * const supabaseClient = ...
+         *
+         * A top-level lexical variable can still be
+         * accessible from another classic script through
+         * typeof / direct reference.
+         */
+
+        try {
+
+            if (
+                typeof supabaseClient !== "undefined" &&
+                supabaseClient &&
+                typeof supabaseClient.from === "function"
+            ) {
+                return supabaseClient;
+            }
+
+        }
+        catch (error) {
+            /* Ignore and continue. */
         }
 
 
         return null;
-
     }
+
+
+    /* =====================================================
+       WAIT FOR SUPABASE
+    ====================================================== */
+
+    async function waitForSupabase(
+        attempts = 30,
+        delay = 100
+    ) {
+
+        for (
+            let attempt = 0;
+            attempt < attempts;
+            attempt++
+        ) {
+
+            const client =
+                getSupabaseClient();
+
+            if (client) {
+                return client;
+            }
+
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        delay
+                    )
+            );
+
+        }
+
+        return null;
+    }
+
+
+    /* =====================================================
+       GET SUPABASE CLIENT
+    ====================================================== */
+
+    const supabaseClient =
+        await waitForSupabase();
+
+
+    if (!supabaseClient) {
+
+        console.error(
+            "EduCore: Supabase client could not be found."
+        );
+
+        if (app) {
+
+            app.innerHTML = `
+                <div style="
+                    padding:40px;
+                    text-align:center;
+                    font-family:Arial,sans-serif;
+                ">
+                    <h2>
+                        Supabase connection unavailable
+                    </h2>
+
+                    <p>
+                        The Phase 2 Supabase client could not
+                        be found.
+                    </p>
+
+                    <p style="
+                        opacity:.7;
+                        font-size:14px;
+                    ">
+                        Check that supabase.js is loaded
+                        before admin.js.
+                    </p>
+                </div>
+            `;
+
+        }
+
+        return;
+    }
+
+
+    console.log(
+        "EduCore: Supabase client detected."
+    );
 
 
     /* =====================================================
@@ -280,24 +387,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             value === null ||
             value === undefined
         ) {
-
             return "";
-
         }
 
-
         return String(value)
-
             .replaceAll("&", "&amp;")
-
             .replaceAll("<", "&lt;")
-
             .replaceAll(">", "&gt;")
-
             .replaceAll('"', "&quot;")
-
             .replaceAll("'", "&#039;");
-
     }
 
 
@@ -310,18 +408,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const number =
             Number(value);
 
-
-        if (
-            !Number.isFinite(number)
-        ) {
-
+        if (!Number.isFinite(number)) {
             return "0";
-
         }
 
-
         return number.toLocaleString();
-
     }
 
 
@@ -332,26 +423,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     function formatDate(value) {
 
         if (!value) {
-
             return "—";
-
         }
-
 
         const date =
             new Date(value);
-
 
         if (
             Number.isNaN(
                 date.getTime()
             )
         ) {
-
             return "—";
-
         }
-
 
         return date.toLocaleDateString(
             undefined,
@@ -361,7 +445,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 year: "numeric"
             }
         );
-
     }
 
 
@@ -372,115 +455,90 @@ document.addEventListener("DOMContentLoaded", async () => {
     function formatRelativeTime(value) {
 
         if (!value) {
-
             return "Unknown time";
-
         }
-
 
         const date =
             new Date(value);
-
 
         if (
             Number.isNaN(
                 date.getTime()
             )
         ) {
-
             return "Unknown time";
-
         }
-
 
         const now =
             new Date();
 
-
         const difference =
             now.getTime() -
             date.getTime();
-
 
         const seconds =
             Math.floor(
                 difference / 1000
             );
 
-
         if (seconds < 60) {
-
             return "Just now";
-
         }
-
 
         const minutes =
             Math.floor(
                 seconds / 60
             );
 
-
         if (minutes < 60) {
-
             return `${minutes} min ago`;
-
         }
-
 
         const hours =
             Math.floor(
                 minutes / 60
             );
 
-
         if (hours < 24) {
-
             return `${hours} hr ago`;
-
         }
-
 
         const days =
             Math.floor(
                 hours / 24
             );
 
-
         if (days < 7) {
 
-            return `${days} day${days === 1 ? "" : "s"} ago`;
+            return `${days} day${
+                days === 1
+                    ? ""
+                    : "s"
+            } ago`;
 
         }
 
-
         return formatDate(value);
-
     }
 
 
     /* =====================================================
-       GET RECORD STATUS
+       GET STATUS
     ====================================================== */
 
     function getStatus(record) {
 
         if (!record) {
-
             return "draft";
-
         }
-
 
         if (
             typeof record.status === "string"
         ) {
 
-            return record.status
-                .toLowerCase();
+            return record.status.toLowerCase();
 
         }
-
 
         if (
             record.published === true ||
@@ -491,7 +549,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
-
         if (
             record.archived === true ||
             record.is_archived === true
@@ -501,9 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
-
         return "draft";
-
     }
 
 
@@ -514,21 +569,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     function getStatusLabel(status) {
 
         if (status === "published") {
-
             return "Published";
-
         }
-
 
         if (status === "archived") {
-
             return "Archived";
-
         }
 
-
         return "Draft";
-
     }
 
 
@@ -548,9 +596,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
-
         return "draft";
-
     }
 
 
@@ -561,30 +607,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     function showDashboardError(message) {
 
         if (!dashboardError) {
-
             return;
-
         }
-
 
         const span =
-            dashboardError.querySelector(
-                "span"
-            );
-
+            dashboardError.querySelector("span");
 
         if (span) {
-
-            span.textContent =
-                message;
-
+            span.textContent = message;
         }
-
 
         dashboardError.classList.remove(
             "admin-hidden"
         );
-
     }
 
 
@@ -595,40 +630,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     function hideDashboardError() {
 
         if (!dashboardError) {
-
             return;
-
         }
-
 
         dashboardError.classList.add(
             "admin-hidden"
         );
-
     }
 
 
     /* =====================================================
-       GET TABLE COUNT
-       
-       Uses exact database counts rather than downloading
-       entire tables.
+       TABLE COUNT
     ====================================================== */
 
     async function getTableCount(
-        client,
         table,
         filter = null
     ) {
 
         let query =
-            client
+            supabaseClient
                 .from(table)
                 .select("*", {
                     count: "exact",
                     head: true
                 });
-
 
         if (
             filter &&
@@ -644,41 +670,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
-
         const result =
             await query;
 
-
         if (result.error) {
-
             throw result.error;
-
         }
 
-
         return result.count || 0;
-
     }
 
 
     /* =====================================================
-       COUNT PUBLISHED CONTENT
-       
-       Published content =
-       published courses +
-       published units +
-       published lessons.
+       PUBLISHED CONTENT
     ====================================================== */
 
-    async function getPublishedContentCount(
-        client
-    ) {
+    async function getPublishedContentCount() {
 
         const counts =
             await Promise.all([
 
                 getTableCount(
-                    client,
                     "courses",
                     {
                         column: "status",
@@ -687,7 +699,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ),
 
                 getTableCount(
-                    client,
                     "units",
                     {
                         column: "status",
@@ -696,7 +707,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ),
 
                 getTableCount(
-                    client,
                     "lessons",
                     {
                         column: "status",
@@ -706,29 +716,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             ]);
 
-
         return counts.reduce(
             (total, count) =>
                 total + count,
             0
         );
-
     }
 
 
     /* =====================================================
-       COUNT DRAFT CONTENT
+       DRAFT CONTENT
     ====================================================== */
 
-    async function getDraftContentCount(
-        client
-    ) {
+    async function getDraftContentCount() {
 
         const counts =
             await Promise.all([
 
                 getTableCount(
-                    client,
                     "courses",
                     {
                         column: "status",
@@ -737,7 +742,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ),
 
                 getTableCount(
-                    client,
                     "units",
                     {
                         column: "status",
@@ -746,7 +750,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ),
 
                 getTableCount(
-                    client,
                     "lessons",
                     {
                         column: "status",
@@ -756,29 +759,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             ]);
 
-
         return counts.reduce(
             (total, count) =>
                 total + count,
             0
         );
-
     }
 
 
     /* =====================================================
        STUDENT COUNT
-       
-       Profiles table contains the user role according to
-       the Phase 1/2 database structure.
     ====================================================== */
 
-    async function getStudentCount(
-        client
-    ) {
+    async function getStudentCount() {
 
         return getTableCount(
-            client,
             "profiles",
             {
                 column: "role",
@@ -790,100 +785,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       LOAD DASHBOARD STATISTICS
+       DASHBOARD STATISTICS
     ====================================================== */
 
     async function loadDashboardStatistics() {
 
-        const client =
-            getSupabaseClient();
-
-
-        if (!client) {
-
-            showDashboardError(
-                "Supabase is not available. Make sure the Phase 2 Supabase client is loaded before admin.js."
-            );
-
-            return;
-
-        }
-
-
         state.dashboardErrors = [];
-
 
         setStatisticLoading();
 
+        const requests = [
 
-        const requests = {
+            getTableCount("courses"),
 
-            courses:
-                getTableCount(
-                    client,
-                    "courses"
-                ),
+            getTableCount("units"),
 
-            units:
-                getTableCount(
-                    client,
-                    "units"
-                ),
+            getTableCount("lessons"),
 
-            lessons:
-                getTableCount(
-                    client,
-                    "lessons"
-                ),
+            getStudentCount(),
 
-            students:
-                getStudentCount(
-                    client
-                ),
+            getPublishedContentCount(),
 
-            published:
-                getPublishedContentCount(
-                    client
-                ),
+            getDraftContentCount()
 
-            drafts:
-                getDraftContentCount(
-                    client
-                )
-
-        };
+        ];
 
 
         const results =
-            await Promise.allSettled([
-
-                requests.courses,
-
-                requests.units,
-
-                requests.lessons,
-
-                requests.students,
-
-                requests.published,
-
-                requests.drafts
-
-            ]);
+            await Promise.allSettled(
+                requests
+            );
 
 
-        const values = [
+        const elements = [
 
             totalCourses,
-
             totalUnits,
-
             totalLessons,
-
             totalStudents,
-
             publishedContent,
-
             draftContent
 
         ];
@@ -893,15 +833,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             (result, index) => {
 
                 const element =
-                    values[index];
-
+                    elements[index];
 
                 if (!element) {
-
                     return;
-
                 }
-
 
                 if (
                     result.status ===
@@ -914,12 +850,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                         );
 
                 }
-
                 else {
 
                     element.textContent =
                         "—";
-
 
                     state.dashboardErrors.push(
                         result.reason
@@ -936,11 +870,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         ) {
 
             showDashboardError(
-                "Some dashboard statistics could not be loaded. Check that the Phase 1 database tables and columns are available."
+                "Some dashboard statistics could not be loaded. Check the database tables and permissions."
             );
 
         }
-
         else {
 
             hideDashboardError();
@@ -949,46 +882,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         state.dashboardLoaded = true;
-
     }
 
 
     /* =====================================================
-       STATISTIC LOADING STATE
+       STATISTIC LOADING
     ====================================================== */
 
     function setStatisticLoading() {
 
-        const elements = [
+        [
 
             totalCourses,
-
             totalUnits,
-
             totalLessons,
-
             totalStudents,
-
             publishedContent,
-
             draftContent
 
-        ];
-
-
-        elements.forEach(
+        ].forEach(
             element => {
 
                 if (!element) {
-
                     return;
-
                 }
 
-
-                element.textContent =
-                    "—";
-
+                element.textContent = "—";
 
                 element.classList.add(
                     "dashboard-loading"
@@ -996,28 +915,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             }
         );
-
-
-        setTimeout(() => {
-
-            elements.forEach(
-                element => {
-
-                    if (!element) {
-
-                        return;
-
-                    }
-
-
-                    element.classList.remove(
-                        "dashboard-loading"
-                    );
-
-                }
-            );
-
-        }, 150);
 
     }
 
@@ -1029,24 +926,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadCourses() {
 
         if (!coursesList) {
-
             return;
-
-        }
-
-
-        const client =
-            getSupabaseClient();
-
-
-        if (!client) {
-
-            renderCoursesError(
-                "Supabase is not available."
-            );
-
-            return;
-
         }
 
 
@@ -1062,37 +942,66 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
-            const result =
-                await client
+            let result =
+                await supabaseClient
                     .from("courses")
-                    .select("*")
-                    .order(
-                        "updated_at",
-                        {
-                            ascending: false
-                        }
-                    );
+                    .select("*");
 
 
             if (result.error) {
-
                 throw result.error;
-
             }
 
 
-            state.courses =
-                Array.isArray(
-                    result.data
-                )
+            /*
+             * Try updated_at ordering when available.
+             * If the column doesn't exist, use the returned
+             * data instead of breaking the Courses page.
+             */
+
+            let data =
+                Array.isArray(result.data)
                     ? result.data
                     : [];
 
 
+            try {
+
+                const orderedResult =
+                    await supabaseClient
+                        .from("courses")
+                        .select("*")
+                        .order(
+                            "updated_at",
+                            {
+                                ascending: false
+                            }
+                        );
+
+
+                if (
+                    !orderedResult.error &&
+                    Array.isArray(
+                        orderedResult.data
+                    )
+                ) {
+
+                    data =
+                        orderedResult.data;
+
+                }
+
+            }
+            catch (error) {
+                /* Keep original result. */
+            }
+
+
+            state.courses = data;
+
             applyCourseFilters();
 
         }
-
         catch (error) {
 
             console.error(
@@ -1100,9 +1009,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 error
             );
 
-
             state.courses = [];
-
 
             renderCoursesError(
                 "Courses could not be loaded from the database."
@@ -1114,27 +1021,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       RENDER COURSES ERROR
+       COURSES ERROR
     ====================================================== */
 
-    function renderCoursesError(
-        message
-    ) {
+    function renderCoursesError(message) {
 
         if (!coursesList) {
-
             return;
-
         }
-
 
         if (courseCount) {
-
             courseCount.textContent =
                 "Unavailable";
-
         }
-
 
         coursesList.innerHTML = `
             <div class="courses-empty">
@@ -1158,14 +1057,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       FILTER COURSES
+       COURSE FILTERS
     ====================================================== */
 
     function applyCourseFilters() {
 
         const search =
             state.searchTerm;
-
 
         const status =
             state.statusFilter;
@@ -1176,28 +1074,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 course => {
 
                     const courseStatus =
-                        getStatus(
-                            course
-                        );
+                        getStatus(course);
 
 
-                    const searchableText =
-                        [
+                    const searchableText = [
 
-                            course.title,
+                        course.title,
 
-                            course.name,
+                        course.name,
 
-                            course.description,
+                        course.description,
 
-                            course.category,
+                        course.category,
 
-                            course.level
+                        course.level
 
-                        ]
-                            .filter(Boolean)
-                            .join(" ")
-                            .toLowerCase();
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
 
 
                     const matchesSearch =
@@ -1222,7 +1117,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         renderCourses();
-
     }
 
 
@@ -1233,9 +1127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     function renderCourses() {
 
         if (!coursesList) {
-
             return;
-
         }
 
 
@@ -1245,12 +1137,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (courseCount) {
 
-            const count =
-                courses.length;
-
-
             courseCount.textContent =
-                `${count} course${count === 1 ? "" : "s"}`;
+                `${courses.length} course${
+                    courses.length === 1
+                        ? ""
+                        : "s"
+                }`;
 
         }
 
@@ -1276,17 +1168,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             `;
 
             return;
-
         }
 
 
         coursesList.innerHTML =
             courses
                 .map(
-                    course =>
-                        createCourseRow(
-                            course
-                        )
+                    createCourseRow
                 )
                 .join("");
 
@@ -1297,9 +1185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        CREATE COURSE ROW
     ====================================================== */
 
-    function createCourseRow(
-        course
-    ) {
+    function createCourseRow(course) {
 
         const title =
             course.title ||
@@ -1324,21 +1210,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         const status =
-            getStatus(
-                course
-            );
+            getStatus(course);
 
 
         const statusClass =
-            getStatusClass(
-                status
-            );
+            getStatusClass(status);
 
 
         const statusLabel =
-            getStatusLabel(
-                status
-            );
+            getStatusLabel(status);
 
 
         const updated =
@@ -1390,7 +1270,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                             description
                                 ? `
                                     <div class="course-description">
-                                        ${escapeHTML(description)}
+                                        ${escapeHTML(
+                                            description
+                                        )}
                                     </div>
                                 `
                                 : ""
@@ -1400,27 +1282,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 </div>
 
-
                 <div class="course-category">
                     ${escapeHTML(category)}
                 </div>
 
-
                 <div class="course-level">
                     ${escapeHTML(level)}
                 </div>
-
 
                 <div>
 
                     <span
                         class="course-status ${statusClass}"
                     >
-                        ${escapeHTML(statusLabel)}
+                        ${escapeHTML(
+                            statusLabel
+                        )}
                     </span>
 
                 </div>
-
 
                 <div class="course-updated">
                     ${escapeHTML(
@@ -1430,7 +1310,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             </article>
         `;
-
     }
 
 
@@ -1448,7 +1327,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     event.target.value
                         .toLowerCase()
                         .trim();
-
 
                 applyCourseFilters();
 
@@ -1471,7 +1349,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 state.statusFilter =
                     event.target.value;
 
-
                 applyCourseFilters();
 
             }
@@ -1482,34 +1359,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        RECENT ACTIVITY
-       
-       We use the existing database structure where possible.
-       If an audit/activity table exists, it is used first.
-       Otherwise the dashboard builds useful recent activity
-       from recently updated courses, units and lessons.
     ====================================================== */
 
     async function loadRecentActivity() {
 
         if (!activityList) {
-
             return;
-
-        }
-
-
-        const client =
-            getSupabaseClient();
-
-
-        if (!client) {
-
-            renderActivityEmpty(
-                "Recent activity is unavailable because Supabase is not connected."
-            );
-
-            return;
-
         }
 
 
@@ -1522,8 +1377,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
-            const activityResult =
-                await client
+            const result =
+                await supabaseClient
                     .from("activities")
                     .select("*")
                     .order(
@@ -1536,51 +1391,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
             if (
-                !activityResult.error &&
-                Array.isArray(
-                    activityResult.data
-                ) &&
-                activityResult.data.length
+                !result.error &&
+                Array.isArray(result.data) &&
+                result.data.length
             ) {
 
                 renderDatabaseActivities(
-                    activityResult.data
+                    result.data
                 );
 
                 return;
-
             }
 
 
-            await loadContentActivity(
-                client
-            );
+            await loadContentActivity();
 
         }
-
         catch (error) {
 
             console.warn(
-                "EduCore: activities table unavailable, using content activity fallback.",
+                "EduCore: activities table unavailable.",
                 error
             );
 
-
             try {
 
-                await loadContentActivity(
-                    client
-                );
+                await loadContentActivity();
 
             }
-
             catch (fallbackError) {
 
                 console.error(
-                    "EduCore: recent activity failed",
+                    "EduCore: recent activity failed.",
                     fallbackError
                 );
-
 
                 renderActivityEmpty(
                     "No recent activity is available."
@@ -1594,19 +1438,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       RENDER DATABASE ACTIVITIES
+       DATABASE ACTIVITIES
     ====================================================== */
 
     function renderDatabaseActivities(
         activities
     ) {
-
-        if (!activityList) {
-
-            return;
-
-        }
-
 
         if (!activities.length) {
 
@@ -1615,7 +1452,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             return;
-
         }
 
 
@@ -1642,12 +1478,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       DATABASE ACTIVITY TITLE
+       ACTIVITY TITLE
     ====================================================== */
 
-    function getActivityTitle(
-        activity
-    ) {
+    function getActivityTitle(activity) {
 
         if (
             activity.title &&
@@ -1661,9 +1495,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        if (
-            activity.activity_type
-        ) {
+        if (activity.activity_type) {
 
             return formatActivityType(
                 activity.activity_type
@@ -1673,17 +1505,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         return "Activity recorded";
-
     }
 
 
     /* =====================================================
-       DATABASE ACTIVITY META
+       ACTIVITY META
     ====================================================== */
 
-    function getActivityMeta(
-        activity
-    ) {
+    function getActivityMeta(activity) {
 
         const date =
             activity.created_at ||
@@ -1691,26 +1520,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         if (!date) {
-
             return "Recent activity";
-
         }
 
 
-        return formatRelativeTime(
-            date
-        );
-
+        return formatRelativeTime(date);
     }
 
 
     /* =====================================================
-       DATABASE ACTIVITY ICON
+       ACTIVITY ICON
     ====================================================== */
 
-    function getActivityIcon(
-        activity
-    ) {
+    function getActivityIcon(activity) {
 
         const type =
             String(
@@ -1719,47 +1541,32 @@ document.addEventListener("DOMContentLoaded", async () => {
             ).toLowerCase();
 
 
-        if (
-            type.includes("publish")
-        ) {
-
+        if (type.includes("publish")) {
             return "✓";
-
         }
-
 
         if (
             type.includes("create") ||
             type.includes("add")
         ) {
-
             return "+";
-
         }
-
 
         if (
             type.includes("delete") ||
             type.includes("archive")
         ) {
-
             return "−";
-
         }
-
 
         if (
             type.includes("update") ||
             type.includes("edit")
         ) {
-
             return "↗";
-
         }
 
-
         return "•";
-
     }
 
 
@@ -1767,9 +1574,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        FORMAT ACTIVITY TYPE
     ====================================================== */
 
-    function formatActivityType(
-        value
-    ) {
+    function formatActivityType(value) {
 
         return String(value)
             .replaceAll("_", " ")
@@ -1787,9 +1592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        CONTENT ACTIVITY FALLBACK
     ====================================================== */
 
-    async function loadContentActivity(
-        client
-    ) {
+    async function loadContentActivity() {
 
         const activitySources = [];
 
@@ -1821,7 +1624,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
 
                 const result =
-                    await client
+                    await supabaseClient
                         .from(
                             source.table
                         )
@@ -1837,12 +1640,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         .limit(5);
 
 
-                if (
-                    result.error
-                ) {
-
+                if (result.error) {
                     continue;
-
                 }
 
 
@@ -1860,7 +1659,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                         activitySources.push({
 
                             title:
-                                `${source.label} "${record.title || record.name || "Untitled"}" updated`,
+                                `${source.label} "${
+                                    record.title ||
+                                    record.name ||
+                                    "Untitled"
+                                }" updated`,
 
                             date:
                                 record.updated_at ||
@@ -1878,11 +1681,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 );
 
             }
-
             catch (error) {
 
                 console.warn(
-                    `EduCore: could not load ${source.table} activity`,
+                    `EduCore: could not load ${source.table} activity.`,
                     error
                 );
 
@@ -1899,12 +1701,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                         a.date || 0
                     ).getTime();
 
-
                 const bDate =
                     new Date(
                         b.date || 0
                     ).getTime();
-
 
                 return bDate - aDate;
 
@@ -1919,7 +1719,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             return;
-
         }
 
 
@@ -1955,7 +1754,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="activity-item">
 
                 <div class="activity-icon">
-                    ${escapeHTML(icon || "•")}
+                    ${escapeHTML(
+                        icon || "•"
+                    )}
                 </div>
 
                 <div class="activity-content">
@@ -1980,16 +1781,11 @@ document.addEventListener("DOMContentLoaded", async () => {
        EMPTY ACTIVITY
     ====================================================== */
 
-    function renderActivityEmpty(
-        message
-    ) {
+    function renderActivityEmpty(message) {
 
         if (!activityList) {
-
             return;
-
         }
-
 
         activityList.innerHTML = `
             <div class="activity-empty">
@@ -2004,18 +1800,10 @@ document.addEventListener("DOMContentLoaded", async () => {
        NAVIGATION
     ====================================================== */
 
-    function openSection(
-        sectionName
-    ) {
+    function openSection(sectionName) {
 
-        if (
-            !sectionTitles[
-                sectionName
-            ]
-        ) {
-
+        if (!sectionTitles[sectionName]) {
             return;
-
         }
 
 
@@ -2063,11 +1851,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         window.scrollTo({
-
             top: 0,
-
             behavior: "smooth"
-
         });
 
 
@@ -2122,7 +1907,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     toggleMobileSidebar();
 
                 }
-
                 else {
 
                     toggleDesktopSidebar();
@@ -2142,9 +1926,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     function toggleDesktopSidebar() {
 
         if (!app) {
-
             return;
-
         }
 
 
@@ -2175,7 +1957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       RESTORE DESKTOP SIDEBAR
+       RESTORE SIDEBAR
     ====================================================== */
 
     function restoreDesktopSidebar() {
@@ -2184,9 +1966,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             !app ||
             window.innerWidth <= 768
         ) {
-
             return;
-
         }
 
 
@@ -2214,9 +1994,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     function toggleMobileSidebar() {
 
         if (!app) {
-
             return;
-
         }
 
 
@@ -2245,9 +2023,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     function closeMobileSidebar() {
 
         if (!app) {
-
             return;
-
         }
 
 
@@ -2269,7 +2045,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       MOBILE CLOSE BUTTON
+       MOBILE CLOSE
     ====================================================== */
 
     if (mobileSidebarClose) {
@@ -2297,7 +2073,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       ESCAPE KEY
+       ESCAPE
     ====================================================== */
 
     document.addEventListener(
@@ -2340,28 +2116,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        ADMIN PROFILE
-       
-       Uses the currently authenticated Supabase user
-       without changing the Phase 2 authentication system.
     ====================================================== */
 
     async function loadAdminProfile() {
 
-        const client =
-            getSupabaseClient();
-
-
-        if (!client) {
-
-            return;
-
-        }
-
-
         try {
 
             const authResult =
-                await client.auth.getUser();
+                await supabaseClient.auth.getUser();
 
 
             const user =
@@ -2369,9 +2131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
             if (!user) {
-
                 return;
-
             }
 
 
@@ -2390,7 +2150,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
 
                 const profileResult =
-                    await client
+                    await supabaseClient
                         .from("profiles")
                         .select(
                             "name, email, role"
@@ -2429,7 +2189,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
 
             }
-
             catch (profileError) {
 
                 console.warn(
@@ -2472,26 +2231,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     adminAvatar.innerHTML = `
                         <img
-                            src="${escapeHTML(avatarSource)}"
+                            src="${escapeHTML(
+                                avatarSource
+                            )}"
                             alt=""
                         >
                     `;
 
                 }
-
                 else {
 
                     adminAvatar.textContent =
-                        getInitials(
-                            name
-                        );
+                        getInitials(name);
 
                 }
 
             }
 
         }
-
         catch (error) {
 
             console.warn(
@@ -2508,9 +2265,7 @@ document.addEventListener("DOMContentLoaded", async () => {
        INITIALS
     ====================================================== */
 
-    function getInitials(
-        value
-    ) {
+    function getInitials(value) {
 
         const words =
             String(value || "A")
@@ -2520,9 +2275,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         if (!words.length) {
-
             return "A";
-
         }
 
 
@@ -2546,9 +2299,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        LOGOUT
-       
-       Uses the existing Supabase authentication session.
-       Phase 2 remains responsible for authentication.
     ====================================================== */
 
     if (logoutButton) {
@@ -2557,13 +2307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             "click",
             async () => {
 
-                const client =
-                    getSupabaseClient();
-
-
-                logoutButton.disabled =
-                    true;
-
+                logoutButton.disabled = true;
 
                 logoutButton.classList.add(
                     "is-loading"
@@ -2572,26 +2316,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 try {
 
-                    if (
-                        client &&
-                        client.auth
-                    ) {
-
-                        await client.auth.signOut();
-
-                    }
+                    await supabaseClient.auth.signOut();
 
                 }
-
                 catch (error) {
 
                     console.error(
-                        "EduCore: logout failed",
+                        "EduCore: logout failed.",
                         error
                     );
 
                 }
-
                 finally {
 
                     window.location.href =
@@ -2617,7 +2352,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 hideDashboardError();
 
-
                 await Promise.all([
 
                     loadDashboardStatistics(),
@@ -2642,10 +2376,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         restoreDesktopSidebar();
 
-
-        openSection(
-            "overview"
-        );
+        openSection("overview");
 
 
         await Promise.all([
@@ -2664,12 +2395,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       START ADMIN DASHBOARD
-       
-       This is reached only after requireAdmin()
-       successfully authorizes the current user.
+       START
     ====================================================== */
 
-    initializeAdminDashboard();
+    await initializeAdminDashboard();
 
 });
