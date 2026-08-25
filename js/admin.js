@@ -8,88 +8,22 @@ document.addEventListener("DOMContentLoaded", () => {
     "use strict";
 
     /* =====================================================
-       SUPABASE CHECK
+       SUPABASE
     ===================================================== */
 
-    if (
-        typeof window.supabaseClient === "undefined" ||
-        !window.supabaseClient
-    ) {
+    const client =
+        window.supabaseClient ||
+        window.supabase ||
+        null;
+
+    if (!client || typeof client.from !== "function") {
+
         console.error(
-            "Supabase is not available. Make sure the Phase 2 Supabase client is loaded before admin.js."
+            "Supabase client is not available."
         );
+
         return;
     }
-
-    const supabase = window.supabaseClient;
-
-    /* =====================================================
-       DOM
-    ===================================================== */
-
-    const app = document.getElementById("admin-app");
-
-    const navItems = document.querySelectorAll(".nav-item");
-    const sections = document.querySelectorAll(".admin-section");
-
-    const pageTitle = document.getElementById("page-title");
-
-    const sidebarToggle = document.getElementById("sidebar-toggle");
-    const mobileSidebarClose =
-        document.getElementById("mobile-sidebar-close");
-    const sidebarOverlay =
-        document.getElementById("sidebar-overlay");
-
-    const logoutButton =
-        document.getElementById("logout-button");
-
-    const adminName =
-        document.getElementById("admin-name");
-
-    const adminRole =
-        document.getElementById("admin-role");
-
-    const adminAvatar =
-        document.getElementById("admin-avatar");
-
-    const dashboardError =
-        document.getElementById("dashboard-error");
-
-    const dashboardRetry =
-        document.getElementById("dashboard-retry");
-
-    const totalCourses =
-        document.getElementById("total-courses");
-
-    const totalUnits =
-        document.getElementById("total-units");
-
-    const totalLessons =
-        document.getElementById("total-lessons");
-
-    const totalStudents =
-        document.getElementById("total-students");
-
-    const publishedContent =
-        document.getElementById("published-content");
-
-    const draftContent =
-        document.getElementById("draft-content");
-
-    const activityList =
-        document.getElementById("activity-list");
-
-    const courseSearch =
-        document.getElementById("course-search");
-
-    const courseFilter =
-        document.getElementById("course-filter");
-
-    const courseCount =
-        document.getElementById("course-count");
-
-    const coursesList =
-        document.getElementById("courses-list");
 
 
     /* =====================================================
@@ -98,15 +32,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let allCourses = [];
 
-    let currentUser = null;
-
-    let currentProfile = null;
-
     let editingCourseId = null;
+
+    let currentCourseAction = null;
 
 
     /* =====================================================
-       INITIALIZATION
+       DOM HELPERS
+    ===================================================== */
+
+    const $ = (selector) =>
+        document.querySelector(selector);
+
+    const $$ = (selector) =>
+        document.querySelectorAll(selector);
+
+
+    /* =====================================================
+       INITIALISE
     ===================================================== */
 
     init();
@@ -114,143 +57,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function init() {
 
-        try {
+        setupNavigation();
 
-            await loadCurrentUser();
+        setupSidebar();
 
-            setupNavigation();
+        setupLogout();
 
-            setupSidebar();
+        setupCourseControls();
 
-            setupLogout();
+        setupDashboardRetry();
 
-            setupCourseManagement();
+        await loadAdminUser();
 
-            await loadDashboard();
+        await loadDashboard();
 
-            await loadCourses();
-
-        } catch (error) {
-
-            console.error(
-                "EduCore Admin initialization error:",
-                error
-            );
-
-            showDashboardError(
-                "The admin dashboard could not be initialized."
-            );
-        }
-    }
-
-
-    /* =====================================================
-       AUTH
-    ===================================================== */
-
-    async function loadCurrentUser() {
-
-        const {
-            data,
-            error
-        } = await supabase.auth.getUser();
-
-        if (error) {
-
-            console.error(
-                "Unable to retrieve current user:",
-                error
-            );
-
-            return;
-        }
-
-        currentUser = data?.user || null;
-
-        if (!currentUser) {
-            return;
-        }
-
-        await loadProfile(currentUser.id);
-    }
-
-
-    async function loadProfile(userId) {
-
-        try {
-
-            const {
-                data,
-                error
-            } = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("id", userId)
-                .maybeSingle();
-
-            if (error) {
-
-                console.warn(
-                    "Could not load admin profile:",
-                    error
-                );
-
-                return;
-            }
-
-            currentProfile = data;
-
-            const name =
-                data?.name ||
-                currentUser?.email ||
-                "Administrator";
-
-            const role =
-                data?.role ||
-                "Admin";
-
-            if (adminName) {
-                adminName.textContent = name;
-            }
-
-            if (adminRole) {
-                adminRole.textContent = role;
-            }
-
-            if (adminAvatar) {
-
-                const initials =
-                    getInitials(name);
-
-                adminAvatar.textContent =
-                    initials;
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Profile loading error:",
-                error
-            );
-        }
-    }
-
-
-    function getInitials(name) {
-
-        if (!name) {
-            return "A";
-        }
-
-        return name
-            .trim()
-            .split(/\s+/)
-            .slice(0, 2)
-            .map(
-                part =>
-                    part.charAt(0).toUpperCase()
-            )
-            .join("");
+        await loadCourses();
     }
 
 
@@ -260,53 +81,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupNavigation() {
 
-        navItems.forEach(item => {
+        $$(".nav-item").forEach(button => {
 
-            item.addEventListener("click", () => {
+            button.addEventListener("click", () => {
 
-                const sectionName =
-                    item.dataset.section;
+                const section =
+                    button.dataset.section;
 
-                if (!sectionName) {
-                    return;
-                }
+                if (!section) return;
 
-                navItems.forEach(nav => {
-                    nav.classList.remove("active");
-                });
-
-                item.classList.add("active");
-
-                sections.forEach(section => {
-                    section.classList.remove("active");
-                });
-
-                const target =
-                    document.getElementById(
-                        `${sectionName}-section`
-                    );
-
-                if (target) {
-                    target.classList.add("active");
-                }
-
-                const label =
-                    item.querySelector(
-                        ".nav-label"
-                    );
-
-                if (pageTitle && label) {
-                    pageTitle.textContent =
-                        label.textContent.trim();
-                }
+                showSection(section);
 
                 closeMobileSidebar();
-
-                if (sectionName === "courses") {
-                    loadCourses();
-                }
             });
         });
+    }
+
+
+    function showSection(section) {
+
+        $$(".nav-item").forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.section === section
+            );
+        });
+
+
+        $$(".admin-section").forEach(element => {
+
+            element.classList.toggle(
+                "active",
+                element.id === `${section}-section`
+            );
+        });
+
+
+        const title =
+            section.charAt(0).toUpperCase() +
+            section.slice(1);
+
+        const pageTitle =
+            $("#page-title");
+
+        if (pageTitle) {
+
+            pageTitle.textContent =
+                title;
+        }
+
+
+        if (section === "courses") {
+
+            loadCourses();
+        }
     }
 
 
@@ -316,9 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupSidebar() {
 
-        if (sidebarToggle) {
+        const app =
+            $("#admin-app");
 
-            sidebarToggle.addEventListener(
+        const toggle =
+            $("#sidebar-toggle");
+
+        const close =
+            $("#mobile-sidebar-close");
+
+        const overlay =
+            $("#sidebar-overlay");
+
+
+        if (toggle) {
+
+            toggle.addEventListener(
                 "click",
                 () => {
 
@@ -340,21 +182,24 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
 
-        if (mobileSidebarClose) {
 
-            mobileSidebarClose.addEventListener(
+        if (close) {
+
+            close.addEventListener(
                 "click",
                 closeMobileSidebar
             );
         }
 
-        if (sidebarOverlay) {
 
-            sidebarOverlay.addEventListener(
+        if (overlay) {
+
+            overlay.addEventListener(
                 "click",
                 closeMobileSidebar
             );
         }
+
 
         window.addEventListener(
             "resize",
@@ -363,6 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (
                     window.innerWidth > 768
                 ) {
+
                     app.classList.remove(
                         "sidebar-open"
                     );
@@ -374,9 +220,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function closeMobileSidebar() {
 
-        app.classList.remove(
-            "sidebar-open"
-        );
+        const app =
+            $("#admin-app");
+
+        if (app) {
+
+            app.classList.remove(
+                "sidebar-open"
+            );
+        }
     }
 
 
@@ -386,25 +238,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupLogout() {
 
-        if (!logoutButton) {
-            return;
-        }
+        const button =
+            $("#logout-button");
 
-        logoutButton.addEventListener(
+        if (!button) return;
+
+
+        button.addEventListener(
             "click",
             async () => {
 
                 try {
 
-                    logoutButton.disabled = true;
+                    if (
+                        typeof window.logout ===
+                        "function"
+                    ) {
 
-                    const {
-                        error
-                    } = await supabase.auth.signOut();
+                        await window.logout();
 
-                    if (error) {
-                        throw error;
+                        return;
                     }
+
+
+                    await client.auth.signOut();
 
                     window.location.href =
                         "index.html";
@@ -415,15 +272,88 @@ document.addEventListener("DOMContentLoaded", () => {
                         "Logout error:",
                         error
                     );
-
-                    logoutButton.disabled = false;
-
-                    alert(
-                        "Unable to log out. Please try again."
-                    );
                 }
             }
         );
+    }
+
+
+    /* =====================================================
+       ADMIN USER
+    ===================================================== */
+
+    async function loadAdminUser() {
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client.auth.getUser();
+
+
+            if (error || !data?.user) {
+
+                return;
+            }
+
+
+            const user =
+                data.user;
+
+
+            const metadata =
+                user.user_metadata || {};
+
+
+            const name =
+                metadata.name ||
+                metadata.full_name ||
+                metadata.display_name ||
+                user.email?.split("@")[0] ||
+                "Administrator";
+
+
+            const nameElement =
+                $("#admin-name");
+
+            const roleElement =
+                $("#admin-role");
+
+            const avatarElement =
+                $("#admin-avatar");
+
+
+            if (nameElement) {
+
+                nameElement.textContent =
+                    name;
+            }
+
+
+            if (roleElement) {
+
+                roleElement.textContent =
+                    "Admin";
+            }
+
+
+            if (avatarElement) {
+
+                avatarElement.textContent =
+                    name
+                        .charAt(0)
+                        .toUpperCase();
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Could not load admin user:",
+                error
+            );
+        }
     }
 
 
@@ -433,312 +363,396 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadDashboard() {
 
-        hideDashboardError();
-
         try {
 
             await Promise.all([
-                loadCourseStatistics(),
-                loadUnitStatistics(),
-                loadLessonStatistics(),
-                loadStudentStatistics(),
-                loadContentStatistics(),
+                loadCourseCount(),
+                loadUnitCount(),
+                loadLessonCount(),
+                loadStudentCount(),
+                loadContentCounts(),
                 loadRecentActivity()
             ]);
+
+            hideDashboardError();
 
         } catch (error) {
 
             console.error(
-                "Dashboard loading error:",
+                "Dashboard error:",
                 error
             );
 
-            showDashboardError(
-                "Some dashboard information could not be loaded."
+            showDashboardError();
+        }
+    }
+
+
+    async function loadCourseCount() {
+
+        const {
+            count,
+            error
+        } =
+            await client
+                .from("courses")
+                .select("id", {
+                    count: "exact",
+                    head: true
+                })
+                .neq("status", "archived");
+
+
+        if (error) throw error;
+
+
+        const element =
+            $("#total-courses");
+
+        if (element) {
+
+            element.textContent =
+                count ?? 0;
+        }
+    }
+
+
+    async function loadUnitCount() {
+
+        const element =
+            $("#total-units");
+
+        if (!element) return;
+
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("units")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    });
+
+
+            if (error) throw error;
+
+            element.textContent =
+                count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load units:",
+                error
             );
+
+            element.textContent = "—";
         }
     }
 
 
-    async function loadCourseStatistics() {
+    async function loadLessonCount() {
 
-        const {
-            count,
-            error
-        } = await supabase
-            .from("courses")
-            .select("*", {
-                count: "exact",
-                head: true
-            })
-            .neq("status", "archived");
+        const element =
+            $("#total-lessons");
 
-        if (error) {
-            throw error;
-        }
+        if (!element) return;
 
-        if (totalCourses) {
-            totalCourses.textContent =
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("lessons")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    });
+
+
+            if (error) throw error;
+
+            element.textContent =
                 count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load lessons:",
+                error
+            );
+
+            element.textContent = "—";
         }
     }
 
 
-    async function loadUnitStatistics() {
+    async function loadStudentCount() {
 
-        const {
-            count,
-            error
-        } = await supabase
-            .from("units")
-            .select("*", {
-                count: "exact",
-                head: true
-            });
+        const element =
+            $("#total-students");
 
-        if (error) {
-            throw error;
-        }
+        if (!element) return;
 
-        if (totalUnits) {
-            totalUnits.textContent =
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("profiles")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    })
+                    .eq("role", "student");
+
+
+            if (error) throw error;
+
+            element.textContent =
                 count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load students:",
+                error
+            );
+
+            element.textContent = "—";
         }
     }
 
 
-    async function loadLessonStatistics() {
-
-        const {
-            count,
-            error
-        } = await supabase
-            .from("lessons")
-            .select("*", {
-                count: "exact",
-                head: true
-            });
-
-        if (error) {
-            throw error;
-        }
-
-        if (totalLessons) {
-            totalLessons.textContent =
-                count ?? 0;
-        }
-    }
-
-
-    async function loadStudentStatistics() {
-
-        const {
-            count,
-            error
-        } = await supabase
-            .from("profiles")
-            .select("*", {
-                count: "exact",
-                head: true
-            })
-            .eq("role", "student");
-
-        if (error) {
-            throw error;
-        }
-
-        if (totalStudents) {
-            totalStudents.textContent =
-                count ?? 0;
-        }
-    }
-
-
-    async function loadContentStatistics() {
-
-        const [
-            publishedCourses,
-            publishedUnits,
-            publishedLessons,
-            draftCourses,
-            draftUnits,
-            draftLessons
-        ] = await Promise.all([
-
-            supabase
-                .from("courses")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "published"),
-
-            supabase
-                .from("units")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "published"),
-
-            supabase
-                .from("lessons")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "published"),
-
-            supabase
-                .from("courses")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "draft"),
-
-            supabase
-                .from("units")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "draft"),
-
-            supabase
-                .from("lessons")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("status", "draft")
-        ]);
-
-
-        const errors = [
-            publishedCourses.error,
-            publishedUnits.error,
-            publishedLessons.error,
-            draftCourses.error,
-            draftUnits.error,
-            draftLessons.error
-        ].filter(Boolean);
-
-        if (errors.length) {
-            throw errors[0];
-        }
-
+    async function loadContentCounts() {
 
         const published =
-            (publishedCourses.count || 0) +
-            (publishedUnits.count || 0) +
-            (publishedLessons.count || 0);
+            $("#published-content");
 
-        const drafts =
-            (draftCourses.count || 0) +
-            (draftUnits.count || 0) +
-            (draftLessons.count || 0);
+        const draft =
+            $("#draft-content");
 
 
-        if (publishedContent) {
-            publishedContent.textContent =
-                published;
-        }
+        try {
 
-        if (draftContent) {
-            draftContent.textContent =
-                drafts;
+            const [
+                publishedCourses,
+                draftCourses
+            ] =
+                await Promise.all([
+
+                    client
+                        .from("courses")
+                        .select("id", {
+                            count: "exact",
+                            head: true
+                        })
+                        .eq("status", "published"),
+
+                    client
+                        .from("courses")
+                        .select("id", {
+                            count: "exact",
+                            head: true
+                        })
+                        .eq("status", "draft")
+                ]);
+
+
+            if (
+                publishedCourses.error
+            ) {
+                throw publishedCourses.error;
+            }
+
+
+            if (
+                draftCourses.error
+            ) {
+                throw draftCourses.error;
+            }
+
+
+            if (published) {
+
+                published.textContent =
+                    publishedCourses.count ?? 0;
+            }
+
+
+            if (draft) {
+
+                draft.textContent =
+                    draftCourses.count ?? 0;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load content counts:",
+                error
+            );
+
+            if (published)
+                published.textContent = "—";
+
+            if (draft)
+                draft.textContent = "—";
         }
     }
 
 
     async function loadRecentActivity() {
 
-        if (!activityList) {
-            return;
-        }
+        const list =
+            $("#activity-list");
 
-        activityList.innerHTML =
-            `<div class="activity-loading">
-                Loading recent activity...
-            </div>`;
+        if (!list) return;
 
 
-        const {
-            data,
-            error
-        } = await supabase
-            .from("activities")
-            .select("*")
-            .order("created_at", {
-                ascending: false
-            })
-            .limit(8);
+        try {
 
-
-        if (error) {
-
-            console.warn(
-                "Activity loading error:",
+            const {
+                data,
                 error
-            );
-
-            activityList.innerHTML =
-                `<div class="activity-empty">
-                    No recent activity available.
-                </div>`;
-
-            return;
-        }
-
-
-        if (!data || !data.length) {
-
-            activityList.innerHTML =
-                `<div class="activity-empty">
-                    No recent activity yet.
-                </div>`;
-
-            return;
-        }
+            } =
+                await client
+                    .from("courses")
+                    .select(
+                        "id,title,status,created_at,updated_at"
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(6);
 
 
-        activityList.innerHTML =
-            data.map(activity => {
+            if (error) throw error;
 
-                const title =
-                    activity.title ||
-                    activity.activity_type ||
-                    "Activity";
 
-                const date =
-                    formatDate(
-                        activity.created_at
-                    );
+            if (!data || !data.length) {
 
-                return `
-                    <div class="activity-item">
-
-                        <div class="activity-icon">
-                            •
-                        </div>
-
-                        <div class="activity-content">
-
-                            <div class="activity-title">
-                                ${escapeHTML(title)}
-                            </div>
-
-                            <div class="activity-meta">
-                                ${escapeHTML(date)}
-                            </div>
-
-                        </div>
-
+                list.innerHTML = `
+                    <div class="activity-empty">
+                        No recent course activity.
                     </div>
                 `;
 
-            }).join("");
+                return;
+            }
+
+
+            list.innerHTML =
+                data.map(course => {
+
+                    const action =
+                        course.status ===
+                        "published"
+                            ? "Course published"
+                            : course.status ===
+                              "archived"
+                                ? "Course archived"
+                                : "Course created";
+
+
+                    return `
+                        <div class="activity-item">
+
+                            <div class="activity-icon">
+                                ▣
+                            </div>
+
+                            <div class="activity-content">
+
+                                <div class="activity-title">
+                                    ${escapeHTML(action)}
+                                </div>
+
+                                <div class="activity-meta">
+                                    ${escapeHTML(course.title)}
+                                    ·
+                                    ${formatDate(
+                                        course.created_at
+                                    )}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }).join("");
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load activity:",
+                error
+            );
+
+            list.innerHTML = `
+                <div class="activity-error">
+                    Could not load recent activity.
+                </div>
+            `;
+        }
+    }
+
+
+    function setupDashboardRetry() {
+
+        const button =
+            $("#dashboard-retry");
+
+        if (!button) return;
+
+
+        button.addEventListener(
+            "click",
+            loadDashboard
+        );
+    }
+
+
+    function showDashboardError() {
+
+        const element =
+            $("#dashboard-error");
+
+        if (element) {
+
+            element.classList.remove(
+                "admin-hidden"
+            );
+        }
+    }
+
+
+    function hideDashboardError() {
+
+        const element =
+            $("#dashboard-error");
+
+        if (element) {
+
+            element.classList.add(
+                "admin-hidden"
+            );
+        }
     }
 
 
@@ -746,44 +760,51 @@ document.addEventListener("DOMContentLoaded", () => {
        COURSE MANAGEMENT
     ===================================================== */
 
-    function setupCourseManagement() {
+    function setupCourseControls() {
 
-        if (courseSearch) {
+        const search =
+            $("#course-search");
 
-            courseSearch.addEventListener(
+        const filter =
+            $("#course-filter");
+
+
+        if (search) {
+
+            search.addEventListener(
                 "input",
-                renderFilteredCourses
+                renderCourses
             );
         }
 
-        if (courseFilter) {
 
-            courseFilter.addEventListener(
+        if (filter) {
+
+            filter.addEventListener(
                 "change",
-                renderFilteredCourses
+                renderCourses
             );
         }
 
 
-        /*
-         * Create button is injected into the existing
-         * Courses header.
-         */
-
-        addCreateCourseButton();
+        addCreateButton();
     }
 
 
-    function addCreateCourseButton() {
+    /* =====================================================
+       CREATE BUTTON
+    ===================================================== */
 
-        const coursesHeader =
+    function addCreateButton() {
+
+        const header =
             document.querySelector(
                 ".courses-header"
             );
 
-        if (!coursesHeader) {
-            return;
-        }
+
+        if (!header) return;
+
 
         if (
             document.getElementById(
@@ -797,6 +818,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const button =
             document.createElement("button");
 
+
         button.type = "button";
 
         button.id =
@@ -805,8 +827,11 @@ document.addEventListener("DOMContentLoaded", () => {
         button.className =
             "primary-button";
 
-        button.innerHTML =
-            `<span>+</span> Create Course`;
+
+        button.innerHTML = `
+            <span>+</span>
+            Create Course
+        `;
 
 
         button.addEventListener(
@@ -815,7 +840,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        coursesHeader.appendChild(button);
+        header.appendChild(button);
     }
 
 
@@ -825,12 +850,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadCourses() {
 
-        if (!coursesList) {
-            return;
-        }
+        const list =
+            $("#courses-list");
 
-        coursesList.innerHTML =
-            `<div class="courses-loading">
+        if (!list) return;
+
+
+        list.innerHTML = `
+            <div class="courses-loading">
 
                 <div class="courses-loading-icon">
                     ◌
@@ -838,146 +865,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 Loading courses...
 
-            </div>`;
+            </div>
+        `;
 
 
-        const {
-            data,
-            error
-        } = await supabase
-            .from("courses")
-            .select("*")
-            .order("sort_order", {
-                ascending: true,
-                nullsFirst: false
-            })
-            .order("created_at", {
-                ascending: false
-            });
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        category,
+                        level,
+                        cover_image,
+                        status,
+                        sort_order,
+                        created_at,
+                        slug,
+                        archived_at
+                    `)
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true,
+                            nullsFirst: false
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
 
 
-        if (error) {
+            if (error) throw error;
+
+
+            allCourses =
+                data || [];
+
+
+            renderCourses();
+
+
+        } catch (error) {
 
             console.error(
-                "Course loading error:",
+                "Could not load courses:",
                 error
             );
 
-            coursesList.innerHTML =
-                `<div class="courses-empty">
+
+            list.innerHTML = `
+                <div class="courses-empty">
 
                     <div class="courses-empty-icon">
                         !
                     </div>
 
                     <h3>
-                        Unable to load courses
+                        Could not load courses
                     </h3>
 
                     <p>
                         ${escapeHTML(
                             error.message ||
-                            "An unexpected error occurred."
+                            "Please try again."
                         )}
                     </p>
 
-                </div>`;
-
-            if (courseCount) {
-                courseCount.textContent =
-                    "Error";
-            }
-
-            return;
+                </div>
+            `;
         }
-
-
-        allCourses = data || [];
-
-        renderFilteredCourses();
-    }
-
-
-    /* =====================================================
-       FILTER
-    ===================================================== */
-
-    function renderFilteredCourses() {
-
-        const search =
-            (
-                courseSearch?.value ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        const filter =
-            courseFilter?.value ||
-            "all";
-
-
-        let filtered =
-            allCourses.filter(course => {
-
-                const matchesSearch =
-                    !search ||
-                    String(
-                        course.title || ""
-                    )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                    String(
-                        course.description || ""
-                    )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                    String(
-                        course.level || ""
-                    )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                    String(
-                        course.language || ""
-                    )
-                    .toLowerCase()
-                    .includes(search);
-
-
-                const status =
-                    normalizeStatus(
-                        course.status
-                    );
-
-
-                const matchesFilter =
-                    filter === "all" ||
-                    status === filter;
-
-
-                return (
-                    matchesSearch &&
-                    matchesFilter
-                );
-            });
-
-
-        if (courseCount) {
-
-            courseCount.textContent =
-                `${filtered.length} ${
-                    filtered.length === 1
-                        ? "course"
-                        : "courses"
-                }`;
-        }
-
-
-        renderCourses(filtered);
     }
 
 
@@ -985,17 +951,86 @@ document.addEventListener("DOMContentLoaded", () => {
        RENDER COURSES
     ===================================================== */
 
-    function renderCourses(courses) {
+    function renderCourses() {
 
-        if (!coursesList) {
-            return;
+        const list =
+            $("#courses-list");
+
+        const count =
+            $("#course-count");
+
+        if (!list) return;
+
+
+        const search =
+            (
+                $("#course-search")?.value ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const filter =
+            $("#course-filter")?.value ||
+            "all";
+
+
+        let courses =
+            [...allCourses];
+
+
+        if (filter !== "all") {
+
+            courses =
+                courses.filter(
+                    course =>
+                        (
+                            course.status ||
+                            "draft"
+                        ) === filter
+                );
+        }
+
+
+        if (search) {
+
+            courses =
+                courses.filter(course => {
+
+                    const text = [
+
+                        course.title,
+                        course.description,
+                        course.category,
+                        course.level
+
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return text.includes(search);
+                });
+        }
+
+
+        if (count) {
+
+            count.textContent =
+                `${courses.length} ${
+                    courses.length === 1
+                        ? "course"
+                        : "courses"
+                }`;
         }
 
 
         if (!courses.length) {
 
-            coursesList.innerHTML =
-                `<div class="courses-empty">
+            list.innerHTML = `
+                <div class="courses-empty">
 
                     <div class="courses-empty-icon">
                         ▣
@@ -1006,142 +1041,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     </h3>
 
                     <p>
-                        Try changing your search or filter,
-                        or create a new course.
+                        ${
+                            search ||
+                            filter !== "all"
+                                ? "Try changing your search or filter."
+                                : "Create your first course to get started."
+                        }
                     </p>
 
-                </div>`;
+                </div>
+            `;
 
             return;
         }
 
 
-        coursesList.innerHTML =
-            courses.map(course => {
-
-                const status =
-                    normalizeStatus(
-                        course.status
-                    );
-
-
-                const cover =
-                    course.cover_image ||
-                    course.cover_url ||
-                    course.image_url ||
-                    "";
-
-
-                return `
-                    <div
-                        class="course-row"
-                        data-course-id="${escapeAttribute(
-                            course.id
-                        )}"
-                    >
-
-                        <div class="course-main">
-
-                            <div class="course-cover">
-
-                                ${
-                                    cover
-                                        ? `
-                                            <img
-                                                src="${escapeAttribute(
-                                                    cover
-                                                )}"
-                                                alt="${escapeAttribute(
-                                                    course.title ||
-                                                    "Course"
-                                                )}"
-                                            >
-                                          `
-                                        : `
-                                            <div class="course-cover-placeholder">
-                                                ▣
-                                            </div>
-                                          `
-                                }
-
-                            </div>
-
-
-                            <div class="course-info">
-
-                                <div class="course-title">
-                                    ${escapeHTML(
-                                        course.title ||
-                                        "Untitled Course"
-                                    )}
-                                </div>
-
-                                <div class="course-description">
-                                    ${escapeHTML(
-                                        course.description ||
-                                        "No description"
-                                    )}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="course-category">
-
-                            ${escapeHTML(
-                                course.language ||
-                                course.category ||
-                                "—"
-                            )}
-
-                        </div>
-
-
-                        <div class="course-level">
-
-                            ${escapeHTML(
-                                course.level ||
-                                "—"
-                            )}
-
-                        </div>
-
-
-                        <div>
-
-                            <span
-                                class="course-status ${status}"
-                            >
-                                ${capitalize(
-                                    status
-                                )}
-                            </span>
-
-                        </div>
-
-
-                        <div class="course-updated">
-
-                            ${formatDate(
-                                course.updated_at ||
-                                course.created_at
-                            )}
-
-                        </div>
-
-
-                        <div class="course-actions">
-
-                            ${getCourseActions(course)}
-
-                        </div>
-
-                    </div>
-                `;
-
-            }).join("");
+        list.innerHTML =
+            courses
+                .map(renderCourseRow)
+                .join("");
 
 
         attachCourseActions();
@@ -1149,10 +1067,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       COURSE ACTIONS
+       COURSE ROW
     ===================================================== */
 
-    function getCourseActions(course) {
+    function renderCourseRow(course) {
 
         const status =
             normalizeStatus(
@@ -1160,146 +1078,288 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        let buttons = `
-            <button
-                type="button"
-                class="course-action edit"
-                data-action="edit"
-                data-id="${escapeAttribute(course.id)}"
+        const cover =
+            course.cover_image
+                ? `
+                    <img
+                        src="${escapeAttribute(
+                            course.cover_image
+                        )}"
+                        alt="${escapeAttribute(
+                            course.title ||
+                            "Course cover"
+                        )}"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+
+                    <div
+                        class="course-cover-placeholder"
+                        style="display:none;"
+                    >
+                        ▣
+                    </div>
+                `
+                : `
+                    <div class="course-cover-placeholder">
+                        ▣
+                    </div>
+                `;
+
+
+        return `
+            <div
+                class="course-row"
+                data-course-id="${escapeAttribute(
+                    course.id
+                )}"
             >
-                Edit
-            </button>
+
+                <div class="course-main">
+
+                    <div class="course-cover">
+                        ${cover}
+                    </div>
+
+                    <div class="course-info">
+
+                        <div class="course-title">
+                            ${escapeHTML(
+                                course.title ||
+                                "Untitled Course"
+                            )}
+                        </div>
+
+                        <div class="course-description">
+                            ${escapeHTML(
+                                course.description ||
+                                "No description."
+                            )}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="course-category">
+                    ${escapeHTML(
+                        course.category ||
+                        "General"
+                    )}
+                </div>
+
+
+                <div class="course-level">
+                    ${escapeHTML(
+                        course.level ||
+                        "All levels"
+                    )}
+                </div>
+
+
+                <div>
+                    <span
+                        class="course-status ${status}"
+                    >
+                        ${escapeHTML(
+                            status
+                        )}
+                    </span>
+                </div>
+
+
+                <div class="course-updated">
+                    ${formatDate(
+                        course.created_at
+                    )}
+                </div>
+
+
+                <div class="course-actions">
+
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-action="edit"
+                        data-id="${escapeAttribute(
+                            course.id
+                        )}"
+                    >
+                        Edit
+                    </button>
+
+
+                    ${
+                        status === "draft"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="publish"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Publish
+                                </button>
+                            `
+                            : ""
+                    }
+
+
+                    ${
+                        status === "published"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="unpublish"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Unpublish
+                                </button>
+                            `
+                            : ""
+                    }
+
+
+                    ${
+                        status !== "archived"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="duplicate"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Duplicate
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="course-action-button danger"
+                                    data-action="archive"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Archive
+                                </button>
+                            `
+                            : `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="restore"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Restore
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="duplicate"
+                                    data-id="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    Duplicate
+                                </button>
+                            `
+                    }
+
+                </div>
+
+            </div>
         `;
-
-
-        if (status === "published") {
-
-            buttons += `
-                <button
-                    type="button"
-                    class="course-action"
-                    data-action="unpublish"
-                    data-id="${escapeAttribute(course.id)}"
-                >
-                    Unpublish
-                </button>
-            `;
-
-        } else if (status === "draft") {
-
-            buttons += `
-                <button
-                    type="button"
-                    class="course-action publish"
-                    data-action="publish"
-                    data-id="${escapeAttribute(course.id)}"
-                >
-                    Publish
-                </button>
-            `;
-        }
-
-
-        if (status !== "archived") {
-
-            buttons += `
-                <button
-                    type="button"
-                    class="course-action"
-                    data-action="duplicate"
-                    data-id="${escapeAttribute(course.id)}"
-                >
-                    Duplicate
-                </button>
-
-                <button
-                    type="button"
-                    class="course-action danger"
-                    data-action="archive"
-                    data-id="${escapeAttribute(course.id)}"
-                >
-                    Archive
-                </button>
-            `;
-
-        } else {
-
-            buttons += `
-                <button
-                    type="button"
-                    class="course-action restore"
-                    data-action="restore"
-                    data-id="${escapeAttribute(course.id)}"
-                >
-                    Restore
-                </button>
-            `;
-        }
-
-
-        return buttons;
     }
 
 
+    /* =====================================================
+       COURSE ACTIONS
+    ===================================================== */
+
     function attachCourseActions() {
 
-        document
-            .querySelectorAll(
-                ".course-action"
-            )
+        $$(".course-action-button")
             .forEach(button => {
 
                 button.addEventListener(
                     "click",
-                    async event => {
+                    async () => {
 
                         const action =
-                            event.currentTarget
-                                .dataset.action;
+                            button.dataset.action;
 
                         const id =
-                            event.currentTarget
-                                .dataset.id;
+                            button.dataset.id;
 
 
-                        if (!id) {
+                        if (!action || !id)
                             return;
-                        }
 
 
-                        if (action === "edit") {
-                            openCourseModal(id);
-                        }
-
-                        if (action === "publish") {
-                            await updateCourseStatus(
-                                id,
-                                "published"
+                        const course =
+                            allCourses.find(
+                                item =>
+                                    String(item.id) ===
+                                    String(id)
                             );
-                        }
 
-                        if (action === "unpublish") {
-                            await updateCourseStatus(
-                                id,
-                                "draft"
-                            );
-                        }
 
-                        if (action === "archive") {
-                            await archiveCourse(id);
-                        }
+                        if (!course) return;
 
-                        if (action === "restore") {
-                            await updateCourseStatus(
-                                id,
-                                "draft"
-                            );
-                        }
 
-                        if (action === "duplicate") {
-                            await duplicateCourse(id);
-                        }
+                        switch (action) {
 
+                            case "edit":
+                                openCourseModal(
+                                    course
+                                );
+                                break;
+
+
+                            case "publish":
+                                await publishCourse(
+                                    course
+                                );
+                                break;
+
+
+                            case "unpublish":
+                                await unpublishCourse(
+                                    course
+                                );
+                                break;
+
+
+                            case "archive":
+                                await archiveCourse(
+                                    course
+                                );
+                                break;
+
+
+                            case "restore":
+                                await restoreCourse(
+                                    course
+                                );
+                                break;
+
+
+                            case "duplicate":
+                                await duplicateCourse(
+                                    course
+                                );
+                                break;
+                        }
                     }
                 );
             });
@@ -1307,53 +1367,132 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       CREATE / EDIT MODAL
+       COURSE MODAL
     ===================================================== */
 
-    function openCourseModal(courseId = null) {
+    function openCourseModal(
+        course = null
+    ) {
 
         editingCourseId =
-            courseId || null;
-
-
-        let course = null;
-
-
-        if (courseId) {
-
-            course =
-                allCourses.find(
-                    item =>
-                        String(item.id) ===
-                        String(courseId)
-                );
-
-            if (!course) {
-                alert(
-                    "The selected course could not be found."
-                );
-                return;
-            }
-        }
-
-
-        removeCourseModal();
+            course?.id || null;
 
 
         const modal =
+            getCourseModal();
+
+
+        const title =
+            modal.querySelector(
+                "#course-modal-title"
+            );
+
+
+        const form =
+            modal.querySelector(
+                "#course-form"
+            );
+
+
+        title.textContent =
+            course
+                ? "Edit Course"
+                : "Create Course";
+
+
+        form.reset();
+
+
+        form.elements.title.value =
+            course?.title || "";
+
+
+        form.elements.description.value =
+            course?.description || "";
+
+
+        form.elements.category.value =
+            course?.category || "";
+
+
+        form.elements.level.value =
+            course?.level || "";
+
+
+        form.elements.cover_image.value =
+            course?.cover_image || "";
+
+
+        form.elements.sort_order.value =
+            course?.sort_order ?? "";
+
+
+        modal.classList.add(
+            "open"
+        );
+
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+
+        setTimeout(() => {
+
+            form.elements.title.focus();
+
+        }, 50);
+    }
+
+
+    function closeCourseModal() {
+
+        const modal =
+            $("#course-modal");
+
+        if (!modal) return;
+
+
+        modal.classList.remove(
+            "open"
+        );
+
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+
+        editingCourseId =
+            null;
+    }
+
+
+    function getCourseModal() {
+
+        let modal =
+            $("#course-modal");
+
+
+        if (modal) return modal;
+
+
+        modal =
             document.createElement("div");
 
+
         modal.id =
-            "course-management-modal";
+            "course-modal";
 
         modal.className =
             "course-modal";
 
 
         modal.innerHTML = `
+
             <div
                 class="course-modal-backdrop"
-                data-modal-close="true"
+                data-close-modal="true"
             ></div>
 
 
@@ -1373,14 +1512,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
 
                         <h2 id="course-modal-title">
-                            ${
-                                course
-                                    ? "Edit Course"
-                                    : "Create Course"
-                            }
+                            Create Course
                         </h2>
 
                     </div>
+
 
                     <button
                         type="button"
@@ -1399,71 +1535,61 @@ document.addEventListener("DOMContentLoaded", () => {
                     class="course-form"
                 >
 
+                    <div class="course-form-field">
+
+                        <label for="course-title-input">
+                            Course title
+                        </label>
+
+                        <input
+                            id="course-title-input"
+                            name="title"
+                            type="text"
+                            required
+                            maxlength="200"
+                            placeholder="Enter course title"
+                        >
+
+                    </div>
+
+
+                    <div class="course-form-field">
+
+                        <label for="course-description-input">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="course-description-input"
+                            name="description"
+                            rows="4"
+                            maxlength="5000"
+                            placeholder="Describe this course..."
+                        ></textarea>
+
+                    </div>
+
+
                     <div class="course-form-grid">
 
-                        <div class="course-field full">
+                        <div class="course-form-field">
 
-                            <label for="course-title-input">
-                                Course Title
+                            <label for="course-category-input">
+                                Category
                             </label>
 
                             <input
-                                id="course-title-input"
-                                name="title"
-                                type="text"
-                                required
-                                maxlength="200"
-                                placeholder="e.g. English A1"
-                                value="${escapeAttribute(
-                                    course?.title || ""
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div class="course-field full">
-
-                            <label for="course-description-input">
-                                Description
-                            </label>
-
-                            <textarea
-                                id="course-description-input"
-                                name="description"
-                                rows="4"
-                                maxlength="2000"
-                                placeholder="Describe this course..."
-                            >${escapeHTML(
-                                course?.description || ""
-                            )}</textarea>
-
-                        </div>
-
-
-                        <div class="course-field">
-
-                            <label for="course-language-input">
-                                Language
-                            </label>
-
-                            <input
-                                id="course-language-input"
-                                name="language"
+                                id="course-category-input"
+                                name="category"
                                 type="text"
                                 maxlength="100"
-                                placeholder="English"
-                                value="${escapeAttribute(
-                                    course?.language ||
-                                    course?.category ||
-                                    ""
-                                )}"
+                                placeholder="e.g. Business, Science, Language"
                             >
 
                         </div>
 
 
-                        <div class="course-field">
+                        <div class="course-form-field">
 
                             <label for="course-level-input">
                                 Level
@@ -1474,100 +1600,48 @@ document.addEventListener("DOMContentLoaded", () => {
                                 name="level"
                                 type="text"
                                 maxlength="100"
-                                placeholder="A1"
-                                value="${escapeAttribute(
-                                    course?.level || ""
-                                )}"
+                                placeholder="e.g. Beginner, Intermediate"
                             >
 
                         </div>
 
-
-                        <div class="course-field full">
-
-                            <label for="course-cover-input">
-                                Cover Image URL
-                            </label>
-
-                            <input
-                                id="course-cover-input"
-                                name="cover_image"
-                                type="url"
-                                maxlength="1000"
-                                placeholder="https://..."
-                                value="${escapeAttribute(
-                                    course?.cover_image ||
-                                    course?.cover_url ||
-                                    course?.image_url ||
-                                    ""
-                                )}"
-                            >
-
-                        </div>
+                    </div>
 
 
-                        <div class="course-field">
+                    <div class="course-form-field">
 
-                            <label for="course-status-input">
-                                Status
-                            </label>
+                        <label for="course-cover-input">
+                            Cover image URL
+                        </label>
 
-                            <select
-                                id="course-status-input"
-                                name="status"
-                            >
+                        <input
+                            id="course-cover-input"
+                            name="cover_image"
+                            type="url"
+                            placeholder="https://..."
+                        >
 
-                                <option
-                                    value="draft"
-                                    ${
-                                        !course ||
-                                        normalizeStatus(
-                                            course.status
-                                        ) === "draft"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Draft
-                                </option>
+                        <small>
+                            Optional. You can add the image URL now.
+                        </small>
 
-                                <option
-                                    value="published"
-                                    ${
-                                        course &&
-                                        normalizeStatus(
-                                            course.status
-                                        ) === "published"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Published
-                                </option>
-
-                            </select>
-
-                        </div>
+                    </div>
 
 
-                        <div class="course-field">
+                    <div class="course-form-field">
 
-                            <label for="course-order-input">
-                                Display Order
-                            </label>
+                        <label for="course-sort-input">
+                            Display order
+                        </label>
 
-                            <input
-                                id="course-order-input"
-                                name="sort_order"
-                                type="number"
-                                min="0"
-                                step="1"
-                                value="${escapeAttribute(
-                                    course?.sort_order ?? 0
-                                )}"
-                            >
-
-                        </div>
+                        <input
+                            id="course-sort-input"
+                            name="sort_order"
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                        >
 
                     </div>
 
@@ -1579,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ></div>
 
 
-                    <div class="course-modal-footer">
+                    <div class="course-form-actions">
 
                         <button
                             type="button"
@@ -1589,16 +1663,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             Cancel
                         </button>
 
+
                         <button
                             type="submit"
                             class="primary-button"
                             id="course-save-button"
                         >
-                            ${
-                                course
-                                    ? "Save Changes"
-                                    : "Create Course"
-                            }
+                            Save Course
                         </button>
 
                     </div>
@@ -1609,91 +1680,74 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
 
-        document.body.appendChild(modal);
-
-        document.body.classList.add(
-            "modal-open"
+        document.body.appendChild(
+            modal
         );
 
-
-        const closeButton =
-            document.getElementById(
-                "course-modal-close"
-            );
-
-        const cancelButton =
-            document.getElementById(
-                "course-cancel-button"
-            );
 
         const form =
-            document.getElementById(
-                "course-form"
+            modal.querySelector(
+                "#course-form"
             );
 
 
-        closeButton?.addEventListener(
-            "click",
-            removeCourseModal
-        );
-
-        cancelButton?.addEventListener(
-            "click",
-            removeCourseModal
+        form.addEventListener(
+            "submit",
+            saveCourse
         );
 
 
         modal
             .querySelector(
-                ".course-modal-backdrop"
+                "#course-modal-close"
             )
-            ?.addEventListener(
+            .addEventListener(
                 "click",
-                removeCourseModal
+                closeCourseModal
             );
 
 
-        form?.addEventListener(
-            "submit",
-            async event => {
+        modal
+            .querySelector(
+                "#course-cancel-button"
+            )
+            .addEventListener(
+                "click",
+                closeCourseModal
+            );
 
-                event.preventDefault();
 
-                await saveCourse(
-                    new FormData(form)
-                );
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target.dataset
+                        .closeModal === "true"
+                ) {
+
+                    closeCourseModal();
+                }
             }
         );
 
 
-        setTimeout(() => {
+        document.addEventListener(
+            "keydown",
+            event => {
 
-            document
-                .getElementById(
-                    "course-title-input"
-                )
-                ?.focus();
+                if (
+                    event.key === "Escape" &&
+                    modal.classList.contains("open")
+                ) {
 
-        }, 50);
-    }
-
-
-    function removeCourseModal() {
-
-        const modal =
-            document.getElementById(
-                "course-management-modal"
-            );
-
-        if (modal) {
-            modal.remove();
-        }
-
-        document.body.classList.remove(
-            "modal-open"
+                    closeCourseModal();
+                }
+            }
         );
 
-        editingCourseId = null;
+
+        return modal;
     }
 
 
@@ -1701,43 +1755,77 @@ document.addEventListener("DOMContentLoaded", () => {
        SAVE COURSE
     ===================================================== */
 
-    async function saveCourse(formData) {
+    async function saveCourse(event) {
+
+        event.preventDefault();
+
+
+        const form =
+            event.currentTarget;
+
+
+        const saveButton =
+            $("#course-save-button");
+
+
+        const errorElement =
+            $("#course-form-error");
+
+
+        if (errorElement) {
+
+            errorElement.hidden =
+                true;
+
+            errorElement.textContent =
+                "";
+        }
+
+
+        const formData =
+            new FormData(form);
+
 
         const title =
             String(
                 formData.get("title") || ""
             ).trim();
 
+
         const description =
             String(
                 formData.get("description") || ""
             ).trim();
 
-        const language =
+
+        const category =
             String(
-                formData.get("language") || ""
+                formData.get("category") || ""
             ).trim();
+
 
         const level =
             String(
                 formData.get("level") || ""
             ).trim();
 
+
         const coverImage =
             String(
                 formData.get("cover_image") || ""
             ).trim();
 
-        const status =
+
+        const sortOrderRaw =
             String(
-                formData.get("status") ||
-                "draft"
+                formData.get("sort_order") || ""
             ).trim();
 
+
         const sortOrder =
-            Number(
-                formData.get("sort_order") || 0
-            );
+            sortOrderRaw === ""
+                ? 0
+                : Number(sortOrderRaw);
 
 
         if (!title) {
@@ -1750,15 +1838,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        const saveButton =
-            document.getElementById(
-                "course-save-button"
+        if (
+            Number.isNaN(sortOrder) ||
+            sortOrder < 0
+        ) {
+
+            showFormError(
+                "Display order must be a valid positive number."
             );
+
+            return;
+        }
 
 
         if (saveButton) {
 
-            saveButton.disabled = true;
+            saveButton.disabled =
+                true;
 
             saveButton.textContent =
                 editingCourseId
@@ -1769,24 +1865,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            const payload = {
+            const courseData = {
+
                 title,
+
                 description:
                     description || null,
-                language:
-                    language || null,
+
+                category:
+                    category || null,
+
                 level:
                     level || null,
+
                 cover_image:
                     coverImage || null,
-                status:
-                    status === "published"
-                        ? "published"
-                        : "draft",
+
                 sort_order:
-                    Number.isFinite(sortOrder)
-                        ? sortOrder
-                        : 0
+                    sortOrder
             };
 
 
@@ -1794,96 +1890,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const {
                     error
-                } = await supabase
-                    .from("courses")
-                    .update(payload)
-                    .eq(
-                        "id",
-                        editingCourseId
-                    );
+                } =
+                    await client
+                        .from("courses")
+                        .update(courseData)
+                        .eq(
+                            "id",
+                            editingCourseId
+                        );
 
 
-                if (error) {
-                    throw error;
-                }
-
-
-                removeCourseModal();
-
-                await loadCourses();
-
-                await loadDashboard();
-
-                await createActivity(
-                    "course_updated",
-                    `Updated course: ${title}`
-                );
-
-
-                showToast(
-                    "Course updated successfully."
-                );
-
+                if (error) throw error;
 
             } else {
 
-                const slug =
-                    await generateUniqueSlug(
+                courseData.status =
+                    "draft";
+
+                courseData.slug =
+                    await createUniqueSlug(
                         title
                     );
 
 
-                payload.slug =
-                    slug;
-
-
                 const {
-                    data,
                     error
-                } = await supabase
-                    .from("courses")
-                    .insert(payload)
-                    .select()
-                    .single();
+                } =
+                    await client
+                        .from("courses")
+                        .insert(
+                            courseData
+                        );
 
 
-                if (error) {
-                    throw error;
-                }
-
-
-                removeCourseModal();
-
-                await loadCourses();
-
-                await loadDashboard();
-
-                await createActivity(
-                    "course_created",
-                    `Created course: ${
-                        data?.title || title
-                    }`
-                );
-
-
-                showToast(
-                    "Course created successfully."
-                );
+                if (error) throw error;
             }
+
+
+            closeCourseModal();
+
+            await refreshCoursesAndDashboard();
 
 
         } catch (error) {
 
             console.error(
-                "Course save error:",
+                "Could not save course:",
                 error
             );
 
+
             showFormError(
                 error.message ||
-                "Unable to save the course."
+                "Could not save the course."
             );
 
+        } finally {
 
             if (saveButton) {
 
@@ -1891,169 +1953,57 @@ document.addEventListener("DOMContentLoaded", () => {
                     false;
 
                 saveButton.textContent =
-                    editingCourseId
-                        ? "Save Changes"
-                        : "Create Course";
+                    "Save Course";
             }
         }
     }
 
 
     /* =====================================================
-       SLUG
+       PUBLISH
     ===================================================== */
 
-    async function generateUniqueSlug(title) {
-
-        let baseSlug =
-            title
-                .toLowerCase()
-                .trim()
-                .replace(
-                    /[^a-z0-9]+/g,
-                    "-"
-                )
-                .replace(
-                    /^-+|-+$/g,
-                    ""
-                );
-
-
-        if (!baseSlug) {
-            baseSlug = "course";
-        }
-
-
-        let slug = baseSlug;
-
-        let counter = 2;
-
-
-        while (true) {
-
-            const {
-                data,
-                error
-            } = await supabase
-                .from("courses")
-                .select("id")
-                .eq("slug", slug)
-                .limit(1);
-
-
-            if (error) {
-                throw error;
-            }
-
-
-            if (!data || !data.length) {
-                return slug;
-            }
-
-
-            slug =
-                `${baseSlug}-${counter}`;
-
-            counter++;
-        }
-    }
-
-
-    /* =====================================================
-       PUBLISH / UNPUBLISH
-    ===================================================== */
-
-    async function updateCourseStatus(
-        courseId,
-        status
+    async function publishCourse(
+        course
     ) {
 
-        const course =
-            allCourses.find(
-                item =>
-                    String(item.id) ===
-                    String(courseId)
-            );
-
-
-        if (!course) {
+        if (
+            !confirm(
+                `Publish "${course.title}"?`
+            )
+        ) {
             return;
         }
 
 
-        const actionText =
-            status === "published"
-                ? "publish"
-                : "move back to draft";
+        await updateCourseStatus(
+            course,
+            "published"
+        );
+    }
 
 
-        const confirmed =
-            window.confirm(
-                `Are you sure you want to ${actionText} "${course.title}"?`
-            );
+    /* =====================================================
+       UNPUBLISH
+    ===================================================== */
 
+    async function unpublishCourse(
+        course
+    ) {
 
-        if (!confirmed) {
+        if (
+            !confirm(
+                `Unpublish "${course.title}" and return it to Draft?`
+            )
+        ) {
             return;
         }
 
 
-        try {
-
-            const {
-                error
-            } = await supabase
-                .from("courses")
-                .update({
-                    status
-                })
-                .eq(
-                    "id",
-                    courseId
-                );
-
-
-            if (error) {
-                throw error;
-            }
-
-
-            await createActivity(
-                status === "published"
-                    ? "course_published"
-                    : "course_unpublished",
-                `${
-                    status === "published"
-                        ? "Published"
-                        : "Unpublished"
-                } course: ${course.title}`
-            );
-
-
-            await loadCourses();
-
-            await loadDashboard();
-
-
-            showToast(
-                status === "published"
-                    ? "Course published."
-                    : "Course moved back to draft."
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Course status update error:",
-                error
-            );
-
-            alert(
-                error.message ||
-                "Unable to update course status."
-            );
-        }
+        await updateCourseStatus(
+            course,
+            "draft"
+        );
     }
 
 
@@ -2061,28 +2011,15 @@ document.addEventListener("DOMContentLoaded", () => {
        ARCHIVE
     ===================================================== */
 
-    async function archiveCourse(courseId) {
+    async function archiveCourse(
+        course
+    ) {
 
-        const course =
-            allCourses.find(
-                item =>
-                    String(item.id) ===
-                    String(courseId)
-            );
-
-
-        if (!course) {
-            return;
-        }
-
-
-        const confirmed =
-            window.confirm(
-                `Archive "${course.title}"?\n\nThe course will not be permanently deleted. It will be moved to Archived.`
-            );
-
-
-        if (!confirmed) {
+        if (
+            !confirm(
+                `Archive "${course.title}"?\n\nThe course will not be permanently deleted.`
+            )
+        ) {
             return;
         }
 
@@ -2091,48 +2028,159 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const {
                 error
-            } = await supabase
-                .from("courses")
-                .update({
-                    status: "archived"
-                })
-                .eq(
-                    "id",
-                    courseId
-                );
+            } =
+                await client
+                    .from("courses")
+                    .update({
+
+                        status:
+                            "archived",
+
+                        archived_at:
+                            new Date()
+                                .toISOString()
+
+                    })
+                    .eq(
+                        "id",
+                        course.id
+                    );
 
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
 
-            await createActivity(
-                "course_archived",
-                `Archived course: ${course.title}`
-            );
-
-
-            await loadCourses();
-
-            await loadDashboard();
-
-
-            showToast(
-                "Course archived."
-            );
+            await refreshCoursesAndDashboard();
 
 
         } catch (error) {
 
             console.error(
-                "Course archive error:",
+                "Could not archive course:",
                 error
             );
 
+
             alert(
                 error.message ||
-                "Unable to archive course."
+                "Could not archive the course."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       RESTORE
+    ===================================================== */
+
+    async function restoreCourse(
+        course
+    ) {
+
+        if (
+            !confirm(
+                `Restore "${course.title}" to Draft?`
+            )
+        ) {
+            return;
+        }
+
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("courses")
+                    .update({
+
+                        status:
+                            "draft",
+
+                        archived_at:
+                            null
+
+                    })
+                    .eq(
+                        "id",
+                        course.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not restore course:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Could not restore the course."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       UPDATE STATUS
+    ===================================================== */
+
+    async function updateCourseStatus(
+        course,
+        status
+    ) {
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("courses")
+                    .update({
+
+                        status,
+
+                        archived_at:
+                            status ===
+                            "archived"
+                                ? new Date()
+                                    .toISOString()
+                                : null
+
+                    })
+                    .eq(
+                        "id",
+                        course.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not update course status:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Could not update the course."
             );
         }
     }
@@ -2142,28 +2190,15 @@ document.addEventListener("DOMContentLoaded", () => {
        DUPLICATE
     ===================================================== */
 
-    async function duplicateCourse(courseId) {
+    async function duplicateCourse(
+        course
+    ) {
 
-        const course =
-            allCourses.find(
-                item =>
-                    String(item.id) ===
-                    String(courseId)
-            );
-
-
-        if (!course) {
-            return;
-        }
-
-
-        const confirmed =
-            window.confirm(
-                `Duplicate "${course.title}"?\n\nA new draft course will be created.`
-            );
-
-
-        if (!confirmed) {
+        if (
+            !confirm(
+                `Duplicate "${course.title}"?\n\nThe duplicate will be created as a Draft.`
+            )
+        ) {
             return;
         }
 
@@ -2174,165 +2209,164 @@ document.addEventListener("DOMContentLoaded", () => {
                 `${course.title} Copy`;
 
 
-            const duplicateSlug =
-                await generateUniqueSlug(
-                    duplicateTitle
-                );
-
-
-            const newCourse = {
+            const duplicate = {
 
                 title:
                     duplicateTitle,
 
-                slug:
-                    duplicateSlug,
-
                 description:
-                    course.description ||
-                    null,
+                    course.description || null,
 
-                language:
-                    course.language ||
-                    course.category ||
-                    null,
+                category:
+                    course.category || null,
 
                 level:
-                    course.level ||
-                    null,
+                    course.level || null,
 
                 cover_image:
-                    course.cover_image ||
-                    course.cover_url ||
-                    course.image_url ||
-                    null,
+                    course.cover_image || null,
 
                 status:
                     "draft",
 
                 sort_order:
-                    course.sort_order ??
-                    0
+                    course.sort_order ?? 0,
+
+                slug:
+                    await createUniqueSlug(
+                        duplicateTitle
+                    ),
+
+                archived_at:
+                    null
             };
 
 
             const {
-                data,
                 error
-            } = await supabase
-                .from("courses")
-                .insert(newCourse)
-                .select()
-                .single();
+            } =
+                await client
+                    .from("courses")
+                    .insert(
+                        duplicate
+                    );
 
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
 
-            /*
-             * Important:
-             * Course duplication creates the course itself.
-             *
-             * Units and lessons are intentionally NOT
-             * duplicated in Phase 4.
-             *
-             * That belongs to Unit/Lesson Management.
-             */
-
-
-            await createActivity(
-                "course_duplicated",
-                `Duplicated course: ${course.title}`
-            );
-
-
-            await loadCourses();
-
-            await loadDashboard();
-
-
-            showToast(
-                `Course duplicated as "${data?.title || duplicateTitle}".`
-            );
+            await refreshCoursesAndDashboard();
 
 
         } catch (error) {
 
             console.error(
-                "Course duplication error:",
+                "Could not duplicate course:",
                 error
             );
 
+
             alert(
                 error.message ||
-                "Unable to duplicate course."
+                "Could not duplicate the course."
             );
         }
     }
 
 
     /* =====================================================
-       ACTIVITY
+       SLUG
     ===================================================== */
 
-    async function createActivity(
-        activityType,
+    async function createUniqueSlug(
         title
     ) {
 
-        try {
+        const base =
+            slugify(title) ||
+            "course";
 
-            /*
-             * Activity logging is optional.
-             * If your existing activities table has
-             * different required fields, course management
-             * itself is not blocked by this function.
-             */
 
-            const payload = {
+        let slug =
+            base;
 
-                activity_type:
-                    activityType,
 
-                title,
+        let counter = 1;
 
-                created_at:
-                    new Date().toISOString()
-            };
+
+        while (true) {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select("id")
+                    .eq(
+                        "slug",
+                        slug
+                    )
+                    .limit(1);
+
+
+            if (error) throw error;
 
 
             if (
-                currentUser?.id
+                !data ||
+                data.length === 0
             ) {
-                payload.user_id =
-                    currentUser.id;
+
+                return slug;
             }
 
 
-            const {
-                error
-            } = await supabase
-                .from("activities")
-                .insert(payload);
+            counter++;
 
-
-            if (error) {
-
-                console.warn(
-                    "Activity was not recorded:",
-                    error
-                );
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Activity logging failed:",
-                error
-            );
+            slug =
+                `${base}-${counter}`;
         }
+    }
+
+
+    function slugify(value) {
+
+        return String(value)
+
+            .normalize("NFD")
+
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+
+            .toLowerCase()
+
+            .trim()
+
+            .replace(
+                /[^a-z0-9]+/g,
+                "-"
+            )
+
+            .replace(
+                /^-+|-+$/g,
+                ""
+            );
+    }
+
+
+    /* =====================================================
+       REFRESH
+    ===================================================== */
+
+    async function refreshCoursesAndDashboard() {
+
+        await Promise.all([
+            loadCourses(),
+            loadDashboard()
+        ]);
     }
 
 
@@ -2340,127 +2374,23 @@ document.addEventListener("DOMContentLoaded", () => {
        FORM ERROR
     ===================================================== */
 
-    function showFormError(message) {
-
-        const errorBox =
-            document.getElementById(
-                "course-form-error"
-            );
-
-        if (!errorBox) {
-            alert(message);
-            return;
-        }
-
-        errorBox.textContent =
-            message;
-
-        errorBox.hidden = false;
-    }
-
-
-    /* =====================================================
-       DASHBOARD ERROR
-    ===================================================== */
-
-    function showDashboardError(
+    function showFormError(
         message
     ) {
 
-        if (!dashboardError) {
-            return;
-        }
-
-        const span =
-            dashboardError.querySelector(
-                "span"
-            );
-
-        if (span) {
-            span.textContent =
-                message;
-        }
-
-        dashboardError.classList.remove(
-            "admin-hidden"
-        );
-    }
+        const element =
+            $("#course-form-error");
 
 
-    function hideDashboardError() {
-
-        if (!dashboardError) {
-            return;
-        }
-
-        dashboardError.classList.add(
-            "admin-hidden"
-        );
-    }
+        if (!element) return;
 
 
-    if (dashboardRetry) {
-
-        dashboardRetry.addEventListener(
-            "click",
-            loadDashboard
-        );
-    }
-
-
-    /* =====================================================
-       TOAST
-    ===================================================== */
-
-    function showToast(message) {
-
-        const existing =
-            document.getElementById(
-                "admin-toast"
-            );
-
-        if (existing) {
-            existing.remove();
-        }
-
-
-        const toast =
-            document.createElement(
-                "div"
-            );
-
-        toast.id =
-            "admin-toast";
-
-        toast.textContent =
+        element.textContent =
             message;
 
 
-        document.body.appendChild(
-            toast
-        );
-
-
-        requestAnimationFrame(() => {
-
-            toast.classList.add(
-                "show"
-            );
-        });
-
-
-        setTimeout(() => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-            setTimeout(
-                () => toast.remove(),
-                250
-            );
-
-        }, 3000);
+        element.hidden =
+            false;
     }
 
 
@@ -2468,49 +2398,35 @@ document.addEventListener("DOMContentLoaded", () => {
        UTILITIES
     ===================================================== */
 
-    function normalizeStatus(status) {
-
-        const value =
-            String(
-                status || "draft"
-            )
-            .toLowerCase()
-            .trim();
-
+    function normalizeStatus(
+        status
+    ) {
 
         if (
-            value === "published" ||
-            value === "archived"
+            status === "published" ||
+            status === "archived"
         ) {
-            return value;
+
+            return status;
         }
+
 
         return "draft";
     }
 
 
-    function capitalize(value) {
+    function formatDate(
+        value
+    ) {
 
         if (!value) {
-            return "";
-        }
 
-        return (
-            value.charAt(0).toUpperCase() +
-            value.slice(1)
-        );
-    }
-
-
-    function formatDate(dateValue) {
-
-        if (!dateValue) {
             return "—";
         }
 
 
         const date =
-            new Date(dateValue);
+            new Date(value);
 
 
         if (
@@ -2518,6 +2434,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 date.getTime()
             )
         ) {
+
             return "—";
         }
 
@@ -2525,43 +2442,46 @@ document.addEventListener("DOMContentLoaded", () => {
         return date.toLocaleDateString(
             undefined,
             {
-                day: "2-digit",
+                year: "numeric",
                 month: "short",
-                year: "numeric"
+                day: "numeric"
             }
         );
     }
 
 
-    function escapeHTML(value) {
+    function escapeHTML(
+        value
+    ) {
 
-        return String(
-            value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        return String(value ?? "")
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
     }
 
 
-    function escapeAttribute(value) {
+    function escapeAttribute(
+        value
+    ) {
+
         return escapeHTML(value);
     }
 
