@@ -1,6 +1,6 @@
 /* =========================================================
    EDUCORE ADMIN DASHBOARD
-   COMPLETE ADMIN.CSS
+   PHASE 3 — COMPLETE ADMIN UI
 ========================================================= */
 
 * {
@@ -27,12 +27,12 @@
     --accent-dark: #626bc7;
 
     --success: #398963;
+    --warning: #a87935;
     --danger: #b04b4b;
 
     --radius: 14px;
 
-    --shadow:
-        0 10px 28px rgba(22, 26, 35, 0.05);
+    --shadow: 0 10px 28px rgba(22, 26, 35, 0.05);
 }
 
 html,
@@ -92,7 +92,6 @@ img {
     display: none !important;
 }
 
-
 /* =========================================================
    APPLICATION
 ========================================================= */
@@ -102,17 +101,13 @@ img {
     width: 100%;
 }
 
-
 /* =========================================================
    SIDEBAR
 ========================================================= */
 
 .admin-sidebar {
     position: fixed;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
+    inset: 0 auto 0 0;
 
     width: var(--sidebar-width);
 
@@ -141,9 +136,8 @@ img {
     width: var(--sidebar-collapsed);
 }
 
-
 /* =========================================================
-   SIDEBAR BRAND
+   BRAND
 ========================================================= */
 
 .sidebar-brand {
@@ -184,8 +178,7 @@ img {
 
     opacity: 1;
 
-    transition:
-        opacity 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .brand-name {
@@ -212,9 +205,8 @@ img {
     pointer-events: none;
 }
 
-
 /* =========================================================
-   MOBILE CLOSE BUTTON
+   MOBILE CLOSE
 ========================================================= */
 
 .mobile-sidebar-close {
@@ -235,7 +227,8 @@ img {
     background:
         rgba(255, 255, 255, 0.06);
 
-    color: rgba(255, 255, 255, 0.75);
+    color:
+        rgba(255, 255, 255, 0.75);
 
     font-size: 22px;
 
@@ -251,9 +244,8 @@ img {
     color: #ffffff;
 }
 
-
 /* =========================================================
-   SIDEBAR NAVIGATION
+   NAVIGATION
 ========================================================= */
 
 .admin-navigation {
@@ -292,7 +284,6 @@ img {
 
     margin-bottom: 3px;
 
-    border: 0;
     border-radius: 9px;
 
     background: transparent;
@@ -344,11 +335,6 @@ img {
     font-size: 13px;
 }
 
-
-/* =========================================================
-   COLLAPSED SIDEBAR
-========================================================= */
-
 #admin-app.sidebar-collapsed .nav-item,
 #admin-app.sidebar-collapsed .logout-button {
     justify-content: center;
@@ -366,7 +352,6 @@ img {
 #admin-app.sidebar-collapsed .logout-button:hover {
     transform: none;
 }
-
 
 /* =========================================================
    SIDEBAR FOOTER
@@ -388,9 +373,8 @@ img {
         rgba(255, 255, 255, 0.40);
 }
 
-
 /* =========================================================
-   MAIN AREA
+   MAIN
 ========================================================= */
 
 .admin-main {
@@ -405,7 +389,6 @@ img {
 #admin-app.sidebar-collapsed .admin-main {
     margin-left: var(--sidebar-collapsed);
 }
-
 
 /* =========================================================
    HEADER
@@ -441,11 +424,6 @@ img {
     min-width: 0;
 }
 
-
-/* =========================================================
-   SIDEBAR TOGGLE
-========================================================= */
-
 .sidebar-toggle {
     width: 42px;
     height: 42px;
@@ -460,7 +438,6 @@ img {
 
     flex-shrink: 0;
 
-    border: 0;
     border-radius: 10px;
 
     background: #f0f1f3;
@@ -487,12 +464,7 @@ img {
     background: #272b34;
 
     border-radius: 2px;
-
-    transition:
-        transform 0.2s ease,
-        opacity 0.2s ease;
 }
-
 
 /* =========================================================
    HEADER TITLE
@@ -526,7 +498,6 @@ img {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 
 /* =========================================================
    ADMIN USER
@@ -567,8 +538,6 @@ img {
     width: 100%;
     height: 100%;
 
-    display: block;
-
     object-fit: cover;
 }
 
@@ -593,14 +562,12 @@ img {
     white-space: nowrap;
 }
 
-
 /* =========================================================
-   MOBILE SIDEBAR OVERLAY
+   MOBILE OVERLAY
 ========================================================= */
 
 .sidebar-overlay {
     position: fixed;
-
     inset: 0;
 
     z-index: 900;
@@ -612,15 +579,13 @@ img {
 
     opacity: 0;
 
-    transition:
-        opacity 0.3s ease;
+    transition: opacity 0.3s ease;
 }
 
 #admin-app.sidebar-open .sidebar-overlay {
     display: block;
     opacity: 1;
 }
-
 
 /* =========================================================
    CONTENT
@@ -643,9 +608,8 @@ img {
     display: block;
 }
 
-
 /* =========================================================
-   SECTION INTRODUCTION
+   SECTION INTRO
 ========================================================= */
 
 .section-introduction {
@@ -682,16 +646,15 @@ img {
     line-height: 1.5;
 }
 
-
 /* =========================================================
-   STATISTICS GRID
+   STATISTICS
 ========================================================= */
 
 .statistics-grid {
     display: grid;
 
     grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+        repeat(3, minmax(0, 1fr));
 
     gap: 18px;
 
@@ -710,10 +673,6 @@ img {
     border-radius: var(--radius);
 
     box-shadow: var(--shadow);
-}
-
-.stat-card-wide {
-    grid-column: span 2;
 }
 
 .stat-card-top {
@@ -770,9 +729,8 @@ img {
     font-size: 10px;
 }
 
-
 /* =========================================================
-   DASHBOARD ACTIVITY
+   DASHBOARD PANEL
 ========================================================= */
 
 .dashboard-panel {
@@ -804,7 +762,8 @@ img {
 }
 
 .activity-loading,
-.activity-empty {
+.activity-empty,
+.activity-error {
     min-height: 150px;
 
     display: flex;
@@ -812,11 +771,17 @@ img {
     align-items: center;
     justify-content: center;
 
+    padding: 30px;
+
     color: #999ca4;
 
     font-size: 12px;
 
     text-align: center;
+}
+
+.activity-error {
+    color: var(--danger);
 }
 
 .activity-item {
@@ -871,6 +836,92 @@ img {
     font-size: 10px;
 }
 
+/* =========================================================
+   LOADING
+========================================================= */
+
+.dashboard-loading {
+    position: relative;
+
+    overflow: hidden;
+
+    color: transparent !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f4f5f7 25%,
+            #ffffff 50%,
+            #f4f5f7 75%
+        );
+
+    background-size: 200% 100%;
+
+    animation:
+        dashboardShimmer 1.4s infinite;
+}
+
+@keyframes dashboardShimmer {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
+
+/* =========================================================
+   ERROR BANNER
+========================================================= */
+
+.dashboard-error {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+
+    padding: 13px 15px;
+
+    border: 1px solid #f0cccc;
+
+    border-radius: 10px;
+
+    background: #fff3f3;
+
+    color: #9c4c4c;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+.dashboard-error button {
+    margin-left: auto;
+
+    padding: 7px 10px;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5c6c6;
+
+    color: #8f4848;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.dashboard-error button:hover {
+    background: #fffafa;
+}
 
 /* =========================================================
    EMPTY SECTIONS
@@ -924,16 +975,20 @@ img {
 }
 
 .empty-section p {
+    max-width: 430px;
+
     margin-top: 7px;
 
     color: #999ca4;
 
     font-size: 12px;
+
+    line-height: 1.5;
 }
 
-
 /* =========================================================
-   COURSES HEADER
+   COURSES
+   PHASE 3 = VIEW ONLY
 ========================================================= */
 
 .courses-header {
@@ -951,80 +1006,6 @@ img {
 .courses-header .section-introduction {
     margin-bottom: 0;
 }
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.primary-button,
-.secondary-button {
-    min-height: 43px;
-
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 7px;
-
-    padding: 0 16px;
-
-    border-radius: 10px;
-
-    font-size: 11px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.primary-button {
-    background: #20242c;
-
-    color: white;
-}
-
-.primary-button:hover {
-    background: #30343e;
-
-    transform: translateY(-1px);
-}
-
-.primary-button:active {
-    transform: translateY(0);
-}
-
-.secondary-button {
-    background: white;
-
-    color: #555a65;
-
-    border: 1px solid var(--border);
-}
-
-.secondary-button:hover {
-    background: #f5f6f8;
-
-    border-color: #d8d9de;
-}
-
-.button-plus {
-    font-size: 17px;
-
-    line-height: 1;
-}
-
-
-/* =========================================================
-   COURSE TOOLBAR
-========================================================= */
 
 .course-toolbar {
     display: flex;
@@ -1075,13 +1056,10 @@ img {
     color: #999ca4;
 
     font-size: 19px;
-
-    line-height: 1;
 }
 
 .course-search input {
     width: 100%;
-
     height: 100%;
 
     border: 0;
@@ -1104,7 +1082,7 @@ img {
 
     min-width: 135px;
 
-    padding: 0 32px 0 12px;
+    padding: 0 12px;
 
     border: 1px solid var(--border);
 
@@ -1127,7 +1105,6 @@ img {
     box-shadow:
         0 0 0 3px rgba(115, 123, 212, 0.08);
 }
-
 
 /* =========================================================
    COURSES PANEL
@@ -1178,9 +1155,8 @@ img {
     font-size: 10px;
 }
 
-
 /* =========================================================
-   COURSES TABLE HEADER
+   COURSE TABLE
 ========================================================= */
 
 .courses-table-header {
@@ -1189,12 +1165,11 @@ img {
     display: grid;
 
     grid-template-columns:
-        minmax(180px, 1.5fr)
-        100px
-        100px
+        minmax(220px, 1.5fr)
+        110px
+        110px
         120px
-        120px
-        150px;
+        140px;
 
     align-items: center;
 
@@ -1217,11 +1192,6 @@ img {
 
     letter-spacing: 0.7px;
 }
-
-
-/* =========================================================
-   COURSE LIST
-========================================================= */
 
 .courses-list {
     width: 100%;
@@ -1253,7 +1223,6 @@ img {
 }
 
 @keyframes coursesSpin {
-
     from {
         transform: rotate(0deg);
     }
@@ -1261,13 +1230,7 @@ img {
     to {
         transform: rotate(360deg);
     }
-
 }
-
-
-/* =========================================================
-   COURSE ROW
-========================================================= */
 
 .course-row {
     min-height: 92px;
@@ -1275,12 +1238,11 @@ img {
     display: grid;
 
     grid-template-columns:
-        minmax(180px, 1.5fr)
-        100px
-        100px
+        minmax(220px, 1.5fr)
+        110px
+        110px
         120px
-        120px
-        150px;
+        140px;
 
     align-items: center;
 
@@ -1302,11 +1264,6 @@ img {
 .course-row:last-child {
     border-bottom: 0;
 }
-
-
-/* =========================================================
-   COURSE MAIN INFORMATION
-========================================================= */
 
 .course-main {
     min-width: 0;
@@ -1366,6 +1323,7 @@ img {
     text-overflow: ellipsis;
 
     font-size: 13px;
+
     font-weight: 700;
 }
 
@@ -1397,9 +1355,8 @@ img {
     font-size: 10px;
 }
 
-
 /* =========================================================
-   COURSE STATUS
+   STATUS
 ========================================================= */
 
 .course-status {
@@ -1422,6 +1379,19 @@ img {
     letter-spacing: 0.6px;
 }
 
+.course-status::before {
+    content: "";
+
+    width: 5px;
+    height: 5px;
+
+    margin-right: 5px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
 .course-status.published {
     background: #eaf7f0;
 
@@ -1440,11 +1410,6 @@ img {
     color: #8b6767;
 }
 
-
-/* =========================================================
-   COURSE UPDATED
-========================================================= */
-
 .course-updated {
     color: #858992;
 
@@ -1453,65 +1418,8 @@ img {
     line-height: 1.4;
 }
 
-
 /* =========================================================
-   COURSE ACTIONS
-========================================================= */
-
-.course-actions {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    gap: 5px;
-
-    flex-wrap: wrap;
-}
-
-.course-action {
-    min-height: 31px;
-
-    padding: 0 9px;
-
-    border: 1px solid var(--border);
-
-    border-radius: 7px;
-
-    background: white;
-
-    color: #626774;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease;
-}
-
-.course-action:hover {
-    background: #f4f5f7;
-
-    color: #20242c;
-}
-
-.course-action.danger:hover {
-    background: #fff0f0;
-
-    border-color: #f0caca;
-
-    color: var(--danger);
-}
-
-
-/* =========================================================
-   EMPTY COURSES
+   COURSE EMPTY
 ========================================================= */
 
 .courses-empty {
@@ -1555,7 +1463,7 @@ img {
 }
 
 .courses-empty p {
-    max-width: 350px;
+    max-width: 400px;
 
     margin-top: 7px;
 
@@ -1566,290 +1474,62 @@ img {
     line-height: 1.5;
 }
 
-.courses-empty .primary-button {
-    margin-top: 18px;
-}
-
-
 /* =========================================================
-   COURSE MODAL
+   COURSE PHASE BADGE
 ========================================================= */
 
-.modal-overlay {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 3000;
-
-    display: none;
+.phase-badge {
+    display: inline-flex;
 
     align-items: center;
 
-    justify-content: center;
+    min-height: 26px;
 
-    padding: 20px;
+    padding: 0 9px;
 
-    background:
-        rgba(15, 17, 22, 0.55);
+    border-radius: 7px;
 
-    backdrop-filter: blur(5px);
+    background: #f1f2f5;
 
-    -webkit-backdrop-filter: blur(5px);
+    color: #707580;
+
+    font-size: 9px;
+
+    font-weight: 700;
 }
-
-.modal-overlay.open {
-    display: flex;
-}
-
-.course-modal {
-    width: 100%;
-
-    max-width: 650px;
-
-    max-height:
-        calc(100vh - 40px);
-
-    overflow-y: auto;
-
-    background: white;
-
-    border-radius: 16px;
-
-    box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.25);
-
-    animation:
-        modalAppear 0.2s ease;
-}
-
-@keyframes modalAppear {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(10px)
-            scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
-
-}
-
 
 /* =========================================================
-   MODAL HEADER
+   GENERAL BUTTON
 ========================================================= */
 
-.modal-header {
-    display: flex;
+.secondary-button {
+    min-height: 40px;
 
-    align-items: flex-start;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding: 24px;
-
-    border-bottom:
-        1px solid var(--border);
-}
-
-.modal-kicker {
-    margin-bottom: 6px;
-
-    color: #999ca4;
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
-}
-
-.modal-header h2 {
-    font-size: 21px;
-
-    letter-spacing: -0.5px;
-}
-
-.modal-close {
-    width: 34px;
-    height: 34px;
-
-    flex-shrink: 0;
-
-    display: flex;
+    display: inline-flex;
 
     align-items: center;
     justify-content: center;
 
-    border: 0;
-
-    border-radius: 8px;
-
-    background: #f1f2f4;
-
-    color: #555a65;
-
-    font-size: 21px;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease;
-}
-
-.modal-close:hover {
-    background: #e7e8eb;
-}
-
-
-/* =========================================================
-   COURSE FORM
-========================================================= */
-
-#course-form {
-    padding: 24px;
-}
-
-.form-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap: 17px;
-}
-
-.form-full {
-    grid-column: 1 / -1;
-}
-
-.form-group {
-    display: flex;
-
-    flex-direction: column;
-}
-
-.form-group label {
-    margin-bottom: 7px;
-
-    color: #555a65;
-
-    font-size: 10px;
-
-    font-weight: 750;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-    width: 100%;
-
-    border: 1px solid #dedfe4;
+    padding: 0 14px;
 
     border-radius: 9px;
 
-    background: #fafafa;
-
-    color: #20242c;
-
-    font-family: inherit;
-
-    font-size: 12px;
-
-    outline: none;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-}
-
-.form-group input,
-.form-group select {
-    height: 43px;
-
-    padding: 0 12px;
-}
-
-.form-group textarea {
-    min-height: 110px;
-
-    padding: 12px;
-
-    resize: vertical;
-
-    line-height: 1.5;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
     background: white;
 
-    border-color: #a8ade4;
+    border: 1px solid var(--border);
 
-    box-shadow:
-        0 0 0 3px rgba(115, 123, 212, 0.08);
-}
-
-
-/* =========================================================
-   FORM ERROR
-========================================================= */
-
-.form-error {
-    display: none;
-
-    margin-top: 15px;
-
-    padding: 11px 12px;
-
-    border-radius: 8px;
-
-    background: #fff1f1;
-
-    color: #a64646;
+    color: #555a65;
 
     font-size: 10px;
 
-    line-height: 1.5;
+    font-weight: 700;
+
+    cursor: pointer;
 }
 
-.form-error.visible {
-    display: block;
+.secondary-button:hover {
+    background: #f5f6f8;
 }
-
-
-/* =========================================================
-   MODAL FOOTER
-========================================================= */
-
-.modal-footer {
-    display: flex;
-
-    justify-content: flex-end;
-
-    gap: 9px;
-
-    margin-top: 25px;
-
-    padding-top: 20px;
-
-    border-top:
-        1px solid var(--border);
-}
-
 
 /* =========================================================
    TABLET
@@ -1867,38 +1547,19 @@ img {
             repeat(2, minmax(0, 1fr));
     }
 
-    .stat-card-wide {
-        grid-column: span 2;
-    }
-
-    .courses-table-header {
-        grid-template-columns:
-            minmax(180px, 1.5fr)
-            90px
-            90px
-            110px
-            110px
-            130px;
-    }
-
+    .courses-table-header,
     .course-row {
         grid-template-columns:
-            minmax(180px, 1.5fr)
-            90px
-            90px
-            110px
+            minmax(200px, 1.5fr)
+            100px
+            100px
             110px
             130px;
-    }
-
-    .course-actions {
-        justify-content: flex-start;
     }
 }
 
-
 /* =========================================================
-   SMALLER TABLET
+   SMALL TABLET
 ========================================================= */
 
 @media (max-width: 900px) {
@@ -1920,40 +1581,36 @@ img {
     .course-row {
         grid-template-columns:
             minmax(220px, 1fr)
-            100px
             110px
-            130px;
+            120px;
 
         gap: 12px;
     }
 
     .course-main {
-        grid-column: span 1;
+        grid-column: 1 / -1;
     }
 
     .course-category {
-        grid-column: 2;
+        grid-column: 1;
     }
 
     .course-level {
-        grid-column: 3;
+        grid-column: 2;
     }
 
     .course-status {
-        grid-column: 4;
+        grid-column: 3;
     }
 
     .course-updated {
-        grid-column: 2 / 3;
+        grid-column: 1;
     }
 
-    .course-actions {
-        grid-column: 3 / 5;
-
-        justify-content: flex-start;
+    .phase-badge {
+        grid-column: 2 / 4;
     }
 }
-
 
 /* =========================================================
    MOBILE
@@ -1992,8 +1649,7 @@ img {
     .admin-header {
         height: 68px;
 
-        padding:
-            0 20px;
+        padding: 0 20px;
     }
 
     .header-title {
@@ -2031,10 +1687,6 @@ img {
         gap: 12px;
     }
 
-    .stat-card-wide {
-        grid-column: span 1;
-    }
-
     .stat-card {
         min-height: 135px;
 
@@ -2042,15 +1694,7 @@ img {
     }
 
     .courses-header {
-        flex-direction: column;
-
         align-items: stretch;
-
-        gap: 18px;
-    }
-
-    .courses-header .primary-button {
-        width: 100%;
     }
 
     .course-toolbar {
@@ -2089,10 +1733,6 @@ img {
         border: 0;
 
         background: transparent;
-    }
-
-    .courses-panel-top > div {
-        gap: 8px;
     }
 
     .courses-list {
@@ -2134,7 +1774,7 @@ img {
     .course-level,
     .course-status,
     .course-updated,
-    .course-actions {
+    .phase-badge {
         grid-column: auto;
     }
 
@@ -2175,21 +1815,13 @@ img {
     }
 
     .course-status::before {
-        content: "Status";
+        margin-right: 5px;
+    }
+
+    .course-status::after {
+        content: "";
 
         display: block;
-
-        margin-bottom: 5px;
-
-        color: #a0a2a9;
-
-        font-size: 8px;
-
-        font-weight: 800;
-
-        text-transform: uppercase;
-
-        letter-spacing: .6px;
     }
 
     .course-updated::before {
@@ -2210,29 +1842,8 @@ img {
         letter-spacing: .6px;
     }
 
-    .course-actions {
-        grid-column: 1 / -1;
-
-        padding-top: 5px;
-
-        border-top:
-            1px solid var(--border);
-
-        justify-content: flex-start;
-    }
-
-    .courses-empty {
-        min-height: 260px;
-
-        padding: 30px 20px;
-
-        background: white;
-
-        border: 1px solid var(--border);
-
-        border-radius: var(--radius);
-
-        box-shadow: var(--shadow);
+    .phase-badge {
+        align-self: center;
     }
 
     .activity-item {
@@ -2251,53 +1862,10 @@ img {
         padding: 30px 20px;
     }
 
-    .modal-overlay {
-        padding: 12px;
-    }
-
-    .course-modal {
-        max-height:
-            calc(100vh - 24px);
-
-        border-radius: 14px;
-    }
-
-    .modal-header {
-        padding: 20px;
-    }
-
-    #course-form {
-        padding: 20px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-
-        gap: 15px;
-    }
-
-    .form-full {
-        grid-column: auto;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-    }
-
-    .modal-footer button {
-        width: 100%;
-    }
-
     #admin-app.sidebar-open {
         overflow: hidden;
     }
-
-    #admin-app.sidebar-collapsed:not(.sidebar-open)
-    .admin-sidebar {
-        transform: translateX(-100%);
-    }
 }
-
 
 /* =========================================================
    SMALL MOBILE
@@ -2376,15 +1944,6 @@ img {
         font-size: 9px;
     }
 
-    .course-action {
-        min-height: 30px;
-
-        padding:
-            0 8px;
-
-        font-size: 8px;
-    }
-
     .activity-item {
         align-items: flex-start;
 
@@ -2403,20 +1962,7 @@ img {
     .empty-section {
         min-height: 280px;
     }
-
-    .modal-header h2 {
-        font-size: 18px;
-    }
-
-    .modal-header {
-        padding: 18px;
-    }
-
-    #course-form {
-        padding: 18px;
-    }
 }
-
 
 /* =========================================================
    VERY SMALL MOBILE
@@ -2463,7 +2009,6 @@ img {
     }
 }
 
-
 /* =========================================================
    REDUCED MOTION
 ========================================================= */
@@ -2476,22 +2021,20 @@ img {
         scroll-behavior: auto !important;
 
         animation-duration: 0.01ms !important;
+
         animation-iteration-count: 1 !important;
 
         transition-duration: 0.01ms !important;
     }
 }
 
-
 /* =========================================================
-   ACCESSIBILITY / INTERACTION
+   ACCESSIBILITY
 ========================================================= */
 
 .nav-item:disabled,
 .logout-button:disabled,
-.primary-button:disabled,
-.secondary-button:disabled,
-.course-action:disabled {
+.secondary-button:disabled {
     opacity: 0.5;
 
     cursor: not-allowed;
@@ -2499,14 +2042,15 @@ img {
     transform: none !important;
 }
 
-
 /* =========================================================
    SCROLLBAR
 ========================================================= */
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: #c9cbd1 transparent;
+
+    scrollbar-color:
+        #c9cbd1 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -2528,9 +2072,8 @@ img {
     background: #b5b7bd;
 }
 
-
 /* =========================================================
-   TEXT SELECTION
+   SELECTION
 ========================================================= */
 
 ::selection {
@@ -2540,88 +2083,13 @@ img {
     color: var(--text);
 }
 
-
 /* =========================================================
-   COURSE IMAGE FALLBACK
-========================================================= */
-
-.course-cover img {
-    width: 100%;
-    height: 100%;
-
-    display: block;
-
-    object-fit: cover;
-}
-
-.course-cover img[src=""],
-.course-cover img:not([src]) {
-    display: none;
-}
-
-
-/* =========================================================
-   FORM PLACEHOLDER
-========================================================= */
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: #a3a5ac;
-}
-
-
-/* =========================================================
-   DISABLED FORM FIELDS
-========================================================= */
-
-.form-group input:disabled,
-.form-group textarea:disabled,
-.form-group select:disabled {
-    background: #f0f1f3;
-
-    color: #999ca4;
-
-    cursor: not-allowed;
-}
-
-
-/* =========================================================
-   COURSE STATUS DOT
-========================================================= */
-
-.course-status::before {
-    content: "";
-
-    width: 5px;
-    height: 5px;
-
-    margin-right: 5px;
-
-    border-radius: 50%;
-
-    background: currentColor;
-}
-
-
-/* =========================================================
-   LOADING STATE
-========================================================= */
-
-.is-loading {
-    pointer-events: none;
-
-    opacity: 0.65;
-}
-
-
-/* =========================================================
-   HIDDEN UTILITY
+   HIDDEN
 ========================================================= */
 
 .admin-hidden {
     display: none !important;
 }
-
 
 /* =========================================================
    PRINT
@@ -2632,10 +2100,7 @@ img {
     .admin-sidebar,
     .admin-header,
     .sidebar-overlay,
-    .sidebar-toggle,
-    .primary-button,
-    .secondary-button,
-    .course-actions {
+    .sidebar-toggle {
         display: none !important;
     }
 
@@ -2667,7 +2132,6 @@ img {
         border-color: #cccccc;
     }
 }
-
 
 /* =========================================================
    END OF EDUCORE ADMIN.CSS
