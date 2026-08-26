@@ -1334,13 +1334,43 @@ document.addEventListener("DOMContentLoaded", () => {
                                 Category
                             </label>
 
-                            <input
-                                id="course-category-input"
-                                name="category"
-                                type="text"
-                                maxlength="100"
-                                placeholder="e.g. Business, Science, Language"
-                            >
+                            <select
+    id="course-category-input"
+    name="category"
+    required
+>
+    <option value="">
+        Select a category
+    </option>
+
+    <option value="Language">
+        Language
+    </option>
+
+    <option value="MS Office">
+        MS Office
+    </option>
+
+    <option value="Trading">
+        Trading
+    </option>
+
+    <option value="Business">
+        Business
+    </option>
+
+    <option value="Technology">
+        Technology
+    </option>
+
+    <option value="Finance">
+        Finance
+    </option>
+
+    <option value="Personal Development">
+        Personal Development
+    </option>
+</select>
 
                         </div>
 
