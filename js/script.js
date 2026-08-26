@@ -1,289 +1,13 @@
-document.addEventListener("DOMContentLoaded", () => {
+// ============================================================
+// EduCore — Public Homepage
+// Dynamic Course Catalogue
+// ============================================================
 
-    /* =========================================
-       COURSE DATA
-    ========================================== */
+document.addEventListener("DOMContentLoaded", async () => {
 
-    const courses = [
-
-        {
-            title: "English",
-            level: "Language",
-            category: "Language",
-            categoryKey: "language",
-            cover: "images/english.jpg",
-            url: "#",
-            description:
-                "Build practical English skills through structured lessons designed for independent learning. Develop your vocabulary, grammar, listening, speaking and communication skills step by step.",
-            time: "25 minutes",
-            learning:
-                "Vocabulary, grammar, listening, speaking, pronunciation, reading and practical communication.",
-            structure:
-                "Short structured lessons, practice activities, repeated practice and immediate feedback."
-        },
-
-
-        {
-            title: "French",
-            level: "Language",
-            category: "Language",
-            categoryKey: "language",
-            cover: "images/french.jpg",
-            url: "#",
-            description:
-                "Develop useful French communication skills through structured autonomous lessons. Learn progressively while practising vocabulary, grammar, pronunciation and real-world communication.",
-            time: "25 minutes",
-            learning:
-                "Vocabulary, grammar, pronunciation, listening, speaking, reading and everyday communication.",
-            structure:
-                "Progressive lessons with explanations, guided practice, activities and continuous review."
-        },
-
-
-        {
-            title: "Portuguese",
-            level: "Language",
-            category: "Language",
-            categoryKey: "language",
-            cover: "images/portuguese.jpg",
-            url: "#",
-            description:
-                "Learn Portuguese through a practical and structured learning path designed to help you communicate confidently in everyday situations.",
-            time: "25 minutes",
-            learning:
-                "Vocabulary, grammar, pronunciation, listening, speaking, reading and practical communication.",
-            structure:
-                "Structured lessons followed by practice, activities, review and immediate feedback."
-        },
-
-
-        {
-            title: "Microsoft Word",
-            level: "MS Office",
-            category: "MS Office",
-            categoryKey: "ms-office",
-            cover: "images/ms-word.jpg",
-            url: "#",
-            description:
-                "Learn how to use Microsoft Word effectively to create professional documents, organise information and work confidently with essential document tools.",
-            time: "25 minutes",
-            learning:
-                "Document creation, formatting, page layout, tables, images, styles and professional documents.",
-            structure:
-                "Practical demonstrations followed by guided exercises and independent practice."
-        },
-
-
-        {
-            title: "Microsoft Excel",
-            level: "MS Office",
-            category: "MS Office",
-            categoryKey: "ms-office",
-            cover: "images/ms-excel.jpg",
-            url: "#",
-            description:
-                "Develop practical Excel skills for organising information, working with data, using formulas and creating useful spreadsheets.",
-            time: "25 minutes",
-            learning:
-                "Spreadsheets, formulas, functions, formatting, data organisation, charts and practical analysis.",
-            structure:
-                "Step-by-step lessons with demonstrations, exercises and repeated practice."
-        },
-
-
-        {
-            title: "Microsoft PowerPoint",
-            level: "MS Office",
-            category: "MS Office",
-            categoryKey: "ms-office",
-            cover: "images/ms-powerpoint.jpg",
-            url: "#",
-            description:
-                "Learn to create clear, professional and engaging presentations using Microsoft PowerPoint and its most important presentation tools.",
-            time: "25 minutes",
-            learning:
-                "Slides, layouts, text, images, charts, animations, transitions and presentation design.",
-            structure:
-                "Practical lessons combining demonstrations, guided activities and presentation projects."
-        },
-
-
-        {
-            title: "Trading Fundamentals",
-            level: "Trading",
-            category: "Trading",
-            categoryKey: "trading",
-            cover: "images/trading-fundamentals.jpg",
-            url: "#",
-            description:
-                "Build a solid foundation in financial markets and trading concepts before moving into more advanced market analysis and strategies.",
-            time: "25 minutes",
-            learning:
-                "Markets, financial instruments, orders, risk, trading terminology and fundamental concepts.",
-            structure:
-                "Concept-based lessons followed by examples, practice and knowledge checks."
-        },
-
-
-        {
-            title: "Technical Analysis",
-            level: "Trading",
-            category: "Trading",
-            categoryKey: "trading",
-            cover: "images/technical-analysis.jpg",
-            url: "#",
-            description:
-                "Learn the principles of technical analysis and how traders study price movements, charts and market behaviour.",
-            time: "25 minutes",
-            learning:
-                "Charts, trends, support and resistance, indicators, patterns and technical analysis concepts.",
-            structure:
-                "Visual explanations, chart examples, guided analysis and repeated practice."
-        },
-
-
-        {
-            title: "Business Fundamentals",
-            level: "Business",
-            category: "Business",
-            categoryKey: "business",
-            cover: "images/business-fundamentals.jpg",
-            url: "#",
-            description:
-                "Understand the essential concepts behind modern business and develop a practical foundation for working in business environments.",
-            time: "25 minutes",
-            learning:
-                "Business models, customers, markets, operations, strategy and essential business concepts.",
-            structure:
-                "Short lessons with practical examples, activities and knowledge checks."
-        },
-
-
-        {
-            title: "Entrepreneurship",
-            level: "Business",
-            category: "Business",
-            categoryKey: "business",
-            cover: "images/entrepreneurship.jpg",
-            url: "#",
-            description:
-                "Explore the principles of entrepreneurship and learn how ideas can be developed into practical business opportunities.",
-            time: "25 minutes",
-            learning:
-                "Business ideas, opportunity identification, customers, business models, planning and execution.",
-            structure:
-                "Progressive lessons supported by practical activities and real-world examples."
-        },
-
-
-        {
-            title: "Web Development",
-            level: "Technology",
-            category: "Technology",
-            categoryKey: "technology",
-            cover: "images/web-development.jpg",
-            url: "#",
-            description:
-                "Build a practical foundation in web development and understand how modern websites are structured, designed and developed.",
-            time: "25 minutes",
-            learning:
-                "HTML, CSS, JavaScript, web structure, styling, interaction and development fundamentals.",
-            structure:
-                "Concept explanations followed by coding demonstrations, exercises and projects."
-        },
-
-
-        {
-            title: "Artificial Intelligence",
-            level: "Technology",
-            category: "Technology",
-            categoryKey: "technology",
-            cover: "images/artificial-intelligence.jpg",
-            url: "#",
-            description:
-                "Explore the fundamentals of artificial intelligence and understand how AI systems are changing technology, business and everyday life.",
-            time: "25 minutes",
-            learning:
-                "AI concepts, machine learning, generative AI, applications, limitations and practical use.",
-            structure:
-                "Conceptual lessons, demonstrations, examples and practical activities."
-        },
-
-
-        {
-            title: "Personal Finance",
-            level: "Finance",
-            category: "Finance",
-            categoryKey: "finance",
-            cover: "images/personal-finance.jpg",
-            url: "#",
-            description:
-                "Develop practical knowledge for managing personal money, making informed financial decisions and building stronger financial habits.",
-            time: "25 minutes",
-            learning:
-                "Budgeting, saving, spending, debt, financial planning and responsible money management.",
-            structure:
-                "Practical lessons with examples, activities and financial decision-making exercises."
-        },
-
-
-        {
-            title: "Financial Literacy",
-            level: "Finance",
-            category: "Finance",
-            categoryKey: "finance",
-            cover: "images/financial-literacy.jpg",
-            url: "#",
-            description:
-                "Build the knowledge needed to understand money, financial products, economic concepts and everyday financial decisions.",
-            time: "25 minutes",
-            learning:
-                "Money, banking, interest, credit, investing, risk and essential financial concepts.",
-            structure:
-                "Structured lessons with explanations, examples, activities and regular review."
-        },
-
-
-        {
-            title: "Communication Skills",
-            level: "Personal Development",
-            category: "Personal Development",
-            categoryKey: "personal-development",
-            cover: "images/communication.jpg",
-            url: "#",
-            description:
-                "Improve the way you communicate in professional and everyday situations by developing practical communication skills and greater confidence.",
-            time: "25 minutes",
-            learning:
-                "Speaking, listening, clarity, confidence, professional communication and interpersonal skills.",
-            structure:
-                "Short lessons with examples, practical exercises, reflection and repeated practice."
-        },
-
-
-        {
-            title: "Time Management",
-            level: "Personal Development",
-            category: "Personal Development",
-            categoryKey: "personal-development",
-            cover: "images/time-management.jpg",
-            url: "#",
-            description:
-                "Learn practical methods for organising your time, prioritising important tasks and creating more effective working and learning habits.",
-            time: "25 minutes",
-            learning:
-                "Priorities, planning, organisation, productivity, routines and effective time use.",
-            structure:
-                "Practical lessons supported by planning activities and real-world exercises."
-        }
-
-    ];
-
-
-
-    /* =========================================
-       ELEMENTS
-    ========================================== */
+    // ========================================================
+    // ELEMENTS
+    // ========================================================
 
     const sidebar =
         document.getElementById("sidebar");
@@ -299,6 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const noResults =
         document.getElementById("noResults");
+
+    const loadingCourses =
+        document.getElementById("loadingCourses");
 
     const searchInput =
         document.getElementById("searchInput");
@@ -320,7 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    /* COURSE DETAILS */
+    // ========================================================
+    // COURSE DETAILS
+    // ========================================================
 
     const homeContent =
         document.getElementById("homeContent");
@@ -362,10 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("courseStartButton");
 
 
+    // ========================================================
+    // STATE
+    // ========================================================
 
-    /* =========================================
-       STATE
-    ========================================== */
+    let courses = [];
 
     let activeFilter = "all";
 
@@ -374,10 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeCourse = null;
 
 
-
-    /* =========================================
-       YEAR
-    ========================================== */
+    // ========================================================
+    // YEAR
+    // ========================================================
 
     if (year) {
 
@@ -387,26 +116,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       TITLES
-    ========================================== */
+    // ========================================================
+    // CATEGORY TITLES
+    // ========================================================
 
     const titles = {
 
-        all: "All Areas",
+        all:
+            "All Areas",
 
-        language: "Language",
+        language:
+            "Language",
 
-        "ms-office": "MS Office",
+        "ms-office":
+            "MS Office",
 
-        trading: "Trading",
+        trading:
+            "Trading",
 
-        business: "Business",
+        business:
+            "Business",
 
-        technology: "Technology",
+        technology:
+            "Technology",
 
-        finance: "Finance",
+        finance:
+            "Finance",
 
         "personal-development":
             "Personal Development"
@@ -414,133 +149,567 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 
+    // ========================================================
+    // ESCAPE HTML
+    // ========================================================
 
-    /* =========================================
-       CREATE COURSE CARDS
-    ========================================== */
+    function escapeHTML(value) {
 
-    function createCourseCards() {
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
 
-        if (!bookGrid) return;
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    // ========================================================
+    // ESCAPE ATTRIBUTE
+    // ========================================================
+
+    function escapeAttribute(value) {
+
+        return escapeHTML(value);
+
+    }
+
+
+    // ========================================================
+    // NORMALIZE CATEGORY
+    // ========================================================
+
+    function normalizeCategory(category) {
+
+        if (!category) {
+            return "other";
+        }
+
+        return String(category)
+            .trim()
+            .toLowerCase()
+            .replace(/&/g, "and")
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "");
+
+    }
+
+
+    // ========================================================
+    // COURSE DEFAULTS
+    // ========================================================
+
+    function getCourseTime(course) {
+
+        /*
+            The current courses table does not contain
+            a lesson_length field.
+
+            EduCore lessons are designed around 25 minutes.
+        */
+
+        return (
+            course.lesson_length ||
+            course.duration ||
+            "25 minutes"
+        );
+
+    }
+
+
+    function getCourseLearning(course) {
+
+        /*
+            The current Admin Create Course form does not yet
+            have a "What you will learn" database field.
+
+            Therefore we use a useful automatic description
+            until that field is added to the database/Admin.
+        */
+
+        if (course.learning) {
+
+            return course.learning;
+
+        }
+
+        if (course.description) {
+
+            return course.description;
+
+        }
+
+        return (
+            `Develop practical knowledge and skills through `
+            + `structured autonomous learning in ${course.title || "this course"}.`
+        );
+
+    }
+
+
+    function getCourseStructure(course) {
+
+        /*
+            The current Admin Create Course form does not yet
+            contain a course structure field.
+
+            Keep the existing EduCore lesson model as the
+            default until those fields are added.
+        */
+
+        if (course.structure) {
+
+            return course.structure;
+
+        }
+
+        return (
+            "Structured 25-minute lessons with explanations, "
+            + "practice activities, knowledge checks, repeated "
+            + "practice and immediate feedback."
+        );
+
+    }
+
+
+    // ========================================================
+    // LOAD COURSES FROM SUPABASE
+    // ========================================================
+
+    async function loadCourses() {
+
+        if (!bookGrid) {
+            return;
+        }
+
+
+        if (loadingCourses) {
+
+            loadingCourses.style.display =
+                "block";
+
+        }
+
+
+        if (noResults) {
+
+            noResults.classList.remove(
+                "visible"
+            );
+
+        }
+
 
         bookGrid.innerHTML = "";
 
 
-        courses.forEach(course => {
+        try {
 
-            const card =
-                document.createElement("article");
+            // ------------------------------------------------
+            // CHECK SUPABASE CLIENT
+            // ------------------------------------------------
 
+            if (
+                typeof window.supabaseClient ===
+                "undefined"
+            ) {
 
-            card.className =
-                "book-card";
-
-
-            card.dataset.category =
-                course.categoryKey;
-
-
-            card.dataset.search = (
-
-                course.title +
-                " " +
-                course.category +
-                " " +
-                course.level
-
-            ).toLowerCase();
-
-
-            card.innerHTML = `
-
-                <a
-                    href="#"
-                    class="book-card-link"
-                    aria-label="Open ${course.title}"
-                >
-
-                    <div class="book-cover-wrapper">
-
-                        <img
-                            src="${course.cover}"
-                            alt="${course.title}"
-                            class="book-cover"
-                            loading="lazy"
-                        >
-
-                        <div class="book-hover">
-
-                            <div class="open-button">
-
-                                <span>
-                                    EXPLORE
-                                </span>
-
-                                <span class="open-arrow">
-                                    →
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="book-information">
-
-                        <div class="book-language">
-                            ${course.category.toUpperCase()}
-                        </div>
-
-                        <div class="book-title">
-                            ${course.title}
-                        </div>
-
-                        <div class="book-level">
-                            ${course.level}
-                        </div>
-
-                    </div>
-
-                </a>
-
-            `;
-
-
-            const cardLink =
-                card.querySelector(
-                    ".book-card-link"
-                );
-
-
-            if (cardLink) {
-
-                cardLink.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-                        openCourseDetails(course);
-
-                    }
+                throw new Error(
+                    "Supabase client is not available."
                 );
 
             }
 
 
-            bookGrid.appendChild(card);
+            // ------------------------------------------------
+            // LOAD ONLY PUBLISHED COURSES
+            // ------------------------------------------------
 
-        });
+            const {
+                data,
+                error
+            } =
+                await window.supabaseClient
+                    .from("courses")
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        category,
+                        level,
+                        cover_image,
+                        status,
+                        sort_order,
+                        created_at,
+                        slug
+                    `)
+                    .eq(
+                        "status",
+                        "published"
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true,
+                            nullsFirst: false
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            courses =
+                (data || []).map(
+                    course => {
+
+                        return {
+
+                            ...course,
+
+                            categoryKey:
+                                normalizeCategory(
+                                    course.category
+                                ),
+
+                            cover:
+                                course.cover_image ||
+                                "images/course-placeholder.jpg",
+
+                            url:
+                                course.slug
+                                    ? `course.html?slug=${encodeURIComponent(course.slug)}`
+                                    : "#",
+
+                            time:
+                                getCourseTime(course),
+
+                            learning:
+                                getCourseLearning(course),
+
+                            structure:
+                                getCourseStructure(course)
+
+                        };
+
+                    }
+                );
+
+
+            // ------------------------------------------------
+            // RENDER
+            // ------------------------------------------------
+
+            createCourseCards();
+
+            setFilter("all");
+
+
+        } catch (error) {
+
+            console.error(
+                "EduCore: Could not load courses:",
+                error
+            );
+
+
+            courses = [];
+
+
+            if (bookGrid) {
+
+                bookGrid.innerHTML = `
+
+                    <div class="courses-load-error">
+
+                        <div class="courses-load-error-icon">
+                            !
+                        </div>
+
+                        <h3>
+                            Unable to load courses
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                error?.message ||
+                                "Please try again later."
+                            )}
+                        </p>
+
+                        <button
+                            type="button"
+                            id="retryCoursesButton"
+                        >
+                            Try Again
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                const retryButton =
+                    document.getElementById(
+                        "retryCoursesButton"
+                    );
+
+
+                if (retryButton) {
+
+                    retryButton.addEventListener(
+                        "click",
+                        loadCourses
+                    );
+
+                }
+
+            }
+
+        } finally {
+
+            if (loadingCourses) {
+
+                loadingCourses.style.display =
+                    "none";
+
+            }
+
+        }
 
     }
 
 
+    // ========================================================
+    // CREATE COURSE CARDS
+    // ========================================================
 
-    /* =========================================
-       FILTER COURSES
-    ========================================== */
+    function createCourseCards() {
+
+        if (!bookGrid) {
+            return;
+        }
+
+
+        bookGrid.innerHTML = "";
+
+
+        if (!courses.length) {
+
+            if (noResults) {
+
+                noResults.classList.add(
+                    "visible"
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        courses.forEach(
+            course => {
+
+                const card =
+                    document.createElement(
+                        "article"
+                    );
+
+
+                card.className =
+                    "book-card";
+
+
+                // --------------------------------------------
+                // CATEGORY
+                // --------------------------------------------
+
+                card.dataset.category =
+                    course.categoryKey;
+
+
+                // --------------------------------------------
+                // SEARCH TEXT
+                // --------------------------------------------
+
+                card.dataset.search = [
+
+                    course.title,
+
+                    course.category,
+
+                    course.level,
+
+                    course.description
+
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+
+                // --------------------------------------------
+                // CARD
+                // --------------------------------------------
+
+                card.innerHTML = `
+
+                    <a
+                        href="#"
+                        class="book-card-link"
+                        aria-label="Open ${escapeAttribute(
+                            course.title
+                        )}"
+                    >
+
+                        <div class="book-cover-wrapper">
+
+                            <img
+                                src="${escapeAttribute(
+                                    course.cover
+                                )}"
+                                alt="${escapeAttribute(
+                                    course.title
+                                )}"
+                                class="book-cover"
+                                loading="lazy"
+                            >
+
+                            <div class="book-hover">
+
+                                <div class="open-button">
+
+                                    <span>
+                                        EXPLORE
+                                    </span>
+
+                                    <span class="open-arrow">
+                                        →
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="book-information">
+
+                            <div class="book-language">
+                                ${escapeHTML(
+                                    course.category ||
+                                    "Course"
+                                ).toUpperCase()}
+                            </div>
+
+                            <div class="book-title">
+                                ${escapeHTML(
+                                    course.title ||
+                                    "Untitled Course"
+                                )}
+                            </div>
+
+                            <div class="book-level">
+                                ${escapeHTML(
+                                    course.level ||
+                                    ""
+                                )}
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                `;
+
+
+                // --------------------------------------------
+                // OPEN COURSE
+                // --------------------------------------------
+
+                const cardLink =
+                    card.querySelector(
+                        ".book-card-link"
+                    );
+
+
+                if (cardLink) {
+
+                    cardLink.addEventListener(
+                        "click",
+                        event => {
+
+                            event.preventDefault();
+
+                            openCourseDetails(
+                                course
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                // --------------------------------------------
+                // IMAGE ERROR
+                // --------------------------------------------
+
+                const image =
+                    card.querySelector(
+                        ".book-cover"
+                    );
+
+
+                if (image) {
+
+                    image.addEventListener(
+                        "error",
+                        () => {
+
+                            image.style.display =
+                                "none";
+
+                        }
+                    );
+
+                }
+
+
+                bookGrid.appendChild(
+                    card
+                );
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // FILTER COURSES
+    // ========================================================
 
     function filterCourses() {
 
@@ -553,55 +722,69 @@ document.addEventListener("DOMContentLoaded", () => {
         let visibleCount = 0;
 
 
-        cards.forEach(card => {
+        cards.forEach(
+            card => {
 
-            const category =
-                card.dataset.category;
-
-
-            const text =
-                card.dataset.search;
+                const category =
+                    card.dataset.category ||
+                    "";
 
 
-            const matchesCategory =
-                activeFilter === "all" ||
-                category === activeFilter;
+                const text =
+                    card.dataset.search ||
+                    "";
 
 
-            const matchesSearch =
-                searchTerm === "" ||
-                text.includes(searchTerm);
+                const matchesCategory =
+                    activeFilter === "all" ||
+                    category === activeFilter;
 
 
-            const visible =
-                matchesCategory &&
-                matchesSearch;
+                const matchesSearch =
+                    searchTerm === "" ||
+                    text.includes(searchTerm);
 
 
-            if (visible) {
-
-                card.classList.remove("hide");
-
-                visibleCount++;
+                const visible =
+                    matchesCategory &&
+                    matchesSearch;
 
 
-                setTimeout(() => {
+                if (visible) {
 
-                    card.classList.add("show");
+                    card.classList.remove(
+                        "hide"
+                    );
 
-                }, 30);
+
+                    visibleCount++;
+
+
+                    setTimeout(
+                        () => {
+
+                            card.classList.add(
+                                "show"
+                            );
+
+                        },
+                        30
+                    );
+
+                } else {
+
+                    card.classList.remove(
+                        "show"
+                    );
+
+                    card.classList.add(
+                        "hide"
+                    );
+
+                }
 
             }
-
-            else {
-
-                card.classList.remove("show");
-
-                card.classList.add("hide");
-
-            }
-
-        });
+        );
 
 
         if (noResults) {
@@ -616,50 +799,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       SET FILTER
-    ========================================== */
+    // ========================================================
+    // SET FILTER
+    // ========================================================
 
     function setFilter(filter) {
 
-        activeFilter = filter;
+        activeFilter =
+            filter ||
+            "all";
 
 
-        navigationButtons.forEach(button => {
+        // --------------------------------------------
+        // SIDEBAR
+        // --------------------------------------------
 
-            button.classList.toggle(
-                "active",
-                button.dataset.filter === filter
-            );
+        navigationButtons.forEach(
+            button => {
 
-        });
+                button.classList.toggle(
+                    "active",
+                    button.dataset.filter ===
+                    activeFilter
+                );
+
+            }
+        );
 
 
-        filterButtons.forEach(button => {
+        // --------------------------------------------
+        // FILTER BAR
+        // --------------------------------------------
 
-            button.classList.toggle(
-                "active",
-                button.dataset.filter === filter
-            );
+        filterButtons.forEach(
+            button => {
 
-        });
+                button.classList.toggle(
+                    "active",
+                    button.dataset.filter ===
+                    activeFilter
+                );
 
+            }
+        );
+
+
+        // --------------------------------------------
+        // TITLE
+        // --------------------------------------------
 
         if (libraryTitle) {
 
             libraryTitle.textContent =
-                titles[filter] || "All Areas";
+                titles[activeFilter] ||
+                activeFilter === "all"
+                    ? (
+                        titles[activeFilter] ||
+                        "All Areas"
+                    )
+                    : activeFilter;
 
         }
 
 
+        // --------------------------------------------
+        // FILTER
+        // --------------------------------------------
+
         filterCourses();
 
 
-        /* On mobile, close sidebar */
+        // --------------------------------------------
+        // MOBILE SIDEBAR
+        // --------------------------------------------
 
-        if (window.innerWidth <= 768) {
+        if (
+            window.innerWidth <= 768
+        ) {
 
             closeMobileSidebar();
 
@@ -668,54 +884,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // ========================================================
+    // SIDEBAR NAVIGATION
+    // ========================================================
 
-    /* =========================================
-       SIDEBAR NAVIGATION
-    ========================================== */
+    navigationButtons.forEach(
+        button => {
 
-    navigationButtons.forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
 
-        button.addEventListener(
-            "click",
-            () => {
+                    setFilter(
+                        button.dataset.filter
+                    );
 
-                const filter =
-                    button.dataset.filter;
+                }
+            );
 
-                setFilter(filter);
-
-            }
-        );
-
-    });
-
-
-
-    /* =========================================
-       FILTER BUTTONS
-    ========================================== */
-
-    filterButtons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const filter =
-                    button.dataset.filter;
-
-                setFilter(filter);
-
-            }
-        );
-
-    });
+        }
+    );
 
 
+    // ========================================================
+    // FILTER BUTTONS
+    // ========================================================
 
-    /* =========================================
-       SEARCH
-    ========================================== */
+    filterButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setFilter(
+                        button.dataset.filter
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // SEARCH
+    // ========================================================
 
     if (searchInput) {
 
@@ -728,6 +943,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         .toLowerCase()
                         .trim();
 
+
                 filterCourses();
 
             }
@@ -736,119 +952,162 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       OPEN COURSE DETAILS
-    ========================================== */
+    // ========================================================
+    // OPEN COURSE DETAILS
+    // ========================================================
 
     function openCourseDetails(course) {
 
         if (
             !courseDetails ||
-            !homeContent
+            !homeContent ||
+            !course
         ) {
+
             return;
+
         }
 
 
-        activeCourse = course;
+        activeCourse =
+            course;
 
 
-        /* -------------------------------------
-           COURSE COVER
-        ------------------------------------- */
+        // --------------------------------------------
+        // COVER
+        // --------------------------------------------
 
         if (courseDetailsCover) {
 
             courseDetailsCover.src =
-                course.cover;
+                course.cover ||
+                "";
 
             courseDetailsCover.alt =
-                course.title;
+                course.title ||
+                "";
 
         }
 
 
-        /* -------------------------------------
-           COURSE INFORMATION
-        ------------------------------------- */
+        // --------------------------------------------
+        // CATEGORY
+        // --------------------------------------------
 
         if (courseDetailsCategory) {
 
             courseDetailsCategory.textContent =
-                course.category.toUpperCase();
+                (
+                    course.category ||
+                    "Course"
+                ).toUpperCase();
 
         }
 
+
+        // --------------------------------------------
+        // TITLE
+        // --------------------------------------------
 
         if (courseDetailsTitle) {
 
             courseDetailsTitle.textContent =
-                course.title;
+                course.title ||
+                "";
 
         }
 
+
+        // --------------------------------------------
+        // LEVEL
+        // --------------------------------------------
 
         if (courseDetailsLevel) {
 
             courseDetailsLevel.textContent =
-                course.level;
+                course.level ||
+                "";
 
         }
 
+
+        // --------------------------------------------
+        // DESCRIPTION
+        // --------------------------------------------
 
         if (courseDetailsDescription) {
 
             courseDetailsDescription.textContent =
-                course.description;
+                course.description ||
+                "";
 
         }
 
+
+        // --------------------------------------------
+        // STAT LEVEL
+        // --------------------------------------------
 
         if (courseDetailsStatLevel) {
 
             courseDetailsStatLevel.textContent =
-                course.level;
+                course.level ||
+                "";
 
         }
 
+
+        // --------------------------------------------
+        // LESSON LENGTH
+        // --------------------------------------------
 
         if (courseDetailsTime) {
 
             courseDetailsTime.textContent =
-                course.time;
+                course.time ||
+                "25 minutes";
 
         }
 
+
+        // --------------------------------------------
+        // LEARNING
+        // --------------------------------------------
 
         if (courseDetailsLearning) {
 
             courseDetailsLearning.textContent =
-                course.learning;
+                course.learning ||
+                "";
 
         }
 
+
+        // --------------------------------------------
+        // STRUCTURE
+        // --------------------------------------------
 
         if (courseDetailsStructure) {
 
             courseDetailsStructure.textContent =
-                course.structure;
+                course.structure ||
+                "";
 
         }
 
 
-        /* -------------------------------------
-           HIDE HOME
-        ------------------------------------- */
+        // --------------------------------------------
+        // HIDE HOME
+        // --------------------------------------------
 
         homeContent.classList.add(
             "home-hidden"
         );
 
 
-        /* -------------------------------------
-           SHOW DETAILS
-        ------------------------------------- */
+        // --------------------------------------------
+        // SHOW DETAILS
+        // --------------------------------------------
 
         courseDetails.classList.add(
             "visible"
@@ -861,29 +1120,31 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* -------------------------------------
-           CLOSE MOBILE SIDEBAR
-        ------------------------------------- */
+        // --------------------------------------------
+        // CLOSE MOBILE SIDEBAR
+        // --------------------------------------------
 
         closeMobileSidebar();
 
 
-        /* -------------------------------------
-           MOVE TO TOP
-        ------------------------------------- */
+        // --------------------------------------------
+        // TOP
+        // --------------------------------------------
 
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
 
     }
 
 
-
-    /* =========================================
-       CLOSE COURSE DETAILS
-    ========================================== */
+    // ========================================================
+    // CLOSE COURSE DETAILS
+    // ========================================================
 
     function closeCourseDetails() {
 
@@ -891,7 +1152,9 @@ document.addEventListener("DOMContentLoaded", () => {
             !courseDetails ||
             !homeContent
         ) {
+
             return;
+
         }
 
 
@@ -911,21 +1174,24 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        activeCourse = null;
+        activeCourse =
+            null;
 
 
         window.scrollTo({
+
             top: 0,
+
             behavior: "smooth"
+
         });
 
     }
 
 
-
-    /* =========================================
-       BACK BUTTON
-    ========================================== */
+    // ========================================================
+    // BACK BUTTON
+    // ========================================================
 
     if (courseBackButton) {
 
@@ -937,10 +1203,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       COURSE START BUTTON
-    ========================================== */
+    // ========================================================
+    // EXPLORE COURSE
+    // ========================================================
 
     if (courseStartButton) {
 
@@ -949,15 +1214,41 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
 
                 if (
-                    activeCourse &&
-                    activeCourse.url &&
-                    activeCourse.url !== "#"
+                    !activeCourse
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                    If a slug exists, use the course URL.
+
+                    Example:
+
+                    course.html?slug=english-a1
+                */
+
+                if (
+                    activeCourse.slug
                 ) {
 
                     window.location.href =
-                        activeCourse.url;
+                        `course.html?slug=${encodeURIComponent(
+                            activeCourse.slug
+                        )}`;
+
+                    return;
 
                 }
+
+
+                /*
+                    If no slug exists, do nothing.
+                    This prevents the button from navigating
+                    to an invalid "#".
+                */
 
             }
         );
@@ -965,12 +1256,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // ========================================================
+    // SIDEBAR TOGGLE
+    // ========================================================
 
-    /* =========================================
-       SIDEBAR TOGGLE
-    ========================================== */
-
-    if (menuButton && sidebar) {
+    if (
+        menuButton &&
+        sidebar
+    ) {
 
         menuButton.addEventListener(
             "click",
@@ -1003,10 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         opened
                     );
 
-                }
-
-
-                else {
+                } else {
 
                     const collapsed =
                         sidebar.classList.toggle(
@@ -1027,10 +1317,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       CLOSE MOBILE SIDEBAR
-    ========================================== */
+    // ========================================================
+    // CLOSE MOBILE SIDEBAR
+    // ========================================================
 
     function closeMobileSidebar() {
 
@@ -1064,10 +1353,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       BACKDROP
-    ========================================== */
+    // ========================================================
+    // BACKDROP
+    // ========================================================
 
     if (backdrop) {
 
@@ -1079,50 +1367,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
-    /* =========================================
-       ESCAPE
-    ========================================== */
+    // ========================================================
+    // ESCAPE
+    // ========================================================
 
     document.addEventListener(
         "keydown",
         event => {
 
-            if (event.key === "Escape") {
+            if (
+                event.key !== "Escape"
+            ) {
 
-                if (
-                    courseDetails &&
-                    courseDetails.classList.contains(
-                        "visible"
-                    )
-                ) {
-
-                    closeCourseDetails();
-
-                }
-
-                else {
-
-                    closeMobileSidebar();
-
-                }
+                return;
 
             }
 
-        }
-    );
 
+            if (
+                courseDetails &&
+                courseDetails.classList.contains(
+                    "visible"
+                )
+            ) {
 
+                closeCourseDetails();
 
-    /* =========================================
-       HANDLE SCREEN RESIZE
-    ========================================== */
-
-    window.addEventListener(
-        "resize",
-        () => {
-
-            if (window.innerWidth > 768) {
+            } else {
 
                 closeMobileSidebar();
 
@@ -1132,13 +1403,30 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
+    // ========================================================
+    // SCREEN RESIZE
+    // ========================================================
 
-    /* =========================================
-       INITIALIZE
-    ========================================== */
+    window.addEventListener(
+        "resize",
+        () => {
 
-    createCourseCards();
+            if (
+                window.innerWidth > 768
+            ) {
 
-    setFilter("all");
+                closeMobileSidebar();
+
+            }
+
+        }
+    );
+
+
+    // ========================================================
+    // INITIALIZE
+    // ========================================================
+
+    await loadCourses();
 
 });
