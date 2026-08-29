@@ -733,45 +733,63 @@ a {
 ========================================= */
 
 .library {
+    position: relative;
+
     padding: 48px 7% 80px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            120deg,
+            #ffffff 0%,
+            #fafbff 100%
+        );
+}
+
+.library::before,
+.library::after {
+    content: "";
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
 }
 
 
-.library-header {
-    display: flex;
+.library::before {
+    width: 430px;
+    height: 430px;
 
-    justify-content: space-between;
+    left: -200px;
+    bottom: -250px;
 
-    align-items: flex-end;
-
-    gap: 25px;
-
-    margin-bottom: 25px;
+    border:
+        1px solid rgba(108, 119, 219, 0.12);
 }
 
 
-.library-label {
-    margin-bottom: 6px;
+.library::after {
+    width: 270px;
+    height: 270px;
 
-    color: #999ca4;
+    right: -100px;
+    top: 120px;
 
-    font-size: 9px;
-
-    font-weight: 750;
-
-    letter-spacing: 1.7px;
+    background:
+        rgba(105, 116, 220, 0.035);
 }
 
+.library-header,
+.filter-bar,
+.book-grid,
+.no-results {
+    position: relative;
 
-.library-header h2 {
-    font-size: 29px;
-
-    letter-spacing: -1px;
-
-    font-weight: 740;
+    z-index: 1;
 }
-
-
 
 /* =========================================
    SEARCH
