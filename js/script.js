@@ -159,7 +159,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             value === null ||
             value === undefined
         ) {
+
             return "";
+
         }
 
         return String(value)
@@ -190,7 +192,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     function normalizeCategory(category) {
 
         if (!category) {
+
             return "other";
+
         }
 
         return String(category)
@@ -209,13 +213,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function getCourseTime(course) {
 
-        /*
-            The current courses table does not contain
-            a lesson_length field.
-
-            EduCore lessons are designed around 25 minutes.
-        */
-
         return (
             course.lesson_length ||
             course.duration ||
@@ -226,14 +223,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     function getCourseLearning(course) {
-
-        /*
-            The current Admin Create Course form does not yet
-            have a "What you will learn" database field.
-
-            Therefore we use a useful automatic description
-            until that field is added to the database/Admin.
-        */
 
         if (course.learning) {
 
@@ -249,21 +238,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         return (
             `Develop practical knowledge and skills through `
-            + `structured autonomous learning in ${course.title || "this course"}.`
+            + `structured autonomous learning in `
+            + `${course.title || "this course"}.`
         );
 
     }
 
 
     function getCourseStructure(course) {
-
-        /*
-            The current Admin Create Course form does not yet
-            contain a course structure field.
-
-            Keep the existing EduCore lesson model as the
-            default until those fields are added.
-        */
 
         if (course.structure) {
 
@@ -287,7 +269,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadCourses() {
 
         if (!bookGrid) {
+
             return;
+
         }
 
 
@@ -313,10 +297,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
-            // ------------------------------------------------
-            // CHECK SUPABASE CLIENT
-            // ------------------------------------------------
-
             if (
                 typeof window.supabaseClient ===
                 "undefined"
@@ -328,10 +308,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             }
 
-
-            // ------------------------------------------------
-            // LOAD ONLY PUBLISHED COURSES
-            // ------------------------------------------------
 
             const {
                 data,
@@ -394,11 +370,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 course.cover_image ||
                                 "images/course-placeholder.jpg",
 
-                            url:
-                                course.slug
-                                    ? `course.html?slug=${encodeURIComponent(course.slug)}`
-                                    : "#",
-
                             time:
                                 getCourseTime(course),
 
@@ -413,10 +384,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                 );
 
-
-            // ------------------------------------------------
-            // RENDER
-            // ------------------------------------------------
 
             createCourseCards();
 
@@ -434,53 +401,49 @@ document.addEventListener("DOMContentLoaded", async () => {
             courses = [];
 
 
-            if (bookGrid) {
+            bookGrid.innerHTML = `
 
-                bookGrid.innerHTML = `
+                <div class="courses-load-error">
 
-                    <div class="courses-load-error">
-
-                        <div class="courses-load-error-icon">
-                            !
-                        </div>
-
-                        <h3>
-                            Unable to load courses
-                        </h3>
-
-                        <p>
-                            ${escapeHTML(
-                                error?.message ||
-                                "Please try again later."
-                            )}
-                        </p>
-
-                        <button
-                            type="button"
-                            id="retryCoursesButton"
-                        >
-                            Try Again
-                        </button>
-
+                    <div class="courses-load-error-icon">
+                        !
                     </div>
 
-                `;
+                    <h3>
+                        Unable to load courses
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(
+                            error?.message ||
+                            "Please try again later."
+                        )}
+                    </p>
+
+                    <button
+                        type="button"
+                        id="retryCoursesButton"
+                    >
+                        Try Again
+                    </button>
+
+                </div>
+
+            `;
 
 
-                const retryButton =
-                    document.getElementById(
-                        "retryCoursesButton"
-                    );
+            const retryButton =
+                document.getElementById(
+                    "retryCoursesButton"
+                );
 
 
-                if (retryButton) {
+            if (retryButton) {
 
-                    retryButton.addEventListener(
-                        "click",
-                        loadCourses
-                    );
-
-                }
+                retryButton.addEventListener(
+                    "click",
+                    loadCourses
+                );
 
             }
 
@@ -505,7 +468,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     function createCourseCards() {
 
         if (!bookGrid) {
+
             return;
+
         }
 
 
@@ -540,26 +505,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "book-card";
 
 
-                // --------------------------------------------
-                // CATEGORY
-                // --------------------------------------------
-
                 card.dataset.category =
                     course.categoryKey;
 
 
-                // --------------------------------------------
-                // SEARCH TEXT
-                // --------------------------------------------
-
                 card.dataset.search = [
 
                     course.title,
-
                     course.category,
-
                     course.level,
-
                     course.description
 
                 ]
@@ -567,10 +521,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     .join(" ")
                     .toLowerCase();
 
-
-                // --------------------------------------------
-                // CARD
-                // --------------------------------------------
 
                 card.innerHTML = `
 
@@ -617,24 +567,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <div class="book-information">
 
                             <div class="book-language">
+
                                 ${escapeHTML(
                                     course.category ||
                                     "Course"
                                 ).toUpperCase()}
+
                             </div>
 
                             <div class="book-title">
+
                                 ${escapeHTML(
                                     course.title ||
                                     "Untitled Course"
                                 )}
+
                             </div>
 
                             <div class="book-level">
+
                                 ${escapeHTML(
                                     course.level ||
                                     ""
                                 )}
+
                             </div>
 
                         </div>
@@ -643,10 +599,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 `;
 
-
-                // --------------------------------------------
-                // OPEN COURSE
-                // --------------------------------------------
 
                 const cardLink =
                     card.querySelector(
@@ -671,10 +623,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 }
 
-
-                // --------------------------------------------
-                // IMAGE ERROR
-                // --------------------------------------------
 
                 const image =
                     card.querySelector(
@@ -703,6 +651,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             }
         );
+
+
+        filterCourses();
 
     }
 
@@ -810,10 +761,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             "all";
 
 
-        // --------------------------------------------
-        // SIDEBAR
-        // --------------------------------------------
-
         navigationButtons.forEach(
             button => {
 
@@ -826,10 +773,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         );
 
-
-        // --------------------------------------------
-        // FILTER BAR
-        // --------------------------------------------
 
         filterButtons.forEach(
             button => {
@@ -844,110 +787,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
-        // --------------------------------------------
-        // TITLE
-        // --------------------------------------------
-
         if (libraryTitle) {
 
             libraryTitle.textContent =
                 titles[activeFilter] ||
-                activeFilter === "all"
-                    ? (
-                        titles[activeFilter] ||
-                        "All Areas"
-                    )
-                    : activeFilter;
+                "Courses";
 
         }
 
-
-        // --------------------------------------------
-        // FILTER
-        // --------------------------------------------
 
         filterCourses();
-
-
-        // --------------------------------------------
-        // MOBILE SIDEBAR
-        // --------------------------------------------
-
-        if (
-            window.innerWidth <= 768
-        ) {
-
-            closeMobileSidebar();
-
-        }
-
-    }
-
-
-    // ========================================================
-    // SIDEBAR NAVIGATION
-    // ========================================================
-
-    navigationButtons.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    setFilter(
-                        button.dataset.filter
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    // ========================================================
-    // FILTER BUTTONS
-    // ========================================================
-
-    filterButtons.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    setFilter(
-                        button.dataset.filter
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    // ========================================================
-    // SEARCH
-    // ========================================================
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
-            event => {
-
-                searchTerm =
-                    event.target.value
-                        .toLowerCase()
-                        .trim();
-
-
-                filterCourses();
-
-            }
-        );
 
     }
 
@@ -959,9 +808,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     function openCourseDetails(course) {
 
         if (
+            !course ||
             !courseDetails ||
-            !homeContent ||
-            !course
+            !homeContent
         ) {
 
             return;
@@ -973,9 +822,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             course;
 
 
-        // --------------------------------------------
         // COVER
-        // --------------------------------------------
 
         if (courseDetailsCover) {
 
@@ -985,29 +832,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             courseDetailsCover.alt =
                 course.title ||
-                "";
+                "Course cover";
 
         }
 
 
-        // --------------------------------------------
         // CATEGORY
-        // --------------------------------------------
 
         if (courseDetailsCategory) {
 
             courseDetailsCategory.textContent =
-                (
-                    course.category ||
-                    "Course"
-                ).toUpperCase();
+                course.category ||
+                "Course";
 
         }
 
 
-        // --------------------------------------------
         // TITLE
-        // --------------------------------------------
 
         if (courseDetailsTitle) {
 
@@ -1018,9 +859,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // LEVEL
-        // --------------------------------------------
 
         if (courseDetailsLevel) {
 
@@ -1031,9 +870,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // DESCRIPTION
-        // --------------------------------------------
 
         if (courseDetailsDescription) {
 
@@ -1044,9 +881,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // STAT LEVEL
-        // --------------------------------------------
 
         if (courseDetailsStatLevel) {
 
@@ -1057,9 +892,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // LESSON LENGTH
-        // --------------------------------------------
 
         if (courseDetailsTime) {
 
@@ -1070,9 +903,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // LEARNING
-        // --------------------------------------------
 
         if (courseDetailsLearning) {
 
@@ -1083,9 +914,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // STRUCTURE
-        // --------------------------------------------
 
         if (courseDetailsStructure) {
 
@@ -1096,18 +925,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        // --------------------------------------------
         // HIDE HOME
-        // --------------------------------------------
 
         homeContent.classList.add(
             "home-hidden"
         );
 
 
-        // --------------------------------------------
         // SHOW DETAILS
-        // --------------------------------------------
 
         courseDetails.classList.add(
             "visible"
@@ -1120,16 +945,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
-        // --------------------------------------------
-        // CLOSE MOBILE SIDEBAR
-        // --------------------------------------------
-
         closeMobileSidebar();
 
-
-        // --------------------------------------------
-        // TOP
-        // --------------------------------------------
 
         window.scrollTo({
 
@@ -1141,8 +958,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
-
-    // ========================================================
+// ========================================================
     // CLOSE COURSE DETAILS
     // ========================================================
 
@@ -1190,6 +1006,72 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     // ========================================================
+    // FILTER BUTTON EVENTS
+    // ========================================================
+
+    navigationButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setFilter(
+                        button.dataset.filter
+                    );
+
+                    closeMobileSidebar();
+
+                }
+            );
+
+        }
+    );
+
+
+    filterButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setFilter(
+                        button.dataset.filter
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // SEARCH
+    // ========================================================
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            () => {
+
+                searchTerm =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+
+                filterCourses();
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
     // BACK BUTTON
     // ========================================================
 
@@ -1213,42 +1095,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             "click",
             () => {
 
-                if (
-                    !activeCourse
-                ) {
+                if (!activeCourse) {
 
                     return;
 
                 }
 
 
-                /*
-                    If a slug exists, use the course URL.
-
-                    Example:
-
-                    course.html?slug=english-a1
-                */
-
-                if (
-                    activeCourse.slug
-                ) {
+                if (activeCourse.slug) {
 
                     window.location.href =
                         `course.html?slug=${encodeURIComponent(
                             activeCourse.slug
                         )}`;
 
-                    return;
-
                 }
-
-
-                /*
-                    If no slug exists, do nothing.
-                    This prevents the button from navigating
-                    to an invalid "#".
-                */
 
             }
         );
@@ -1368,7 +1229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     // ========================================================
-    // ESCAPE
+    // ESCAPE KEY
     // ========================================================
 
     document.addEventListener(
@@ -1430,3 +1291,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCourses();
 
 });
+   
