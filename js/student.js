@@ -360,15 +360,15 @@ function setActiveView(
     }
 
 
-    if (updateHash) {
+   if (updateHash) {
 
-        window.history.replaceState(
-            null,
-            "",
-            `#${viewName}`
-        );
+    window.history.pushState(
+        null,
+        "",
+        `#${viewName}`
+    );
 
-    }
+}
 
 
     if (viewName === "courses") {
@@ -423,7 +423,26 @@ document
 
     });
 
+window.addEventListener(
+    "popstate",
+    () => {
 
+        let viewName =
+            window.location.hash
+                .replace("#", "")
+                .trim();
+
+        if (!viewNames.includes(viewName)) {
+            viewName = "home";
+        }
+
+        setActiveView(
+            viewName,
+            false
+        );
+
+    }
+);
 document
     .querySelectorAll(
         ".bottom-nav-button[data-view]"
