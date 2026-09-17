@@ -1,924 +1,581 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <meta
-        name="theme-color"
-        content="#11141b"
-    >
+<meta
+    name="theme-color"
+    content="#11141b"
+>
 
-    <title>EduCore | Login</title>
+<title>EduCore | Login</title>
 
-    <link
-        rel="stylesheet"
-        href="css/login.css"
-    >
+<link
+    rel="stylesheet"
+    href="css/login.css"
+>
+```
 
 </head>
 
-
 <body data-page="login">
 
+```
+<!-- =====================================================
+     MOBILE BACKDROP
+====================================================== -->
 
-    <!-- =====================================================
-         MOBILE BACKDROP
-    ====================================================== -->
-
-    <div
-        class="sidebar-backdrop"
-        id="sidebarBackdrop"
-    ></div>
+<div
+    class="sidebar-backdrop"
+    id="sidebarBackdrop"
+></div>
 
 
 
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
 
-    <aside
-        class="sidebar"
-        id="sidebar"
-    >
+<aside
+    class="sidebar"
+    id="sidebar"
+>
 
-        <!-- BRAND -->
+    <!-- BRAND -->
 
-        <div class="sidebar-brand">
+    <div class="sidebar-brand">
 
-            <a
-                href="index.html"
-                class="sidebar-brand-link"
+        <a
+            href="index.html"
+            class="sidebar-brand-link"
+        >
+
+            <img
+                src="images/logo.jpg"
+                alt="EduCore"
+                class="logo"
             >
+
+            <div class="brand-information">
+
+                <div class="brand-name">
+                    EduCore
+                </div>
+
+                <div class="brand-name">
+                    Learning
+                </div>
+
+                <div class="brand-subtitle">
+                    Autonomous Learning
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="sidebar-navigation">
+
+        <div class="navigation-section">
+
+            <div class="navigation-heading">
+                COURSES
+            </div>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="all"
+            >
+                <span class="navigation-symbol">
+                    ◈
+                </span>
+
+                <span>
+                    All Courses
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="language"
+            >
+                <span class="navigation-symbol">
+                    A
+                </span>
+
+                <span>
+                    Language
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="ms-office"
+            >
+                <span class="navigation-symbol">
+                    ▣
+                </span>
+
+                <span>
+                    MS Office
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="trading"
+            >
+                <span class="navigation-symbol">
+                    ◇
+                </span>
+
+                <span>
+                    Trading
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="technology"
+            >
+                <span class="navigation-symbol">
+                    ◉
+                </span>
+
+                <span>
+                    Technology
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="business"
+            >
+                <span class="navigation-symbol">
+                    ◆
+                </span>
+
+                <span>
+                    Business
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="finance"
+            >
+                <span class="navigation-symbol">
+                    $
+                </span>
+
+                <span>
+                    Finance
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="personal-development"
+            >
+                <span class="navigation-symbol">
+                    +
+                </span>
+
+                <span>
+                    Personal Development
+                </span>
+            </button>
+
+        </div>
+
+
+
+        <!-- LEARNING MODE -->
+
+        <div class="navigation-section">
+
+            <div class="navigation-heading">
+                LEARNING MODE
+            </div>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="autonomous"
+            >
+                <span class="navigation-symbol">
+                    AI
+                </span>
+
+                <span>
+                    Autonomous
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="blended"
+            >
+                <span class="navigation-symbol">
+                    ◐
+                </span>
+
+                <span>
+                    Blended
+                </span>
+            </button>
+
+
+            <button
+                class="navigation-button"
+                type="button"
+                data-filter="guided"
+            >
+                <span class="navigation-symbol">
+                    ●
+                </span>
+
+                <span>
+                    Guided
+                </span>
+            </button>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- FOOTER -->
+
+    <div class="sidebar-footer">
+
+        <div class="sidebar-footer-line"></div>
+
+        <div>
+            EDUCORE
+        </div>
+
+        <small>
+            Autonomous Learning Platform
+        </small>
+
+    </div>
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main
+    class="main"
+    id="main"
+>
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <header class="top-header">
+
+        <button
+            class="menu-button"
+            id="menuButton"
+            type="button"
+            aria-label="Toggle navigation"
+            aria-controls="sidebar"
+            aria-expanded="false"
+        >
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+
+        <div class="header-title">
+
+            <span>
+                EDUCORE
+            </span>
+
+            <strong>
+                Autonomous Learning
+            </strong>
+
+        </div>
+
+
+        <div class="header-status">
+
+            <span class="online-dot"></span>
+
+            <span>
+                Platform Online
+            </span>
+
+        </div>
+
+
+        <a
+            href="index.html"
+            class="header-login"
+        >
+            Home
+        </a>
+
+    </header>
+
+
+
+    <!-- =================================================
+         LOGIN CONTENT
+    ================================================== -->
+
+    <section class="login-section">
+
+        <div class="login-card">
+
+
+            <!-- MOBILE BRAND -->
+
+            <div class="mobile-brand">
 
                 <img
                     src="images/logo.jpg"
                     alt="EduCore"
-                    class="logo"
+                    class="mobile-logo"
                 >
 
-                <div class="brand-information">
+                <div>
 
-                    <div class="brand-name">
+                    <strong>
                         EduCore
-                    </div>
+                    </strong>
 
-                    <div class="brand-name">
-                        Learning
-                    </div>
-
-                    <div class="brand-subtitle">
+                    <span>
                         Autonomous Learning
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LOGIN HEADING -->
+
+            <div class="login-heading">
+
+                <span>
+                    ACCOUNT ACCESS
+                </span>
+
+                <h1>
+                    Sign in
+                </h1>
+
+                <p>
+                    Enter your account details
+                    to continue.
+                </p>
+
+            </div>
+
+
+
+            <!-- LOGIN MESSAGE -->
+
+            <div
+                id="login-message"
+                class="message hidden"
+                role="alert"
+            ></div>
+
+
+
+            <!-- LOGIN FORM -->
+
+            <form id="login-form">
+
+
+                <div class="form-group">
+
+                    <label for="login-email">
+                        Email address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="login-email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+
+                <div class="form-group">
+
+                    <div class="password-label">
+
+                        <label for="login-password">
+                            Password
+                        </label>
+
+                        <a
+                            href="forgot-password.html"
+                        >
+                            Forgot password?
+                        </a>
+
                     </div>
 
-                </div>
 
-            </a>
+                    <input
+                        type="password"
+                        id="login-password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
 
-        </div>
-
-
-        <!-- NAVIGATION -->
-
-        <nav class="sidebar-navigation">
-
-            <div class="navigation-section">
-
-                <div class="navigation-heading">
-                    COURSES
                 </div>
 
 
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="all"
-                >
-                    <span class="navigation-symbol">
-                        ◈
-                    </span>
-
-                    <span>
-                        All Courses
-                    </span>
-                </button>
-
 
                 <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="language"
+                    type="submit"
+                    id="login-button"
+                    class="login-button"
                 >
-                    <span class="navigation-symbol">
-                        A
-                    </span>
 
                     <span>
-                        Language
+                        Sign in
                     </span>
+
                 </button>
 
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="ms-office"
-                >
-                    <span class="navigation-symbol">
-                        ▣
-                    </span>
-
-                    <span>
-                        MS Office
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="trading"
-                >
-                    <span class="navigation-symbol">
-                        ◇
-                    </span>
-
-                    <span>
-                        Trading
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="technology"
-                >
-                    <span class="navigation-symbol">
-                        ◉
-                    </span>
-
-                    <span>
-                        Technology
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="business"
-                >
-                    <span class="navigation-symbol">
-                        ◆
-                    </span>
-
-                    <span>
-                        Business
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="finance"
-                >
-                    <span class="navigation-symbol">
-                        $
-                    </span>
-
-                    <span>
-                        Finance
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="personal-development"
-                >
-                    <span class="navigation-symbol">
-                        +
-                    </span>
-
-                    <span>
-                        Personal Development
-                    </span>
-                </button>
-
-            </div>
+            </form>
 
 
 
-            <!-- LEARNING MODE -->
+            <!-- DIVIDER -->
 
-            <div class="navigation-section">
-
-                <div class="navigation-heading">
-                    LEARNING MODE
-                </div>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="autonomous"
-                >
-                    <span class="navigation-symbol">
-                        AI
-                    </span>
-
-                    <span>
-                        Autonomous
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="blended"
-                >
-                    <span class="navigation-symbol">
-                        ◐
-                    </span>
-
-                    <span>
-                        Blended
-                    </span>
-                </button>
-
-
-                <button
-                    class="navigation-button"
-                    type="button"
-                    data-filter="guided"
-                >
-                    <span class="navigation-symbol">
-                        ●
-                    </span>
-
-                    <span>
-                        Guided
-                    </span>
-                </button>
-
-            </div>
-
-        </nav>
-
-
-
-        <!-- FOOTER -->
-
-        <div class="sidebar-footer">
-
-            <div class="sidebar-footer-line"></div>
-
-            <div>
-                EDUCORE
-            </div>
-
-            <small>
-                Autonomous Learning Platform
-            </small>
-
-        </div>
-
-    </aside>
-
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-    ====================================================== -->
-
-    <main
-        class="main"
-        id="main"
-    >
-
-
-        <!-- =================================================
-             HEADER
-        ================================================== -->
-
-        <header class="top-header">
-
-            <button
-                class="menu-button"
-                id="menuButton"
-                type="button"
-                aria-label="Toggle navigation"
-                aria-controls="sidebar"
-                aria-expanded="false"
-            >
-
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </button>
-
-
-            <div class="header-title">
+            <div class="login-divider">
 
                 <span>
-                    EDUCORE
-                </span>
-
-                <strong>
-                    Autonomous Learning
-                </strong>
-
-            </div>
-
-
-            <div class="header-status">
-
-                <span class="online-dot"></span>
-
-                <span>
-                    Platform Online
+                    OR
                 </span>
 
             </div>
 
+
+
+            <!-- REGISTER -->
+
+            <p class="register-text">
+
+                Don't have an account?
+
+                <a href="register.html">
+                    Create one
+                </a>
+
+            </p>
+
+
+
+            <!-- BACK -->
 
             <a
                 href="index.html"
-                class="header-login"
+                class="back-home"
             >
-                Home
+                ← Back to EduCore
             </a>
 
-        </header>
+        </div>
 
+    </section>
 
 
-        <!-- =================================================
-             LOGIN CONTENT
-        ================================================== -->
 
-        <section class="login-section">
+    <!-- =================================================
+         FOOTER
+    ================================================== -->
 
-            <div class="login-card">
+    <footer class="footer">
 
+        <span>
+            © <span id="year"></span> EduCore
+        </span>
 
-                <!-- MOBILE BRAND -->
+        <span>
+            Autonomous Learning Platform
+        </span>
 
-                <div class="mobile-brand">
+    </footer>
 
-                    <img
-                        src="images/logo.jpg"
-                        alt="EduCore"
-                        class="mobile-logo"
-                    >
+</main>
 
-                    <div>
 
-                        <strong>
-                            EduCore
-                        </strong>
 
-                        <span>
-                            Autonomous Learning
-                        </span>
+<!-- =====================================================
+     SUPABASE
+====================================================== -->
 
-                    </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-                </div>
+<script src="js/supabase.js"></script>
 
+<script src="js/auth.js"></script>
 
-
-                <!-- LOGIN HEADING -->
-
-                <div class="login-heading">
-
-                    <span>
-                        ACCOUNT ACCESS
-                    </span>
-
-                    <h1>
-                        Sign in
-                    </h1>
-
-                    <p>
-                        Enter your account details
-                        to continue.
-                    </p>
-
-                </div>
-
-
-
-                <!-- ERROR MESSAGE -->
-
-                <div
-                    id="login-error"
-                    class="form-message error hidden"
-                    role="alert"
-                ></div>
-
-
-
-                <!-- LOGIN FORM -->
-
-                <form id="login-form">
-
-
-                    <div class="form-group">
-
-                        <label for="email">
-                            Email address
-                        </label>
-
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="you@example.com"
-                            autocomplete="email"
-                            required
-                        >
-
-                    </div>
-
-
-
-                    <div class="form-group">
-
-                        <div class="password-label">
-
-                            <label for="password">
-                                Password
-                            </label>
-
-                            <a
-                                href="forgot-password.html"
-                            >
-                                Forgot password?
-                            </a>
-
-                        </div>
-
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            required
-                        >
-
-                    </div>
-
-
-
-                    <button
-                        type="submit"
-                        id="login-button"
-                        class="login-button"
-                    >
-
-                        <span id="login-button-text">
-                            Sign in
-                        </span>
-
-                        <span
-                            id="login-spinner"
-                            class="spinner hidden"
-                        ></span>
-
-                    </button>
-
-                </form>
-
-
-
-                <!-- DIVIDER -->
-
-                <div class="login-divider">
-
-                    <span>
-                        OR
-                    </span>
-
-                </div>
-
-
-
-                <!-- REGISTER -->
-
-                <p class="register-text">
-
-                    Don't have an account?
-
-                    <a href="register.html">
-                        Create one
-                    </a>
-
-                </p>
-
-
-
-                <!-- BACK -->
-
-                <a
-                    href="index.html"
-                    class="back-home"
-                >
-                    ← Back to EduCore
-                </a>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             FOOTER
-        ================================================== -->
-
-        <footer class="footer">
-
-            <span>
-                © <span id="year"></span> EduCore
-            </span>
-
-            <span>
-                Autonomous Learning Platform
-            </span>
-
-        </footer>
-
-    </main>
-
-
-
-    <!-- =====================================================
-         SUPABASE
-    ====================================================== -->
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script src="js/supabase.js"></script>
-
-    <script src="js/auth.js"></script>
-
-
-
-    <!-- =====================================================
-         SIDEBAR + LOGIN CONTROLLER
-    ====================================================== -->
-
-    <script>
-
-        /* =================================================
-           SIDEBAR
-        ================================================= */
-
-        const sidebar =
-            document.getElementById("sidebar");
-
-        const menuButton =
-            document.getElementById("menuButton");
-
-        const backdrop =
-            document.getElementById("sidebarBackdrop");
-
-
-        function openMobileSidebar() {
-
-            if (!sidebar) return;
-
-            sidebar.classList.add("mobile-open");
-
-            if (backdrop) {
-                backdrop.classList.add("active");
-            }
-
-            menuButton?.setAttribute(
-                "aria-expanded",
-                "true"
-            );
-
-        }
-
-
-        function closeMobileSidebar() {
-
-            if (!sidebar) return;
-
-            sidebar.classList.remove("mobile-open");
-
-            if (backdrop) {
-                backdrop.classList.remove("active");
-            }
-
-            menuButton?.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-        }
-
-
-        function toggleSidebar() {
-
-            if (!sidebar) return;
-
-
-            if (window.innerWidth <= 768) {
-
-                if (
-                    sidebar.classList.contains(
-                        "mobile-open"
-                    )
-                ) {
-
-                    closeMobileSidebar();
-
-                } else {
-
-                    openMobileSidebar();
-
-                }
-
-                return;
-            }
-
-
-            sidebar.classList.toggle("collapsed");
-
-            menuButton?.setAttribute(
-                "aria-expanded",
-                sidebar.classList.contains(
-                    "collapsed"
-                )
-                    ? "false"
-                    : "true"
-            );
-
-        }
-
-
-        if (menuButton) {
-
-            menuButton.addEventListener(
-                "click",
-                toggleSidebar
-            );
-
-        }
-
-
-        if (backdrop) {
-
-            backdrop.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-
-        }
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (event.key === "Escape") {
-
-                    closeMobileSidebar();
-
-                }
-
-            }
-        );
-
-
-        /* =================================================
-           SIDEBAR NAVIGATION
-        ================================================= */
-
-        document
-            .querySelectorAll(".navigation-button")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const filter =
-                            button.dataset.filter;
-
-
-                        /*
-                         * The login page has no
-                         * course grid.
-                         *
-                         * Return to the main
-                         * library and pass the
-                         * selected category.
-                         */
-
-                        window.location.href =
-                            "index.html?filter=" +
-                            encodeURIComponent(filter);
-
-                    }
-                );
-
-            });
-
-
-        /* =================================================
-           YEAR
-        ================================================= */
-
-        const year =
-            document.getElementById("year");
-
-        if (year) {
-
-            year.textContent =
-                new Date().getFullYear();
-
-        }
-
-
-        /* =================================================
-           LOGIN CONTROLLER
-           YOUR SUPABASE AUTHENTICATION LOGIC
-           IS KEPT INTACT.
-        ================================================= */
-
-        document
-            .getElementById("login-form")
-            .addEventListener(
-                "submit",
-                handleLogin
-            );
-
-
-        async function handleLogin(event) {
-
-            event.preventDefault();
-
-
-            const emailInput =
-                document.getElementById("email");
-
-            const passwordInput =
-                document.getElementById("password");
-
-            const button =
-                document.getElementById("login-button");
-
-            const buttonText =
-                document.getElementById(
-                    "login-button-text"
-                );
-
-            const spinner =
-                document.getElementById(
-                    "login-spinner"
-                );
-
-            const errorBox =
-                document.getElementById(
-                    "login-error"
-                );
-
-
-            const email =
-                emailInput.value.trim();
-
-            const password =
-                passwordInput.value;
-
-
-            errorBox.textContent = "";
-
-            errorBox.classList.add("hidden");
-
-
-            button.disabled = true;
-
-            buttonText.textContent =
-                "Signing in...";
-
-            spinner.classList.remove("hidden");
-
-
-            try {
-
-                await loginUser(
-                    email,
-                    password
-                );
-
-
-                const profile =
-                    await getCurrentProfile();
-
-
-                if (!profile) {
-
-                    throw new Error(
-                        "Your account profile could not be found."
-                    );
-
-                }
-
-
-                if (profile.active !== true) {
-
-                    throw new Error(
-                        "Your account is currently inactive. Please contact an administrator."
-                    );
-
-                }
-
-
-                if (profile.role === "admin") {
-
-                    window.location.href =
-                        "admin.html";
-
-                    return;
-
-                }
-
-
-                if (profile.role === "student") {
-
-                    window.location.href =
-                        "student.html";
-
-                    return;
-
-                }
-
-
-                throw new Error(
-                    "Your account does not have a valid EduCore role."
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Login failed:",
-                    error
-                );
-
-
-                let message =
-                    "Unable to sign in. Please check your email and password.";
-
-
-                if (error?.message) {
-
-                    message =
-                        error.message;
-
-                }
-
-
-                errorBox.textContent =
-                    message;
-
-                errorBox.classList.remove(
-                    "hidden"
-                );
-
-
-                button.disabled = false;
-
-                buttonText.textContent =
-                    "Sign in";
-
-                spinner.classList.add(
-                    "hidden"
-                );
-
-            }
-
-        }
-
-    </script>
+<script src="js/login.js"></script>
+```
 
 </body>
 
-                                     </html>
+</html>
