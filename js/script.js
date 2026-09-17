@@ -103,7 +103,87 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let activeCourse = null;
 
+    // ========================================================
+    // AUTHENTICATION / SESSION
+    // ========================================================
 
+    async function updateHeaderLogin() {
+
+        const headerLogin =
+            document.querySelector(".header-login");
+
+        if (!headerLogin) {
+            return;
+        }
+
+        try {
+
+            const {
+                data: {
+                    session
+                }
+            } =
+                await window.supabaseClient.auth.getSession();
+
+
+            // ------------------------------------------------
+            // NOT LOGGED IN
+            // ------------------------------------------------
+
+            if (!session) {
+
+                headerLogin.textContent =
+                    "Log in";
+
+                headerLogin.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+            // ------------------------------------------------
+            // LOGGED IN
+            // ------------------------------------------------
+
+            const profile =
+                await getCurrentProfile();
+
+
+            if (
+                profile &&
+                profile.role === "admin"
+            ) {
+
+                headerLogin.textContent =
+                    "Dashboard";
+
+                headerLogin.href =
+                    "admin.html";
+
+                return;
+
+            }
+
+
+            headerLogin.textContent =
+                "Dashboard";
+
+            headerLogin.href =
+                "student.html";
+
+
+        } catch (error) {
+
+            console.error(
+                "EduCore: Could not determine authentication state:",
+                error
+            );
+
+        }
+
+    }
     // ========================================================
     // YEAR
     // ========================================================
@@ -1287,6 +1367,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ========================================================
     // INITIALIZE
     // ========================================================
+
+    
+    await updateHeaderLogin();
 
     await loadCourses();
 
