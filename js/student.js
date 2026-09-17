@@ -635,13 +635,13 @@ function createCourseCard(course) {
         "student-course-cover";
 
 
-    if (course.thumbnail) {
+  if (course.cover_image) {
 
-        const image =
-            document.createElement("img");
+    const image =
+        document.createElement("img");
 
-        image.src =
-            course.thumbnail;
+    image.src =
+        course.cover_image;
 
         image.alt =
             course.title || "Course";
