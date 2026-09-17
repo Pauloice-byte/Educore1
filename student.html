@@ -14,10 +14,6 @@
 
 <title>Student Dashboard — EduCore</title>
 
-<!-- =====================================================
-     GOOGLE FONT
-====================================================== -->
-
 <link
     rel="preconnect"
     href="https://fonts.googleapis.com"
@@ -25,7 +21,7 @@
 
 <link
     rel="preconnect"
-    href="https://fonts.gstatic.com"
+    href="https://fonts.googleapis.com"
     crossorigin
 >
 
@@ -34,16 +30,7 @@
     rel="stylesheet"
 >
 
-<!-- =====================================================
-     MAIN EDUCORE DESIGN
-====================================================== -->
-
 <link rel="stylesheet" href="css/style.css">
-
-<!-- =====================================================
-     STUDENT DASHBOARD DESIGN
-====================================================== -->
-
 <link rel="stylesheet" href="css/student.css">
 
 
@@ -53,7 +40,7 @@
 
 
 <!-- =====================================================
-     MOBILE BACKDROP
+     MOBILE SIDEBAR BACKDROP
 ====================================================== -->
 
 <div
@@ -73,7 +60,7 @@
 
     <div class="sidebar-brand">
 
-        <a href="index.html">
+        <a href="student.html">
 
             <div class="logo">
                 E
@@ -98,6 +85,10 @@
 
     <nav class="sidebar-navigation">
 
+        <!-- =============================================
+             LEARN
+        ============================================== -->
+
         <div class="navigation-section">
 
             <div class="navigation-heading">
@@ -105,25 +96,27 @@
             </div>
 
 
-            <a
-                href="student.html"
-                class="navigation-button active"
+            <button
+                type="button"
+                class="navigation-button student-nav-button active"
+                data-view="home"
             >
 
                 <span class="navigation-symbol">
-                    ▦
+                    ⌂
                 </span>
 
                 <span>
-                    Dashboard
+                    Home
                 </span>
 
-            </a>
+            </button>
 
 
-            <a
-                href="index.html"
-                class="navigation-button"
+            <button
+                type="button"
+                class="navigation-button student-nav-button"
+                data-view="courses"
             >
 
                 <span class="navigation-symbol">
@@ -134,26 +127,48 @@
                     Courses
                 </span>
 
-            </a>
+            </button>
 
 
-            <a
-                href="#"
-                class="navigation-button placeholder-link"
+            <button
+                type="button"
+                class="navigation-button student-nav-button"
+                data-view="search"
             >
 
                 <span class="navigation-symbol">
-                    ◔
+                    ⌕
                 </span>
 
                 <span>
-                    My Progress
+                    Search
                 </span>
 
-            </a>
+            </button>
+
+
+            <button
+                type="button"
+                class="navigation-button student-nav-button"
+                data-view="my-courses"
+            >
+
+                <span class="navigation-symbol">
+                    ♡
+                </span>
+
+                <span>
+                    My Courses
+                </span>
+
+            </button>
 
         </div>
 
+
+        <!-- =============================================
+             ACCOUNT
+        ============================================== -->
 
         <div class="navigation-section">
 
@@ -162,8 +177,8 @@
             </div>
 
 
-            <a
-                href="#"
+            <button
+                type="button"
                 class="navigation-button placeholder-link"
             >
 
@@ -175,13 +190,13 @@
                     Profile
                 </span>
 
-            </a>
+            </button>
 
 
             <button
                 type="button"
-                id="logoutButton"
                 class="navigation-button"
+                id="logoutButton"
             >
 
                 <span class="navigation-symbol">
@@ -234,6 +249,7 @@
             id="menuButton"
             class="menu-button"
             aria-label="Toggle menu"
+            aria-expanded="false"
         >
 
             <span></span>
@@ -245,12 +261,12 @@
 
         <div class="header-title">
 
-            <span>
+            <span id="headerSectionLabel">
                 STUDENT AREA
             </span>
 
-            <strong>
-                Dashboard
+            <strong id="headerSectionTitle">
+                Home
             </strong>
 
         </div>
@@ -270,260 +286,439 @@
 
 
     <!-- =================================================
-         DASHBOARD
+         HOME VIEW
     ================================================== -->
 
-    <section class="dashboard">
+    <section
+        id="view-home"
+        class="student-view active"
+    >
 
-        <div class="dashboard-inner">
+        <div class="dashboard">
+
+            <div class="dashboard-inner">
 
 
-            <!-- =========================================
-                 WELCOME
-            ========================================== -->
+                <!-- WELCOME -->
 
-            <div class="dashboard-welcome">
+                <div class="dashboard-welcome">
 
-                <span class="dashboard-label">
-                    STUDENT DASHBOARD
-                </span>
-
-                <h1>
-                    Welcome back,
-                    <span id="studentName">
-                        Student
+                    <span class="dashboard-label">
+                        STUDENT DASHBOARD
                     </span>
-                </h1>
 
-                <p>
-                    Continue learning and keep building
-                    your skills.
-                </p>
+                    <h1>
+                        Welcome back,
+                        <span id="studentName">
+                            Student
+                        </span>
+                    </h1>
 
-            </div>
-
-
-            <!-- =========================================
-                 STATISTICS
-            ========================================== -->
-
-            <div class="dashboard-stats">
-
-
-                <article class="dashboard-stat">
-
-                    <div class="dashboard-stat-label">
-                        My Courses
-                    </div>
-
-                    <div
-                        id="coursesCount"
-                        class="dashboard-stat-value"
-                    >
-                        0
-                    </div>
-
-                    <div class="dashboard-stat-detail">
-                        Enrolled courses
-                    </div>
-
-                </article>
-
-
-                <article class="dashboard-stat">
-
-                    <div class="dashboard-stat-label">
-                        Lessons Completed
-                    </div>
-
-                    <div
-                        id="lessonsCompleted"
-                        class="dashboard-stat-value"
-                    >
-                        0
-                    </div>
-
-                    <div class="dashboard-stat-detail">
-                        Completed lessons
-                    </div>
-
-                </article>
-
-
-                <article class="dashboard-stat">
-
-                    <div class="dashboard-stat-label">
-                        Overall Progress
-                    </div>
-
-                    <div
-                        id="overallProgress"
-                        class="dashboard-stat-value"
-                    >
-                        0%
-                    </div>
-
-                    <div class="dashboard-stat-detail">
-                        Across your courses
-                    </div>
-
-                </article>
-
-
-                <article class="dashboard-stat">
-
-                    <div class="dashboard-stat-label">
-                        Learning Streak
-                    </div>
-
-                    <div
-                        id="learningStreak"
-                        class="dashboard-stat-value"
-                    >
-                        0
-                    </div>
-
-                    <div class="dashboard-stat-detail">
-                        Days
-                    </div>
-
-                </article>
-
-
-            </div>
-
-
-            <!-- =========================================
-                 CONTINUE LEARNING
-            ========================================== -->
-
-            <section class="dashboard-section">
-
-                <div class="dashboard-section-header">
-
-                    <div>
-
-                        <div class="dashboard-section-label">
-                            KEEP GOING
-                        </div>
-
-                        <h2 class="dashboard-section-title">
-                            Continue Learning
-                        </h2>
-
-                    </div>
+                    <p>
+                        Continue learning and keep building
+                        your skills.
+                    </p>
 
                 </div>
 
 
-                <div
-                    id="continueLearning"
-                    class="continue-card"
-                >
+                <!-- STATISTICS -->
 
-                    <div class="continue-cover">
+                <div class="dashboard-stats">
+
+                    <article class="dashboard-stat">
+
+                        <div class="dashboard-stat-label">
+                            My Courses
+                        </div>
 
                         <div
-                            style="
-                                width:100%;
-                                height:100%;
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                color:#92959d;
-                                font-size:11px;
-                            "
+                            id="coursesCount"
+                            class="dashboard-stat-value"
                         >
-                            EDUCORE
+                            0
                         </div>
 
-                    </div>
-
-
-                    <div class="continue-content">
-
-                        <div class="continue-language">
-                            YOUR LEARNING
+                        <div class="dashboard-stat-detail">
+                            Enrolled courses
                         </div>
 
-                        <div class="continue-title">
-                            No course in progress
+                    </article>
+
+
+                    <article class="dashboard-stat">
+
+                        <div class="dashboard-stat-label">
+                            Lessons Completed
                         </div>
 
-                        <div class="continue-level">
-                            Enroll in a course to start learning.
+                        <div
+                            id="lessonsCompleted"
+                            class="dashboard-stat-value"
+                        >
+                            0
                         </div>
 
-
-                        <div class="continue-progress">
-
-                            <div class="continue-progress-top">
-
-                                <span>
-                                    Progress
-                                </span>
-
-                                <span>
-                                    0%
-                                </span>
-
-                            </div>
-
-                            <div class="progress-bar">
-
-                                <div class="progress-bar-fill"></div>
-
-                            </div>
-
+                        <div class="dashboard-stat-detail">
+                            Completed lessons
                         </div>
 
-                    </div>
+                    </article>
 
 
-                    <a
-                        href="index.html"
-                        class="continue-button"
-                    >
-                        Explore Courses
-                    </a>
+                    <article class="dashboard-stat">
+
+                        <div class="dashboard-stat-label">
+                            Overall Progress
+                        </div>
+
+                        <div
+                            id="overallProgress"
+                            class="dashboard-stat-value"
+                        >
+                            0%
+                        </div>
+
+                        <div class="dashboard-stat-detail">
+                            Across your courses
+                        </div>
+
+                    </article>
+
+
+                    <article class="dashboard-stat">
+
+                        <div class="dashboard-stat-label">
+                            Learning Streak
+                        </div>
+
+                        <div
+                            id="learningStreak"
+                            class="dashboard-stat-value"
+                        >
+                            0
+                        </div>
+
+                        <div class="dashboard-stat-detail">
+                            Days
+                        </div>
+
+                    </article>
 
                 </div>
 
-            </section>
 
+                <!-- CONTINUE LEARNING -->
 
-            <!-- =========================================
-                 MY COURSES
-            ========================================== -->
+                <section class="dashboard-section">
 
-            <section class="dashboard-section">
+                    <div class="dashboard-section-header">
 
-                <div class="dashboard-section-header">
+                        <div>
 
-                    <div>
+                            <div class="dashboard-section-label">
+                                KEEP GOING
+                            </div>
 
-                        <div class="dashboard-section-label">
-                            YOUR LEARNING
+                            <h2 class="dashboard-section-title">
+                                Continue Learning
+                            </h2>
+
                         </div>
-
-                        <h2 class="dashboard-section-title">
-                            My Courses
-                        </h2>
 
                     </div>
 
-                    <a
-                        href="index.html"
-                        class="continue-button"
+
+                    <div
+                        id="continueLearning"
+                        class="continue-card"
                     >
-                        Browse Courses
-                    </a>
+
+                        <div class="continue-cover">
+
+                            <div class="continue-placeholder">
+                                EDUCORE
+                            </div>
+
+                        </div>
+
+
+                        <div class="continue-content">
+
+                            <div class="continue-language">
+                                YOUR LEARNING
+                            </div>
+
+                            <div class="continue-title">
+                                No course in progress
+                            </div>
+
+                            <div class="continue-level">
+                                Enroll in a course to start learning.
+                            </div>
+
+
+                            <div class="continue-progress">
+
+                                <div class="continue-progress-top">
+
+                                    <span>
+                                        Progress
+                                    </span>
+
+                                    <span>
+                                        0%
+                                    </span>
+
+                                </div>
+
+                                <div class="progress-bar">
+
+                                    <div class="progress-bar-fill"></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="continue-button"
+                            data-view-target="courses"
+                        >
+                            Explore Courses
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- RECENT ACTIVITY -->
+
+                <section class="dashboard-section">
+
+                    <div class="dashboard-section-header">
+
+                        <div>
+
+                            <div class="dashboard-section-label">
+                                ACTIVITY
+                            </div>
+
+                            <h2 class="dashboard-section-title">
+                                Recent Activity
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-empty">
+
+                        <div class="dashboard-empty-title">
+                            No recent activity
+                        </div>
+
+                        <div class="dashboard-empty-text">
+                            Your learning activity will appear
+                            here as you complete lessons and exercises.
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         COURSES VIEW
+    ================================================== -->
+
+    <section
+        id="view-courses"
+        class="student-view"
+    >
+
+        <div class="student-page">
+
+            <div class="student-page-inner">
+
+                <div class="student-page-heading">
+
+                    <span class="dashboard-label">
+                        LEARNING LIBRARY
+                    </span>
+
+                    <h1>
+                        Courses
+                    </h1>
+
+                    <p>
+                        Explore all courses currently available
+                        on EduCore.
+                    </p>
 
                 </div>
 
 
                 <div
-                    id="myCourses"
+                    id="coursesLoading"
+                    class="student-message"
+                >
+                    Loading courses...
+                </div>
+
+
+                <div
+                    id="coursesGrid"
+                    class="student-course-grid"
+                ></div>
+
+
+                <div
+                    id="coursesEmpty"
+                    class="dashboard-empty hidden"
+                >
+
+                    <div class="dashboard-empty-title">
+                        No courses available
+                    </div>
+
+                    <div class="dashboard-empty-text">
+                        There are currently no published courses.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         SEARCH VIEW
+    ================================================== -->
+
+    <section
+        id="view-search"
+        class="student-view"
+    >
+
+        <div class="student-page">
+
+            <div class="student-page-inner">
+
+                <div class="student-page-heading">
+
+                    <span class="dashboard-label">
+                        FIND YOUR NEXT COURSE
+                    </span>
+
+                    <h1>
+                        Search Courses
+                    </h1>
+
+                    <p>
+                        Find a course by name, language or level.
+                    </p>
+
+                </div>
+
+
+                <div class="course-search-box">
+
+                    <span class="course-search-icon">
+                        ⌕
+                    </span>
+
+                    <input
+                        type="search"
+                        id="courseSearchInput"
+                        placeholder="Search courses..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <div
+                    id="searchResults"
+                    class="student-course-grid"
+                ></div>
+
+
+                <div
+                    id="searchEmpty"
+                    class="dashboard-empty"
+                >
+
+                    <div class="dashboard-empty-title">
+                        Search the course catalogue
+                    </div>
+
+                    <div class="dashboard-empty-text">
+                        Start typing to find courses available
+                        on EduCore.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         MY COURSES VIEW
+    ================================================== -->
+
+    <section
+        id="view-my-courses"
+        class="student-view"
+    >
+
+        <div class="student-page">
+
+            <div class="student-page-inner">
+
+                <div class="student-page-heading">
+
+                    <span class="dashboard-label">
+                        YOUR LEARNING
+                    </span>
+
+                    <h1>
+                        My Courses
+                    </h1>
+
+                    <p>
+                        Courses you have enrolled in will appear here.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="myCoursesGrid"
+                    class="student-course-grid"
+                ></div>
+
+
+                <div
+                    id="myCoursesEmpty"
                     class="dashboard-empty"
                 >
 
@@ -532,56 +727,22 @@
                     </div>
 
                     <div class="dashboard-empty-text">
-                        Your enrolled courses will appear here
-                        once you start learning.
+                        You haven't enrolled in a course yet.
+                        Explore the course catalogue to get started.
                     </div>
+
+
+                    <button
+                        type="button"
+                        class="continue-button"
+                        data-view-target="courses"
+                    >
+                        Explore Courses
+                    </button>
 
                 </div>
 
-            </section>
-
-
-            <!-- =========================================
-                 RECENT ACTIVITY
-            ========================================== -->
-
-            <section class="dashboard-section">
-
-                <div class="dashboard-section-header">
-
-                    <div>
-
-                        <div class="dashboard-section-label">
-                            ACTIVITY
-                        </div>
-
-                        <h2 class="dashboard-section-title">
-                            Recent Activity
-                        </h2>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="recentActivity"
-                    class="dashboard-empty"
-                >
-
-                    <div class="dashboard-empty-title">
-                        No recent activity
-                    </div>
-
-                    <div class="dashboard-empty-text">
-                        Your learning activity will appear
-                        here as you complete lessons and exercises.
-                    </div>
-
-                </div>
-
-            </section>
-
+            </div>
 
         </div>
 
@@ -606,6 +767,85 @@
 
 
 </main>
+
+
+<!-- =====================================================
+     MOBILE / APP BOTTOM NAVIGATION
+====================================================== -->
+
+<nav
+    class="student-bottom-nav"
+    aria-label="Student navigation"
+>
+
+    <button
+        type="button"
+        class="bottom-nav-button active"
+        data-view="home"
+    >
+
+        <span class="bottom-nav-icon">
+            ⌂
+        </span>
+
+        <span>
+            Home
+        </span>
+
+    </button>
+
+
+    <button
+        type="button"
+        class="bottom-nav-button"
+        data-view="courses"
+    >
+
+        <span class="bottom-nav-icon">
+            ▣
+        </span>
+
+        <span>
+            Courses
+        </span>
+
+    </button>
+
+
+    <button
+        type="button"
+        class="bottom-nav-button"
+        data-view="search"
+    >
+
+        <span class="bottom-nav-icon">
+            ⌕
+        </span>
+
+        <span>
+            Search
+        </span>
+
+    </button>
+
+
+    <button
+        type="button"
+        class="bottom-nav-button"
+        data-view="my-courses"
+    >
+
+        <span class="bottom-nav-icon">
+            ♡
+        </span>
+
+        <span>
+            My Courses
+        </span>
+
+    </button>
+
+</nav>
 
 
 <!-- =====================================================
