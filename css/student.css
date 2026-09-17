@@ -543,7 +543,7 @@ BOTTOM APP NAVIGATION
 .student-bottom-nav {
 position: fixed;
 
-```
+
 left: 270px;
 right: 0;
 bottom: 0;
@@ -564,7 +564,7 @@ backdrop-filter: blur(18px);
 
 box-shadow:
     0 -10px 30px rgba(22, 26, 35, 0.05);
-```
+
 
 }
 
@@ -573,7 +573,6 @@ width: 100%;
 min-width: 0;
 height: 100%;
 
-```
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -609,7 +608,7 @@ cursor: pointer;
 transition:
     color 0.2s ease,
     background 0.2s ease;
-```
+
 
 }
 
@@ -626,7 +625,7 @@ color: #7079d9;
 width: 28px;
 height: 24px;
 
-```
+
 display: flex;
 align-items: center;
 justify-content: center;
@@ -641,7 +640,7 @@ font-size: 21px;
 line-height: 1;
 
 text-align: center;
-```
+
 
 }
 
@@ -651,7 +650,7 @@ BOTTOM NAV MOBILE
 
 @media (max-width: 900px) {
 
-```
+
 .student-bottom-nav {
     left: 0;
     right: 0;
@@ -670,7 +669,7 @@ BOTTOM NAV MOBILE
 .bottom-nav-icon {
     font-size: 21px;
 }
-```
+
 
 }
 
@@ -692,7 +691,7 @@ TABLET
 .dashboard-stats {
     grid-template-columns: repeat(2, 1fr);
 }
-```
+
 
 }
 
@@ -702,7 +701,7 @@ PHONE
 
 @media (max-width: 600px) {
 
-```
+
 /* -----------------------------------------
    DASHBOARD
 ----------------------------------------- */
@@ -939,7 +938,7 @@ PHONE
     font-size: 21px;
     line-height: 1;
 }
-```
+
 
 }
 
@@ -949,7 +948,7 @@ VERY SMALL PHONES
 
 @media (max-width: 360px) {
 
-```
+
 .bottom-nav-button {
     font-size: 8px;
 }
@@ -963,7 +962,7 @@ VERY SMALL PHONES
 .dashboard-stat {
     min-width: 235px;
 }
-```
+
 
 }
 
@@ -973,13 +972,13 @@ REDUCED MOTION
 
 @media (prefers-reduced-motion: reduce) {
 
-```
+
 .student-course-cover,
 .student-course-cover img,
 .continue-button,
 .bottom-nav-button {
     transition: none;
 }
-```
+
 
 }
