@@ -106,8 +106,9 @@ async function registerStudent(
 
             data: {
                 full_name: cleanName
-            }
-
+            },
+emailRedirectTo:
+    `${window.location.origin}/login.html`
         }
 
     });
