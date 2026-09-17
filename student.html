@@ -1,91 +1,606 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b1730">
-<title>EduCore — Autonomous Learning</title>
-<link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Student Dashboard — EduCore</title>
+
+    <!-- =====================================================
+         GOOGLE FONT
+    ====================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         DASHBOARD CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/student.css"
+    >
+
 </head>
-<body>
-<div id="app">
-  <aside id="sidebar" class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">EC</div>
-      <div><strong>EduCore</strong><span>Autonomous Learning</span></div>
-      <button id="close-sidebar" class="mobile-only icon-btn">×</button>
-    </div>
-    <div class="side-label">YOUR COURSE</div>
-    <nav id="unit-navigation" class="course-navigation"></nav>
-    <div class="sidebar-footer">
-      <div class="side-progress"><span>Course progress</span><strong id="course-progress-text">0%</strong></div>
-      <div class="progress-track"><div id="course-progress-bar" class="progress-fill"></div></div>
-      <p>Learn independently, practise actively and progress at your own pace.</p>
-    </div>
-  </aside>
 
-  <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button id="mobile-menu-btn" class="mobile-only menu-btn">☰</button>
-        <div class="breadcrumb"><span>EduCore</span><b>›</b><strong id="current-unit-label">Unit 1</strong><b>›</b><strong id="current-lesson-title">Lesson 1</strong></div>
-      </div>
-      <div class="topbar-right">
-        <label class="language"><span>🌐</span><select id="language-selector">
-          <option value="en">English</option><option value="pt">Português</option><option value="fr">Français</option><option value="es">Español</option>
-        </select></label>
-        <div class="top-progress"><span>Progress</span><strong id="top-progress-text">0%</strong><div class="top-progress-track"><div id="top-progress-bar"></div></div></div>
-      </div>
-    </header>
+<body data-page="student">
 
-    <section id="lesson-home" class="lesson-home">
-      <div class="hero">
-        <div class="hero-content">
-          <span class="eyebrow">AUTONOMOUS ENGLISH COURSE</span>
-          <h1 id="welcome-title">Getting Started</h1>
-          <p id="welcome-description">Build your English foundations through guided explanations, practice, listening and AI-powered speaking.</p>
-          <div class="hero-meta"><span>⏱ 25 minutes</span><span>● 8 steps</span><span>✦ AI learning support</span></div>
-          <button id="start-lesson-btn" class="primary large">Start lesson <span>→</span></button>
+
+    <!-- =====================================================
+         MOBILE BACKDROP
+    ====================================================== -->
+
+    <div
+        id="sidebarBackdrop"
+        class="sidebar-backdrop"
+    ></div>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside
+        id="sidebar"
+        class="sidebar"
+    >
+
+        <div class="sidebar-logo">
+
+            <a
+                href="index.html"
+                class="logo-link"
+            >
+
+                <span class="logo-mark">
+                    E
+                </span>
+
+                <span class="logo-text">
+                    EduCore
+                </span>
+
+            </a>
+
         </div>
-        <div class="hero-visual"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="ai-card"><span>EDUCORE AI</span><strong>Ready</strong><small>Your learning companion</small></div></div>
-      </div>
-      <div class="content-heading"><div><span class="section-label">LESSON PATH</span><h2>Learn step by step</h2></div><span id="lesson-status" class="status">Not started</span></div>
-      <div id="lesson-cards" class="lesson-cards"></div>
-    </section>
 
-    <section id="activity-area" class="activity-area hidden">
-      <div class="activity-top">
-        <button id="back-to-lesson" class="back-button">← Lesson overview</button>
-        <div><span id="activity-type" class="activity-type">WELCOME</span><span id="activity-counter" class="activity-counter">1 / 8</span></div>
-      </div>
-      <div id="activity-content" class="activity-content"></div>
-      <div class="activity-navigation">
-        <button id="previous-activity" class="secondary-button">← Previous</button>
-        <div class="activity-position"><span id="activity-position">1 / 8</span><div class="activity-dots"></div></div>
-        <button id="next-activity" class="primary-button">Continue →</button>
-      </div>
-    </section>
 
-    <section id="completion-screen" class="completion-screen hidden">
-      <div class="completion-card">
-        <div class="trophy">🏆</div><span class="eyebrow">LESSON COMPLETE</span>
-        <h1>Excellent work.</h1><p>You completed <strong id="completion-lesson">Unit 1 · Lesson 1</strong>.</p>
-        <div class="score-circle"><strong id="final-score">0%</strong><span>lesson score</span></div>
-        <div class="completion-stats"><div><strong id="completion-correct">0</strong><span>Correct</span></div><div><strong id="completion-activities">8</strong><span>Steps</span></div></div>
-        <button id="next-lesson-btn" class="primary large">Next lesson →</button>
-        <button id="review-lesson-btn" class="secondary-button">Review lesson</button>
-      </div>
-    </section>
-  </main>
-</div>
+        <nav class="sidebar-navigation">
 
-<script src="course/unit-1.js"></script>
-<script src="js/progress.js"></script>
-<script src="js/exercises.js"></script>
-<script src="js/speaking.js"></script>
-<script src="js/course-engine.js"></script>
-<script src="js/app.js"></script>
+            <div class="navigation-section">
+
+                <div class="navigation-label">
+                    LEARN
+                </div>
+
+
+                <a
+                    href="student.html"
+                    class="navigation-button active"
+                    data-page="dashboard"
+                >
+
+                    <span class="navigation-icon">
+                        ▦
+                    </span>
+
+                    <span class="navigation-text">
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="index.html"
+                    class="navigation-button"
+                >
+
+                    <span class="navigation-icon">
+                        ◫
+                    </span>
+
+                    <span class="navigation-text">
+                        Courses
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#"
+                    class="navigation-button"
+                    data-placeholder="true"
+                >
+
+                    <span class="navigation-icon">
+                        ✓
+                    </span>
+
+                    <span class="navigation-text">
+                        My Progress
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="navigation-section">
+
+                <div class="navigation-label">
+                    ACCOUNT
+                </div>
+
+
+                <a
+                    href="#"
+                    class="navigation-button"
+                    data-placeholder="true"
+                >
+
+                    <span class="navigation-icon">
+                        ◉
+                    </span>
+
+                    <span class="navigation-text">
+                        Profile
+                    </span>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="navigation-button navigation-logout"
+                    id="logoutButton"
+                >
+
+                    <span class="navigation-icon">
+                        ↪
+                    </span>
+
+                    <span class="navigation-text">
+                        Log out
+                    </span>
+
+                </button>
+
+            </div>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="sidebar-footer-line"></div>
+
+            <span>
+                EduCore Learning Platform
+            </span>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN AREA
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOP HEADER
+        ================================================== -->
+
+        <header class="top-header">
+
+            <button
+                type="button"
+                id="menuButton"
+                class="menu-button"
+                aria-label="Open navigation"
+                aria-expanded="false"
+            >
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+
+            <div class="header-brand">
+
+                <span class="header-brand-mark">
+                    E
+                </span>
+
+                <span class="header-brand-name">
+                    EduCore
+                </span>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <div class="header-status">
+
+                    <span class="online-dot"></span>
+
+                    <span>
+                        Platform Online
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             DASHBOARD CONTENT
+        ================================================== -->
+
+        <div class="dashboard-container">
+
+
+            <!-- =============================================
+                 WELCOME
+            ============================================== -->
+
+            <section class="welcome-section">
+
+                <div>
+
+                    <div class="welcome-eyebrow">
+                        STUDENT DASHBOARD
+                    </div>
+
+                    <h1>
+                        Welcome back,
+                        <span id="studentName">
+                            Student
+                        </span>
+                    </h1>
+
+                    <p>
+                        Continue learning and keep building
+                        your skills.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 OVERVIEW CARDS
+            ============================================== -->
+
+            <section class="overview-grid">
+
+
+                <article class="overview-card">
+
+                    <div class="overview-icon">
+                        ◫
+                    </div>
+
+                    <div>
+
+                        <span class="overview-label">
+                            My Courses
+                        </span>
+
+                        <strong id="coursesCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="overview-card">
+
+                    <div class="overview-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span class="overview-label">
+                            Lessons Completed
+                        </span>
+
+                        <strong id="lessonsCompleted">
+                            0
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="overview-card">
+
+                    <div class="overview-icon">
+                        %
+                    </div>
+
+                    <div>
+
+                        <span class="overview-label">
+                            Overall Progress
+                        </span>
+
+                        <strong id="overallProgress">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="overview-card">
+
+                    <div class="overview-icon">
+                        ★
+                    </div>
+
+                    <div>
+
+                        <span class="overview-label">
+                            Learning Streak
+                        </span>
+
+                        <strong id="learningStreak">
+                            0 days
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+            </section>
+
+
+            <!-- =============================================
+                 CONTINUE LEARNING
+            ============================================== -->
+
+            <section class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            KEEP GOING
+                        </span>
+
+                        <h2>
+                            Continue Learning
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="continueLearning"
+                    class="continue-learning-card"
+                >
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            ▶
+                        </div>
+
+                        <h3>
+                            Nothing to continue yet
+                        </h3>
+
+                        <p>
+                            Enroll in a course to start
+                            your learning journey.
+                        </p>
+
+                        <a
+                            href="index.html"
+                            class="primary-button"
+                        >
+                            Explore Courses
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 MY COURSES
+            ============================================== -->
+
+            <section class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            YOUR LEARNING
+                        </span>
+
+                        <h2>
+                            My Courses
+                        </h2>
+
+                    </div>
+
+
+                    <a
+                        href="index.html"
+                        class="section-link"
+                    >
+                        Browse Courses →
+                    </a>
+
+                </div>
+
+
+                <div
+                    id="myCourses"
+                    class="courses-grid"
+                >
+
+                    <div class="empty-state compact">
+
+                        <div class="empty-state-icon">
+                            ◫
+                        </div>
+
+                        <h3>
+                            No courses yet
+                        </h3>
+
+                        <p>
+                            Your enrolled courses will
+                            appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 RECENT ACTIVITY
+            ============================================== -->
+
+            <section class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            ACTIVITY
+                        </span>
+
+                        <h2>
+                            Recent Activity
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="recentActivity"
+                    class="activity-card"
+                >
+
+                    <div class="activity-empty">
+
+                        <span class="activity-empty-icon">
+                            ◷
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                No recent activity
+                            </strong>
+
+                            <p>
+                                Your learning activity will
+                                appear here.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="dashboard-footer">
+
+            <span>
+                © <span id="year"></span> EduCore
+            </span>
+
+            <span>
+                Autonomous Learning Platform
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         SCRIPTS
+    ====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="js/supabase.js"></script>
+
+    <script src="js/auth.js"></script>
+
+    <script src="js/student.js"></script>
+
+
 </body>
+
 </html>
+```
