@@ -1138,3 +1138,39 @@ a {
     }
 
     }
+
+/* ==========================================================
+GENERAL MESSAGE STATES
+========================================================== */
+
+.hidden {
+display: none !important;
+}
+
+.form-message.info {
+border:
+1px solid #dfe2f4;
+
+```
+background:
+    #f5f6ff;
+
+color:
+    #5962b8;
+```
+
+}
+
+.form-message.success {
+border:
+1px solid #c8e7d6;
+
+```
+background:
+    #effaf4;
+
+color:
+    #26734d;
+```
+
+}
