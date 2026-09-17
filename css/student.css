@@ -765,11 +765,11 @@ PHONE
 
 .dashboard-stat {
 
-    flex: 0 0 170px;
+    flex: 0 0 120px;
 
-    width: 170px;
+    width: 120px;
 
-    min-width: 170px;
+    min-width: 120px;
 
     padding: 20px;
 
