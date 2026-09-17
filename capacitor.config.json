@@ -1,0 +1,6 @@
+{
+  "appId": "com.educore.learning",
+  "appName": "EduCore",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
