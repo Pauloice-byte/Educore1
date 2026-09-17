@@ -38,12 +38,13 @@ async function initializeEduCore() {
     // LOGIN PAGE
     // --------------------------------------------------------
 
-    if (page === "login") {
+   if (page === "login") {
 
-        setupLoginForm();
+    setupLoginForm();
+    setupLoginSidebar();
 
-        return;
-    }
+    return;
+}
 
 
     // --------------------------------------------------------
@@ -188,7 +189,7 @@ function setupLoginForm() {
                 ) {
 
                     window.location.href =
-                        "admin/index.html";
+                        "admin.html";
 
                     return;
                 }
@@ -203,7 +204,7 @@ function setupLoginForm() {
                 ) {
 
                     window.location.href =
-                        "student/index.html";
+                        "student.html";
 
                     return;
                 }
@@ -498,7 +499,7 @@ function setupResetPasswordForm() {
                     () => {
 
                         window.location.href =
-                            "index.html";
+                            "student.html";
 
                     },
                     2000
@@ -638,7 +639,7 @@ async function initializeStudentPage() {
         ) {
 
             window.location.href =
-                "admin/index.html";
+                "admin.html";
 
         }
         else {
@@ -646,7 +647,7 @@ async function initializeStudentPage() {
             await supabaseClient.auth.signOut();
 
             window.location.href =
-                "index.html";
+                "student.html";
 
         }
 
@@ -810,5 +811,141 @@ function getAuthErrorMessage(error) {
 
     return message ||
         "Something went wrong. Please try again.";
+
+}
+
+// ============================================================
+// LOGIN PAGE SIDEBAR
+// ============================================================
+
+function setupLoginSidebar() {
+
+    const sidebar =
+        document.getElementById("sidebar");
+
+    const menuButton =
+        document.getElementById("menuButton");
+
+    const backdrop =
+        document.getElementById("sidebarBackdrop");
+
+
+    if (!sidebar || !menuButton) {
+        return;
+    }
+
+
+    function openMobileSidebar() {
+
+        sidebar.classList.add("mobile-open");
+
+        if (backdrop) {
+            backdrop.classList.add("active");
+        }
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+    }
+
+
+    function closeMobileSidebar() {
+
+        sidebar.classList.remove("mobile-open");
+
+        if (backdrop) {
+            backdrop.classList.remove("active");
+        }
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
+
+
+    menuButton.addEventListener(
+        "click",
+        () => {
+
+            if (window.innerWidth <= 768) {
+
+                if (
+                    sidebar.classList.contains(
+                        "mobile-open"
+                    )
+                ) {
+
+                    closeMobileSidebar();
+
+                } else {
+
+                    openMobileSidebar();
+
+                }
+
+                return;
+            }
+
+
+            sidebar.classList.toggle("collapsed");
+
+            menuButton.setAttribute(
+                "aria-expanded",
+                sidebar.classList.contains("collapsed")
+                    ? "false"
+                    : "true"
+            );
+
+        }
+    );
+
+
+    if (backdrop) {
+
+        backdrop.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Escape") {
+                closeMobileSidebar();
+            }
+
+        }
+    );
+
+
+    // Sidebar course navigation
+
+    document
+        .querySelectorAll(".navigation-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const filter =
+                        button.dataset.filter;
+
+                    window.location.href =
+                        "index.html?filter=" +
+                        encodeURIComponent(filter);
+
+                }
+            );
+
+        });
 
 }
