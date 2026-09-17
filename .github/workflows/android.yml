@@ -22,11 +22,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Create Android project
-        run: npx cap add android
+      - name: Prepare EduCore web files
+  run: |
+    mkdir -p www
+    cp index.html www/
+    cp login.html www/
+    cp register.html www/
+    cp student.html www/
+    cp admin.html www/
+    cp -r css www/
+    cp -r js www/
+    cp -r images www/
 
-      - name: Sync EduCore
-        run: npx cap sync android
+- name: Create Android project
+  run: npx cap add android
+
+- name: Sync EduCore
+  run: npx cap sync android
 
       - name: Setup Java
         uses: actions/setup-java@v4
