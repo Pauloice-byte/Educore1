@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
+
 /* =====================================================
    ELEMENTS
 ===================================================== */
@@ -77,7 +78,11 @@ const user =
     await getCurrentUser();
 
 if (!user) {
-    window.location.href = "index.html";
+
+    window.location.replace(
+        "index.html"
+    );
+
     return;
 }
 
@@ -86,8 +91,13 @@ const profile =
     await getCurrentProfile();
 
 if (!profile) {
+
     await supabaseClient.auth.signOut();
-    window.location.href = "index.html";
+
+    window.location.replace(
+        "index.html"
+    );
+
     return;
 }
 
@@ -95,8 +105,13 @@ if (!profile) {
 if (
     profile.active !== true
 ) {
+
     await supabaseClient.auth.signOut();
-    window.location.href = "index.html";
+
+    window.location.replace(
+        "index.html"
+    );
+
     return;
 }
 
@@ -104,7 +119,11 @@ if (
 if (
     profile.role === "admin"
 ) {
-    window.location.href = "admin.html";
+
+    window.location.replace(
+        "admin.html"
+    );
+
     return;
 }
 
@@ -112,8 +131,13 @@ if (
 if (
     profile.role !== "student"
 ) {
+
     await supabaseClient.auth.signOut();
-    window.location.href = "index.html";
+
+    window.location.replace(
+        "index.html"
+    );
+
     return;
 }
 
@@ -134,6 +158,7 @@ if (
 
     studentName.textContent =
         firstName || "Student";
+
 }
 
 
@@ -145,18 +170,27 @@ function openMobileSidebar() {
 
     if (!sidebar) return;
 
-    sidebar.classList.add("mobile-open");
+    sidebar.classList.add(
+        "mobile-open"
+    );
 
     if (sidebarBackdrop) {
-        sidebarBackdrop.classList.add("active");
+
+        sidebarBackdrop.classList.add(
+            "active"
+        );
+
     }
 
     if (menuButton) {
+
         menuButton.setAttribute(
             "aria-expanded",
             "true"
         );
+
     }
+
 }
 
 
@@ -164,18 +198,27 @@ function closeMobileSidebar() {
 
     if (!sidebar) return;
 
-    sidebar.classList.remove("mobile-open");
+    sidebar.classList.remove(
+        "mobile-open"
+    );
 
     if (sidebarBackdrop) {
-        sidebarBackdrop.classList.remove("active");
+
+        sidebarBackdrop.classList.remove(
+            "active"
+        );
+
     }
 
     if (menuButton) {
+
         menuButton.setAttribute(
             "aria-expanded",
             "false"
         );
+
     }
+
 }
 
 
@@ -186,6 +229,7 @@ function toggleSidebar() {
     const isMobile =
         window.innerWidth <= 900;
 
+
     if (isMobile) {
 
         if (
@@ -193,17 +237,27 @@ function toggleSidebar() {
                 "mobile-open"
             )
         ) {
+
             closeMobileSidebar();
+
         } else {
+
             openMobileSidebar();
+
         }
 
         return;
+
     }
 
-    sidebar.classList.toggle("collapsed");
+
+    sidebar.classList.toggle(
+        "collapsed"
+    );
+
 
     if (menuButton) {
+
         menuButton.setAttribute(
             "aria-expanded",
             String(
@@ -212,7 +266,9 @@ function toggleSidebar() {
                 )
             )
         );
+
     }
+
 }
 
 
@@ -241,7 +297,9 @@ document.addEventListener(
     event => {
 
         if (event.key === "Escape") {
+
             closeMobileSidebar();
+
         }
 
     }
@@ -253,7 +311,9 @@ window.addEventListener(
     () => {
 
         if (window.innerWidth > 900) {
+
             closeMobileSidebar();
+
         }
 
     }
@@ -273,79 +333,146 @@ const viewNames = [
 
 
 const viewTitles = {
-    home: "Home",
-    courses: "Courses",
-    search: "Search",
-    "my-courses": "My Courses"
+
+    home:
+        "Home",
+
+    courses:
+        "Courses",
+
+    search:
+        "Search",
+
+    "my-courses":
+        "My Courses"
+
 };
 
 
 const viewLabels = {
-    home: "STUDENT AREA",
-    courses: "COURSE LIBRARY",
-    search: "COURSE SEARCH",
-    "my-courses": "YOUR LEARNING"
+
+    home:
+        "STUDENT AREA",
+
+    courses:
+        "COURSE LIBRARY",
+
+    search:
+        "COURSE SEARCH",
+
+    "my-courses":
+        "YOUR LEARNING"
+
 };
 
 
-function setActiveView(
-    viewName,
-    updateHash = true
-) {
+/*
+ * Prevents unnecessary duplicate history entries.
+ *
+ * Example:
+ *
+ * Home → Courses → Search
+ *
+ * Back:
+ *
+ * Search → Courses
+ *
+ * Back:
+ *
+ * Courses → Home
+ *
+ * Back:
+ *
+ * leaves the student area/page naturally.
+ */
+
+let currentView =
+    null;
+
+
+function normalizeView(viewName) {
 
     if (
         !viewNames.includes(viewName)
     ) {
-        viewName = "home";
+
+        return "home";
+
     }
+
+    return viewName;
+
+}
+
+
+function applyActiveView(
+    viewName
+) {
+
+    viewName =
+        normalizeView(viewName);
+
+
+    currentView =
+        viewName;
 
 
     document
-        .querySelectorAll(".student-view")
-        .forEach(view => {
+        .querySelectorAll(
+            ".student-view"
+        )
+        .forEach(
+            view => {
 
-            view.classList.toggle(
-                "active",
-                view.id ===
-                `view-${viewName}`
-            );
+                view.classList.toggle(
+                    "active",
+                    view.id ===
+                    `view-${viewName}`
+                );
 
-        });
+            }
+        );
 
 
     document
         .querySelectorAll(
             ".student-nav-button"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.classList.toggle(
-                "active",
-                button.dataset.view ===
-                viewName
-            );
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view ===
+                    viewName
+                );
 
-        });
+            }
+        );
 
 
     document
         .querySelectorAll(
             ".bottom-nav-button"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.classList.toggle(
-                "active",
-                button.dataset.view ===
-                viewName
-            );
+                button.classList.toggle(
+                    "active",
+                    button.dataset.view ===
+                    viewName
+                );
 
-        });
+            }
+        );
 
 
     if (headerSectionTitle) {
+
         headerSectionTitle.textContent =
             viewTitles[viewName];
+
     }
 
 
@@ -354,133 +481,264 @@ function setActiveView(
             "headerSectionLabel"
         );
 
+
     if (headerLabel) {
+
         headerLabel.textContent =
             viewLabels[viewName];
+
     }
 
 
-   if (updateHash) {
-
-    window.history.pushState(
-        null,
-        "",
-        `#${viewName}`
-    );
-
-}
+    closeMobileSidebar();
 
 
-    if (viewName === "courses") {
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+
+    /*
+     * Load data required by the selected view.
+     */
+
+    if (
+        viewName === "courses"
+    ) {
+
         loadPublishedCourses();
+
     }
 
 
-    if (viewName === "search") {
-
-        if (searchInput) {
-            searchInput.focus();
-        }
+    if (
+        viewName === "search"
+    ) {
 
         renderSearchResults(
             searchInput
                 ? searchInput.value
                 : ""
         );
+
     }
 
 
-    if (viewName === "my-courses") {
+    if (
+        viewName === "my-courses"
+    ) {
+
         loadMyCourses();
+
     }
 
-
-    closeMobileSidebar();
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
 }
 
+
+function setActiveView(
+    viewName,
+    addHistory = true
+) {
+
+    viewName =
+        normalizeView(viewName);
+
+
+    /*
+     * Do nothing if the requested view
+     * is already active.
+     */
+
+    if (
+        viewName === currentView
+    ) {
+
+        return;
+
+    }
+
+
+    if (addHistory) {
+
+        window.history.pushState(
+            {
+                studentView:
+                    viewName
+            },
+            "",
+            `#${viewName}`
+        );
+
+    }
+
+
+    applyActiveView(
+        viewName
+    );
+
+}
+
+
+/* =====================================================
+   STUDENT NAVIGATION
+===================================================== */
 
 document
     .querySelectorAll(
         ".student-nav-button[data-view]"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                setActiveView(
-                    button.dataset.view
-                );
+                    setActiveView(
+                        button.dataset.view,
+                        true
+                    );
 
-            }
-        );
+                }
+            );
 
-    });
-
-window.addEventListener(
-    "popstate",
-    () => {
-
-        let viewName =
-            window.location.hash
-                .replace("#", "")
-                .trim();
-
-        if (!viewNames.includes(viewName)) {
-            viewName = "home";
         }
+    );
 
-        setActiveView(
-            viewName,
-            false
-        );
 
-    }
-);
 document
     .querySelectorAll(
         ".bottom-nav-button[data-view]"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                setActiveView(
-                    button.dataset.view
-                );
+                    setActiveView(
+                        button.dataset.view,
+                        true
+                    );
 
-            }
-        );
+                }
+            );
 
-    });
+        }
+    );
 
 
 document
     .querySelectorAll(
         "[data-view-target]"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                setActiveView(
-                    button.dataset.viewTarget
-                );
+                    setActiveView(
+                        button.dataset.viewTarget,
+                        true
+                    );
 
-            }
+                }
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   BROWSER / PHONE BACK BUTTON
+===================================================== */
+
+window.addEventListener(
+    "popstate",
+    event => {
+
+        let viewName = null;
+
+
+        /*
+         * Prefer the history state.
+         */
+
+        if (
+            event.state &&
+            event.state.studentView
+        ) {
+
+            viewName =
+                event.state.studentView;
+
+        }
+
+
+        /*
+         * Fall back to the URL hash.
+         */
+
+        if (!viewName) {
+
+            viewName =
+                window.location.hash
+                    .replace("#", "")
+                    .trim();
+
+        }
+
+
+        viewName =
+            normalizeView(
+                viewName
+            );
+
+
+        applyActiveView(
+            viewName
         );
 
-    });
+    }
+);
+
+
+/*
+ * Hash changes can also happen independently
+ * of popstate in some browsers/webview environments.
+ */
+
+window.addEventListener(
+    "hashchange",
+    () => {
+
+        const viewName =
+            normalizeView(
+                window.location.hash
+                    .replace("#", "")
+                    .trim()
+            );
+
+
+        if (
+            viewName !== currentView
+        ) {
+
+            applyActiveView(
+                viewName
+            );
+
+        }
+
+    }
+);
 
 
 /* =====================================================
@@ -491,18 +749,20 @@ document
     .querySelectorAll(
         ".placeholder-link"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            event => {
+            button.addEventListener(
+                "click",
+                event => {
 
-                event.preventDefault();
+                    event.preventDefault();
 
-            }
-        );
+                }
+            );
 
-    });
+        }
+    );
 
 
 /* =====================================================
@@ -531,13 +791,20 @@ async function loadPublishedCourses() {
     const {
         data,
         error
-    } = await supabaseClient
-        .from("courses")
-        .select("*")
-        .eq("status", "published")
-        .order("created_at", {
-            ascending: false
-        });
+    } =
+        await supabaseClient
+            .from("courses")
+            .select("*")
+            .eq(
+                "status",
+                "published"
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
 
 
     coursesLoading.classList.add(
@@ -552,21 +819,26 @@ async function loadPublishedCourses() {
             error
         );
 
+
         coursesEmpty.classList.remove(
             "hidden"
         );
+
 
         coursesEmpty.querySelector(
             ".dashboard-empty-title"
         ).textContent =
             "Unable to load courses";
 
+
         coursesEmpty.querySelector(
             ".dashboard-empty-text"
         ).textContent =
             "There was a problem loading the course catalogue.";
 
+
         return;
+
     }
 
 
@@ -604,64 +876,94 @@ function renderCourses(
 
     if (!container) return;
 
+
     container.innerHTML = "";
 
 
-    courses.forEach(course => {
+    courses.forEach(
+        course => {
 
-        const card =
-            createCourseCard(course);
+            const card =
+                createCourseCard(
+                    course
+                );
 
-        container.appendChild(card);
 
-    });
+            container.appendChild(
+                card
+            );
+
+        }
+    );
 
 }
 
 
-function createCourseCard(course) {
+function createCourseCard(
+    course
+) {
 
     const card =
-        document.createElement("article");
+        document.createElement(
+            "article"
+        );
+
 
     card.className =
         "student-course-card";
 
 
     const cover =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     cover.className =
         "student-course-cover";
 
 
-  if (course.cover_image) {
+    if (course.cover_image) {
 
-    const image =
-        document.createElement("img");
+        const image =
+            document.createElement(
+                "img"
+            );
 
-    image.src =
-        course.cover_image;
+
+        image.src =
+            course.cover_image;
+
 
         image.alt =
-            course.title || "Course";
+            course.title ||
+            "Course";
+
 
         image.loading =
             "lazy";
 
-        cover.appendChild(image);
+
+        cover.appendChild(
+            image
+        );
 
     } else {
 
         const placeholder =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
 
         placeholder.className =
             "student-course-cover-placeholder";
 
+
         placeholder.textContent =
             course.title ||
             "EDUCORE COURSE";
+
 
         cover.appendChild(
             placeholder
@@ -671,17 +973,24 @@ function createCourseCard(course) {
 
 
     const information =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     information.className =
         "student-course-information";
 
 
     const language =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     language.className =
         "student-course-language";
+
 
     language.textContent =
         course.language ||
@@ -689,10 +998,14 @@ function createCourseCard(course) {
 
 
     const title =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     title.className =
         "student-course-title";
+
 
     title.textContent =
         course.title ||
@@ -700,10 +1013,14 @@ function createCourseCard(course) {
 
 
     const level =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     level.className =
         "student-course-level";
+
 
     level.textContent =
         course.level ||
@@ -714,9 +1031,11 @@ function createCourseCard(course) {
         language
     );
 
+
     information.appendChild(
         title
     );
+
 
     information.appendChild(
         level
@@ -726,6 +1045,7 @@ function createCourseCard(course) {
     card.appendChild(
         cover
     );
+
 
     card.appendChild(
         information
@@ -751,6 +1071,7 @@ function createCourseCard(course) {
 
 
     return card;
+
 }
 
 
@@ -766,7 +1087,9 @@ function renderSearchResults(
         !searchResults ||
         !searchEmpty
     ) {
+
         return;
+
     }
 
 
@@ -780,21 +1103,26 @@ function renderSearchResults(
 
         searchResults.innerHTML = "";
 
+
         searchEmpty.classList.remove(
             "hidden"
         );
+
 
         searchEmpty.querySelector(
             ".dashboard-empty-title"
         ).textContent =
             "Search the course catalogue";
 
+
         searchEmpty.querySelector(
             ".dashboard-empty-text"
         ).textContent =
             "Start typing to find courses available on EduCore.";
 
+
         return;
+
     }
 
 
@@ -826,23 +1154,29 @@ function renderSearchResults(
     searchResults.innerHTML = "";
 
 
-    if (results.length === 0) {
+    if (
+        results.length === 0
+    ) {
 
         searchEmpty.classList.remove(
             "hidden"
         );
+
 
         searchEmpty.querySelector(
             ".dashboard-empty-title"
         ).textContent =
             "No courses found";
 
+
         searchEmpty.querySelector(
             ".dashboard-empty-text"
         ).textContent =
             "Try another course name, language or level.";
 
+
         return;
+
     }
 
 
@@ -870,15 +1204,18 @@ if (searchInput) {
             ) {
 
                 loadPublishedCourses()
-                    .then(() => {
+                    .then(
+                        () => {
 
-                        renderSearchResults(
-                            event.target.value
-                        );
+                            renderSearchResults(
+                                event.target.value
+                            );
 
-                    });
+                        }
+                    );
 
                 return;
+
             }
 
 
@@ -903,15 +1240,19 @@ async function loadMyCourses() {
         !myCoursesGrid ||
         !myCoursesEmpty
     ) {
+
         return;
+
     }
 
 
     myCoursesGrid.innerHTML = "";
 
+
     myCoursesEmpty.classList.remove(
         "hidden"
     );
+
 
     /*
      * Enrollment data will be connected
@@ -955,6 +1296,34 @@ if (logoutButton) {
    INITIAL VIEW
 ===================================================== */
 
+/*
+ * IMPORTANT:
+ *
+ * When a student opens student.html directly
+ * without a hash, always start at Home.
+ *
+ * We deliberately replace the current URL with
+ * #home rather than pushing another history entry.
+ *
+ * This gives us a clean starting point:
+ *
+ * Previous page
+ *      ↓
+ * student.html#home
+ *
+ * Then navigation creates:
+ *
+ * student.html#home
+ *      ↓
+ * student.html#courses
+ *      ↓
+ * student.html#search
+ *
+ * Therefore the phone Back button first moves
+ * through the Student Area instead of immediately
+ * leaving the app.
+ */
+
 let initialView =
     window.location.hash
         .replace("#", "")
@@ -966,22 +1335,54 @@ if (
         initialView
     )
 ) {
-    initialView = "home";
+
+    initialView =
+        "home";
+
+
+    window.history.replaceState(
+        {
+            studentView:
+                "home"
+        },
+        "",
+        `${window.location.pathname}#home`
+    );
+
+} else {
+
+    /*
+     * Convert an existing hash into a proper
+     * student history state.
+     */
+
+    window.history.replaceState(
+        {
+            studentView:
+                initialView
+        },
+        "",
+        `${window.location.pathname}#${initialView}`
+    );
+
 }
 
 
-setActiveView(
-    initialView,
-    false
+/*
+ * Apply the dashboard/view immediately.
+ */
+
+applyActiveView(
+    initialView
 );
 
 
-/*
- * Preload the course catalogue so
- * Search works immediately.
- */
+/* =====================================================
+   PRELOAD COURSE CATALOGUE
+===================================================== */
 
 await loadPublishedCourses();
 
 
 });
+
