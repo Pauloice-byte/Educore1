@@ -61,19 +61,31 @@ document.addEventListener("DOMContentLoaded", () => {
        INITIALISE
     ===================================================== */
 
-   async function init() {
-    setupNavigation();
-    setupSidebar();
-    setupLogout();
-    setupCourseControls();
-    setupCarouselControls();
-    setupDashboardRetry();
-    await loadAdminUser();
-    await loadDashboard();
-    await loadCourses();
-    await loadCarouselItems();
-}
-}
+   init();
+
+
+    async function init() {
+
+        setupNavigation();
+
+        setupSidebar();
+
+        setupLogout();
+
+        setupCourseControls();
+
+        setupCarouselControls();
+
+        setupDashboardRetry();
+
+        await loadAdminUser();
+
+        await loadDashboard();
+
+        await loadCourses();
+
+        await loadCarouselItems();
+    }
 
     /* =====================================================
        CAROUSEL CONTROLS
