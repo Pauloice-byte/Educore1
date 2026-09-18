@@ -555,49 +555,16 @@ a {
 
 
 /* =========================================
-   HERO AREA
-   Layout wrapper ONLY
+   COURSE / PROMOTION CAROUSEL
 ========================================= */
 
-.hero-area {
-    display: flex;
+.hero-carousel {
+    position: relative;
 
-    flex-direction: column;
-
-    gap: 24px;
+    min-height: 430px;
 
     margin:
         28px 7% 0;
-}
-
-
-/* =========================================
-   SHARED CARD BACKGROUND DECORATION
-========================================= */
-
-.hero-background-circle {
-    position: absolute;
-
-    border-radius: 50%;
-
-    pointer-events: none;
-
-    z-index: 0;
-}
-
-
-/* =========================================
-   PERMANENT INFORMATION CARD
-========================================= */
-
-.hero-information-card {
-    position: relative;
-
-    min-height: 350px;
-
-    display: flex;
-
-    align-items: center;
 
     overflow: hidden;
 
@@ -615,33 +582,26 @@ a {
 
     box-shadow:
         0 12px 35px rgba(25, 29, 40, 0.045);
-
-    padding:
-        55px 7% 58px;
 }
 
 
-.information-circle-one {
-    width: 500px;
-    height: 500px;
+.hero-carousel-track {
+    position: relative;
 
-    right: -175px;
-    top: -290px;
+    width: 100%;
 
-    border:
-        1px solid rgba(108, 119, 219, 0.12);
+    min-height: 430px;
 }
 
 
-.information-circle-two {
-    width: 310px;
-    height: 310px;
+/* =========================================
+   HERO / INTRO SLIDE
+========================================= */
 
-    right: 9%;
-    bottom: -230px;
+.hero-intro-slide {
+    align-items: center;
 
-    background:
-        rgba(105, 116, 220, 0.035);
+    justify-content: flex-start;
 }
 
 
@@ -669,7 +629,7 @@ a {
 }
 
 
-.hero-information-card h1 {
+.hero-intro-slide h1 {
     color: #171a21;
 
     font-size:
@@ -683,14 +643,14 @@ a {
 }
 
 
-.hero-information-card h1 span {
+.hero-intro-slide h1 span {
     display: block;
 
     color: #737bd4;
 }
 
 
-.hero-information-card p {
+.hero-intro-slide p {
     max-width: 560px;
 
     margin-top: 21px;
@@ -704,40 +664,21 @@ a {
 
 
 /* =========================================
-   COURSE / PROMOTION CAROUSEL CARD
+   CAROUSEL BACKGROUND DECORATION
 ========================================= */
 
-.hero-carousel {
-    position: relative;
+.hero-background-circle {
+    position: absolute;
 
-    z-index: 1;
+    border-radius: 50%;
 
-    min-height: 430px;
+    pointer-events: none;
 
-    overflow: hidden;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            120deg,
-            #ffffff 0%,
-            #fafbff 100%
-        );
-
-    border:
-        1px solid #eef0f4;
-
-    box-shadow:
-        0 12px 35px rgba(25, 29, 40, 0.045);
+    z-index: 0;
 }
 
 
-/* =========================================
-   CAROUSEL OWN BACKGROUND
-========================================= */
-
-.carousel-circle-one {
+.circle-one {
     width: 500px;
     height: 500px;
 
@@ -749,7 +690,7 @@ a {
 }
 
 
-.carousel-circle-two {
+.circle-two {
     width: 310px;
     height: 310px;
 
@@ -758,21 +699,6 @@ a {
 
     background:
         rgba(105, 116, 220, 0.035);
-}
-
-
-/* =========================================
-   CAROUSEL TRACK
-========================================= */
-
-.hero-carousel-track {
-    position: relative;
-
-    width: 100%;
-
-    min-height: 430px;
-
-    z-index: 1;
 }
 
 
@@ -1067,7 +993,9 @@ a {
 .hero-slide.active
 .hero-course-information,
 .hero-slide.active
-.hero-promotion-information {
+.hero-promotion-information,
+.hero-slide.active
+.hero-content {
 
     animation:
         heroInformationReveal
@@ -2216,19 +2144,9 @@ a {
     }
 
 
-    .hero-area {
+    .hero-carousel {
         margin-top: 24px;
 
-        gap: 22px;
-    }
-
-
-    .hero-information-card {
-        min-height: 330px;
-    }
-
-
-    .hero-carousel {
         min-height: 410px;
     }
 
@@ -2305,151 +2223,33 @@ a {
 
 
     /* =====================================
-       MOBILE HERO WRAPPER
-    ===================================== */
-
-    .hero-area {
-
-        margin:
-            18px 14px 0;
-
-        gap: 18px;
-
-    }
-
-
-    /* =====================================
-       MOBILE INFORMATION CARD
-    ===================================== */
-
-    .hero-information-card {
-
-        min-height: 320px;
-
-        padding:
-            40px 24px 38px;
-
-        align-items: center;
-
-        border-radius: 16px;
-
-    }
-
-
-    .hero-content {
-        max-width: 100%;
-    }
-
-
-    .hero-label {
-        margin-bottom: 13px;
-
-        font-size: 8px;
-
-        letter-spacing: 1.5px;
-    }
-
-
-    .hero-information-card h1 {
-
-        font-size: 39px;
-
-        line-height: 1.02;
-
-        letter-spacing: -2.3px;
-
-    }
-
-
-    .hero-information-card p {
-
-        max-width: 100%;
-
-        margin-top: 18px;
-
-        font-size: 13px;
-
-        line-height: 1.65;
-
-    }
-
-
-    /* =====================================
-       INFORMATION CARD CIRCLES
-    ===================================== */
-
-    .information-circle-one {
-
-        width: 330px;
-        height: 330px;
-
-        right: -160px;
-        top: -190px;
-
-    }
-
-
-    .information-circle-two {
-
-        width: 220px;
-        height: 220px;
-
-        right: 4%;
-        bottom: -170px;
-
-    }
-
-
-    /* =====================================
-       MOBILE CAROUSEL CARD
+       MOBILE CAROUSEL
     ===================================== */
 
     .hero-carousel {
-
         min-height: 0;
 
         height: auto;
 
+        margin:
+            18px 14px 0;
+
         border-radius: 16px;
 
-    }
-
-
-    .carousel-circle-one {
-
-        width: 330px;
-        height: 330px;
-
-        right: -160px;
-        top: -190px;
-
-    }
-
-
-    .carousel-circle-two {
-
-        width: 220px;
-        height: 220px;
-
-        right: 4%;
-        bottom: -170px;
-
+        overflow: hidden;
     }
 
 
     .hero-carousel-track {
-
         min-height: 0;
 
         height: auto;
 
         width: 100%;
-
     }
 
 
     .hero-slide {
-
         position: absolute;
 
         min-height: 0;
@@ -2472,18 +2272,91 @@ a {
             scale(0.99);
 
         filter: none;
-
     }
 
 
     .hero-slide.active {
-
         position: relative;
 
         transform:
             translateX(0)
             scale(1);
+    }
 
+
+    /* =====================================
+       MOBILE INTRO
+    ===================================== */
+
+    .hero-intro-slide {
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        align-items: flex-start;
+
+        min-height: 340px;
+
+        padding:
+            44px 24px 72px;
+    }
+
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+
+    .hero-label {
+        margin-bottom: 13px;
+
+        font-size: 8px;
+
+        letter-spacing: 1.5px;
+    }
+
+
+    .hero-intro-slide h1 {
+        font-size: 39px;
+
+        line-height: 1.02;
+
+        letter-spacing: -2.3px;
+    }
+
+
+    .hero-intro-slide p {
+        max-width: 100%;
+
+        margin-top: 18px;
+
+        font-size: 13px;
+
+        line-height: 1.65;
+    }
+
+
+    /* =====================================
+       MOBILE BACKGROUND CIRCLES
+    ===================================== */
+
+    .circle-one {
+        width: 330px;
+        height: 330px;
+
+        right: -160px;
+        top: -190px;
+    }
+
+
+    .circle-two {
+        width: 220px;
+        height: 220px;
+
+        right: 4%;
+        bottom: -170px;
     }
 
 
@@ -2493,11 +2366,9 @@ a {
 
     .hero-course-slide,
     .hero-promotion-slide {
-
         justify-content: flex-start;
 
         text-align: left;
-
     }
 
 
@@ -2963,35 +2834,25 @@ a {
 
 @media (max-width: 430px) {
 
-    .hero-area {
+    .hero-carousel {
 
         margin:
             16px 10px 0;
 
-        gap: 16px;
-
-    }
-
-
-    .hero-information-card,
-    .hero-carousel {
-
         border-radius: 15px;
-
     }
 
 
-    .hero-information-card {
+    .hero-intro-slide {
 
-        min-height: 300px;
+        min-height: 320px;
 
         padding:
-            38px 20px 34px;
-
+            40px 20px 68px;
     }
 
 
-    .hero-information-card h1 {
+    .hero-intro-slide h1 {
 
         font-size: 34px;
 
@@ -3000,7 +2861,7 @@ a {
     }
 
 
-    .hero-information-card p {
+    .hero-intro-slide p {
 
         font-size: 12px;
 
