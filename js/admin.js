@@ -61,33 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
        INITIALISE
     ===================================================== */
 
-    async function init() {
+   async function init() {
     setupNavigation();
     setupSidebar();
     setupLogout();
-
-    try {
-        setupCourseControls();
-    } catch (error) {
-        console.error("Course controls setup failed:", error);
-    }
-
-    try {
-        setupCarouselControls();
-    } catch (error) {
-        console.error("Carousel controls setup failed:", error);
-    }
-
-    try {
-        setupDashboardRetry();
-    } catch (error) {
-        console.error("Dashboard retry setup failed:", error);
-    }
-
+    setupCourseControls();
+    setupCarouselControls();
+    setupDashboardRetry();
     await loadAdminUser();
     await loadDashboard();
     await loadCourses();
     await loadCarouselItems();
+}
 }
 
     /* =====================================================
