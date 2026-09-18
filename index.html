@@ -254,95 +254,119 @@
 
         <div id="homeContent">
 
+            <!-- HERO -->
 
-            <!-- =========================================
-                 STANDALONE HERO
-            ========================================== -->
+         <!-- =========================================
+     HERO / FEATURED COURSE CAROUSEL
+========================================== -->
 
-            <section
-                class="homepage-hero"
-                id="homepageHero"
-            >
+<section
+    class="hero-carousel"
+    id="heroCarousel"
+>
 
-                <div class="hero-background-circle circle-one"></div>
+    <!-- =====================================
+         SLIDES
+    ====================================== -->
 
-                <div class="hero-background-circle circle-two"></div>
+    <div
+        class="hero-carousel-track"
+        id="heroCarouselTrack"
+    >
 
+        <!-- =================================
+             SLIDE 1 — INTRODUCTION
+        ================================== -->
 
-                <div class="homepage-hero-content">
+        <article
+            class="hero-slide hero-intro-slide active"
+            data-slide-type="intro"
+        >
 
-                    <div class="hero-label">
-                        AUTONOMOUS LEARNING PLATFORM
-                    </div>
+            <div
+                class="hero-background-circle circle-one"
+            ></div>
 
+            <div
+                class="hero-background-circle circle-two"
+            ></div>
 
-                    <h1>
-                        Learn without
-                        <span>limits.</span>
-                    </h1>
+            <div class="hero-content">
 
-
-                    <p>
-                        Explore structured learning areas designed
-                        to help you build practical knowledge,
-                        develop new skills and learn at your own pace.
-                    </p>
-
+                <div class="hero-label">
+                    AUTONOMOUS LEARNING PLATFORM
                 </div>
 
-            </section>
+                <h1>
+                    Learn without
+                    <span>limits.</span>
+                </h1>
+
+                <p>
+                    Explore structured learning areas designed
+                    to help you build practical knowledge,
+                    develop new skills and learn at your own pace.
+                </p>
+
+            </div>
+
+        </article>
 
 
-            <!-- =========================================
-                 COURSE / PROMOTION CAROUSEL
-            ========================================== -->
+        <!-- =================================
+             COURSE SLIDES
+             Generated dynamically by JavaScript
+        ================================== -->
 
-            <section
-                class="hero-carousel"
-                id="heroCarousel"
-            >
-
-                <div
-                    class="hero-carousel-track"
-                    id="heroCarouselTrack"
-                ></div>
+    </div>
 
 
-                <!-- CAROUSEL CONTROLS -->
+    <!-- =====================================
+         CAROUSEL CONTROLS
+    ====================================== -->
 
-                <div
-                    class="hero-carousel-controls"
-                    id="heroCarouselControls"
-                >
+    <div
+        class="hero-carousel-controls"
+        id="heroCarouselControls"
+    >
 
-                    <button
-                        type="button"
-                        class="hero-carousel-arrow"
-                        id="heroCarouselPrevious"
-                        aria-label="Previous slide"
-                    >
-                        ←
-                    </button>
-
-
-                    <div
-                        class="hero-carousel-dots"
-                        id="heroCarouselDots"
-                    ></div>
+        <button
+            type="button"
+            class="hero-carousel-arrow"
+            id="heroCarouselPrevious"
+            aria-label="Previous slide"
+        >
+            ←
+        </button>
 
 
-                    <button
-                        type="button"
-                        class="hero-carousel-arrow"
-                        id="heroCarouselNext"
-                        aria-label="Next slide"
-                    >
-                        →
-                    </button>
+        <div
+            class="hero-carousel-dots"
+            id="heroCarouselDots"
+        >
 
-                </div>
+            <button
+                type="button"
+                class="hero-carousel-dot active"
+                data-slide="0"
+                aria-label="Go to slide 1"
+            ></button>
 
-            </section>
+        </div>
+
+
+        <button
+            type="button"
+            class="hero-carousel-arrow"
+            id="heroCarouselNext"
+            aria-label="Next slide"
+        >
+            →
+        </button>
+
+    </div>
+
+</section>
 
 
             <!-- =========================================
@@ -611,6 +635,8 @@
                         ></div>
 
 
+
+
                         <!-- COURSE STATS -->
 
                         <div class="course-details-stats">
@@ -715,15 +741,19 @@
     </main>
 
 
+  
+
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
+
 
     <script src="js/supabase.js"></script>
 
     <script src="js/auth.js"></script>
 
     <script src="js/script.js"></script>
+
 
 </body>
 
