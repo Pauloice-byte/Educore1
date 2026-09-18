@@ -2429,7 +2429,85 @@ a {
 
     text-align: center;
 }
+/* =========================================
+   PROMOTION MOBILE
+========================================= */
 
+@media (max-width: 768px) {
+
+    .hero-promotion-slide {
+        flex-direction: column;
+
+        justify-content: flex-start;
+
+        align-items: center;
+
+        gap: 20px;
+
+        padding-top: 40px;
+
+        text-align: center;
+    }
+
+
+    .hero-promotion-image-wrapper {
+        width: 100%;
+        max-width: 320px;
+
+        min-width: 0;
+
+        height: 190px;
+
+        flex-shrink: 0;
+    }
+
+
+    .hero-promotion-information {
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+    }
+
+
+    .hero-promotion-title {
+        font-size: 30px;
+
+        letter-spacing: -1.5px;
+    }
+
+
+    .hero-promotion-description {
+        font-size: 12px;
+    }
+
+
+    .hero-promotion-button {
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+}
+
+
+@media (max-width: 430px) {
+
+    .hero-promotion-image-wrapper {
+        max-width: 280px;
+
+        height: 165px;
+    }
+
+
+    .hero-promotion-title {
+        font-size: 27px;
+    }
+
+}
 
 .hero-course-cover-wrapper {
     width: 145px;
