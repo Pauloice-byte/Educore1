@@ -1,935 +1,1561 @@
-// ============================================================
-// EduCore — Public Homepage
-// Dynamic Course Catalogue + Promotional Carousel
-// ============================================================
+/* =========================================
+   EDUCORE
+========================================= */
 
-document.addEventListener("DOMContentLoaded", async () => {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    "use strict";
+
+html {
+    scroll-behavior: smooth;
+}
 
 
-    // ========================================================
-    // ELEMENTS
-    // ========================================================
+body {
+    min-height: 100vh;
 
-    const sidebar =
-        document.getElementById("sidebar");
+    background: #f5f6f8;
 
-    const menuButton =
-        document.getElementById("menuButton");
+    color: #171a21;
 
-    const backdrop =
-        document.getElementById("sidebarBackdrop");
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
-    const bookGrid =
-        document.getElementById("bookGrid");
+    overflow-x: hidden;
+}
 
-    const noResults =
-        document.getElementById("noResults");
 
-    const loadingCourses =
-        document.getElementById("loadingCourses");
+button,
+input {
+    font-family: inherit;
+}
 
-    const heroCarousel =
-        document.getElementById("heroCarousel");
 
-    const heroCarouselTrack =
-        document.getElementById("heroCarouselTrack");
+button {
+    border: 0;
+}
 
-    const heroCarouselDots =
-        document.getElementById("heroCarouselDots");
 
-    const heroCarouselPrevious =
-        document.getElementById("heroCarouselPrevious");
+a {
+    color: inherit;
+    text-decoration: none;
+}
 
-    const heroCarouselNext =
-        document.getElementById("heroCarouselNext");
 
-    const searchInput =
-        document.getElementById("searchInput");
+/* =========================================
+   SIDEBAR
+========================================= */
 
-    const libraryTitle =
-        document.getElementById("libraryTitle");
+.sidebar {
+    position: fixed;
 
-    const year =
-        document.getElementById("year");
+    left: 0;
+    top: 0;
+    bottom: 0;
 
-    const navigationButtons =
-        document.querySelectorAll(
-            ".navigation-button"
+    width: 270px;
+
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            180deg,
+            #11141b 0%,
+            #181c25 100%
         );
 
-    const filterButtons =
-        document.querySelectorAll(
-            ".filter-button"
+    color: white;
+
+    box-shadow:
+        12px 0 40px rgba(0, 0, 0, 0.08);
+
+    overflow: hidden;
+
+    transition:
+        width 0.3s ease,
+        transform 0.3s ease;
+}
+
+
+.sidebar.collapsed {
+    width: 78px;
+}
+
+
+/* =========================================
+   SIDEBAR BRAND
+========================================= */
+
+.sidebar-brand {
+    height: 100px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 20px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    flex-shrink: 0;
+}
+
+
+.logo {
+    width: 49px;
+    height: 49px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+
+    flex-shrink: 0;
+}
+
+
+.brand-information {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    transition:
+        opacity 0.2s ease,
+        width 0.2s ease;
+}
+
+
+.brand-name {
+    font-size: 16px;
+    line-height: 18px;
+
+    font-weight: 750;
+}
+
+
+.brand-subtitle {
+    margin-top: 6px;
+
+    color:
+        rgba(255, 255, 255, 0.35);
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+}
+
+
+.sidebar.collapsed .brand-information {
+    width: 0;
+    opacity: 0;
+}
+
+
+.sidebar.collapsed .sidebar-brand {
+    justify-content: center;
+
+    padding: 20px 14px;
+}
+
+
+/* =========================================
+   SIDEBAR NAVIGATION
+========================================= */
+
+.sidebar-navigation {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 25px 13px;
+}
+
+
+.navigation-section {
+    margin-bottom: 28px;
+}
+
+
+.navigation-heading {
+    padding: 0 12px 9px;
+
+    color:
+        rgba(255, 255, 255, 0.28);
+
+    font-size: 9px;
+
+    font-weight: 750;
+
+    letter-spacing: 1.7px;
+
+    white-space: nowrap;
+}
+
+
+.sidebar.collapsed .navigation-heading {
+    height: 0;
+
+    opacity: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   NAVIGATION BUTTON
+========================================= */
+
+.navigation-button {
+    width: 100%;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 0 12px;
+
+    margin-bottom: 3px;
+
+    border-radius: 9px;
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.navigation-button:hover {
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: white;
+
+    transform: translateX(3px);
+}
+
+
+.navigation-button.active {
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    color: white;
+
+    box-shadow:
+        inset 2px 0 0 #8d95ef;
+}
+
+
+.navigation-symbol {
+    width: 22px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    font-size: 13px;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+}
+
+
+.sidebar.collapsed .navigation-button {
+    justify-content: center;
+
+    padding: 0;
+}
+
+
+.sidebar.collapsed
+.navigation-button > span:last-child {
+    display: none;
+}
+
+
+/* =========================================
+   SIDEBAR FOOTER
+========================================= */
+
+.sidebar-footer {
+    padding: 18px 20px 20px;
+
+    flex-shrink: 0;
+
+    color:
+        rgba(255, 255, 255, 0.35);
+
+    font-size: 9px;
+
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+
+.sidebar-footer-line {
+    width: 100%;
+    height: 1px;
+
+    margin-bottom: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.sidebar-footer small {
+    display: block;
+
+    margin-top: 4px;
+
+    color:
+        rgba(255, 255, 255, 0.20);
+
+    font-size: 8px;
+
+    font-weight: 400;
+}
+
+
+.sidebar.collapsed .sidebar-footer {
+    opacity: 0;
+}
+
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.main {
+    min-height: 100vh;
+
+    margin-left: 270px;
+
+    transition:
+        margin-left 0.3s ease;
+}
+
+
+.sidebar.collapsed + .main {
+    margin-left: 78px;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.top-header {
+    height: 76px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 500;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 36px;
+
+    background:
+        rgba(255, 255, 255, 0.92);
+
+    border-bottom:
+        1px solid #e6e7ea;
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+}
+
+
+.menu-button {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 4px;
+
+    border-radius: 10px;
+
+    background: #f0f1f3;
+
+    cursor: pointer;
+}
+
+
+.menu-button:hover {
+    background: #e5e6e9;
+}
+
+
+.menu-button span {
+    width: 17px;
+    height: 2px;
+
+    background: #272b34;
+
+    border-radius: 2px;
+}
+
+
+.header-title {
+    display: flex;
+
+    flex-direction: column;
+
+    margin-left: 17px;
+}
+
+
+.header-title span {
+    color: #9b9da5;
+
+    font-size: 8px;
+
+    font-weight: 750;
+
+    letter-spacing: 1.5px;
+}
+
+
+.header-title strong {
+    margin-top: 3px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+.header-status {
+    margin-left: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #92959d;
+
+    font-size: 10px;
+}
+
+
+.online-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #4db783;
+
+    box-shadow:
+        0 0 0 4px rgba(77, 183, 131, 0.10);
+}
+
+
+.header-login {
+    margin-left: 25px;
+
+    padding: 9px 17px;
+
+    border:
+        1px solid #e1e2e6;
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: #20242c;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.header-login:hover {
+    background: #f5f5f6;
+}
+
+
+/* =========================================
+   HOME CONTENT
+========================================= */
+
+#homeContent {
+    display: block;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.25s ease;
+}
+
+
+#homeContent.home-hidden {
+    display: none;
+}
+
+
+/* =========================================
+   SHARED HERO + CAROUSEL FEATURE ZONE
+========================================= */
+
+.home-feature-zone {
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            120deg,
+            #ffffff 0%,
+            #fafbff 100%
+        );
+}
+
+
+/* =========================================
+   FEATURE BACKGROUND CIRCLES
+========================================= */
+
+.feature-background-circle {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+
+.feature-circle-one {
+    width: 430px;
+    height: 430px;
+
+    right: -150px;
+    top: -170px;
+
+    border:
+        1px solid rgba(108, 119, 219, 0.12);
+}
+
+
+.feature-circle-two {
+    width: 300px;
+    height: 300px;
+
+    right: 12%;
+    bottom: -175px;
+
+    background:
+        rgba(105, 116, 220, 0.035);
+}
+
+
+/* =========================================
+   STANDALONE HOMEPAGE HERO
+========================================= */
+
+.homepage-hero {
+    position: relative;
+
+    min-height: 330px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding:
+        72px 7% 62px;
+
+    overflow: hidden;
+
+    background: transparent;
+}
+
+
+.homepage-hero-content {
+    position: relative;
+
+    z-index: 5;
+
+    max-width: 700px;
+
+    animation:
+        homepageHeroReveal
+        0.8s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+}
+
+
+@keyframes homepageHeroReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(25px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+.hero-label {
+    margin-bottom: 17px;
+
+    color: #737bd4;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+.homepage-hero h1 {
+    font-size:
+        clamp(38px, 4vw, 54px);
+
+    line-height: 1.03;
+
+    letter-spacing: -2.8px;
+
+    font-weight: 760;
+}
+
+
+.homepage-hero h1 span {
+    display: block;
+
+    color: #737bd4;
+}
+
+
+.homepage-hero p {
+    max-width: 560px;
+
+    margin-top: 22px;
+
+    color: #7d8089;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   COURSE / PROMOTION CAROUSEL
+========================================= */
+
+.hero-carousel {
+    position: relative;
+
+    min-height: 360px;
+
+    overflow: hidden;
+
+    background: transparent;
+
+    border-top:
+        1px solid rgba(240, 241, 244, 0.9);
+
+    margin-top: 8px;
+}
+
+
+.hero-carousel-track {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 360px;
+}
+
+
+.hero-slide {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    min-height: 360px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 45px 7%;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform:
+        translateX(45px)
+        scale(0.985);
+
+    filter: blur(2px);
+
+    transition:
+        opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.75s ease,
+        visibility 0.75s ease;
+}
+
+
+.hero-slide.active {
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateX(0)
+        scale(1);
+
+    filter: blur(0);
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   COURSE SLIDE
+========================================= */
+
+.hero-course-slide {
+    gap: 55px;
+
+    background: transparent;
+}
+
+
+.hero-course-cover-wrapper {
+    width: 190px;
+    min-width: 190px;
+
+    aspect-ratio: 3 / 4;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    background: #e5e7eb;
+
+    box-shadow:
+        0 18px 45px rgba(22, 26, 35, 0.14);
+
+    flex-shrink: 0;
+}
+
+
+.hero-course-cover {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+
+.hero-course-information {
+    position: relative;
+
+    z-index: 5;
+
+    max-width: 700px;
+
+    min-width: 0;
+}
+
+
+.hero-course-category {
+    margin-bottom: 9px;
+
+    color: #737bd4;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+}
+
+
+.hero-course-title {
+    color: #171a21;
+
+    font-size:
+        clamp(30px, 3.5vw, 48px);
+
+    line-height: 1.05;
+
+    letter-spacing: -2px;
+
+    font-weight: 760;
+}
+
+
+.hero-course-level {
+    margin-top: 9px;
+
+    color: #8e919a;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.hero-course-stats {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+
+.hero-course-stat {
+    min-width: 115px;
+
+    padding: 10px 13px;
+
+    border:
+        1px solid #e7e8eb;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.8);
+}
+
+
+.hero-course-stat span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #a0a2a9;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+    text-transform: uppercase;
+}
+
+
+.hero-course-stat strong {
+    color: #272b34;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.hero-course-button,
+.hero-promotion-button {
+    min-width: 150px;
+
+    height: 42px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-top: 18px;
+
+    padding: 0 14px;
+
+    border-radius: 9px;
+
+    background: #20242c;
+
+    color: white;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.hero-course-button:hover,
+.hero-promotion-button:hover {
+    background: #30343d;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 22px rgba(20, 24, 32, 0.16);
+}
+
+
+.hero-course-button span,
+.hero-promotion-button span {
+    font-size: 16px;
+}
+
+
+/* =========================================
+   COURSE / PROMOTION ANIMATION
+========================================= */
+
+.hero-slide.active
+.hero-course-cover-wrapper,
+.hero-slide.active
+.hero-promotion-image-wrapper {
+
+    animation:
+        heroCoverReveal
+        0.9s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+
+}
+
+
+@keyframes heroCoverReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateX(-25px)
+            scale(0.94);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateX(0)
+            scale(1);
+    }
+
+}
+
+
+.hero-slide.active
+.hero-course-information,
+.hero-slide.active
+.hero-promotion-information {
+
+    animation:
+        heroInformationReveal
+        0.8s
+        0.12s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+
+}
+
+
+@keyframes heroInformationReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateX(25px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateX(0);
+    }
+
+}
+
+
+/* =========================================
+   PROMOTION SLIDE
+========================================= */
+
+.hero-promotion-slide {
+    gap: 55px;
+
+    background: transparent;
+}
+
+
+.hero-promotion-image-wrapper {
+    width: 300px;
+    min-width: 300px;
+
+    height: 250px;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    background: #e5e7eb;
+
+    box-shadow:
+        0 18px 45px rgba(22, 26, 35, 0.14);
+
+    flex-shrink: 0;
+}
+
+
+.hero-promotion-image {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+
+.hero-promotion-image-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #20242c,
+            #737bd4
         );
 
+    color: white;
 
-    // ========================================================
-    // COURSE DETAILS
-    // ========================================================
+    font-size: 12px;
 
-    const homeContent =
-        document.getElementById("homeContent");
+    font-weight: 800;
 
-    const courseDetails =
-        document.getElementById("courseDetails");
+    letter-spacing: 2px;
+}
 
-    const courseBackButton =
-        document.getElementById("courseBackButton");
 
-    const courseDetailsCover =
-        document.getElementById("courseDetailsCover");
+.hero-promotion-information {
+    position: relative;
 
-    const courseDetailsCategory =
-        document.getElementById("courseDetailsCategory");
+    z-index: 5;
 
-    const courseDetailsTitle =
-        document.getElementById("courseDetailsTitle");
+    max-width: 700px;
 
-    const courseDetailsLevel =
-        document.getElementById("courseDetailsLevel");
+    min-width: 0;
+}
 
-    const courseDetailsDescription =
-        document.getElementById("courseDetailsDescription");
 
-    const courseDetailsStatLevel =
-        document.getElementById("courseDetailsStatLevel");
+.hero-promotion-label {
+    margin-bottom: 10px;
 
-    const courseDetailsTime =
-        document.getElementById("courseDetailsTime");
+    color: #737bd4;
 
-    const courseDetailsLearning =
-        document.getElementById("courseDetailsLearning");
+    font-size: 9px;
 
-    const courseDetailsStructure =
-        document.getElementById("courseDetailsStructure");
+    font-weight: 800;
 
-    const courseStartButton =
-        document.getElementById("courseStartButton");
+    letter-spacing: 2px;
 
+    text-transform: uppercase;
+}
 
-    // ========================================================
-    // STATE
-    // ========================================================
 
-    let courses = [];
+.hero-promotion-title {
+    color: #171a21;
 
-    let promotions = [];
+    font-size:
+        clamp(30px, 3.5vw, 48px);
 
-    let carouselItems = [];
+    line-height: 1.05;
 
-    let activeFilter = "all";
+    letter-spacing: -2px;
 
-    let searchTerm = "";
+    font-weight: 760;
+}
 
-    let activeCourse = null;
 
-    let activeHeroSlide = 0;
+.hero-promotion-description {
+    max-width: 650px;
 
-    let heroCarouselTimer = null;
+    margin-top: 15px;
 
-    let heroTouchStartX = 0;
+    color: #686c76;
 
-    let heroTouchEndX = 0;
+    font-size: 13px;
 
+    line-height: 1.65;
+}
 
-    // ========================================================
-    // YEAR
-    // ========================================================
 
-    if (year) {
+.hero-promotion-button {
+    margin-top: 20px;
+}
 
-        year.textContent =
-            new Date().getFullYear();
 
-    }
+/* =========================================
+   CAROUSEL CONTROLS
+========================================= */
 
+.hero-carousel-controls {
+    position: absolute;
 
-    // ========================================================
-    // CATEGORY TITLES
-    // ========================================================
+    right: 7%;
+    bottom: 24px;
 
-    const titles = {
+    z-index: 20;
 
-        all:
-            "All Areas",
+    display: flex;
 
-        language:
-            "Language",
+    align-items: center;
 
-        "ms-office":
-            "MS Office",
+    gap: 10px;
+}
 
-        trading:
-            "Trading",
 
-        business:
-            "Business",
+.hero-carousel-arrow {
+    width: 32px;
+    height: 32px;
 
-        technology:
-            "Technology",
+    display: flex;
 
-        finance:
-            "Finance",
+    align-items: center;
+    justify-content: center;
 
-        "personal-development":
-            "Personal Development"
+    border-radius: 8px;
 
-    };
+    background: white;
 
+    border:
+        1px solid #e1e2e6;
 
-    // ========================================================
-    // ESCAPE HTML
-    // ========================================================
+    color: #555963;
 
-    function escapeHTML(value) {
+    font-size: 15px;
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
+    cursor: pointer;
+}
 
-            return "";
 
-        }
+.hero-carousel-arrow:hover {
+    background: #f1f2f4;
 
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+    transform: translateY(-1px);
+}
 
-    }
 
+.hero-carousel-dots {
+    display: flex;
 
-    // ========================================================
-    // ESCAPE ATTRIBUTE
-    // ========================================================
+    align-items: center;
 
-    function escapeAttribute(value) {
+    gap: 5px;
+}
 
-        return escapeHTML(value);
 
-    }
+.hero-carousel-dot {
+    width: 6px;
+    height: 6px;
 
+    padding: 0;
 
-    // ========================================================
-    // NORMALIZE CATEGORY / AREA
-    // ========================================================
+    border-radius: 50%;
 
-    function normalizeCategory(category) {
+    background: #d5d7dc;
 
-        if (!category) {
+    cursor: pointer;
 
-            return "other";
+    transition:
+        width 0.25s ease,
+        background 0.25s ease;
+}
 
-        }
 
-        return String(category)
-            .trim()
-            .toLowerCase()
-            .replace(/&/g, "and")
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, "");
+.hero-carousel-dot.active {
+    width: 18px;
 
-    }
+    border-radius: 100px;
 
+    background: #737bd4;
+}
 
-    // ========================================================
-    // PROMOTION AREA MATCHING
-    // ========================================================
 
-    function promotionMatchesFilter(
-        promotion,
-        filter
-    ) {
+/* =========================================
+   LIBRARY
+========================================= */
 
-        if (
-            !promotion ||
-            filter === "all"
-        ) {
+.library {
+    position: relative;
 
-            return true;
+    padding: 48px 7% 80px;
 
-        }
+    overflow: hidden;
 
+    background:
+        linear-gradient(
+            120deg,
+            #ffffff 0%,
+            #fafbff 100%
+        );
+}
 
-        const area =
-            normalizeCategory(
-                promotion.area
-            );
 
+.library::before,
+.library::after {
+    content: "";
 
-        /*
-           A promotion can explicitly target
-           a course area.
+    position: absolute;
 
-           Examples:
-           Trading
-           Language
-           MS Office
-           Business
+    border-radius: 50%;
 
-           Generic areas such as "EduCore",
-           "All", or "All Areas" remain available
-           globally.
-        */
+    pointer-events: none;
+}
 
-        if (
-            !area ||
-            area === "other" ||
-            area === "all" ||
-            area === "all-areas" ||
-            area === "edcore" ||
-            area === "educore" ||
-            area === "platform"
-        ) {
 
-            return true;
+.library::before {
+    width: 430px;
+    height: 430px;
 
-        }
+    left: -200px;
+    bottom: -250px;
 
+    border:
+        1px solid rgba(108, 119, 219, 0.12);
+}
 
-        return area === filter;
 
-    }
+.library::after {
+    width: 270px;
+    height: 270px;
 
+    right: -100px;
+    top: 120px;
 
-    // ========================================================
-    // COURSE DEFAULTS
-    // ========================================================
+    background:
+        rgba(105, 116, 220, 0.035);
+}
 
-    function getCourseTime(course) {
 
-        return (
-            course.lesson_length ||
-            course.duration ||
-            "25 minutes"
+.library-header,
+.filter-bar,
+.book-grid,
+.no-results {
+    position: relative;
+
+    z-index: 1;
+}
+
+
+/* =========================================
+   LIBRARY HEADER
+========================================= */
+
+.library-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    margin-bottom: 25px;
+}
+
+
+.library-label {
+    margin-bottom: 7px;
+
+    color: #92959d;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.7px;
+}
+
+
+.library-header h2 {
+    font-size: 28px;
+
+    line-height: 1;
+
+    letter-spacing: -1px;
+
+    font-weight: 750;
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.search-box {
+    width: 270px;
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 13px;
+
+    background: white;
+
+    border:
+        1px solid #e1e2e6;
+
+    border-radius: 10px;
+}
+
+
+.search-symbol {
+    margin-right: 7px;
+
+    color: #999ca5;
+
+    font-size: 20px;
+}
+
+
+.search-box input {
+    width: 100%;
+
+    border: 0;
+
+    outline: 0;
+
+    background: transparent;
+
+    color: #272a31;
+
+    font-size: 12px;
+}
+
+
+.search-box input::placeholder {
+    color: #aaacb3;
+}
+
+
+/* =========================================
+   FILTER BAR
+========================================= */
+
+.filter-bar {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-bottom: 30px;
+}
+
+
+.filter-button {
+    padding: 8px 14px;
+
+    border:
+        1px solid #e0e1e5;
+
+    border-radius: 100px;
+
+    background: white;
+
+    color: #7d8089;
+
+    font-size: 10px;
+
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.filter-button:hover {
+    border-color: #a9aee2;
+
+    color: #666dc7;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.filter-button.active {
+    background: #20242c;
+
+    border-color: #20242c;
+
+    color: white;
+}
+
+
+/* =========================================
+   COURSE GRID
+========================================= */
+
+.book-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(205px, 1fr)
         );
 
-    }
+    gap: 34px 23px;
+}
 
 
-    function getCourseLearning(course) {
+/* =========================================
+   COURSE CARD
+========================================= */
 
-        if (course.learning) {
+.book-card {
+    opacity: 0;
 
-            return course.learning;
+    transform:
+        translateY(25px);
 
-        }
+    transition:
+        opacity 0.45s ease,
+        transform 0.45s ease;
+}
 
-        if (course.description) {
 
-            return course.description;
+.book-card.show {
+    opacity: 1;
 
-        }
+    transform:
+        translateY(0);
+}
 
-        return (
-            `Develop practical knowledge and skills through ` +
-            `structured autonomous learning in ` +
-            `${course.title || "this course"}.`
-        );
 
-    }
+.book-card.hide {
+    display: none;
+}
 
 
-    function getCourseStructure(course) {
+.book-card-link {
+    display: block;
 
-        if (course.structure) {
+    cursor: pointer;
+}
 
-            return course.structure;
 
-        }
+/* =========================================
+   COURSE COVER
+========================================= */
 
-        return (
-            "Structured 25-minute lessons with explanations, " +
-            "practice activities, knowledge checks, repeated " +
-            "practice and immediate feedback."
-        );
+.book-cover-wrapper {
+    position: relative;
 
-    }
+    width: 100%;
 
+    aspect-ratio: 3 / 4;
 
-    // ========================================================
-    // MOBILE SWIPE
-    // ========================================================
+    overflow: hidden;
 
-    if (heroCarousel) {
+    border-radius: 14px;
 
-        heroCarousel.addEventListener(
-            "touchstart",
-            event => {
+    background: #e5e7eb;
 
-                heroTouchStartX =
-                    event.touches[0].clientX;
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        heroCarousel.addEventListener(
-            "touchend",
-            event => {
-
-                heroTouchEndX =
-                    event.changedTouches[0].clientX;
-
-                const swipeDistance =
-                    heroTouchEndX -
-                    heroTouchStartX;
-
-
-                if (swipeDistance < -50) {
-
-                    nextHeroSlide();
-
-                }
-
-
-                if (swipeDistance > 50) {
-
-                    previousHeroSlide();
-
-                }
-
-            },
-            {
-                passive: true
-            }
-        );
-
-    }
-
-
-    // ========================================================
-    // AUTHENTICATION / SESSION
-    // ========================================================
-
-    async function updateHeaderLogin() {
-
-        const headerLogin =
-            document.querySelector(".header-login");
-
-        if (!headerLogin) {
-
-            return;
-
-        }
-
-        try {
-
-            const {
-                data: {
-                    session
-                }
-            } =
-                await window.supabaseClient.auth.getSession();
-
-
-            if (!session) {
-
-                headerLogin.textContent =
-                    "Log in";
-
-                headerLogin.href =
-                    "login.html";
-
-                return;
-
-            }
-
-
-            const profile =
-                await getCurrentProfile();
-
-
-            if (
-                profile &&
-                profile.role === "admin"
-            ) {
-
-                headerLogin.textContent =
-                    "Dashboard";
-
-                headerLogin.href =
-                    "admin.html";
-
-                return;
-
-            }
-
-
-            headerLogin.textContent =
-                "Dashboard";
-
-            headerLogin.href =
-                "student.html";
-
-        } catch (error) {
-
-            console.error(
-                "EduCore: Could not determine authentication state:",
-                error
-            );
-
-        }
-
-    }
-
-
-    // ========================================================
-    // LOAD COURSES
-    // ========================================================
-
-    async function loadCourses() {
-
-        if (!bookGrid) {
-
-            return;
-
-        }
-
-
-        if (loadingCourses) {
-
-            loadingCourses.style.display =
-                "block";
-
-        }
-
-
-        if (noResults) {
-
-            noResults.classList.remove(
-                "visible"
-            );
-
-        }
-
-
-        bookGrid.innerHTML = "";
-
-
-        try {
-
-            if (
-                typeof window.supabaseClient ===
-                "undefined"
-            ) {
-
-                throw new Error(
-                    "Supabase client is not available."
-                );
-
-            }
-
-
-            const {
-                data,
-                error
-            } =
-                await window.supabaseClient
-                    .from("courses")
-                    .select(`
-                        id,
-                        title,
-                        description,
-                        category,
-                        level,
-                        cover_image,
-                        status,
-                        sort_order,
-                        created_at,
-                        slug
-                    `)
-                    .eq(
-                        "status",
-                        "published"
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true,
-                            nullsFirst: false
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            courses =
-                (data || []).map(
-                    course => {
-
-                        return {
-
-                            ...course,
-
-                            categoryKey:
-                                normalizeCategory(
-                                    course.category
-                                ),
-
-                            cover:
-                                course.cover_image ||
-                                "images/course-placeholder.jpg",
-
-                            time:
-                                getCourseTime(course),
-
-                            learning:
-                                getCourseLearning(course),
-
-                            structure:
-                                getCourseStructure(course)
-
-                        };
-
-                    }
-                );
-
-
-            createCourseCards();
-
-        } catch (error) {
-
-            console.error(
-                "EduCore: Could not load courses:",
-                error
-            );
-
-
-            courses = [];
-
-
-            bookGrid.innerHTML = `
-
-                <div class="courses-load-error">
-
-                    <div class="courses-load-error-icon">
-                        !
-                    </div>
-
-                    <h3>
-                        Unable to load courses
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            error?.message ||
-                            "Please try again later."
-                        )}
-                    </p>
-
-                    <button
-                        type="button"
-                        id="retryCoursesButton"
-                    >
-                        Try Again
-                    </button>
-
-                </div>
-
-            `;
-
-
-            const retryButton =
-                document.getElementById(
-                    "retryCoursesButton"
-                );
-
-
-            if (retryButton) {
-
-                retryButton.addEventListener(
-                    "click",
-                    loadCourses
-                );
-
-            }
-
-        } finally {
-
-            if (loadingCourses) {
-
-                loadingCourses.style.display =
-                    "none";
-
-            }
-
-        }
-
-    }
-
-
-    // ========================================================
-    // LOAD PROMOTIONS
-    // ========================================================
-
-    async function loadPromotions() {
-
-        if (
-            typeof window.supabaseClient ===
-            "undefined"
-        ) {
-
-            return;
-
-        }
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await window.supabaseClient
-                    .from("carousel_items")
-                    .select(`
-                        id,
-                        title,
-                        description,
-                        image_url,
-                        area,
-                        button_text,
-                        button_url,
-                        status,
-                        start_date,
-                        end_date,
-                        sort_order,
-                        created_at
-                    `)
-                    .eq(
-                        "status",
-                        "published"
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true,
-                            nullsFirst: false
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            const now =
-                new Date();
-
-
-            promotions =
-                (data || []).filter(
-                    promotion => {
-
-                        const starts =
-                            promotion.start_date
-                                ? new Date(
-                                    promotion.start_date
-                                )
-                                : null;
-
-                        const ends =
-                            promotion.end_date
-                                ? new Date(
-                                    promotion.end_date
-                                )
-                                : null;
-
-
-                        if (
-                            starts &&
-                            now < starts
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        if (
-                            ends &&
-                            now > ends
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        return true;
-
-                    }
-                );
-
-        } catch (error) {
-
-            console.error(
-                "EduCore: Could not load promotions:",
-                error
-            );
-
-            promotions = [];
-
-        }
-
-    }
-
-
-    // ========================================================
-    // CREATE CAROUSEL
-    // ========================================================
-
-    function createHeroCarousel() {
-
-        if (!heroCarouselTrack) {
-
-            return;
-
-        }
-
-
-        heroCarouselTrack.innerHTML = "";
-
-        carouselItems = [];
-
-
-        // ----------------------------------------------------
-        // FILTER COURSES FOR CAROUSEL
-        // ----------------------------------------------------
-
-        const visibleCourses =
-            courses.filter(
-                course => {
-
-                    return (
-                        activeFilter === "all" ||
-                        course.categoryKey ===
-                        activeFilter
-                    );
-
-                }
-            );
-
-
-        // ----------------------------------------------------
-        // COURSES
-        // ----------------------------------------------------
-
-        visibleCourses.forEach(
-            course => {
-
-                carouselItems.push({
-
-                    type: "course",
-
-                    data: course
-
-                });
-
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // FILTER PROMOTIONS FOR CAROUSEL
-        // ----------------------------------------------------
-
-        const visiblePromotions =
-            promotions.filter(
-                promotion =>
-                    promotionMatchesFilter(
-                        promotion,
-                        activeFilter
-                    )
-            );
-
-
-        // ----------------------------------------------------
-        // PROMOTIONS
-        // ----------------------------------------------------
-
-        visiblePromotions.forEach(
-            promotion => {
-
-                carouselItems.push({
-
-                    type: "promotion",
-
-                    data: promotion
-
-                });
-
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // NO ITEMS
-        // ----------------------------------------------------
-
-        if (!carouselItems.length) {
-
-            heroCarousel.style.display =
-                "none";
-
-            stopHeroCarousel();
-
-            if (heroCarouselDots) {
-
-                heroCarouselDots.innerHTML =
-                    "";
-
-            }
-
-            return;
-
-        }
-
-
-        heroCarousel.style.display =
-            "block";
-
-
-        // ----------------------------------------------------
-        // CREATE SLIDES
-        // ----------------------------------------------------
-
-        carouselItems.forEach(
-            (item, index) => {
-
-                const slide =
-                    document.createElement(
-                        "article"
-                    );
-
-
-      
+    box-shadow:
+        0 10px 28
