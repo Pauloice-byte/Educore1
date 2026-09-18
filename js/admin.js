@@ -93,43 +93,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setupCarouselControls() {
 
-        const createButton =
-            $("create-carousel-button");
+    const createButton =
+        $("#create-carousel-button");
 
-        const searchInput =
-            $("carousel-search");
+    const searchInput =
+        $("#carousel-search");
 
-        const filterSelect =
-            $("carousel-filter");
-
-
-        if (createButton) {
-
-            createButton.addEventListener(
-                "click",
-                () => openCarouselModal()
-            );
-        }
+    const filterSelect =
+        $("#carousel-filter");
 
 
-        if (searchInput) {
+    /* =================================================
+       CREATE PROMOTION
+    ================================================= */
 
-            searchInput.addEventListener(
-                "input",
-                renderCarouselItems
-            );
-        }
+    if (createButton) {
 
+        createButton.addEventListener(
+            "click",
+            event => {
 
-        if (filterSelect) {
+                event.preventDefault();
+                event.stopPropagation();
 
-            filterSelect.addEventListener(
-                "change",
-                renderCarouselItems
-            );
-        }
+                console.log(
+                    "Create Promotion button clicked."
+                );
+
+                openCarouselModal();
+
+            }
+        );
+
+    } else {
+
+        console.warn(
+            'Create Promotion button not found: "#create-carousel-button"'
+        );
     }
 
+
+    /* =================================================
+       SEARCH
+    ================================================= */
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            renderCarouselItems
+        );
+    }
+
+
+    /* =================================================
+       FILTER
+    ================================================= */
+
+    if (filterSelect) {
+
+        filterSelect.addEventListener(
+            "change",
+            renderCarouselItems
+        );
+    }
+}
 
     /* =====================================================
        NAVIGATION
