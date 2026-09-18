@@ -1,6 +1,6 @@
 /* =========================================================
    EDUCORE ADMIN
-   PHASE 4 — COURSE MANAGEMENT
+   PHASE 4 — COURSE MANAGEMENT + CAROUSEL
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -38,6 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let courseModal = null;
 
+    let allCarouselItems = [];
+
+    let editingCarouselItemId = null;
+
+    let carouselModal = null;
+
 
     /* =====================================================
        DOM HELPERS
@@ -68,6 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setupCourseControls();
 
+        setupCarouselControls();
+
         setupDashboardRetry();
 
         await loadAdminUser();
@@ -75,6 +83,52 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadDashboard();
 
         await loadCourses();
+
+        await loadCarouselItems();
+    }
+
+
+    /* =====================================================
+       CAROUSEL CONTROLS
+    ===================================================== */
+
+    function setupCarouselControls() {
+
+        const createButton =
+            $("create-carousel-button");
+
+        const searchInput =
+            $("carousel-search");
+
+        const filterSelect =
+            $("carousel-filter");
+
+
+        if (createButton) {
+
+            createButton.addEventListener(
+                "click",
+                () => openCarouselModal()
+            );
+        }
+
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                renderCarouselItems
+            );
+        }
+
+
+        if (filterSelect) {
+
+            filterSelect.addEventListener(
+                "change",
+                renderCarouselItems
+            );
+        }
     }
 
 
@@ -86,17 +140,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         $$(".nav-item").forEach(button => {
 
-            button.addEventListener("click", () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const section =
-                    button.dataset.section;
+                    const section =
+                        button.dataset.section;
 
-                if (!section) return;
+                    if (!section) return;
 
-                showSection(section);
+                    showSection(section);
 
-                closeMobileSidebar();
-            });
+                    closeMobileSidebar();
+                }
+            );
 
         });
     }
@@ -140,6 +197,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             loadCourses();
         }
+
+
+        if (section === "carousel") {
+
+            loadCarouselItems();
+        }
     }
 
 
@@ -164,22 +227,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (toggle) {
 
-            toggle.addEventListener("click", () => {
+            toggle.addEventListener(
+                "click",
+                () => {
 
-                if (window.innerWidth <= 768) {
+                    if (window.innerWidth <= 768) {
 
-                    app?.classList.toggle(
-                        "sidebar-open"
-                    );
+                        app?.classList.toggle(
+                            "sidebar-open"
+                        );
 
-                } else {
+                    } else {
 
-                    app?.classList.toggle(
-                        "sidebar-collapsed"
-                    );
+                        app?.classList.toggle(
+                            "sidebar-collapsed"
+                        );
+                    }
+
                 }
-
-            });
+            );
         }
 
 
@@ -735,12 +801,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        /*
-            IMPORTANT:
-            We use the button already present in HTML.
-            We do NOT create another button.
-        */
-
         $("#create-course-button")
             ?.addEventListener(
                 "click",
@@ -838,6 +898,1239 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
         }
+    }
+
+
+    /* =====================================================
+       LOAD CAROUSEL ITEMS
+    ===================================================== */
+
+    async function loadCarouselItems() {
+
+        const list =
+            $("#carousel-list");
+
+
+        if (list) {
+
+            list.innerHTML = `
+                <div class="courses-loading">
+                    Loading promotions...
+                </div>
+            `;
+        }
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("carousel_items")
+                    .select("*")
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) throw error;
+
+
+            allCarouselItems =
+                data || [];
+
+
+            renderCarouselItems();
+
+        } catch (error) {
+
+            console.error(
+                "Error loading carousel items:",
+                error
+            );
+
+
+            if (list) {
+
+                list.innerHTML = `
+                    <div class="courses-loading">
+                        Unable to load promotions.
+                    </div>
+                `;
+            }
+        }
+    }
+
+
+    /* =====================================================
+       RENDER CAROUSEL ITEMS
+    ===================================================== */
+
+    function renderCarouselItems() {
+
+        const list =
+            $("#carousel-list");
+
+        const count =
+            $("#carousel-count");
+
+
+        if (!list) return;
+
+
+        const searchInput =
+            $("#carousel-search");
+
+        const filterSelect =
+            $("#carousel-filter");
+
+
+        const searchTerm =
+            searchInput
+                ? searchInput.value
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+
+        const filter =
+            filterSelect
+                ? filterSelect.value
+                : "all";
+
+
+        let filteredItems =
+            [...allCarouselItems];
+
+
+        if (filter !== "all") {
+
+            filteredItems =
+                filteredItems.filter(
+                    item =>
+                        item.status === filter
+                );
+        }
+
+
+        if (searchTerm) {
+
+            filteredItems =
+                filteredItems.filter(item => {
+
+                    const title =
+                        (item.title || "")
+                            .toLowerCase();
+
+                    const description =
+                        (item.description || "")
+                            .toLowerCase();
+
+                    const area =
+                        (item.area || "")
+                            .toLowerCase();
+
+
+                    return (
+                        title.includes(searchTerm) ||
+                        description.includes(searchTerm) ||
+                        area.includes(searchTerm)
+                    );
+                });
+        }
+
+
+        if (count) {
+
+            count.textContent =
+                `${filteredItems.length} ${
+                    filteredItems.length === 1
+                        ? "promotion"
+                        : "promotions"
+                }`;
+        }
+
+
+        if (!filteredItems.length) {
+
+            list.innerHTML = `
+                <div class="courses-loading">
+                    No promotions found.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        list.innerHTML =
+            filteredItems
+                .map(renderCarouselRow)
+                .join("");
+
+
+        attachCarouselActions();
+    }
+
+
+    /* =====================================================
+       CAROUSEL ROW
+    ===================================================== */
+
+    function renderCarouselRow(item) {
+
+        const startDate =
+            item.start_date
+                ? formatDate(item.start_date)
+                : "—";
+
+
+        const endDate =
+            item.end_date
+                ? formatDate(item.end_date)
+                : "—";
+
+
+        const status =
+            normalizeCarouselStatus(
+                item.status
+            );
+
+
+        const image =
+            item.image_url
+                ? `
+                    <img
+                        src="${escapeAttribute(item.image_url)}"
+                        alt="${escapeAttribute(item.title)}"
+                        onerror="this.style.display='none';"
+                    >
+                `
+                : `
+                    <div class="course-cover-placeholder">
+                        ▤
+                    </div>
+                `;
+
+
+        return `
+            <div
+                class="course-row carousel-row"
+                data-carousel-id="${escapeAttribute(item.id)}"
+            >
+
+                <div class="course-main">
+
+                    <div class="course-cover">
+                        ${image}
+                    </div>
+
+                    <div class="course-info">
+
+                        <div class="course-title">
+                            ${escapeHTML(
+                                item.title ||
+                                "Untitled Promotion"
+                            )}
+                        </div>
+
+                        <div class="course-description">
+                            ${escapeHTML(
+                                item.description ||
+                                "Promotional content."
+                            )}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="course-category">
+                    ${escapeHTML(
+                        formatCarouselArea(
+                            item.area
+                        )
+                    )}
+                </div>
+
+
+                <div class="course-level">
+                    <span class="course-status ${status}">
+                        ${escapeHTML(status)}
+                    </span>
+                </div>
+
+
+                <div class="course-updated">
+                    ${startDate}
+                </div>
+
+
+                <div class="course-updated">
+                    ${endDate}
+                </div>
+
+
+                <div class="course-actions">
+
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-carousel-action="edit"
+                        data-carousel-id="${escapeAttribute(item.id)}"
+                    >
+                        Edit
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="course-action-button danger"
+                        data-carousel-action="delete"
+                        data-carousel-id="${escapeAttribute(item.id)}"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       CAROUSEL ACTIONS
+    ===================================================== */
+
+    function attachCarouselActions() {
+
+        $$(".course-action-button").forEach(button => {
+
+            const action =
+                button.dataset.carouselAction;
+
+
+            if (!action) return;
+
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const id =
+                        button.dataset.carouselId;
+
+
+                    if (!id) return;
+
+
+                    const item =
+                        allCarouselItems.find(
+                            carouselItem =>
+                                String(carouselItem.id) ===
+                                String(id)
+                        );
+
+
+                    if (!item) return;
+
+
+                    if (action === "edit") {
+
+                        openCarouselModal(item);
+
+                        return;
+                    }
+
+
+                    if (action === "delete") {
+
+                        await deleteCarouselItem(item);
+                    }
+
+                }
+            );
+        });
+    }
+
+
+    /* =====================================================
+       DELETE CAROUSEL ITEM
+    ===================================================== */
+
+    async function deleteCarouselItem(item) {
+
+        const confirmed =
+            confirm(
+                `Delete "${item.title}"?`
+            );
+
+
+        if (!confirmed) return;
+
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("carousel_items")
+                    .delete()
+                    .eq(
+                        "id",
+                        item.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await loadCarouselItems();
+
+        } catch (error) {
+
+            console.error(
+                "Error deleting carousel item:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to delete this promotion."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       OPEN CAROUSEL MODAL
+    ===================================================== */
+
+    function openCarouselModal(item = null) {
+
+        editingCarouselItemId =
+            item?.id || null;
+
+
+        if (carouselModal) {
+
+            carouselModal.remove();
+
+            carouselModal = null;
+        }
+
+
+        carouselModal =
+            document.createElement("div");
+
+
+        carouselModal.className =
+            "admin-modal-overlay";
+
+
+        carouselModal.innerHTML = `
+            <div class="admin-modal">
+
+                <div class="admin-modal-header">
+
+                    <div>
+
+                        <div class="section-kicker">
+                            FEATURED CONTENT
+                        </div>
+
+                        <h2>
+                            ${
+                                item
+                                    ? "Edit Promotion"
+                                    : "Create Promotion"
+                            }
+                        </h2>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="admin-modal-close"
+                        id="close-carousel-modal"
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form id="carousel-form">
+
+                    <div class="form-group">
+
+                        <label for="carousel-title">
+                            Title
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carousel-title"
+                            required
+                            maxlength="200"
+                            value="${escapeAttribute(
+                                item?.title || ""
+                            )}"
+                            placeholder="Promotion title"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="carousel-description">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="carousel-description"
+                            rows="4"
+                            maxlength="5000"
+                            placeholder="Short promotional message"
+                        >${escapeHTML(
+                            item?.description || ""
+                        )}</textarea>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="carousel-image">
+                            Image URL
+                        </label>
+
+                        <input
+                            type="url"
+                            id="carousel-image"
+                            value="${escapeAttribute(
+                                item?.image_url || ""
+                            )}"
+                            placeholder="https://..."
+                        >
+
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="carousel-area">
+                                Area
+                            </label>
+
+                            <select id="carousel-area">
+
+                                <option
+                                    value="all"
+                                    ${
+                                        item?.area === "all"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    All Areas
+                                </option>
+
+                                <option
+                                    value="language"
+                                    ${
+                                        item?.area === "language"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Language
+                                </option>
+
+                                <option
+                                    value="ms-office"
+                                    ${
+                                        item?.area === "ms-office"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    MS Office
+                                </option>
+
+                                <option
+                                    value="trading"
+                                    ${
+                                        item?.area === "trading"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Trading
+                                </option>
+
+                                <option
+                                    value="business"
+                                    ${
+                                        item?.area === "business"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Business
+                                </option>
+
+                                <option
+                                    value="technology"
+                                    ${
+                                        item?.area === "technology"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Technology
+                                </option>
+
+                                <option
+                                    value="finance"
+                                    ${
+                                        item?.area === "finance"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Finance
+                                </option>
+
+                                <option
+                                    value="personal-development"
+                                    ${
+                                        item?.area === "personal-development"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Personal Development
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="carousel-status">
+                                Status
+                            </label>
+
+                            <select id="carousel-status">
+
+                                <option
+                                    value="draft"
+                                    ${
+                                        item?.status !== "published"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Draft
+                                </option>
+
+                                <option
+                                    value="published"
+                                    ${
+                                        item?.status === "published"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Published
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="carousel-start-date">
+                                Start Date
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                id="carousel-start-date"
+                                value="${formatDateTimeLocal(
+                                    item?.start_date
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="carousel-end-date">
+                                End Date
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                id="carousel-end-date"
+                                value="${formatDateTimeLocal(
+                                    item?.end_date
+                                )}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="carousel-button-text">
+                                Button Text
+                            </label>
+
+                            <input
+                                type="text"
+                                id="carousel-button-text"
+                                maxlength="100"
+                                value="${escapeAttribute(
+                                    item?.button_text ||
+                                    "Learn More"
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="carousel-sort-order">
+                                Sort Order
+                            </label>
+
+                            <input
+                                type="number"
+                                id="carousel-sort-order"
+                                min="0"
+                                step="1"
+                                value="${item?.sort_order ?? 0}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="carousel-button-url">
+                            Button URL
+                        </label>
+
+                        <input
+                            type="url"
+                            id="carousel-button-url"
+                            value="${escapeAttribute(
+                                item?.button_url || ""
+                            )}"
+                            placeholder="https://..."
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="carousel-form-error"
+                        class="course-form-error"
+                        hidden
+                    ></div>
+
+
+                    <div class="admin-modal-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="cancel-carousel-modal"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="carousel-save-button"
+                        >
+                            ${
+                                item
+                                    ? "Save Changes"
+                                    : "Create Promotion"
+                            }
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        `;
+
+
+        document.body.appendChild(
+            carouselModal
+        );
+
+
+        $("#close-carousel-modal")
+            ?.addEventListener(
+                "click",
+                closeCarouselModal
+            );
+
+
+        $("#cancel-carousel-modal")
+            ?.addEventListener(
+                "click",
+                closeCarouselModal
+            );
+
+
+        $("#carousel-form")
+            ?.addEventListener(
+                "submit",
+                saveCarouselItem
+            );
+
+
+        setTimeout(() => {
+
+            $("#carousel-title")?.focus();
+
+        }, 50);
+    }
+
+
+    /* =====================================================
+       CLOSE CAROUSEL MODAL
+    ===================================================== */
+
+    function closeCarouselModal() {
+
+        if (!carouselModal) return;
+
+
+        carouselModal.remove();
+
+        carouselModal =
+            null;
+
+
+        editingCarouselItemId =
+            null;
+    }
+
+
+    /* =====================================================
+       SAVE CAROUSEL ITEM
+    ===================================================== */
+
+    async function saveCarouselItem(event) {
+
+        event.preventDefault();
+
+
+        const title =
+            $("#carousel-title")
+                ?.value
+                .trim();
+
+
+        const description =
+            $("#carousel-description")
+                ?.value
+                .trim();
+
+
+        const imageUrl =
+            $("#carousel-image")
+                ?.value
+                .trim();
+
+
+        const area =
+            $("#carousel-area")
+                ?.value ||
+            "all";
+
+
+        const status =
+            $("#carousel-status")
+                ?.value ||
+            "draft";
+
+
+        const startDate =
+            $("#carousel-start-date")
+                ?.value;
+
+
+        const endDate =
+            $("#carousel-end-date")
+                ?.value;
+
+
+        const buttonText =
+            $("#carousel-button-text")
+                ?.value
+                .trim() ||
+            "Learn More";
+
+
+        const buttonUrl =
+            $("#carousel-button-url")
+                ?.value
+                .trim();
+
+
+        const sortOrderRaw =
+            $("#carousel-sort-order")
+                ?.value
+                .trim();
+
+
+        const sortOrder =
+            sortOrderRaw === ""
+                ? 0
+                : Number(sortOrderRaw);
+
+
+        const errorElement =
+            $("#carousel-form-error");
+
+
+        const saveButton =
+            $("#carousel-save-button");
+
+
+        if (errorElement) {
+
+            errorElement.textContent = "";
+
+            errorElement.hidden = true;
+        }
+
+
+        if (!title) {
+
+            showCarouselFormError(
+                "Promotion title is required."
+            );
+
+            return;
+        }
+
+
+        if (
+            Number.isNaN(sortOrder) ||
+            sortOrder < 0
+        ) {
+
+            showCarouselFormError(
+                "Sort order must be a valid number."
+            );
+
+            return;
+        }
+
+
+        if (
+            startDate &&
+            endDate &&
+            new Date(startDate) >
+            new Date(endDate)
+        ) {
+
+            showCarouselFormError(
+                "The end date cannot be earlier than the start date."
+            );
+
+            return;
+        }
+
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.textContent =
+                editingCarouselItemId
+                    ? "Saving..."
+                    : "Creating...";
+        }
+
+
+        try {
+
+            const carouselData = {
+
+                title,
+
+                description:
+                    description || null,
+
+                image_url:
+                    imageUrl || null,
+
+                area,
+
+                button_text:
+                    buttonText,
+
+                button_url:
+                    buttonUrl || null,
+
+                status,
+
+                start_date:
+                    startDate
+                        ? new Date(startDate).toISOString()
+                        : null,
+
+                end_date:
+                    endDate
+                        ? new Date(endDate).toISOString()
+                        : null,
+
+                sort_order:
+                    sortOrder
+            };
+
+
+            if (editingCarouselItemId) {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("carousel_items")
+                        .update(carouselData)
+                        .eq(
+                            "id",
+                            editingCarouselItemId
+                        );
+
+
+                if (error) throw error;
+
+            } else {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("carousel_items")
+                        .insert(
+                            carouselData
+                        );
+
+
+                if (error) throw error;
+            }
+
+
+            closeCarouselModal();
+
+
+            await loadCarouselItems();
+
+        } catch (error) {
+
+            console.error(
+                "Could not save carousel item:",
+                error
+            );
+
+
+            showCarouselFormError(
+                error.message ||
+                "Could not save the promotion."
+            );
+
+        } finally {
+
+            if (saveButton) {
+
+                saveButton.disabled =
+                    false;
+
+                saveButton.textContent =
+                    editingCarouselItemId
+                        ? "Save Changes"
+                        : "Create Promotion";
+            }
+        }
+    }
+
+
+    function showCarouselFormError(message) {
+
+        const element =
+            $("#carousel-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+            message;
+
+
+        element.hidden =
+            false;
+    }
+
+
+    /* =====================================================
+       CAROUSEL UTILITIES
+    ===================================================== */
+
+    function normalizeCarouselStatus(status) {
+
+        return status === "published"
+            ? "published"
+            : "draft";
+    }
+
+
+    function formatCarouselArea(area) {
+
+        const areas = {
+
+            "all":
+                "All Areas",
+
+            "language":
+                "Language",
+
+            "ms-office":
+                "MS Office",
+
+            "trading":
+                "Trading",
+
+            "business":
+                "Business",
+
+            "technology":
+                "Technology",
+
+            "finance":
+                "Finance",
+
+            "personal-development":
+                "Personal Development"
+        };
+
+
+        return areas[area] ||
+            "All Areas";
+    }
+
+
+    function formatDateTimeLocal(dateValue) {
+
+        if (!dateValue) return "";
+
+
+        const date =
+            new Date(dateValue);
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "";
+        }
+
+
+        const year =
+            date.getFullYear();
+
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const hours =
+            String(
+                date.getHours()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const minutes =
+            String(
+                date.getMinutes()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
 
@@ -1159,6 +2452,19 @@ document.addEventListener("DOMContentLoaded", () => {
         $$(".course-action-button")
             .forEach(button => {
 
+                /*
+                    Carousel buttons also use
+                    .course-action-button.
+
+                    If a carousel action exists,
+                    this is not a course button.
+                */
+
+                if (button.dataset.carouselAction) {
+                    return;
+                }
+
+
                 button.addEventListener(
                     "click",
                     async () => {
@@ -1335,42 +2641,42 @@ document.addEventListener("DOMContentLoaded", () => {
                             </label>
 
                             <select
-    id="course-category-input"
-    name="category"
-    required
->
-    <option value="">
-        Select a category
-    </option>
+                                id="course-category-input"
+                                name="category"
+                                required
+                            >
+                                <option value="">
+                                    Select a category
+                                </option>
 
-    <option value="Language">
-        Language
-    </option>
+                                <option value="Language">
+                                    Language
+                                </option>
 
-    <option value="MS Office">
-        MS Office
-    </option>
+                                <option value="MS Office">
+                                    MS Office
+                                </option>
 
-    <option value="Trading">
-        Trading
-    </option>
+                                <option value="Trading">
+                                    Trading
+                                </option>
 
-    <option value="Business">
-        Business
-    </option>
+                                <option value="Business">
+                                    Business
+                                </option>
 
-    <option value="Technology">
-        Technology
-    </option>
+                                <option value="Technology">
+                                    Technology
+                                </option>
 
-    <option value="Finance">
-        Finance
-    </option>
+                                <option value="Finance">
+                                    Finance
+                                </option>
 
-    <option value="Personal Development">
-        Personal Development
-    </option>
-</select>
+                                <option value="Personal Development">
+                                    Personal Development
+                                </option>
+                            </select>
 
                         </div>
 
@@ -1559,10 +2865,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* =================================================
-           MODAL EVENTS — ATTACHED ONCE
-        ================================================= */
-
         courseModal
             .querySelector("#course-form")
             .addEventListener(
@@ -1648,7 +2950,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       OPEN MODAL
+       OPEN COURSE MODAL
     ===================================================== */
 
     function openCourseModal(course = null) {
@@ -1672,7 +2974,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         form.reset();
-
 
         clearFormError();
 
@@ -1704,11 +3005,6 @@ document.addEventListener("DOMContentLoaded", () => {
         form.elements.sort_order.value =
             course?.sort_order ?? "";
 
-
-        /*
-            If the existing course has an image,
-            use URL mode for the existing image.
-        */
 
         if (course?.cover_image) {
 
@@ -1743,7 +3039,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       CLOSE MODAL
+       CLOSE COURSE MODAL
     ===================================================== */
 
     function closeCourseModal() {
@@ -1784,6 +3080,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 closeCourseModal();
+
+                return;
+            }
+
+
+            if (
+                event.key === "Escape" &&
+                carouselModal
+            ) {
+
+                closeCarouselModal();
             }
 
         }
@@ -1855,10 +3162,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-
-        /*
-            Limit: 5 MB
-        */
 
         if (file.size > 5 * 1024 * 1024) {
 
@@ -2112,11 +3415,6 @@ document.addEventListener("DOMContentLoaded", () => {
             let finalCoverUrl =
                 coverUrl || null;
 
-
-            /*
-                If a new file was selected,
-                upload it first.
-            */
 
             if (
                 coverFile &&
