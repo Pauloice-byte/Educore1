@@ -1813,10 +1813,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         filterCourses();
 
 
-        // ----------------------------------------------------
-        // KEEP CAROUSEL IN TANDEM WITH THE ACTIVE AREA
-        // ----------------------------------------------------
-
         createHeroCarousel();
 
     }
