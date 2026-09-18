@@ -2103,22 +2103,34 @@ a {
 .hero-course-slide {
     flex-direction: column;
 
-    justify-content: center;
+    justify-content: flex-start;
 
-    gap: 20px;
+    align-items: center;
+
+    gap: 18px;
+
+    padding-top: 30px;
 
     text-align: center;
 }
 
 
 .hero-course-cover-wrapper {
-    width: 130px;
-    min-width: 130px;
+    width: 145px;
+    min-width: 145px;
+
+    flex-shrink: 0;
 }
 
 
 .hero-course-information {
     width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
 }
 
 
