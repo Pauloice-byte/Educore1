@@ -1712,6 +1712,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(
             carouselModal
         );
+       carouselModal.classList.add("open");
+
+document.body.classList.add(
+    "modal-open"
+);
 
 
         $("#close-carousel-modal")
@@ -1749,18 +1754,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function closeCarouselModal() {
 
-        if (!carouselModal) return;
+    if (!carouselModal) return;
 
+    carouselModal.remove();
 
-        carouselModal.remove();
+    carouselModal = null;
 
-        carouselModal =
-            null;
+    editingCarouselItemId = null;
 
-
-        editingCarouselItemId =
-            null;
-    }
+    document.body.classList.remove(
+        "modal-open"
+    );
+}
 
 
     /* =====================================================
