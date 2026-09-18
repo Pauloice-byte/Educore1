@@ -1335,26 +1335,55 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
+        /*
+            IMPORTANT:
+
+            The existing admin.css does not contain
+            .admin-modal-* styles.
+
+            It already contains the complete
+            .course-modal-* system.
+
+            Therefore the carousel modal uses the
+            exact same modal structure and CSS.
+        */
+
         carouselModal =
             document.createElement("div");
 
 
+        carouselModal.id =
+            "carousel-modal";
+
+
         carouselModal.className =
-            "admin-modal-overlay";
+            "course-modal open";
 
 
         carouselModal.innerHTML = `
-            <div class="admin-modal">
 
-                <div class="admin-modal-header">
+            <div
+                class="course-modal-backdrop"
+                data-close-carousel-modal="true"
+            ></div>
+
+
+            <div
+                class="course-modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="carousel-modal-title"
+            >
+
+                <div class="course-modal-header">
 
                     <div>
 
-                        <div class="section-kicker">
+                        <div class="course-modal-kicker">
                             FEATURED CONTENT
                         </div>
 
-                        <h2>
+                        <h2 id="carousel-modal-title">
                             ${
                                 item
                                     ? "Edit Promotion"
@@ -1367,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <button
                         type="button"
-                        class="admin-modal-close"
+                        class="course-modal-close"
                         id="close-carousel-modal"
                         aria-label="Close"
                     >
@@ -1377,17 +1406,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
 
-                <form id="carousel-form">
+                <form
+                    id="carousel-form"
+                    class="course-form"
+                    novalidate
+                >
 
-                    <div class="form-group">
+                    <div class="course-form-field">
 
                         <label for="carousel-title">
-                            Title
+                            Title *
                         </label>
 
                         <input
                             type="text"
                             id="carousel-title"
+                            name="title"
                             required
                             maxlength="200"
                             value="${escapeAttribute(
@@ -1399,7 +1433,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-group">
+                    <div class="course-form-field">
 
                         <label for="carousel-description">
                             Description
@@ -1407,6 +1441,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <textarea
                             id="carousel-description"
+                            name="description"
                             rows="4"
                             maxlength="5000"
                             placeholder="Short promotional message"
@@ -1417,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-group">
+                    <div class="course-form-field">
 
                         <label for="carousel-image">
                             Image URL
@@ -1426,6 +1461,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input
                             type="url"
                             id="carousel-image"
+                            name="image_url"
                             value="${escapeAttribute(
                                 item?.image_url || ""
                             )}"
@@ -1435,20 +1471,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-row">
+                    <div class="course-form-grid">
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-area">
                                 Area
                             </label>
 
-                            <select id="carousel-area">
+                            <select
+                                id="carousel-area"
+                                name="area"
+                            >
 
                                 <option
                                     value="all"
                                     ${
-                                        item?.area === "all"
+                                        item?.area === "all" ||
+                                        !item?.area
                                             ? "selected"
                                             : ""
                                     }
@@ -1538,13 +1578,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
 
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-status">
                                 Status
                             </label>
 
-                            <select id="carousel-status">
+                            <select
+                                id="carousel-status"
+                                name="status"
+                            >
 
                                 <option
                                     value="draft"
@@ -1575,9 +1618,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-row">
+                    <div class="course-form-grid">
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-start-date">
                                 Start Date
@@ -1586,6 +1629,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="datetime-local"
                                 id="carousel-start-date"
+                                name="start_date"
                                 value="${formatDateTimeLocal(
                                     item?.start_date
                                 )}"
@@ -1594,7 +1638,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
 
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-end-date">
                                 End Date
@@ -1603,6 +1647,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="datetime-local"
                                 id="carousel-end-date"
+                                name="end_date"
                                 value="${formatDateTimeLocal(
                                     item?.end_date
                                 )}"
@@ -1613,9 +1658,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-row">
+                    <div class="course-form-grid">
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-button-text">
                                 Button Text
@@ -1624,17 +1669,19 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="text"
                                 id="carousel-button-text"
+                                name="button_text"
                                 maxlength="100"
                                 value="${escapeAttribute(
                                     item?.button_text ||
                                     "Learn More"
                                 )}"
+                                placeholder="Learn More"
                             >
 
                         </div>
 
 
-                        <div class="form-group">
+                        <div class="course-form-field">
 
                             <label for="carousel-sort-order">
                                 Sort Order
@@ -1643,6 +1690,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="number"
                                 id="carousel-sort-order"
+                                name="sort_order"
                                 min="0"
                                 step="1"
                                 value="${item?.sort_order ?? 0}"
@@ -1653,7 +1701,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
-                    <div class="form-group">
+                    <div class="course-form-field">
 
                         <label for="carousel-button-url">
                             Button URL
@@ -1662,6 +1710,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input
                             type="url"
                             id="carousel-button-url"
+                            name="button_url"
                             value="${escapeAttribute(
                                 item?.button_url || ""
                             )}"
@@ -1678,7 +1727,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ></div>
 
 
-                    <div class="admin-modal-actions">
+                    <div class="course-form-actions">
 
                         <button
                             type="button"
@@ -1712,37 +1761,65 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(
             carouselModal
         );
-       carouselModal.classList.add("open");
-
-document.body.classList.add(
-    "modal-open"
-);
 
 
-        $("#close-carousel-modal")
+        document.body.classList.add(
+            "modal-open"
+        );
+
+
+        carouselModal
+            .querySelector(
+                "#close-carousel-modal"
+            )
             ?.addEventListener(
                 "click",
                 closeCarouselModal
             );
 
 
-        $("#cancel-carousel-modal")
+        carouselModal
+            .querySelector(
+                "#cancel-carousel-modal"
+            )
             ?.addEventListener(
                 "click",
                 closeCarouselModal
             );
 
 
-        $("#carousel-form")
+        carouselModal
+            .querySelector(
+                "#carousel-form"
+            )
             ?.addEventListener(
                 "submit",
                 saveCarouselItem
             );
 
 
+        carouselModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target.dataset
+                        .closeCarouselModal === "true"
+                ) {
+
+                    closeCarouselModal();
+                }
+            }
+        );
+
+
         setTimeout(() => {
 
-            $("#carousel-title")?.focus();
+            carouselModal
+                ?.querySelector(
+                    "#carousel-title"
+                )
+                ?.focus();
 
         }, 50);
     }
@@ -1754,18 +1831,28 @@ document.body.classList.add(
 
     function closeCarouselModal() {
 
-    if (!carouselModal) return;
+        if (!carouselModal) return;
 
-    carouselModal.remove();
 
-    carouselModal = null;
+        carouselModal.classList.remove(
+            "open"
+        );
 
-    editingCarouselItemId = null;
 
-    document.body.classList.remove(
-        "modal-open"
-    );
-}
+        carouselModal.remove();
+
+
+        carouselModal = null;
+
+
+        editingCarouselItemId =
+            null;
+
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+    }
 
 
     /* =====================================================
@@ -2457,14 +2544,6 @@ document.body.classList.add(
         $$(".course-action-button")
             .forEach(button => {
 
-                /*
-                    Carousel buttons also use
-                    .course-action-button.
-
-                    If a carousel action exists,
-                    this is not a course button.
-                */
-
                 if (button.dataset.carouselAction) {
                     return;
                 }
@@ -2705,7 +2784,6 @@ document.body.classList.add(
                     </div>
 
 
-                    <!-- COVER IMAGE -->
                     <div class="course-form-field">
 
                         <label>
