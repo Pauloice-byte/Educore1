@@ -124,6 +124,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     let heroCarouselTimer = null;
 
+    let heroTouchStartX = 0;
+    
+    let heroTouchEndX = 0;
+
+    /* =========================================
+   MOBILE SWIPE
+========================================= */
+
+if (heroCarousel) {
+
+    heroCarousel.addEventListener(
+        "touchstart",
+        (event) => {
+
+            heroTouchStartX =
+                event.touches[0].clientX;
+
+        },
+        { passive: true }
+    );
+
+
+    heroCarousel.addEventListener(
+        "touchend",
+        (event) => {
+
+            heroTouchEndX =
+                event.changedTouches[0].clientX;
+
+            const swipeDistance =
+                heroTouchEndX -
+                heroTouchStartX;
+
+
+            /* Swipe left = next */
+
+            if (swipeDistance < -50) {
+
+                nextHeroSlide();
+
+            }
+
+
+            /* Swipe right = previous */
+
+            if (swipeDistance > 50) {
+
+                previousHeroSlide();
+
+            }
+
+        },
+        { passive: true }
+    );
+
+}
     // ========================================================
     // AUTHENTICATION / SESSION
     // ========================================================
