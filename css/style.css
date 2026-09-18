@@ -555,21 +555,20 @@ a {
 
 
 /* =========================================
-   STANDALONE HOMEPAGE HERO
+   COURSE / PROMOTION CAROUSEL
 ========================================= */
 
-.homepage-hero {
+.hero-carousel {
     position: relative;
 
-    min-height: 310px;
+    min-height: 430px;
 
-    display: flex;
-
-    align-items: center;
-
-    padding: 55px 7%;
+    margin:
+        28px 7% 0;
 
     overflow: hidden;
+
+    border-radius: 20px;
 
     background:
         linear-gradient(
@@ -577,47 +576,48 @@ a {
             #ffffff 0%,
             #fafbff 100%
         );
+
+    border:
+        1px solid #eef0f4;
+
+    box-shadow:
+        0 12px 35px rgba(25, 29, 40, 0.045);
 }
 
 
-.homepage-hero-content {
+.hero-carousel-track {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 430px;
+}
+
+
+/* =========================================
+   HERO / INTRO SLIDE
+========================================= */
+
+.hero-intro-slide {
+    align-items: center;
+
+    justify-content: flex-start;
+}
+
+
+.hero-content {
     position: relative;
 
     z-index: 5;
 
+    width: 100%;
+
     max-width: 700px;
-
-    animation:
-        homepageHeroReveal
-        0.8s
-        cubic-bezier(0.22, 1, 0.36, 1)
-        both;
-}
-
-
-@keyframes homepageHeroReveal {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(25px)
-            scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
-
 }
 
 
 .hero-label {
-    margin-bottom: 14px;
+    margin-bottom: 15px;
 
     color: #737bd4;
 
@@ -629,29 +629,31 @@ a {
 }
 
 
-.homepage-hero h1 {
+.hero-intro-slide h1 {
+    color: #171a21;
+
     font-size:
-        clamp(38px, 4vw, 54px);
+        clamp(42px, 5vw, 64px);
 
-    line-height: 1.03;
+    line-height: 1.02;
 
-    letter-spacing: -2.8px;
+    letter-spacing: -3.2px;
 
     font-weight: 760;
 }
 
 
-.homepage-hero h1 span {
+.hero-intro-slide h1 span {
     display: block;
 
-    color: #7079d9;
+    color: #737bd4;
 }
 
 
-.homepage-hero p {
+.hero-intro-slide p {
     max-width: 560px;
 
-    margin-top: 19px;
+    margin-top: 21px;
 
     color: #7d8089;
 
@@ -662,7 +664,7 @@ a {
 
 
 /* =========================================
-   HERO DECORATION
+   CAROUSEL BACKGROUND DECORATION
 ========================================= */
 
 .hero-background-circle {
@@ -671,15 +673,17 @@ a {
     border-radius: 50%;
 
     pointer-events: none;
+
+    z-index: 0;
 }
 
 
 .circle-one {
-    width: 430px;
-    height: 430px;
+    width: 500px;
+    height: 500px;
 
-    right: -150px;
-    top: -230px;
+    right: -175px;
+    top: -290px;
 
     border:
         1px solid rgba(108, 119, 219, 0.12);
@@ -687,11 +691,11 @@ a {
 
 
 .circle-two {
-    width: 270px;
-    height: 270px;
+    width: 310px;
+    height: 310px;
 
-    right: 12%;
-    bottom: -200px;
+    right: 9%;
+    bottom: -230px;
 
     background:
         rgba(105, 116, 220, 0.035);
@@ -699,36 +703,8 @@ a {
 
 
 /* =========================================
-   COURSE / PROMOTION CAROUSEL
+   GENERIC HERO SLIDE
 ========================================= */
-
-.hero-carousel {
-    position: relative;
-
-    min-height: 360px;
-
-    overflow: hidden;
-
-    background:
-        linear-gradient(
-            120deg,
-            #ffffff 0%,
-            #fafbff 100%
-        );
-
-    border-top:
-        1px solid #f0f1f4;
-}
-
-
-.hero-carousel-track {
-    position: relative;
-
-    width: 100%;
-
-    min-height: 360px;
-}
-
 
 .hero-slide {
     position: absolute;
@@ -736,13 +712,14 @@ a {
     inset: 0;
 
     width: 100%;
-    min-height: 360px;
+    min-height: 430px;
 
     display: flex;
 
     align-items: center;
 
-    padding: 45px 7%;
+    padding:
+        55px 7% 75px;
 
     opacity: 0;
 
@@ -783,13 +760,6 @@ a {
 
 .hero-course-slide {
     gap: 55px;
-
-    background:
-        linear-gradient(
-            120deg,
-            #ffffff 0%,
-            #fafbff 100%
-        );
 }
 
 
@@ -1023,7 +993,9 @@ a {
 .hero-slide.active
 .hero-course-information,
 .hero-slide.active
-.hero-promotion-information {
+.hero-promotion-information,
+.hero-slide.active
+.hero-content {
 
     animation:
         heroInformationReveal
@@ -1060,13 +1032,6 @@ a {
 
 .hero-promotion-slide {
     gap: 55px;
-
-    background:
-        linear-gradient(
-            120deg,
-            #ffffff 0%,
-            #fafbff 100%
-        );
 }
 
 
@@ -1277,6 +1242,8 @@ a {
 
 .library {
     position: relative;
+
+    margin-top: 34px;
 
     padding: 48px 7% 80px;
 
@@ -2176,6 +2143,23 @@ a {
         gap: 40px;
     }
 
+
+    .hero-carousel {
+        margin-top: 24px;
+
+        min-height: 410px;
+    }
+
+
+    .hero-carousel-track {
+        min-height: 410px;
+    }
+
+
+    .hero-slide {
+        min-height: 410px;
+    }
+
 }
 
 
@@ -2239,32 +2223,6 @@ a {
 
 
     /* =====================================
-       MOBILE STANDALONE HERO
-    ===================================== */
-
-    .homepage-hero {
-        min-height: 300px;
-
-        padding:
-            42px 24px;
-    }
-
-
-    .homepage-hero h1 {
-        font-size: 39px;
-
-        letter-spacing: -2px;
-    }
-
-
-    .homepage-hero p {
-        font-size: 13px;
-
-        line-height: 1.65;
-    }
-
-
-    /* =====================================
        MOBILE CAROUSEL
     ===================================== */
 
@@ -2272,6 +2230,11 @@ a {
         min-height: 0;
 
         height: auto;
+
+        margin:
+            18px 14px 0;
+
+        border-radius: 16px;
 
         overflow: hidden;
     }
@@ -2294,7 +2257,7 @@ a {
         height: auto;
 
         padding:
-            24px 20px 62px;
+            34px 20px 68px;
 
         display: flex;
 
@@ -2322,7 +2285,83 @@ a {
 
 
     /* =====================================
-       MOBILE COURSE SLIDE
+       MOBILE INTRO
+    ===================================== */
+
+    .hero-intro-slide {
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        align-items: flex-start;
+
+        min-height: 340px;
+
+        padding:
+            44px 24px 72px;
+    }
+
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+
+    .hero-label {
+        margin-bottom: 13px;
+
+        font-size: 8px;
+
+        letter-spacing: 1.5px;
+    }
+
+
+    .hero-intro-slide h1 {
+        font-size: 39px;
+
+        line-height: 1.02;
+
+        letter-spacing: -2.3px;
+    }
+
+
+    .hero-intro-slide p {
+        max-width: 100%;
+
+        margin-top: 18px;
+
+        font-size: 13px;
+
+        line-height: 1.65;
+    }
+
+
+    /* =====================================
+       MOBILE BACKGROUND CIRCLES
+    ===================================== */
+
+    .circle-one {
+        width: 330px;
+        height: 330px;
+
+        right: -160px;
+        top: -190px;
+    }
+
+
+    .circle-two {
+        width: 220px;
+        height: 220px;
+
+        right: 4%;
+        bottom: -170px;
+    }
+
+
+    /* =====================================
+       MOBILE COURSE / PROMOTION
     ===================================== */
 
     .hero-course-slide,
@@ -2333,28 +2372,22 @@ a {
     }
 
 
-    /*
-       The image takes the same width that
-       a library card receives in the 2-column
-       mobile grid.
-    */
-
     .hero-course-cover-wrapper,
     .hero-promotion-image-wrapper {
 
         width:
             calc(
-                (100vw - 54px) / 2
+                (100% - 14px) / 2
             );
 
         min-width:
             calc(
-                (100vw - 54px) / 2
+                (100% - 14px) / 2
             );
 
         max-width:
             calc(
-                (100vw - 54px) / 2
+                (100% - 14px) / 2
             );
 
         aspect-ratio: 3 / 4;
@@ -2365,6 +2398,11 @@ a {
 
         border-radius: 14px;
 
+    }
+
+
+    .hero-promotion-image-wrapper {
+        aspect-ratio: 3 / 4;
     }
 
 
@@ -2605,7 +2643,7 @@ a {
 
         right: 20px;
 
-        bottom: 16px;
+        bottom: 17px;
 
     }
 
@@ -2638,6 +2676,8 @@ a {
     ===================================== */
 
     .library {
+
+        margin-top: 26px;
 
         padding:
             38px 20px 60px;
@@ -2794,19 +2834,38 @@ a {
 
 @media (max-width: 430px) {
 
-    .homepage-hero {
+    .hero-carousel {
 
-        min-height: 280px;
+        margin:
+            16px 10px 0;
+
+        border-radius: 15px;
+    }
+
+
+    .hero-intro-slide {
+
+        min-height: 320px;
 
         padding:
-            38px 20px;
+            40px 20px 68px;
+    }
+
+
+    .hero-intro-slide h1 {
+
+        font-size: 34px;
+
+        letter-spacing: -2px;
 
     }
 
 
-    .homepage-hero h1 {
+    .hero-intro-slide p {
 
-        font-size: 34px;
+        font-size: 12px;
+
+        line-height: 1.6;
 
     }
 
@@ -2832,6 +2891,13 @@ a {
         height: 32px;
 
         font-size: 6.5px;
+
+    }
+
+
+    .library {
+
+        margin-top: 24px;
 
     }
 
