@@ -556,13 +556,48 @@ a {
 
 /* =========================================
    HERO AREA
+   Layout wrapper ONLY
 ========================================= */
 
 .hero-area {
-    position: relative;
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 24px;
 
     margin:
         28px 7% 0;
+}
+
+
+/* =========================================
+   SHARED CARD BACKGROUND DECORATION
+========================================= */
+
+.hero-background-circle {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+
+/* =========================================
+   PERMANENT INFORMATION CARD
+========================================= */
+
+.hero-information-card {
+    position: relative;
+
+    min-height: 350px;
+
+    display: flex;
+
+    align-items: center;
 
     overflow: hidden;
 
@@ -580,25 +615,13 @@ a {
 
     box-shadow:
         0 12px 35px rgba(25, 29, 40, 0.045);
+
+    padding:
+        55px 7% 58px;
 }
 
 
-/* =========================================
-   GLOBAL HERO BACKGROUND DECORATION
-========================================= */
-
-.hero-background-circle {
-    position: absolute;
-
-    border-radius: 50%;
-
-    pointer-events: none;
-
-    z-index: 0;
-}
-
-
-.circle-one {
+.information-circle-one {
     width: 500px;
     height: 500px;
 
@@ -610,7 +633,7 @@ a {
 }
 
 
-.circle-two {
+.information-circle-two {
     width: 310px;
     height: 310px;
 
@@ -619,26 +642,6 @@ a {
 
     background:
         rgba(105, 116, 220, 0.035);
-}
-
-
-/* =========================================
-   PERMANENT INFORMATION HERO
-========================================= */
-
-.hero-information-card {
-    position: relative;
-
-    z-index: 1;
-
-    min-height: 350px;
-
-    display: flex;
-
-    align-items: center;
-
-    padding:
-        55px 7% 58px;
 }
 
 
@@ -701,7 +704,7 @@ a {
 
 
 /* =========================================
-   COURSE / PROMOTION CAROUSEL
+   COURSE / PROMOTION CAROUSEL CARD
 ========================================= */
 
 .hero-carousel {
@@ -711,19 +714,56 @@ a {
 
     min-height: 430px;
 
-    margin: 0;
-
     overflow: hidden;
 
-    background: transparent;
+    border-radius: 20px;
 
-    border: 0;
+    background:
+        linear-gradient(
+            120deg,
+            #ffffff 0%,
+            #fafbff 100%
+        );
 
-    border-radius: 0;
+    border:
+        1px solid #eef0f4;
 
-    box-shadow: none;
+    box-shadow:
+        0 12px 35px rgba(25, 29, 40, 0.045);
 }
 
+
+/* =========================================
+   CAROUSEL OWN BACKGROUND
+========================================= */
+
+.carousel-circle-one {
+    width: 500px;
+    height: 500px;
+
+    right: -175px;
+    top: -290px;
+
+    border:
+        1px solid rgba(108, 119, 219, 0.12);
+}
+
+
+.carousel-circle-two {
+    width: 310px;
+    height: 310px;
+
+    right: 9%;
+    bottom: -230px;
+
+    background:
+        rgba(105, 116, 220, 0.035);
+}
+
+
+/* =========================================
+   CAROUSEL TRACK
+========================================= */
 
 .hero-carousel-track {
     position: relative;
@@ -731,6 +771,8 @@ a {
     width: 100%;
 
     min-height: 430px;
+
+    z-index: 1;
 }
 
 
@@ -2176,6 +2218,8 @@ a {
 
     .hero-area {
         margin-top: 24px;
+
+        gap: 22px;
     }
 
 
@@ -2261,7 +2305,7 @@ a {
 
 
     /* =====================================
-       MOBILE HERO AREA
+       MOBILE HERO WRAPPER
     ===================================== */
 
     .hero-area {
@@ -2269,13 +2313,13 @@ a {
         margin:
             18px 14px 0;
 
-        border-radius: 16px;
+        gap: 18px;
 
     }
 
 
     /* =====================================
-       MOBILE PERMANENT HERO
+       MOBILE INFORMATION CARD
     ===================================== */
 
     .hero-information-card {
@@ -2286,6 +2330,8 @@ a {
             40px 24px 38px;
 
         align-items: center;
+
+        border-radius: 16px;
 
     }
 
@@ -2329,29 +2375,33 @@ a {
 
 
     /* =====================================
-       MOBILE BACKGROUND CIRCLES
+       INFORMATION CARD CIRCLES
     ===================================== */
 
-    .circle-one {
+    .information-circle-one {
+
         width: 330px;
         height: 330px;
 
         right: -160px;
         top: -190px;
+
     }
 
 
-    .circle-two {
+    .information-circle-two {
+
         width: 220px;
         height: 220px;
 
         right: 4%;
         bottom: -170px;
+
     }
 
 
     /* =====================================
-       MOBILE CAROUSEL
+       MOBILE CAROUSEL CARD
     ===================================== */
 
     .hero-carousel {
@@ -2360,11 +2410,29 @@ a {
 
         height: auto;
 
-        margin: 0;
+        border-radius: 16px;
 
-        border-radius: 0;
+    }
 
-        overflow: hidden;
+
+    .carousel-circle-one {
+
+        width: 330px;
+        height: 330px;
+
+        right: -160px;
+        top: -190px;
+
+    }
+
+
+    .carousel-circle-two {
+
+        width: 220px;
+        height: 220px;
+
+        right: 4%;
+        bottom: -170px;
 
     }
 
@@ -2899,6 +2967,14 @@ a {
 
         margin:
             16px 10px 0;
+
+        gap: 16px;
+
+    }
+
+
+    .hero-information-card,
+    .hero-carousel {
 
         border-radius: 15px;
 
