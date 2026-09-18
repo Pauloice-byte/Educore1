@@ -90,8 +90,6 @@ a {
 }
 
 
-/* DESKTOP COLLAPSED */
-
 .sidebar.collapsed {
     width: 78px;
 }
@@ -430,9 +428,6 @@ a {
 }
 
 
-
-/* MENU BUTTON */
-
 .menu-button {
     width: 42px;
     height: 42px;
@@ -473,9 +468,6 @@ a {
 }
 
 
-
-/* HEADER TITLE */
-
 .header-title {
     display: flex;
 
@@ -505,9 +497,6 @@ a {
 }
 
 
-
-/* STATUS */
-
 .header-status {
     margin-left: auto;
 
@@ -535,9 +524,6 @@ a {
         0 0 0 4px rgba(77, 183, 131, 0.10);
 }
 
-
-
-/* LOGIN */
 
 .header-login {
     margin-left: 25px;
@@ -584,6 +570,7 @@ a {
 #homeContent.home-hidden {
     display: none;
 }
+
 
 
 /* =========================================
@@ -659,6 +646,7 @@ a {
 }
 
 
+
 /* =========================================
    INTRO SLIDE
 ========================================= */
@@ -727,6 +715,7 @@ a {
 }
 
 
+
 /* =========================================
    COURSE HERO SLIDE
 ========================================= */
@@ -769,9 +758,14 @@ a {
     object-fit: cover;
 }
 
-.hero-slide.active .hero-course-cover-wrapper {
+
+.hero-slide.active
+.hero-course-cover-wrapper {
     animation:
-        heroCoverReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+        heroCoverReveal
+        0.9s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
 }
 
 
@@ -795,9 +789,12 @@ a {
 
 }
 
-.hero-slide.active .hero-course-information {
+
+.hero-slide.active
+.hero-course-information {
     animation:
-        heroInformationReveal 0.8s
+        heroInformationReveal
+        0.8s
         0.12s
         cubic-bezier(0.22, 1, 0.36, 1)
         both;
@@ -822,9 +819,12 @@ a {
 
 }
 
-.hero-intro-slide.active .hero-content {
+
+.hero-intro-slide.active
+.hero-content {
     animation:
-        heroIntroReveal 0.9s
+        heroIntroReveal
+        0.9s
         cubic-bezier(0.22, 1, 0.36, 1)
         both;
 }
@@ -850,6 +850,7 @@ a {
 
 }
 
+
 .hero-course-information {
     position: relative;
 
@@ -860,9 +861,14 @@ a {
     min-width: 0;
 }
 
-.hero-slide.active ~ .hero-carousel-controls {
+
+.hero-slide.active
+~ .hero-carousel-controls {
     animation:
-        heroControlsReveal 0.6s ease both;
+        heroControlsReveal
+        0.6s
+        ease
+        both;
 }
 
 
@@ -883,6 +889,8 @@ a {
     }
 
 }
+
+
 .hero-course-category {
     margin-bottom: 9px;
 
@@ -936,7 +944,10 @@ a {
 }
 
 
-/* COURSE STATS */
+
+/* =========================================
+   COURSE STATS
+========================================= */
 
 .hero-course-stats {
     display: flex;
@@ -989,7 +1000,10 @@ a {
 }
 
 
-/* WHAT YOU WILL LEARN */
+
+/* =========================================
+   WHAT YOU WILL LEARN
+========================================= */
 
 .hero-course-learning {
     margin-top: 15px;
@@ -1009,7 +1023,10 @@ a {
 }
 
 
-/* EXPLORE BUTTON */
+
+/* =========================================
+   EXPLORE BUTTON
+========================================= */
 
 .hero-course-button {
     min-width: 150px;
@@ -1063,6 +1080,8 @@ a {
     font-size: 16px;
 }
 
+
+
 /* =========================================
    PROMOTION HERO SLIDE
 ========================================= */
@@ -1078,10 +1097,6 @@ a {
         );
 }
 
-
-/* =========================================
-   PROMOTION IMAGE
-========================================= */
 
 .hero-promotion-image-wrapper {
     width: 300px;
@@ -1144,6 +1159,7 @@ a {
         cubic-bezier(0.22, 1, 0.36, 1)
         both;
 }
+
 
 
 /* =========================================
@@ -1214,6 +1230,7 @@ a {
 }
 
 
+
 /* =========================================
    PROMOTION BUTTON
 ========================================= */
@@ -1269,6 +1286,9 @@ a {
 .hero-promotion-button span {
     font-size: 16px;
 }
+
+
+
 /* =========================================
    CAROUSEL CONTROLS
 ========================================= */
@@ -1360,6 +1380,7 @@ a {
 }
 
 
+
 /* =========================================
    HERO DECORATION
 ========================================= */
@@ -1417,6 +1438,7 @@ a {
         );
 }
 
+
 .library::before,
 .library::after {
     content: "";
@@ -1452,6 +1474,7 @@ a {
         rgba(105, 116, 220, 0.035);
 }
 
+
 .library-header,
 .filter-bar,
 .book-grid,
@@ -1460,6 +1483,8 @@ a {
 
     z-index: 1;
 }
+
+
 
 /* =========================================
    SEARCH
@@ -2390,71 +2415,246 @@ a {
     }
 
 
-   .hero-carousel {
-    min-height: 500px;
-}
+
+    /* =====================================
+       MOBILE HERO
+    ===================================== */
+
+    .hero-carousel {
+        min-height: 500px;
+    }
 
 
-.hero-carousel-track {
-    min-height: 500px;
-}
+    .hero-carousel-track {
+        min-height: 500px;
+    }
 
 
-.hero-slide {
-    min-height: 500px;
+    .hero-slide {
+        min-height: 500px;
 
-    padding: 35px 24px 70px;
+        padding: 35px 24px 70px;
 
-    align-items: center;
-}
-
-
-.hero h1 {
-    font-size: 39px;
-
-    letter-spacing: -2px;
-}
+        align-items: center;
+    }
 
 
-.hero-course-slide {
-    flex-direction: column;
+    .hero h1 {
+        font-size: 39px;
 
-    justify-content: flex-start;
+        letter-spacing: -2px;
+    }
 
-    align-items: center;
 
-    gap: 18px;
 
-    padding-top: 30px;
+    /* =====================================
+       MOBILE COURSE SLIDE
+       HORIZONTAL LAYOUT
+    ===================================== */
 
-    text-align: center;
-}
-/* =========================================
-   PROMOTION MOBILE
-========================================= */
-
-@media (max-width: 768px) {
-
-    .hero-promotion-slide {
-        flex-direction: column;
+    .hero-course-slide {
+        flex-direction: row;
 
         justify-content: flex-start;
 
         align-items: center;
 
-        gap: 20px;
+        gap: 18px;
 
-        padding-top: 40px;
+        padding:
+            30px 20px 70px;
 
-        text-align: center;
+        text-align: left;
+    }
+
+
+    .hero-course-cover-wrapper {
+        width: 145px;
+        min-width: 145px;
+
+        height: auto;
+
+        aspect-ratio: 3 / 4;
+
+        flex-shrink: 0;
+    }
+
+
+    .hero-course-information {
+        width: auto;
+
+        flex: 1;
+
+        min-width: 0;
+
+        max-width: none;
+
+        height: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        justify-content: center;
+
+        overflow: hidden;
+    }
+
+
+    .hero-course-category {
+        margin-bottom: 5px;
+
+        font-size: 7px;
+
+        letter-spacing: 1.3px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        max-width: 100%;
+    }
+
+
+    .hero-course-title {
+        font-size: 23px;
+
+        line-height: 1.02;
+
+        letter-spacing: -1px;
+
+        display: -webkit-box;
+
+        -webkit-box-orient: vertical;
+
+        -webkit-line-clamp: 3;
+
+        overflow: hidden;
+    }
+
+
+    .hero-course-level {
+        margin-top: 5px;
+
+        font-size: 9px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        max-width: 100%;
+    }
+
+
+    .hero-course-stats {
+        width: 100%;
+
+        justify-content: flex-start;
+
+        gap: 5px;
+
+        margin-top: 8px;
+
+        flex-wrap: nowrap;
+    }
+
+
+    .hero-course-stat {
+        min-width: 0;
+
+        flex: 1;
+
+        padding: 6px 7px;
+
+        border-radius: 7px;
+
+        overflow: hidden;
+    }
+
+
+    .hero-course-stat span {
+        margin-bottom: 2px;
+
+        font-size: 5px;
+
+        letter-spacing: 0.7px;
+
+        white-space: nowrap;
+    }
+
+
+    .hero-course-stat strong {
+        display: block;
+
+        font-size: 7px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    .hero-course-button {
+        width: 100%;
+
+        min-width: 0;
+
+        height: 31px;
+
+        margin-top: 8px;
+
+        padding: 0 9px;
+
+        border-radius: 7px;
+
+        gap: 8px;
+
+        font-size: 7px;
+
+        letter-spacing: 0.5px;
+
+        flex-shrink: 0;
+    }
+
+
+    .hero-course-button span {
+        font-size: 13px;
+    }
+
+
+
+    /* =====================================
+       MOBILE PROMOTION SLIDE
+       HORIZONTAL LAYOUT
+    ===================================== */
+
+    .hero-promotion-slide {
+        flex-direction: row;
+
+        justify-content: flex-start;
+
+        align-items: center;
+
+        gap: 18px;
+
+        padding:
+            30px 20px 70px;
+
+        text-align: left;
     }
 
 
     .hero-promotion-image-wrapper {
-        width: 100%;
-        max-width: 320px;
-
-        min-width: 0;
+        width: 190px;
+        min-width: 190px;
 
         height: 190px;
 
@@ -2463,109 +2663,117 @@ a {
 
 
     .hero-promotion-information {
-        width: 100%;
+        width: auto;
+
+        flex: 1;
+
+        min-width: 0;
+
+        max-width: none;
+
+        height: 190px;
 
         display: flex;
 
         flex-direction: column;
 
-        align-items: center;
+        align-items: flex-start;
+
+        justify-content: center;
+
+        overflow: hidden;
+    }
+
+
+    .hero-promotion-label {
+        margin-bottom: 5px;
+
+        font-size: 7px;
+
+        letter-spacing: 1.3px;
+
+        white-space: nowrap;
     }
 
 
     .hero-promotion-title {
-        font-size: 30px;
+        font-size: 23px;
 
-        letter-spacing: -1.5px;
+        line-height: 1.02;
+
+        letter-spacing: -1px;
+
+        display: -webkit-box;
+
+        -webkit-box-orient: vertical;
+
+        -webkit-line-clamp: 4;
+
+        overflow: hidden;
     }
 
 
     .hero-promotion-description {
-        font-size: 12px;
+        margin-top: 7px;
+
+        font-size: 9px;
+
+        line-height: 1.35;
+
+        display: -webkit-box;
+
+        -webkit-box-orient: vertical;
+
+        -webkit-line-clamp: 4;
+
+        overflow: hidden;
     }
 
 
     .hero-promotion-button {
-        margin-left: auto;
+        width: 100%;
 
-        margin-right: auto;
+        min-width: 0;
+
+        height: 31px;
+
+        margin-top: 8px;
+
+        padding: 0 9px;
+
+        border-radius: 7px;
+
+        gap: 8px;
+
+        font-size: 7px;
+
+        letter-spacing: 0.5px;
+
+        flex-shrink: 0;
     }
 
-}
 
-
-@media (max-width: 430px) {
-
-    .hero-promotion-image-wrapper {
-        max-width: 280px;
-
-        height: 165px;
+    .hero-promotion-button span {
+        font-size: 13px;
     }
 
 
-    .hero-promotion-title {
-        font-size: 27px;
+
+    /* =====================================
+       MOBILE CAROUSEL CONTROLS
+    ===================================== */
+
+    .hero-carousel-controls {
+        right: 20px;
+
+        bottom: 20px;
     }
 
-}
-
-.hero-course-cover-wrapper {
-    width: 145px;
-    min-width: 145px;
-
-    flex-shrink: 0;
-}
 
 
-.hero-course-information {
-    width: 100%;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-}
-
-
-.hero-course-title {
-    font-size: 30px;
-
-    letter-spacing: -1.5px;
-}
-
-
-.hero-course-description {
-    font-size: 12px;
-}
-
-
-.hero-course-stats {
-    justify-content: center;
-}
-
-
-.hero-course-stat {
-    min-width: 105px;
-}
-
-
-.hero-course-learning {
-    font-size: 11px;
-}
-
-
-.hero-course-button {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
-.hero-carousel-controls {
-    right: 20px;
-    bottom: 20px;
-}
-
+    /* =====================================
+       LIBRARY
+    ===================================== */
 
     .library {
         padding:
@@ -2577,8 +2785,10 @@ a {
         flex-direction: column;
 
         align-items: stretch;
-       gap: 18px; 
-       margin-bottom: 24px;
+
+        gap: 18px;
+
+        margin-bottom: 24px;
     }
 
 
@@ -2608,7 +2818,9 @@ a {
 
 
 
-    /* COURSE DETAILS MOBILE */
+    /* =====================================
+       COURSE DETAILS MOBILE
+    ===================================== */
 
     .course-details {
         min-height:
@@ -2691,29 +2903,153 @@ a {
 @media (max-width: 430px) {
 
     .hero h1 {
-    font-size: 34px;
-}
+        font-size: 34px;
+    }
 
-.hero-carousel {
-    min-height: 520px;
-}
 
-.hero-carousel-track {
-    min-height: 520px;
-}
+    .hero-carousel {
+        min-height: 520px;
+    }
 
-.hero-slide {
-    min-height: 520px;
-}
 
-.hero-course-cover-wrapper {
-    width: 125px;
-    min-width: 125px;
-}
+    .hero-carousel-track {
+        min-height: 520px;
+    }
 
-.hero-course-title {
-    font-size: 27px;
-}
+
+    .hero-slide {
+        min-height: 520px;
+    }
+
+
+
+    /* =====================================
+       SMALL MOBILE COURSE CAROUSEL
+    ===================================== */
+
+    .hero-course-slide {
+        gap: 12px;
+
+        padding:
+            30px 14px 70px;
+    }
+
+
+    .hero-course-cover-wrapper {
+        width: 125px;
+        min-width: 125px;
+    }
+
+
+    .hero-course-title {
+        font-size: 20px;
+
+        letter-spacing: -0.8px;
+
+        -webkit-line-clamp: 4;
+    }
+
+
+    .hero-course-category {
+        font-size: 6px;
+
+        letter-spacing: 1px;
+    }
+
+
+    .hero-course-level {
+        font-size: 8px;
+    }
+
+
+    .hero-course-stats {
+        gap: 4px;
+    }
+
+
+    .hero-course-stat {
+        padding:
+            5px 6px;
+    }
+
+
+    .hero-course-stat span {
+        font-size: 4.5px;
+    }
+
+
+    .hero-course-stat strong {
+        font-size: 6.5px;
+    }
+
+
+    .hero-course-button {
+        height: 29px;
+
+        margin-top: 6px;
+
+        font-size: 6.5px;
+    }
+
+
+
+    /* =====================================
+       SMALL MOBILE PROMOTION CAROUSEL
+    ===================================== */
+
+    .hero-promotion-slide {
+        gap: 12px;
+
+        padding:
+            30px 14px 70px;
+    }
+
+
+    .hero-promotion-image-wrapper {
+        width: 145px;
+        min-width: 145px;
+
+        height: 165px;
+    }
+
+
+    .hero-promotion-information {
+        height: 165px;
+    }
+
+
+    .hero-promotion-label {
+        font-size: 6px;
+
+        letter-spacing: 1px;
+    }
+
+
+    .hero-promotion-title {
+        font-size: 20px;
+
+        letter-spacing: -0.8px;
+
+        -webkit-line-clamp: 4;
+    }
+
+
+    .hero-promotion-description {
+        font-size: 8px;
+
+        line-height: 1.3;
+
+        -webkit-line-clamp: 4;
+    }
+
+
+    .hero-promotion-button {
+        height: 29px;
+
+        margin-top: 6px;
+
+        font-size: 6.5px;
+    }
 
 
     .hero p {
@@ -2740,6 +3076,56 @@ a {
 
     .course-details-cover-wrapper {
         border-radius: 15px;
+    }
+
+}
+
+
+
+/* =========================================
+   VERY SMALL PHONES
+========================================= */
+
+@media (max-width: 360px) {
+
+    .hero-course-slide,
+    .hero-promotion-slide {
+        gap: 9px;
+
+        padding-left: 10px;
+
+        padding-right: 10px;
+    }
+
+
+    .hero-course-cover-wrapper {
+        width: 112px;
+        min-width: 112px;
+    }
+
+
+    .hero-promotion-image-wrapper {
+        width: 125px;
+        min-width: 125px;
+
+        height: 155px;
+    }
+
+
+    .hero-promotion-information {
+        height: 155px;
+    }
+
+
+    .hero-course-title,
+    .hero-promotion-title {
+        font-size: 18px;
+    }
+
+
+    .hero-course-button,
+    .hero-promotion-button {
+        font-size: 6px;
     }
 
 }
