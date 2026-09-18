@@ -630,12 +630,17 @@ a {
     opacity: 0;
     visibility: hidden;
 
-    transform: translateX(35px);
+    transform:
+        translateX(45px)
+        scale(0.985);
+
+    filter: blur(2px);
 
     transition:
-        opacity 0.5s ease,
-        transform 0.5s ease,
-        visibility 0.5s ease;
+        opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.75s ease,
+        visibility 0.75s ease;
 }
 
 
@@ -644,7 +649,11 @@ a {
 
     visibility: visible;
 
-    transform: translateX(0);
+    transform:
+        translateX(0)
+        scale(1);
+
+    filter: blur(0);
 
     z-index: 2;
 }
@@ -760,6 +769,86 @@ a {
     object-fit: cover;
 }
 
+.hero-slide.active .hero-course-cover-wrapper {
+    animation:
+        heroCoverReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+@keyframes heroCoverReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateX(-25px)
+            scale(0.94);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateX(0)
+            scale(1);
+    }
+
+}
+
+.hero-slide.active .hero-course-information {
+    animation:
+        heroInformationReveal 0.8s
+        0.12s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+}
+
+
+@keyframes heroInformationReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateX(25px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateX(0);
+    }
+
+}
+
+.hero-intro-slide.active .hero-content {
+    animation:
+        heroIntroReveal 0.9s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+}
+
+
+@keyframes heroIntroReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(25px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
 
 .hero-course-information {
     position: relative;
@@ -771,7 +860,29 @@ a {
     min-width: 0;
 }
 
+.hero-slide.active ~ .hero-carousel-controls {
+    animation:
+        heroControlsReveal 0.6s ease both;
+}
 
+
+@keyframes heroControlsReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+
+}
 .hero-course-category {
     margin-bottom: 9px;
 
