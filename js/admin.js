@@ -1335,29 +1335,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /*
-            IMPORTANT:
-
-            The existing admin.css does not contain
-            .admin-modal-* styles.
-
-            It already contains the complete
-            .course-modal-* system.
-
-            Therefore the carousel modal uses the
-            exact same modal structure and CSS.
-        */
-
         carouselModal =
             document.createElement("div");
 
 
-        carouselModal.id =
-            "carousel-modal";
+        /*
+            IMPORTANT:
 
+            admin.css already contains the complete
+            modal styling under:
+
+            .course-modal
+            .course-modal.open
+            .course-modal-backdrop
+            .course-modal-dialog
+            .course-modal-header
+            .course-modal-close
+            .course-form
+            .course-form-field
+            .course-form-grid
+            .course-form-error
+            .course-form-actions
+
+            Therefore the carousel promotion modal
+            uses the same working modal structure.
+        */
 
         carouselModal.className =
-            "course-modal open";
+            "course-modal";
 
 
         carouselModal.innerHTML = `
@@ -1421,7 +1426,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input
                             type="text"
                             id="carousel-title"
-                            name="title"
                             required
                             maxlength="200"
                             value="${escapeAttribute(
@@ -1441,7 +1445,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <textarea
                             id="carousel-description"
-                            name="description"
                             rows="4"
                             maxlength="5000"
                             placeholder="Short promotional message"
@@ -1461,7 +1464,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input
                             type="url"
                             id="carousel-image"
-                            name="image_url"
                             value="${escapeAttribute(
                                 item?.image_url || ""
                             )}"
@@ -1479,16 +1481,13 @@ document.addEventListener("DOMContentLoaded", () => {
                                 Area
                             </label>
 
-                            <select
-                                id="carousel-area"
-                                name="area"
-                            >
+                            <select id="carousel-area">
 
                                 <option
                                     value="all"
                                     ${
-                                        item?.area === "all" ||
-                                        !item?.area
+                                        !item?.area ||
+                                        item?.area === "all"
                                             ? "selected"
                                             : ""
                                     }
@@ -1584,10 +1583,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 Status
                             </label>
 
-                            <select
-                                id="carousel-status"
-                                name="status"
-                            >
+                            <select id="carousel-status">
 
                                 <option
                                     value="draft"
@@ -1629,7 +1625,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="datetime-local"
                                 id="carousel-start-date"
-                                name="start_date"
                                 value="${formatDateTimeLocal(
                                     item?.start_date
                                 )}"
@@ -1647,7 +1642,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="datetime-local"
                                 id="carousel-end-date"
-                                name="end_date"
                                 value="${formatDateTimeLocal(
                                     item?.end_date
                                 )}"
@@ -1669,13 +1663,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="text"
                                 id="carousel-button-text"
-                                name="button_text"
                                 maxlength="100"
                                 value="${escapeAttribute(
                                     item?.button_text ||
                                     "Learn More"
                                 )}"
-                                placeholder="Learn More"
                             >
 
                         </div>
@@ -1690,7 +1682,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="number"
                                 id="carousel-sort-order"
-                                name="sort_order"
                                 min="0"
                                 step="1"
                                 value="${item?.sort_order ?? 0}"
@@ -1710,7 +1701,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <input
                             type="url"
                             id="carousel-button-url"
-                            name="button_url"
                             value="${escapeAttribute(
                                 item?.button_url || ""
                             )}"
@@ -1763,53 +1753,74 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+        /*
+            IMPORTANT:
+            .course-modal is hidden by default.
+            .course-modal.open makes it visible.
+        */
+
+        requestAnimationFrame(() => {
+
+            if (carouselModal) {
+
+                carouselModal.classList.add(
+                    "open"
+                );
+            }
+
+        });
+
+
         document.body.classList.add(
             "modal-open"
         );
 
 
-        carouselModal
-            .querySelector(
+        const closeButton =
+            carouselModal.querySelector(
                 "#close-carousel-modal"
-            )
-            ?.addEventListener(
-                "click",
-                closeCarouselModal
             );
 
 
-        carouselModal
-            .querySelector(
-                "#cancel-carousel-modal"
-            )
-            ?.addEventListener(
-                "click",
-                closeCarouselModal
-            );
-
-
-        carouselModal
-            .querySelector(
-                "#carousel-form"
-            )
-            ?.addEventListener(
-                "submit",
-                saveCarouselItem
-            );
-
-
-        carouselModal.addEventListener(
+        closeButton?.addEventListener(
             "click",
-            event => {
+            closeCarouselModal
+        );
 
-                if (
-                    event.target.dataset
-                        .closeCarouselModal === "true"
-                ) {
 
-                    closeCarouselModal();
-                }
-            }
+        const cancelButton =
+            carouselModal.querySelector(
+                "#cancel-carousel-modal"
+            );
+
+
+        cancelButton?.addEventListener(
+            "click",
+            closeCarouselModal
+        );
+
+
+        const backdrop =
+            carouselModal.querySelector(
+                ".course-modal-backdrop"
+            );
+
+
+        backdrop?.addEventListener(
+            "click",
+            closeCarouselModal
+        );
+
+
+        const form =
+            carouselModal.querySelector(
+                "#carousel-form"
+            );
+
+
+        form?.addEventListener(
+            "submit",
+            saveCarouselItem
         );
 
 
@@ -1840,7 +1851,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         carouselModal.remove();
-
 
         carouselModal = null;
 
@@ -2544,6 +2554,14 @@ document.addEventListener("DOMContentLoaded", () => {
         $$(".course-action-button")
             .forEach(button => {
 
+                /*
+                    Carousel buttons also use
+                    .course-action-button.
+
+                    If a carousel action exists,
+                    this is not a course button.
+                */
+
                 if (button.dataset.carouselAction) {
                     return;
                 }
@@ -2784,6 +2802,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- COVER IMAGE -->
                     <div class="course-form-field">
 
                         <label>
@@ -4003,6 +4022,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             counter++;
+
 
             slug =
                 `${base}-${counter}`;
