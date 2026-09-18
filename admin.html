@@ -80,6 +80,15 @@
             </button>
 
             <button
+    type="button"
+    class="nav-item"
+    data-section="carousel"
+>
+    <span class="nav-icon">▤</span>
+    <span class="nav-label">Carousel</span>
+</button>
+
+            <button
                 type="button"
                 class="nav-item"
                 data-section="students"
@@ -535,6 +544,131 @@
             </section>
 
 
+
+                        <!-- CAROUSEL -->
+            <section
+                id="carousel-section"
+                class="admin-section"
+            >
+
+                <div class="courses-header">
+
+                    <div class="section-introduction">
+
+                        <div class="section-kicker">
+                            FEATURED CONTENT
+                        </div>
+
+                        <h2>Carousel</h2>
+
+                        <p>
+                            Create and manage promotional messages
+                            and advertisements displayed in the
+                            EduCore homepage carousel.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        id="create-carousel-button"
+                    >
+                        <span>+</span>
+                        Create Promotion
+                    </button>
+
+                </div>
+
+
+                <div class="course-toolbar">
+
+                    <div class="course-search">
+
+                        <span class="search-icon">
+                            ⌕
+                        </span>
+
+                        <input
+                            type="search"
+                            id="carousel-search"
+                            placeholder="Search promotions..."
+                            aria-label="Search promotions"
+                        >
+
+                    </div>
+
+
+                    <select
+                        id="carousel-filter"
+                        class="course-filter"
+                        aria-label="Filter carousel promotions"
+                    >
+
+                        <option value="all">
+                            All promotions
+                        </option>
+
+                        <option value="published">
+                            Published
+                        </option>
+
+                        <option value="draft">
+                            Draft
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="courses-panel">
+
+                    <div class="courses-panel-top">
+
+                        <div>
+
+                            <strong>
+                                Promotion List
+                            </strong>
+
+                            <span id="carousel-count">
+                                Loading...
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="courses-table-header">
+
+                        <span>Promotion</span>
+                        <span>Area</span>
+                        <span>Status</span>
+                        <span>Start</span>
+                        <span>End</span>
+                        <span>Actions</span>
+
+                    </div>
+
+
+                    <div
+                        class="courses-list"
+                        id="carousel-list"
+                    >
+
+                        <div class="courses-loading">
+                            Loading promotions...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            
             <!-- STUDENTS -->
             <section
                 id="students-section"
