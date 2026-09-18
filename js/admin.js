@@ -44,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let carouselModal = null;
 
+    let removeCarouselImage = false;
+
 
     /* =====================================================
        DOM HELPERS
@@ -61,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
        INITIALISE
     ===================================================== */
 
-   init();
+    init();
 
 
     async function init() {
@@ -87,77 +89,79 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadCarouselItems();
     }
 
+
     /* =====================================================
        CAROUSEL CONTROLS
     ===================================================== */
 
     function setupCarouselControls() {
 
-    const createButton =
-        $("#create-carousel-button");
+        const createButton =
+            $("#create-carousel-button");
 
-    const searchInput =
-        $("#carousel-search");
+        const searchInput =
+            $("#carousel-search");
 
-    const filterSelect =
-        $("#carousel-filter");
+        const filterSelect =
+            $("#carousel-filter");
 
 
-    /* =================================================
-       CREATE PROMOTION
-    ================================================= */
+        /* =================================================
+           CREATE PROMOTION
+        ================================================= */
 
-    if (createButton) {
+        if (createButton) {
 
-        createButton.addEventListener(
-            "click",
-            event => {
+            createButton.addEventListener(
+                "click",
+                event => {
 
-                event.preventDefault();
-                event.stopPropagation();
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                console.log(
-                    "Create Promotion button clicked."
-                );
+                    console.log(
+                        "Create Promotion button clicked."
+                    );
 
-                openCarouselModal();
+                    openCarouselModal();
 
-            }
-        );
+                }
+            );
 
-    } else {
+        } else {
 
-        console.warn(
-            'Create Promotion button not found: "#create-carousel-button"'
-        );
+            console.warn(
+                'Create Promotion button not found: "#create-carousel-button"'
+            );
+        }
+
+
+        /* =================================================
+           SEARCH
+        ================================================= */
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                renderCarouselItems
+            );
+        }
+
+
+        /* =================================================
+           FILTER
+        ================================================= */
+
+        if (filterSelect) {
+
+            filterSelect.addEventListener(
+                "change",
+                renderCarouselItems
+            );
+        }
     }
 
-
-    /* =================================================
-       SEARCH
-    ================================================= */
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
-            renderCarouselItems
-        );
-    }
-
-
-    /* =================================================
-       FILTER
-    ================================================= */
-
-    if (filterSelect) {
-
-        filterSelect.addEventListener(
-            "change",
-            renderCarouselItems
-        );
-    }
-}
 
     /* =====================================================
        NAVIGATION
@@ -341,6 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     await client.auth.signOut();
+
 
                     window.location.href =
                         "index.html";
@@ -722,6 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     let action =
                         "Course created";
+
 
                     if (
                         course.status ===
@@ -1354,6 +1360,10 @@ document.addEventListener("DOMContentLoaded", () => {
             item?.id || null;
 
 
+        removeCarouselImage =
+            false;
+
+
         if (carouselModal) {
 
             carouselModal.remove();
@@ -1365,28 +1375,6 @@ document.addEventListener("DOMContentLoaded", () => {
         carouselModal =
             document.createElement("div");
 
-
-        /*
-            IMPORTANT:
-
-            admin.css already contains the complete
-            modal styling under:
-
-            .course-modal
-            .course-modal.open
-            .course-modal-backdrop
-            .course-modal-dialog
-            .course-modal-header
-            .course-modal-close
-            .course-form
-            .course-form-field
-            .course-form-grid
-            .course-form-error
-            .course-form-actions
-
-            Therefore the carousel promotion modal
-            uses the same working modal structure.
-        */
 
         carouselModal.className =
             "course-modal";
@@ -1444,6 +1432,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     novalidate
                 >
 
+                    <!-- TITLE -->
+
                     <div class="course-form-field">
 
                         <label for="carousel-title">
@@ -1464,6 +1454,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- DESCRIPTION -->
+
                     <div class="course-form-field">
 
                         <label for="carousel-description">
@@ -1482,23 +1474,80 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- PROMOTION IMAGE -->
+
                     <div class="course-form-field">
 
-                        <label for="carousel-image">
-                            Image URL
+                        <label>
+                            Promotion Image
                         </label>
 
-                        <input
-                            type="url"
-                            id="carousel-image"
-                            value="${escapeAttribute(
-                                item?.image_url || ""
-                            )}"
-                            placeholder="https://..."
+
+                        <label
+                            for="carousel-image-file"
+                            class="course-upload-area"
+                            id="carousel-upload-area"
                         >
+
+                            <div class="upload-icon">
+                                ↑
+                            </div>
+
+                            <strong>
+                                Choose an image
+                            </strong>
+
+                            <span>
+                                JPG, JPEG, PNG or WebP · Max 5 MB
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="carousel-image-file"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                        >
+
+
+                        <div
+                            id="carousel-image-preview"
+                            class="course-cover-preview"
+                            ${
+                                item?.image_url
+                                    ? ""
+                                    : "hidden"
+                            }
+                        >
+
+                            <img
+                                id="carousel-image-preview-image"
+                                src="${
+                                    item?.image_url
+                                        ? escapeAttribute(
+                                            item.image_url
+                                        )
+                                        : ""
+                                }"
+                                alt="Promotion image preview"
+                            >
+
+                            <button
+                                type="button"
+                                id="carousel-remove-image"
+                                class="course-remove-cover"
+                            >
+                                Remove image
+                            </button>
+
+                        </div>
 
                     </div>
 
+
+                    <!-- AREA + STATUS -->
 
                     <div class="course-form-grid">
 
@@ -1641,6 +1690,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- DATES -->
+
                     <div class="course-form-grid">
 
                         <div class="course-form-field">
@@ -1678,6 +1729,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     </div>
 
+
+                    <!-- BUTTON + SORT ORDER -->
 
                     <div class="course-form-grid">
 
@@ -1719,6 +1772,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- BUTTON URL -->
+
                     <div class="course-form-field">
 
                         <label for="carousel-button-url">
@@ -1737,12 +1792,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
 
+                    <!-- ERROR -->
+
                     <div
                         id="carousel-form-error"
                         class="course-form-error"
                         hidden
                     ></div>
 
+
+                    <!-- ACTIONS -->
 
                     <div class="course-form-actions">
 
@@ -1780,12 +1839,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-            IMPORTANT:
-            .course-modal is hidden by default.
-            .course-modal.open makes it visible.
-        */
-
         requestAnimationFrame(() => {
 
             if (carouselModal) {
@@ -1802,6 +1855,10 @@ document.addEventListener("DOMContentLoaded", () => {
             "modal-open"
         );
 
+
+        /* =================================================
+           MODAL EVENTS
+        ================================================= */
 
         const closeButton =
             carouselModal.querySelector(
@@ -1851,6 +1908,34 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
+        /* =================================================
+           IMAGE EVENTS
+        ================================================= */
+
+        const imageFileInput =
+            carouselModal.querySelector(
+                "#carousel-image-file"
+            );
+
+
+        imageFileInput?.addEventListener(
+            "change",
+            handleCarouselImageFile
+        );
+
+
+        const removeImageButton =
+            carouselModal.querySelector(
+                "#carousel-remove-image"
+            );
+
+
+        removeImageButton?.addEventListener(
+            "click",
+            removeCarouselImageFile
+        );
+
+
         setTimeout(() => {
 
             carouselModal
@@ -1860,6 +1945,246 @@ document.addEventListener("DOMContentLoaded", () => {
                 ?.focus();
 
         }, 50);
+    }
+
+
+    /* =====================================================
+       CAROUSEL IMAGE FILE
+    ===================================================== */
+
+    function handleCarouselImageFile(event) {
+
+        const file =
+            event.target.files?.[0];
+
+
+        if (!file) return;
+
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (!allowedTypes.includes(file.type)) {
+
+            showCarouselFormError(
+                "Please select a JPG, PNG or WebP image."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            showCarouselFormError(
+                "The promotion image must be smaller than 5 MB."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        removeCarouselImage =
+            false;
+
+
+        clearCarouselFormError();
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = () => {
+
+            showCarouselImagePreview(
+                reader.result
+            );
+        };
+
+
+        reader.readAsDataURL(file);
+    }
+
+
+    /* =====================================================
+       SHOW CAROUSEL IMAGE PREVIEW
+    ===================================================== */
+
+    function showCarouselImagePreview(src) {
+
+        if (!carouselModal) return;
+
+
+        const preview =
+            carouselModal.querySelector(
+                "#carousel-image-preview"
+            );
+
+
+        const image =
+            carouselModal.querySelector(
+                "#carousel-image-preview-image"
+            );
+
+
+        if (!src) {
+
+            clearCarouselImagePreview();
+
+            return;
+        }
+
+
+        image.src =
+            src;
+
+
+        preview.hidden =
+            false;
+    }
+
+
+    /* =====================================================
+       CLEAR CAROUSEL IMAGE PREVIEW
+    ===================================================== */
+
+    function clearCarouselImagePreview() {
+
+        if (!carouselModal) return;
+
+
+        const preview =
+            carouselModal.querySelector(
+                "#carousel-image-preview"
+            );
+
+
+        const image =
+            carouselModal.querySelector(
+                "#carousel-image-preview-image"
+            );
+
+
+        preview.hidden =
+            true;
+
+
+        image.removeAttribute(
+            "src"
+        );
+    }
+
+
+    /* =====================================================
+       REMOVE CAROUSEL IMAGE
+    ===================================================== */
+
+    function removeCarouselImageFile() {
+
+        if (!carouselModal) return;
+
+
+        const fileInput =
+            carouselModal.querySelector(
+                "#carousel-image-file"
+            );
+
+
+        if (fileInput) {
+
+            fileInput.value = "";
+        }
+
+
+        removeCarouselImage =
+            true;
+
+
+        clearCarouselImagePreview();
+    }
+
+
+    /* =====================================================
+       UPLOAD CAROUSEL IMAGE
+    ===================================================== */
+
+    async function uploadCarouselImage(file) {
+
+        if (!file) {
+
+            throw new Error(
+                "No promotion image was selected."
+            );
+        }
+
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+        const randomName =
+            `${crypto.randomUUID()}.${extension}`;
+
+
+        const filePath =
+            `carousel-images/${randomName}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await client.storage
+                .from("carousel-images")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        cacheControl: "3600",
+                        upsert: false,
+                        contentType: file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            throw new Error(
+                `Promotion image upload failed: ${uploadError.message}`
+            );
+        }
+
+
+        const {
+            data
+        } =
+            client.storage
+                .from("carousel-images")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        if (!data?.publicUrl) {
+
+            throw new Error(
+                "The promotion image was uploaded but its public URL could not be generated."
+            );
+        }
+
+
+        return data.publicUrl;
     }
 
 
@@ -1884,6 +2209,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         editingCarouselItemId =
             null;
+
+
+        removeCarouselImage =
+            false;
 
 
         document.body.classList.remove(
@@ -1913,10 +2242,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 .trim();
 
 
-        const imageUrl =
-            $("#carousel-image")
-                ?.value
-                .trim();
+        const imageFile =
+            $("#carousel-image-file")
+                ?.files?.[0] ||
+            null;
 
 
         const area =
@@ -1976,9 +2305,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (errorElement) {
 
-            errorElement.textContent = "";
+            errorElement.textContent =
+                "";
 
-            errorElement.hidden = true;
+            errorElement.hidden =
+                true;
         }
 
 
@@ -2034,6 +2365,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
+            /* =============================================
+               DETERMINE IMAGE URL
+            ============================================= */
+
+            let finalImageUrl =
+                null;
+
+
+            /*
+                Editing an existing promotion:
+                keep its current image unless the admin
+                selected a new image or explicitly removed it.
+            */
+
+            if (editingCarouselItemId) {
+
+                const existingItem =
+                    allCarouselItems.find(
+                        item =>
+                            String(item.id) ===
+                            String(editingCarouselItemId)
+                    );
+
+
+                finalImageUrl =
+                    existingItem?.image_url ||
+                    null;
+            }
+
+
+            /*
+                Remove image if requested.
+            */
+
+            if (removeCarouselImage) {
+
+                finalImageUrl =
+                    null;
+            }
+
+
+            /*
+                Upload a new image if selected.
+            */
+
+            if (
+                imageFile &&
+                imageFile instanceof File &&
+                imageFile.size > 0
+            ) {
+
+                finalImageUrl =
+                    await uploadCarouselImage(
+                        imageFile
+                    );
+            }
+
+
+            /* =============================================
+               BUILD DATABASE RECORD
+            ============================================= */
+
             const carouselData = {
 
                 title,
@@ -2042,7 +2435,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     description || null,
 
                 image_url:
-                    imageUrl || null,
+                    finalImageUrl,
 
                 area,
 
@@ -2056,18 +2449,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 start_date:
                     startDate
-                        ? new Date(startDate).toISOString()
+                        ? new Date(
+                            startDate
+                        ).toISOString()
                         : null,
 
                 end_date:
                     endDate
-                        ? new Date(endDate).toISOString()
+                        ? new Date(
+                            endDate
+                        ).toISOString()
                         : null,
 
                 sort_order:
                     sortOrder
             };
 
+
+            /* =============================================
+               UPDATE EXISTING PROMOTION
+            ============================================= */
 
             if (editingCarouselItemId) {
 
@@ -2085,7 +2486,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (error) throw error;
 
+
             } else {
+
+
+                /* =========================================
+                   CREATE NEW PROMOTION
+                ========================================= */
 
                 const {
                     error
@@ -2106,6 +2513,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             await loadCarouselItems();
 
+
         } catch (error) {
 
             console.error(
@@ -2118,6 +2526,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 error.message ||
                 "Could not save the promotion."
             );
+
 
         } finally {
 
@@ -2135,6 +2544,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    /* =====================================================
+       CAROUSEL FORM ERROR
+    ===================================================== */
+
     function showCarouselFormError(message) {
 
         const element =
@@ -2150,6 +2563,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         element.hidden =
             false;
+    }
+
+
+    function clearCarouselFormError() {
+
+        const element =
+            $("#carousel-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+        "";
+
+
+        element.hidden =
+            true;
     }
 
 
@@ -2774,6 +3205,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 name="category"
                                 required
                             >
+
                                 <option value="">
                                     Select a category
                                 </option>
@@ -2805,6 +3237,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <option value="Personal Development">
                                     Personal Development
                                 </option>
+
                             </select>
 
                         </div>
@@ -2830,6 +3263,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     <!-- COVER IMAGE -->
+
                     <div class="course-form-field">
 
                         <label>
@@ -2846,6 +3280,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             >
                                 Upload from computer
                             </button>
+
 
                             <button
                                 type="button"
@@ -2882,6 +3317,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </span>
 
                             </label>
+
 
                             <input
                                 id="course-cover-file"
@@ -2923,6 +3359,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 id="course-cover-preview-image"
                                 alt="Course cover preview"
                             >
+
 
                             <button
                                 type="button"
@@ -3153,6 +3590,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         modal.classList.add("open");
+
 
         document.body.classList.add(
             "modal-open"
@@ -3404,7 +3842,9 @@ document.addEventListener("DOMContentLoaded", () => {
             true;
 
 
-        image.removeAttribute("src");
+        image.removeAttribute(
+            "src"
+        );
     }
 
 
