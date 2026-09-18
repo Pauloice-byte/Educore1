@@ -1,6 +1,6 @@
 // ============================================================
 // EduCore — Public Homepage
-// Dynamic Course Catalogue
+// Dynamic Course Catalogue + Promotional Carousel
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -26,20 +26,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const loadingCourses =
         document.getElementById("loadingCourses");
-    
-    const heroCarousel = 
+
+    const heroCarousel =
         document.getElementById("heroCarousel");
-    
-    const heroCarouselTrack = 
+
+    const heroCarouselTrack =
         document.getElementById("heroCarouselTrack");
-    
-    const heroCarouselDots = 
+
+    const heroCarouselDots =
         document.getElementById("heroCarouselDots");
-    
-    const heroCarouselPrevious = 
+
+    const heroCarouselPrevious =
         document.getElementById("heroCarouselPrevious");
-    
-    const heroCarouselNext = 
+
+    const heroCarouselNext =
         document.getElementById("heroCarouselNext");
 
     const searchInput =
@@ -112,6 +112,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let courses = [];
 
+    let promotions = [];
+
     let activeFilter = "all";
 
     let searchTerm = "";
@@ -119,67 +121,70 @@ document.addEventListener("DOMContentLoaded", async () => {
     let activeCourse = null;
 
     let heroSlides = [];
-    
+
     let activeHeroSlide = 0;
-    
+
     let heroCarouselTimer = null;
 
     let heroTouchStartX = 0;
-    
+
     let heroTouchEndX = 0;
 
-    /* =========================================
-   MOBILE SWIPE
-========================================= */
 
-if (heroCarousel) {
+    // ========================================================
+    // MOBILE SWIPE
+    // ========================================================
 
-    heroCarousel.addEventListener(
-        "touchstart",
-        (event) => {
+    if (heroCarousel) {
 
-            heroTouchStartX =
-                event.touches[0].clientX;
+        heroCarousel.addEventListener(
+            "touchstart",
+            (event) => {
 
-        },
-        { passive: true }
-    );
+                heroTouchStartX =
+                    event.touches[0].clientX;
 
-
-    heroCarousel.addEventListener(
-        "touchend",
-        (event) => {
-
-            heroTouchEndX =
-                event.changedTouches[0].clientX;
-
-            const swipeDistance =
-                heroTouchEndX -
-                heroTouchStartX;
+            },
+            { passive: true }
+        );
 
 
-            /* Swipe left = next */
+        heroCarousel.addEventListener(
+            "touchend",
+            (event) => {
 
-            if (swipeDistance < -50) {
+                heroTouchEndX =
+                    event.changedTouches[0].clientX;
 
-                nextHeroSlide();
+                const swipeDistance =
+                    heroTouchEndX -
+                    heroTouchStartX;
 
-            }
+
+                // Swipe left = next
+
+                if (swipeDistance < -50) {
+
+                    nextHeroSlide();
+
+                }
 
 
-            /* Swipe right = previous */
+                // Swipe right = previous
 
-            if (swipeDistance > 50) {
+                if (swipeDistance > 50) {
 
-                previousHeroSlide();
+                    previousHeroSlide();
 
-            }
+                }
 
-        },
-        { passive: true }
-    );
+            },
+            { passive: true }
+        );
 
-}
+    }
+
+
     // ========================================================
     // AUTHENTICATION / SESSION
     // ========================================================
@@ -192,6 +197,7 @@ if (heroCarousel) {
         if (!headerLogin) {
             return;
         }
+
 
         try {
 
@@ -261,6 +267,8 @@ if (heroCarousel) {
         }
 
     }
+
+
     // ========================================================
     // YEAR
     // ========================================================
@@ -394,9 +402,9 @@ if (heroCarousel) {
         }
 
         return (
-            `Develop practical knowledge and skills through `
-            + `structured autonomous learning in `
-            + `${course.title || "this course"}.`
+            `Develop practical knowledge and skills through ` +
+            `structured autonomous learning in ` +
+            `${course.title || "this course"}.`
         );
 
     }
@@ -411,411 +419,878 @@ if (heroCarousel) {
         }
 
         return (
-            "Structured 25-minute lessons with explanations, "
-            + "practice activities, knowledge checks, repeated "
-            + "practice and immediate feedback."
+            "Structured 25-minute lessons with explanations, " +
+            "practice activities, knowledge checks, repeated " +
+            "practice and immediate feedback."
         );
 
     }
 
-        /* =========================================
-   HERO CAROUSEL
-========================================= */
 
-function createHeroCourseSlides() {
+    // ========================================================
+    // HERO CAROUSEL
+    // ========================================================
 
-    if (!heroCarouselTrack || !heroCarouselDots) {
-        return;
-    }
+    function createHeroSlides() {
 
-    /* Remove previously generated course slides */
+        if (
+            !heroCarouselTrack ||
+            !heroCarouselDots
+        ) {
 
-    heroCarouselTrack
-        .querySelectorAll(".hero-course-slide")
-        .forEach(slide => slide.remove());
-
-
-    /* Reset dots */
-
-    heroCarouselDots.innerHTML = "";
-
-
-    /* Create intro dot */
-
-    const introDot =
-        document.createElement("button");
-
-    introDot.type = "button";
-
-    introDot.className =
-        "hero-carousel-dot active";
-
-    introDot.setAttribute(
-        "aria-label",
-        "Go to slide 1"
-    );
-
-    introDot.addEventListener(
-        "click",
-        () => goToHeroSlide(0)
-    );
-
-    heroCarouselDots.appendChild(introDot);
-
-
-    /* Create course slides */
-
-    courses.forEach(
-        (course, index) => {
-
-            const slide =
-                document.createElement("article");
-
-            slide.className =
-                "hero-slide hero-course-slide";
-
-            slide.dataset.slideType =
-                "course";
-
-            slide.dataset.courseId =
-                course.id;
-
-
-            slide.innerHTML = `
-                <div class="hero-course-cover-wrapper">
-
-                    <img
-                        class="hero-course-cover"
-                        src="${escapeAttribute(course.cover)}"
-                        alt="${escapeAttribute(course.title)}"
-                    >
-
-                </div>
-
-
-                <div class="hero-course-information">
-
-                    <div class="hero-course-category">
-                        ${escapeHTML(course.category || "COURSE")}
-                    </div>
-
-
-                    <h2 class="hero-course-title">
-                        ${escapeHTML(course.title)}
-                    </h2>
-
-
-                    <div class="hero-course-level">
-                        ${escapeHTML(course.level || "All Levels")}
-                    </div>
-
-
-                   <div class="hero-course-stats">
-
-    <div class="hero-course-stat">
-
-        <span>
-            LESSON LENGTH
-        </span>
-
-        <strong>
-            ${escapeHTML(course.time)}
-        </strong>
-
-    </div>
-
-
-    <div class="hero-course-stat">
-
-        <span>
-            COURSE TYPE
-        </span>
-
-        <strong>
-            Autonomous
-        </strong>
-
-    </div>
-
-</div>
-
-
-<button
-    type="button"
-    class="hero-course-button"
->
-
-                        Explore Course
-
-                        <span>
-                            →
-                        </span>
-
-                    </button>
-
-                </div>
-            `;
-
-
-            /* Image fallback */
-
-            const image =
-                slide.querySelector(
-                    ".hero-course-cover"
-                );
-
-            if (image) {
-
-                image.addEventListener(
-                    "error",
-                    () => {
-                        image.style.display = "none";
-                    }
-                );
-
-            }
-
-
-            /* Explore Course */
-
-            const button =
-                slide.querySelector(
-                    ".hero-course-button"
-                );
-
-            if (button) {
-
-                button.addEventListener(
-                    "click",
-                    () => openCourseDetails(course)
-                );
-
-            }
-
-
-            heroCarouselTrack.appendChild(slide);
-
-
-            /* Create dot */
-
-            const dot =
-                document.createElement("button");
-
-            dot.type = "button";
-
-            dot.className =
-                "hero-carousel-dot";
-
-            dot.setAttribute(
-                "aria-label",
-                `Go to slide ${index + 2}`
-            );
-
-            dot.addEventListener(
-                "click",
-                () => goToHeroSlide(index + 1)
-            );
-
-            heroCarouselDots.appendChild(dot);
+            return;
 
         }
-    );
 
 
-    heroSlides =
-        heroCarouselTrack.querySelectorAll(
-            ".hero-slide"
+        // ----------------------------------------------------
+        // REMOVE ALL GENERATED SLIDES
+        // ----------------------------------------------------
+
+        heroCarouselTrack
+            .querySelectorAll(
+                ".hero-course-slide, .hero-promotion-slide"
+            )
+            .forEach(
+                slide => slide.remove()
+            );
+
+
+        // ----------------------------------------------------
+        // RESET DOTS
+        // ----------------------------------------------------
+
+        heroCarouselDots.innerHTML = "";
+
+
+        // ----------------------------------------------------
+        // INTRO DOT
+        // ----------------------------------------------------
+
+        const introDot =
+            document.createElement("button");
+
+        introDot.type =
+            "button";
+
+        introDot.className =
+            "hero-carousel-dot active";
+
+        introDot.setAttribute(
+            "aria-label",
+            "Go to slide 1"
+        );
+
+        introDot.addEventListener(
+            "click",
+            () => goToHeroSlide(0)
+        );
+
+        heroCarouselDots.appendChild(
+            introDot
         );
 
 
-    activeHeroSlide = 0;
-
-    updateHeroSlide();
-
-    startHeroCarousel();
-}
+        let slideIndex = 1;
 
 
-/* =========================================
-   UPDATE ACTIVE SLIDE
-========================================= */
+        // ====================================================
+        // PROMOTION SLIDES
+        // ====================================================
 
-function updateHeroSlide() {
-
-    if (!heroSlides.length) {
-        return;
-    }
-
-
-    heroSlides.forEach(
-        (slide, index) => {
-
-            slide.classList.toggle(
-                "active",
-                index === activeHeroSlide
-            );
-
-        }
-    );
-
-
-    const dots =
-        heroCarouselDots.querySelectorAll(
-            ".hero-carousel-dot"
-        );
-
-
-    dots.forEach(
-        (dot, index) => {
-
-            dot.classList.toggle(
-                "active",
-                index === activeHeroSlide
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================
-   GO TO SLIDE
-========================================= */
-
-function goToHeroSlide(index) {
-
-    if (!heroSlides.length) {
-        return;
-    }
-
-
-    if (index < 0) {
-
-        index =
-            heroSlides.length - 1;
-
-    }
-
-
-    if (index >= heroSlides.length) {
-
-        index = 0;
-
-    }
-
-
-    activeHeroSlide = index;
-
-    updateHeroSlide();
-
-    restartHeroCarousel();
-}
-
-
-/* =========================================
-   NEXT / PREVIOUS
-========================================= */
-
-function nextHeroSlide() {
-
-    goToHeroSlide(
-        activeHeroSlide + 1
-    );
-
-}
-
-
-function previousHeroSlide() {
-
-    goToHeroSlide(
-        activeHeroSlide - 1
-    );
-
-}
-
-
-/* =========================================
-   AUTO ROTATION
-========================================= */
-
-function startHeroCarousel() {
-
-    stopHeroCarousel();
-
-
-    if (heroSlides.length <= 1) {
-        return;
-    }
-
-
-    heroCarouselTimer =
-        setInterval(
-            () => {
-
-                activeHeroSlide++;
+        promotions.forEach(
+            promotion => {
 
                 if (
-                    activeHeroSlide >=
-                    heroSlides.length
+                    !promotion ||
+                    !promotion.title
                 ) {
 
-                    activeHeroSlide = 0;
+                    return;
 
                 }
 
-                updateHeroSlide();
 
-            },
-            6000
+                const slide =
+                    document.createElement("article");
+
+                slide.className =
+                    "hero-slide hero-promotion-slide";
+
+                slide.dataset.slideType =
+                    "promotion";
+
+                slide.dataset.promotionId =
+                    promotion.id;
+
+
+                slide.innerHTML = `
+
+                    <div class="hero-promotion-image-wrapper">
+
+                        ${
+                            promotion.image_url
+                                ? `
+                                    <img
+                                        class="hero-promotion-image"
+                                        src="${escapeAttribute(
+                                            promotion.image_url
+                                        )}"
+                                        alt="${escapeAttribute(
+                                            promotion.title
+                                        )}"
+                                    >
+                                `
+                                : `
+                                    <div class="hero-promotion-image-placeholder">
+                                        EDUCORE
+                                    </div>
+                                `
+                        }
+
+                    </div>
+
+
+                    <div class="hero-promotion-information">
+
+                        <div class="hero-promotion-label">
+                            PROMOTION
+                        </div>
+
+
+                        <h2 class="hero-promotion-title">
+                            ${escapeHTML(
+                                promotion.title
+                            )}
+                        </h2>
+
+
+                        ${
+                            promotion.description
+                                ? `
+                                    <p class="hero-promotion-description">
+                                        ${escapeHTML(
+                                            promotion.description
+                                        )}
+                                    </p>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            promotion.button_text
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="hero-promotion-button"
+                                    >
+
+                                        ${escapeHTML(
+                                            promotion.button_text
+                                        )}
+
+                                        <span>
+                                            →
+                                        </span>
+
+                                    </button>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                `;
+
+
+                // ------------------------------------------------
+                // IMAGE FALLBACK
+                // ------------------------------------------------
+
+                const image =
+                    slide.querySelector(
+                        ".hero-promotion-image"
+                    );
+
+                if (image) {
+
+                    image.addEventListener(
+                        "error",
+                        () => {
+
+                            image.style.display =
+                                "none";
+
+                        }
+                    );
+
+                }
+
+
+                // ------------------------------------------------
+                // PROMOTION BUTTON
+                // ------------------------------------------------
+
+                const button =
+                    slide.querySelector(
+                        ".hero-promotion-button"
+                    );
+
+                if (
+                    button &&
+                    promotion.button_url
+                ) {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            window.location.href =
+                                promotion.button_url;
+
+                        }
+                    );
+
+                }
+
+
+                heroCarouselTrack.appendChild(
+                    slide
+                );
+
+
+                // ------------------------------------------------
+                // DOT
+                // ------------------------------------------------
+
+                const dot =
+                    document.createElement("button");
+
+                dot.type =
+                    "button";
+
+                dot.className =
+                    "hero-carousel-dot";
+
+                dot.setAttribute(
+                    "aria-label",
+                    `Go to slide ${slideIndex + 1}`
+                );
+
+                dot.addEventListener(
+                    "click",
+                    () => goToHeroSlide(slideIndex)
+                );
+
+                heroCarouselDots.appendChild(
+                    dot
+                );
+
+
+                slideIndex++;
+
+            }
         );
 
-}
+
+        // ====================================================
+        // COURSE SLIDES
+        // ====================================================
+
+        courses.forEach(
+            course => {
+
+                const currentIndex =
+                    slideIndex;
+
+                const slide =
+                    document.createElement("article");
+
+                slide.className =
+                    "hero-slide hero-course-slide";
+
+                slide.dataset.slideType =
+                    "course";
+
+                slide.dataset.courseId =
+                    course.id;
 
 
-function stopHeroCarousel() {
+                slide.innerHTML = `
 
-    if (heroCarouselTimer) {
+                    <div class="hero-course-cover-wrapper">
 
-        clearInterval(
-            heroCarouselTimer
+                        <img
+                            class="hero-course-cover"
+                            src="${escapeAttribute(
+                                course.cover
+                            )}"
+                            alt="${escapeAttribute(
+                                course.title
+                            )}"
+                        >
+
+                    </div>
+
+
+                    <div class="hero-course-information">
+
+                        <div class="hero-course-category">
+
+                            ${escapeHTML(
+                                course.category ||
+                                "COURSE"
+                            )}
+
+                        </div>
+
+
+                        <h2 class="hero-course-title">
+
+                            ${escapeHTML(
+                                course.title
+                            )}
+
+                        </h2>
+
+
+                        <div class="hero-course-level">
+
+                            ${escapeHTML(
+                                course.level ||
+                                "All Levels"
+                            )}
+
+                        </div>
+
+
+                        <div class="hero-course-stats">
+
+                            <div class="hero-course-stat">
+
+                                <span>
+                                    LESSON LENGTH
+                                </span>
+
+                                <strong>
+                                    ${escapeHTML(
+                                        course.time
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="hero-course-stat">
+
+                                <span>
+                                    COURSE TYPE
+                                </span>
+
+                                <strong>
+                                    Autonomous
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="hero-course-button"
+                        >
+
+                            Explore Course
+
+                            <span>
+                                →
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                // ------------------------------------------------
+                // IMAGE FALLBACK
+                // ------------------------------------------------
+
+                const image =
+                    slide.querySelector(
+                        ".hero-course-cover"
+                    );
+
+                if (image) {
+
+                    image.addEventListener(
+                        "error",
+                        () => {
+
+                            image.style.display =
+                                "none";
+
+                        }
+                    );
+
+                }
+
+
+                // ------------------------------------------------
+                // EXPLORE COURSE
+                // ------------------------------------------------
+
+                const button =
+                    slide.querySelector(
+                        ".hero-course-button"
+                    );
+
+                if (button) {
+
+                    button.addEventListener(
+                        "click",
+                        () => openCourseDetails(course)
+                    );
+
+                }
+
+
+                heroCarouselTrack.appendChild(
+                    slide
+                );
+
+
+                // ------------------------------------------------
+                // DOT
+                // ------------------------------------------------
+
+                const dot =
+                    document.createElement("button");
+
+                dot.type =
+                    "button";
+
+                dot.className =
+                    "hero-carousel-dot";
+
+                dot.setAttribute(
+                    "aria-label",
+                    `Go to slide ${currentIndex + 1}`
+                );
+
+                dot.addEventListener(
+                    "click",
+                    () => goToHeroSlide(currentIndex)
+                );
+
+                heroCarouselDots.appendChild(
+                    dot
+                );
+
+
+                slideIndex++;
+
+            }
         );
 
-        heroCarouselTimer = null;
+
+        // ----------------------------------------------------
+        // GET ALL SLIDES
+        // ----------------------------------------------------
+
+        heroSlides =
+            heroCarouselTrack.querySelectorAll(
+                ".hero-slide"
+            );
+
+
+        activeHeroSlide = 0;
+
+
+        updateHeroSlide();
+
+        startHeroCarousel();
 
     }
 
-}
+
+    // ========================================================
+    // UPDATE ACTIVE SLIDE
+    // ========================================================
+
+    function updateHeroSlide() {
+
+        if (!heroSlides.length) {
+
+            return;
+
+        }
 
 
-function restartHeroCarousel() {
+        heroSlides.forEach(
+            (slide, index) => {
 
-    startHeroCarousel();
+                slide.classList.toggle(
+                    "active",
+                    index === activeHeroSlide
+                );
 
-}
-    
-    /* =========================================
-   HERO CAROUSEL CONTROLS
-========================================= */
-
-if (heroCarouselPrevious) {
-
-    heroCarouselPrevious.addEventListener(
-        "click",
-        previousHeroSlide
-    );
-
-}
+            }
+        );
 
 
-if (heroCarouselNext) {
+        const dots =
+            heroCarouselDots.querySelectorAll(
+                ".hero-carousel-dot"
+            );
 
-    heroCarouselNext.addEventListener(
-        "click",
-        nextHeroSlide
-    );
 
-}
+        dots.forEach(
+            (dot, index) => {
+
+                dot.classList.toggle(
+                    "active",
+                    index === activeHeroSlide
+                );
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // GO TO SLIDE
+    // ========================================================
+
+    function goToHeroSlide(index) {
+
+        if (!heroSlides.length) {
+
+            return;
+
+        }
+
+
+        if (index < 0) {
+
+            index =
+                heroSlides.length - 1;
+
+        }
+
+
+        if (
+            index >=
+            heroSlides.length
+        ) {
+
+            index = 0;
+
+        }
+
+
+        activeHeroSlide =
+            index;
+
+        updateHeroSlide();
+
+        restartHeroCarousel();
+
+    }
+
+
+    // ========================================================
+    // NEXT / PREVIOUS
+    // ========================================================
+
+    function nextHeroSlide() {
+
+        goToHeroSlide(
+            activeHeroSlide + 1
+        );
+
+    }
+
+
+    function previousHeroSlide() {
+
+        goToHeroSlide(
+            activeHeroSlide - 1
+        );
+
+    }
+
+
+    // ========================================================
+    // AUTO ROTATION
+    // ========================================================
+
+    function startHeroCarousel() {
+
+        stopHeroCarousel();
+
+
+        if (
+            heroSlides.length <= 1
+        ) {
+
+            return;
+
+        }
+
+
+        heroCarouselTimer =
+            setInterval(
+                () => {
+
+                    activeHeroSlide++;
+
+                    if (
+                        activeHeroSlide >=
+                        heroSlides.length
+                    ) {
+
+                        activeHeroSlide = 0;
+
+                    }
+
+                    updateHeroSlide();
+
+                },
+                6000
+            );
+
+    }
+
+
+    function stopHeroCarousel() {
+
+        if (heroCarouselTimer) {
+
+            clearInterval(
+                heroCarouselTimer
+            );
+
+            heroCarouselTimer = null;
+
+        }
+
+    }
+
+
+    function restartHeroCarousel() {
+
+        startHeroCarousel();
+
+    }
+
+
+    // ========================================================
+    // HERO CAROUSEL CONTROLS
+    // ========================================================
+
+    if (heroCarouselPrevious) {
+
+        heroCarouselPrevious.addEventListener(
+            "click",
+            previousHeroSlide
+        );
+
+    }
+
+
+    if (heroCarouselNext) {
+
+        heroCarouselNext.addEventListener(
+            "click",
+            nextHeroSlide
+        );
+
+    }
+
+
+    // ========================================================
+    // LOAD PROMOTIONS FROM SUPABASE
+    // ========================================================
+
+    async function loadPromotions() {
+
+        try {
+
+            if (
+                typeof window.supabaseClient ===
+                "undefined"
+            ) {
+
+                throw new Error(
+                    "Supabase client is not available."
+                );
+
+            }
+
+
+            const {
+                data,
+                error
+            } =
+                await window.supabaseClient
+                    .from("carousel_items")
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        image_url,
+                        area,
+                        button_text,
+                        button_url,
+                        status,
+                        start_date,
+                        end_date,
+                        sort_order,
+                        created_at
+                    `)
+                    .eq(
+                        "status",
+                        "published"
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true,
+                            nullsFirst: false
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            const now =
+                new Date();
+
+
+            promotions =
+                (data || [])
+                    .filter(
+                        promotion => {
+
+                            // --------------------------------
+                            // AREA
+                            // --------------------------------
+
+                            const area =
+                                String(
+                                    promotion.area ||
+                                    ""
+                                )
+                                    .trim()
+                                    .toLowerCase();
+
+
+                            const isHomepagePromotion =
+                                !area ||
+                                area === "homepage" ||
+                                area === "home" ||
+                                area === "all";
+
+
+                            if (
+                                !isHomepagePromotion
+                            ) {
+
+                                return false;
+
+                            }
+
+
+                            // --------------------------------
+                            // START DATE
+                            // --------------------------------
+
+                            if (
+                                promotion.start_date
+                            ) {
+
+                                const startDate =
+                                    new Date(
+                                        promotion.start_date
+                                    );
+
+                                if (
+                                    !Number.isNaN(
+                                        startDate.getTime()
+                                    ) &&
+                                    now < startDate
+                                ) {
+
+                                    return false;
+
+                                }
+
+                            }
+
+
+                            // --------------------------------
+                            // END DATE
+                            // --------------------------------
+
+                            if (
+                                promotion.end_date
+                            ) {
+
+                                const endDate =
+                                    new Date(
+                                        promotion.end_date
+                                    );
+
+                                if (
+                                    !Number.isNaN(
+                                        endDate.getTime()
+                                    ) &&
+                                    now > endDate
+                                ) {
+
+                                    return false;
+
+                                }
+
+                            }
+
+
+                            return true;
+
+                        }
+                    );
+
+
+        } catch (error) {
+
+            console.error(
+                "EduCore: Could not load carousel promotions:",
+                error
+            );
+
+            promotions = [];
+
+        }
+
+    }
+
+
     // ========================================================
     // LOAD COURSES FROM SUPABASE
     // ========================================================
@@ -940,8 +1415,10 @@ if (heroCarouselNext) {
 
 
             createCourseCards();
+
             setFilter("all");
-            createHeroCourseSlides();
+
+            createHeroSlides();
 
 
         } catch (error) {
@@ -1099,6 +1576,7 @@ if (heroCarouselNext) {
                                 loading="lazy"
                             >
 
+
                             <div class="book-hover">
 
                                 <div class="open-button">
@@ -1129,6 +1607,7 @@ if (heroCarouselNext) {
 
                             </div>
 
+
                             <div class="book-title">
 
                                 ${escapeHTML(
@@ -1137,6 +1616,7 @@ if (heroCarouselNext) {
                                 )}
 
                             </div>
+
 
                             <div class="book-level">
 
@@ -1512,7 +1992,8 @@ if (heroCarouselNext) {
 
     }
 
-// ========================================================
+
+    // ========================================================
     // CLOSE COURSE DETAILS
     // ========================================================
 
@@ -1842,10 +2323,11 @@ if (heroCarouselNext) {
     // INITIALIZE
     // ========================================================
 
-    
     await updateHeaderLogin();
 
-    await loadCourses();
+    await Promise.all([
+        loadPromotions(),
+        loadCourses()
+    ]);
 
 });
-   
