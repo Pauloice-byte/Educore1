@@ -768,6 +768,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         // ----------------------------------------------------
+        // INTRODUCTION SLIDE
+        // ----------------------------------------------------
+
+        carouselItems.push({
+
+            type: "intro",
+
+            data: null
+
+        });
+
+
+        // ----------------------------------------------------
         // FILTER COURSES FOR CAROUSEL
         // ----------------------------------------------------
 
@@ -863,6 +876,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (
                     item.type ===
+                    "intro"
+                ) {
+
+                    createIntroHeroSlide(
+                        slide
+                    );
+
+                } else if (
+                    item.type ===
                     "course"
                 ) {
 
@@ -944,6 +966,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateHeroSlide();
 
         startHeroCarousel();
+
+    }
+
+
+    // ========================================================
+    // INTRO HERO SLIDE
+    // ========================================================
+
+    function createIntroHeroSlide(
+        slide
+    ) {
+
+        slide.classList.add(
+            "hero-intro-slide"
+        );
+
+
+        slide.dataset.slideType =
+            "intro";
+
+
+        slide.innerHTML = `
+
+            <div class="hero-content">
+
+                <div class="hero-label">
+                    AUTONOMOUS LEARNING PLATFORM
+                </div>
+
+                <h1>
+                    Learn without
+                    <span>limits.</span>
+                </h1>
+
+                <p>
+                    Explore structured learning areas designed
+                    to help you build practical knowledge,
+                    develop new skills and learn at your own pace.
+                </p>
+
+            </div>
+
+        `;
 
     }
 
@@ -1812,6 +1877,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         filterCourses();
 
+
+        // ----------------------------------------------------
+        // KEEP CAROUSEL IN TANDEM WITH THE ACTIVE AREA
+        // ----------------------------------------------------
 
         createHeroCarousel();
 
