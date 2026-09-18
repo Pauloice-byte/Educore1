@@ -454,56 +454,40 @@ function createHeroCourseSlides() {
                     </div>
 
 
-                    <p class="hero-course-description">
-                        ${escapeHTML(course.description || "")}
-                    </p>
+                   <div class="hero-course-stats">
+
+    <div class="hero-course-stat">
+
+        <span>
+            LESSON LENGTH
+        </span>
+
+        <strong>
+            ${escapeHTML(course.time)}
+        </strong>
+
+    </div>
 
 
-                    <div class="hero-course-stats">
+    <div class="hero-course-stat">
 
-                        <div class="hero-course-stat">
+        <span>
+            COURSE TYPE
+        </span>
 
-                            <span>
-                                LESSON LENGTH
-                            </span>
+        <strong>
+            Autonomous
+        </strong>
 
-                            <strong>
-                                ${escapeHTML(course.time)}
-                            </strong>
+    </div>
 
-                        </div>
-
-
-                        <div class="hero-course-stat">
-
-                            <span>
-                                COURSE TYPE
-                            </span>
-
-                            <strong>
-                                Autonomous
-                            </strong>
-
-                        </div>
-
-                    </div>
+</div>
 
 
-                    <div class="hero-course-learning">
-
-                        <strong>
-                            What you will learn:
-                        </strong>
-
-                        ${escapeHTML(course.learning)}
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="hero-course-button"
-                    >
+<button
+    type="button"
+    class="hero-course-button"
+>
 
                         Explore Course
 
@@ -727,7 +711,7 @@ function startHeroCarousel() {
                 updateHeroSlide();
 
             },
-            3000
+            6000
         );
 
 }
