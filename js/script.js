@@ -26,6 +26,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const loadingCourses =
         document.getElementById("loadingCourses");
+    
+    const heroCarousel = 
+        document.getElementById("heroCarousel");
+    
+    const heroCarouselTrack = 
+        document.getElementById("heroCarouselTrack");
+    
+    const heroCarouselDots = 
+        document.getElementById("heroCarouselDots");
+    
+    const heroCarouselPrevious = 
+        document.getElementById("heroCarouselPrevious");
+    
+    const heroCarouselNext = 
+        document.getElementById("heroCarouselNext");
 
     const searchInput =
         document.getElementById("searchInput");
@@ -102,6 +117,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     let searchTerm = "";
 
     let activeCourse = null;
+
+    let heroSlides = [];
+    
+    let activeHeroSlide = 0;
+    
+    let heroCarouselTimer = null;
 
     // ========================================================
     // AUTHENTICATION / SESSION
@@ -341,7 +362,420 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
+        /* =========================================
+   HERO CAROUSEL
+========================================= */
 
+function createHeroCourseSlides() {
+
+    if (!heroCarouselTrack || !heroCarouselDots) {
+        return;
+    }
+
+    /* Remove previously generated course slides */
+
+    heroCarouselTrack
+        .querySelectorAll(".hero-course-slide")
+        .forEach(slide => slide.remove());
+
+
+    /* Reset dots */
+
+    heroCarouselDots.innerHTML = "";
+
+
+    /* Create intro dot */
+
+    const introDot =
+        document.createElement("button");
+
+    introDot.type = "button";
+
+    introDot.className =
+        "hero-carousel-dot active";
+
+    introDot.setAttribute(
+        "aria-label",
+        "Go to slide 1"
+    );
+
+    introDot.addEventListener(
+        "click",
+        () => goToHeroSlide(0)
+    );
+
+    heroCarouselDots.appendChild(introDot);
+
+
+    /* Create course slides */
+
+    courses.forEach(
+        (course, index) => {
+
+            const slide =
+                document.createElement("article");
+
+            slide.className =
+                "hero-slide hero-course-slide";
+
+            slide.dataset.slideType =
+                "course";
+
+            slide.dataset.courseId =
+                course.id;
+
+
+            slide.innerHTML = `
+                <div class="hero-course-cover-wrapper">
+
+                    <img
+                        class="hero-course-cover"
+                        src="${escapeAttribute(course.cover)}"
+                        alt="${escapeAttribute(course.title)}"
+                    >
+
+                </div>
+
+
+                <div class="hero-course-information">
+
+                    <div class="hero-course-category">
+                        ${escapeHTML(course.category || "COURSE")}
+                    </div>
+
+
+                    <h2 class="hero-course-title">
+                        ${escapeHTML(course.title)}
+                    </h2>
+
+
+                    <div class="hero-course-level">
+                        ${escapeHTML(course.level || "All Levels")}
+                    </div>
+
+
+                    <p class="hero-course-description">
+                        ${escapeHTML(course.description || "")}
+                    </p>
+
+
+                    <div class="hero-course-stats">
+
+                        <div class="hero-course-stat">
+
+                            <span>
+                                LESSON LENGTH
+                            </span>
+
+                            <strong>
+                                ${escapeHTML(course.time)}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="hero-course-stat">
+
+                            <span>
+                                COURSE TYPE
+                            </span>
+
+                            <strong>
+                                Autonomous
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="hero-course-learning">
+
+                        <strong>
+                            What you will learn:
+                        </strong>
+
+                        ${escapeHTML(course.learning)}
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="hero-course-button"
+                    >
+
+                        Explore Course
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+            `;
+
+
+            /* Image fallback */
+
+            const image =
+                slide.querySelector(
+                    ".hero-course-cover"
+                );
+
+            if (image) {
+
+                image.addEventListener(
+                    "error",
+                    () => {
+                        image.style.display = "none";
+                    }
+                );
+
+            }
+
+
+            /* Explore Course */
+
+            const button =
+                slide.querySelector(
+                    ".hero-course-button"
+                );
+
+            if (button) {
+
+                button.addEventListener(
+                    "click",
+                    () => openCourseDetails(course)
+                );
+
+            }
+
+
+            heroCarouselTrack.appendChild(slide);
+
+
+            /* Create dot */
+
+            const dot =
+                document.createElement("button");
+
+            dot.type = "button";
+
+            dot.className =
+                "hero-carousel-dot";
+
+            dot.setAttribute(
+                "aria-label",
+                `Go to slide ${index + 2}`
+            );
+
+            dot.addEventListener(
+                "click",
+                () => goToHeroSlide(index + 1)
+            );
+
+            heroCarouselDots.appendChild(dot);
+
+        }
+    );
+
+
+    heroSlides =
+        heroCarouselTrack.querySelectorAll(
+            ".hero-slide"
+        );
+
+
+    activeHeroSlide = 0;
+
+    updateHeroSlide();
+
+    startHeroCarousel();
+}
+
+
+/* =========================================
+   UPDATE ACTIVE SLIDE
+========================================= */
+
+function updateHeroSlide() {
+
+    if (!heroSlides.length) {
+        return;
+    }
+
+
+    heroSlides.forEach(
+        (slide, index) => {
+
+            slide.classList.toggle(
+                "active",
+                index === activeHeroSlide
+            );
+
+        }
+    );
+
+
+    const dots =
+        heroCarouselDots.querySelectorAll(
+            ".hero-carousel-dot"
+        );
+
+
+    dots.forEach(
+        (dot, index) => {
+
+            dot.classList.toggle(
+                "active",
+                index === activeHeroSlide
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   GO TO SLIDE
+========================================= */
+
+function goToHeroSlide(index) {
+
+    if (!heroSlides.length) {
+        return;
+    }
+
+
+    if (index < 0) {
+
+        index =
+            heroSlides.length - 1;
+
+    }
+
+
+    if (index >= heroSlides.length) {
+
+        index = 0;
+
+    }
+
+
+    activeHeroSlide = index;
+
+    updateHeroSlide();
+
+    restartHeroCarousel();
+}
+
+
+/* =========================================
+   NEXT / PREVIOUS
+========================================= */
+
+function nextHeroSlide() {
+
+    goToHeroSlide(
+        activeHeroSlide + 1
+    );
+
+}
+
+
+function previousHeroSlide() {
+
+    goToHeroSlide(
+        activeHeroSlide - 1
+    );
+
+}
+
+
+/* =========================================
+   AUTO ROTATION
+========================================= */
+
+function startHeroCarousel() {
+
+    stopHeroCarousel();
+
+
+    if (heroSlides.length <= 1) {
+        return;
+    }
+
+
+    heroCarouselTimer =
+        setInterval(
+            () => {
+
+                activeHeroSlide++;
+
+                if (
+                    activeHeroSlide >=
+                    heroSlides.length
+                ) {
+
+                    activeHeroSlide = 0;
+
+                }
+
+                updateHeroSlide();
+
+            },
+            3000
+        );
+
+}
+
+
+function stopHeroCarousel() {
+
+    if (heroCarouselTimer) {
+
+        clearInterval(
+            heroCarouselTimer
+        );
+
+        heroCarouselTimer = null;
+
+    }
+
+}
+
+
+function restartHeroCarousel() {
+
+    startHeroCarousel();
+
+}
+    
+    /* =========================================
+   HERO CAROUSEL CONTROLS
+========================================= */
+
+if (heroCarouselPrevious) {
+
+    heroCarouselPrevious.addEventListener(
+        "click",
+        previousHeroSlide
+    );
+
+}
+
+
+if (heroCarouselNext) {
+
+    heroCarouselNext.addEventListener(
+        "click",
+        nextHeroSlide
+    );
+
+}
     // ========================================================
     // LOAD COURSES FROM SUPABASE
     // ========================================================
@@ -466,8 +900,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
             createCourseCards();
-
             setFilter("all");
+            createHeroCourseSlides();
 
 
         } catch (error) {
