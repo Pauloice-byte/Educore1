@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
+    "use strict";
+
 
     /* =====================================================
        ELEMENTS
@@ -76,6 +78,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             "studentCourseDetailsCover"
         );
 
+    const courseDetailsCoverPlaceholder =
+        document.getElementById(
+            "studentCourseDetailsCoverPlaceholder"
+        );
+
     const courseDetailsCategory =
         document.getElementById(
             "studentCourseDetailsCategory"
@@ -130,11 +137,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         new Date().getFullYear();
 
     if (year) {
-        year.textContent = currentYear;
+        year.textContent =
+            currentYear;
     }
 
     if (sidebarYear) {
-        sidebarYear.textContent = currentYear;
+        sidebarYear.textContent =
+            currentYear;
     }
 
 
@@ -170,7 +179,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    if (profile.active !== true) {
+    if (
+        profile.active !== true
+    ) {
 
         await supabaseClient.auth.signOut();
 
@@ -182,7 +193,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    if (profile.role === "admin") {
+    if (
+        profile.role === "admin"
+    ) {
 
         window.location.replace(
             "admin.html"
@@ -192,7 +205,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    if (profile.role !== "student") {
+    if (
+        profile.role !== "student"
+    ) {
 
         await supabaseClient.auth.signOut();
 
@@ -298,7 +313,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             } else {
 
                 openMobileSidebar();
-
             }
 
             return;
@@ -346,7 +360,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         "keydown",
         event => {
 
-            if (event.key === "Escape") {
+            if (
+                event.key === "Escape"
+            ) {
 
                 if (
                     courseDetails &&
@@ -357,12 +373,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                     closeCourseDetails();
 
-                    return;
+                } else {
+
+                    closeMobileSidebar();
                 }
-
-                closeMobileSidebar();
             }
-
         }
     );
 
@@ -371,11 +386,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         "resize",
         () => {
 
-            if (window.innerWidth > 900) {
+            if (
+                window.innerWidth > 900
+            ) {
 
                 closeMobileSidebar();
             }
-
         }
     );
 
@@ -405,7 +421,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         "my-courses":
             "My Courses"
-
     };
 
 
@@ -422,32 +437,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         "my-courses":
             "YOUR LEARNING"
-
     };
 
 
-    let currentView = null;
+    let currentView =
+        null;
 
 
-    /*
-     * The course details screen is a temporary
-     * overlay-style view inside student.html.
-     *
-     * This remembers the student section that
-     * opened the course.
-     */
-
-    let previousCourseView =
+    let previousView =
         "courses";
+
 
     let activeCourse =
         null;
 
 
-    function normalizeView(viewName) {
+    function normalizeView(
+        viewName
+    ) {
 
         if (
-            !viewNames.includes(viewName)
+            !viewNames.includes(
+                viewName
+            )
         ) {
 
             return "home";
@@ -462,7 +474,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     ) {
 
         viewName =
-            normalizeView(viewName);
+            normalizeView(
+                viewName
+            );
 
 
         currentView =
@@ -481,7 +495,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         view.id ===
                         `view-${viewName}`
                     );
-
                 }
             );
 
@@ -498,7 +511,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         button.dataset.view ===
                         viewName
                     );
-
                 }
             );
 
@@ -515,7 +527,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         button.dataset.view ===
                         viewName
                     );
-
                 }
             );
 
@@ -538,11 +549,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         window.scrollTo({
-
             top: 0,
-
             behavior: "smooth"
-
         });
 
 
@@ -581,7 +589,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     ) {
 
         viewName =
-            normalizeView(viewName);
+            normalizeView(
+                viewName
+            );
 
 
         if (
@@ -595,16 +605,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (addHistory) {
 
             window.history.pushState(
-
                 {
                     studentView:
                         viewName
                 },
-
                 "",
-
                 `#${viewName}`
-
             );
         }
 
@@ -630,16 +636,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "click",
                     () => {
 
-                        closeCourseDetails();
-
                         setActiveView(
                             button.dataset.view,
                             true
                         );
-
                     }
                 );
-
             }
         );
 
@@ -655,16 +657,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "click",
                     () => {
 
-                        closeCourseDetails();
-
                         setActiveView(
                             button.dataset.view,
                             true
                         );
-
                     }
                 );
-
             }
         );
 
@@ -680,16 +678,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     "click",
                     () => {
 
-                        closeCourseDetails();
-
                         setActiveView(
                             button.dataset.viewTarget,
                             true
                         );
-
                     }
                 );
-
             }
         );
 
@@ -698,29 +692,16 @@ document.addEventListener("DOMContentLoaded", async () => {
        COURSE DETAILS
     ===================================================== */
 
-    function getCourseCategory(
-        course
-    ) {
-
-        return (
-            course.category ||
-            course.language ||
-            "COURSE"
-        )
-            .toString()
-            .toUpperCase();
-    }
-
-
     function getCourseTime(
         course
     ) {
 
         return (
-            course.lesson_time ||
             course.duration ||
-            course.time ||
-            "25 minutes"
+            course.total_hours ||
+            course.hours ||
+            course.lesson_duration ||
+            "—"
         );
     }
 
@@ -732,8 +713,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return (
             course.learning_outcomes ||
             course.learning ||
-            course.description ||
-            "Build your knowledge and practical skills through structured lessons and practice."
+            course.what_you_learn ||
+            "Course learning information will be available as you progress through the course."
         );
     }
 
@@ -746,14 +727,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             course.structure ||
             course.course_structure ||
             course.modules ||
-            "Structured lessons with guided learning, practice and progress tracking."
+            "The course is organised into structured learning modules."
         );
     }
 
 
-    function openCourseDetails(
-        course,
-        sourceView = currentView || "courses"
+    function getCourseCategory(
+        course
+    ) {
+
+        return (
+            course.category ||
+            course.language ||
+            "COURSE"
+        );
+    }
+
+
+    function showCourseDetails(
+        course
     ) {
 
         if (
@@ -768,25 +760,112 @@ document.addEventListener("DOMContentLoaded", async () => {
         activeCourse =
             course;
 
-        previousCourseView =
-            normalizeView(
-                sourceView
-            );
+
+        if (
+            courseDetailsCategory
+        ) {
+
+            courseDetailsCategory.textContent =
+                getCourseCategory(
+                    course
+                );
+        }
 
 
-        if (courseDetailsCover) {
+        if (
+            courseDetailsTitle
+        ) {
 
-            if (course.cover_image) {
+            courseDetailsTitle.textContent =
+                course.title ||
+                "Untitled Course";
+        }
+
+
+        if (
+            courseDetailsLevel
+        ) {
+
+            courseDetailsLevel.textContent =
+                course.level ||
+                "Level information unavailable";
+        }
+
+
+        if (
+            courseDetailsStatLevel
+        ) {
+
+            courseDetailsStatLevel.textContent =
+                course.level ||
+                "—";
+        }
+
+
+        if (
+            courseDetailsTime
+        ) {
+
+            courseDetailsTime.textContent =
+                getCourseTime(
+                    course
+                );
+        }
+
+
+        if (
+            courseDetailsDescription
+        ) {
+
+            courseDetailsDescription.textContent =
+                course.description ||
+                "Course information will be available here.";
+        }
+
+
+        if (
+            courseDetailsLearning
+        ) {
+
+            courseDetailsLearning.textContent =
+                getCourseLearning(
+                    course
+                );
+        }
+
+
+        if (
+            courseDetailsStructure
+        ) {
+
+            courseDetailsStructure.textContent =
+                getCourseStructure(
+                    course
+                );
+        }
+
+
+        if (
+            courseDetailsCover &&
+            courseDetailsCoverPlaceholder
+        ) {
+
+            if (
+                course.cover_image
+            ) {
 
                 courseDetailsCover.src =
                     course.cover_image;
 
                 courseDetailsCover.alt =
                     course.title ||
-                    "Course cover";
+                    "Course";
 
                 courseDetailsCover.style.display =
                     "block";
+
+                courseDetailsCoverPlaceholder.style.display =
+                    "none";
 
             } else {
 
@@ -799,82 +878,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 courseDetailsCover.style.display =
                     "none";
+
+                courseDetailsCoverPlaceholder.textContent =
+                    course.title ||
+                    "EDUCORE COURSE";
+
+                courseDetailsCoverPlaceholder.style.display =
+                    "flex";
             }
         }
 
 
-        if (courseDetailsCategory) {
-
-            courseDetailsCategory.textContent =
-                getCourseCategory(
-                    course
-                );
-        }
-
-
-        if (courseDetailsTitle) {
-
-            courseDetailsTitle.textContent =
-                course.title ||
-                "Untitled Course";
-        }
-
-
-        if (courseDetailsLevel) {
-
-            courseDetailsLevel.textContent =
-                course.level ||
-                "Level information unavailable";
-        }
-
-
-        if (courseDetailsDescription) {
-
-            courseDetailsDescription.textContent =
-                course.description ||
-                "Explore this course and begin your learning journey on EduCore.";
-        }
-
-
-        if (courseDetailsStatLevel) {
-
-            courseDetailsStatLevel.textContent =
-                course.level ||
-                "—";
-        }
-
-
-        if (courseDetailsTime) {
-
-            courseDetailsTime.textContent =
-                getCourseTime(
-                    course
-                );
-        }
-
-
-        if (courseDetailsLearning) {
-
-            courseDetailsLearning.textContent =
-                getCourseLearning(
-                    course
-                );
-        }
-
-
-        if (courseDetailsStructure) {
-
-            courseDetailsStructure.textContent =
-                getCourseStructure(
-                    course
-                );
-        }
-
-
         /*
-         * Hide all student navigation views while
-         * keeping them in the DOM.
+         * Remember where the student came from.
+         * This lets the Details Back button return
+         * to Courses or Search.
          */
+
+        if (
+            currentView === "search"
+        ) {
+
+            previousView =
+                "search";
+
+        } else {
+
+            previousView =
+                "courses";
+        }
+
 
         document
             .querySelectorAll(
@@ -886,51 +919,54 @@ document.addEventListener("DOMContentLoaded", async () => {
                     view.classList.remove(
                         "active"
                     );
-
                 }
             );
-
-
-        if (courseDetails) {
-
-            courseDetails.classList.add(
-                "visible"
-            );
-
-            courseDetails.setAttribute(
-                "aria-hidden",
-                "false"
-            );
-        }
 
 
         closeMobileSidebar();
 
 
+        courseDetails.classList.add(
+            "visible"
+        );
+
+        courseDetails.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
         window.scrollTo({
-
             top: 0,
-
             behavior: "smooth"
-
         });
+
+
+        /*
+         * Add a browser history state.
+         * Therefore phone/browser Back returns
+         * to the previous student view.
+         */
+
+        window.history.pushState(
+            {
+                studentView:
+                    currentView,
+                courseDetails:
+                    true
+            },
+            "",
+            `#course`
+        );
     }
 
 
     function closeCourseDetails(
-        restoreView = true
+        useHistory = false
     ) {
 
-        if (!courseDetails) {
-
-            return;
-        }
-
-
         if (
-            !courseDetails.classList.contains(
-                "visible"
-            )
+            !courseDetails
         ) {
 
             return;
@@ -951,36 +987,56 @@ document.addEventListener("DOMContentLoaded", async () => {
             null;
 
 
-        if (restoreView) {
+        if (
+            useHistory
+        ) {
 
-            applyActiveView(
-                previousCourseView
-            );
+            window.history.back();
+
+            return;
         }
+
+
+        applyActiveView(
+            previousView
+        );
     }
 
 
-    if (courseBackButton) {
+    if (
+        courseBackButton
+    ) {
 
         courseBackButton.addEventListener(
             "click",
             () => {
 
-                closeCourseDetails(
-                    true
-                );
+                /*
+                 * Go back through browser history
+                 * when possible. The popstate handler
+                 * will restore the previous view.
+                 */
 
+                if (
+                    window.history.length > 1
+                ) {
+
+                    window.history.back();
+
+                } else {
+
+                    closeCourseDetails(
+                        false
+                    );
+                }
             }
         );
     }
 
 
-    /*
-     * This is intentionally the same destination
-     * behavior used by the homepage.
-     */
-
-    if (courseStartButton) {
+    if (
+        courseStartButton
+    ) {
 
         courseStartButton.addEventListener(
             "click",
@@ -1015,9 +1071,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         `course.html?id=${encodeURIComponent(
                             activeCourse.id
                         )}`;
-
                 }
-
             }
         );
     }
@@ -1032,9 +1086,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         event => {
 
             /*
-             * If course details are open, Back first
-             * closes the course information and returns
-             * to the student view from which it opened.
+             * If the course details page is currently
+             * visible, close it and restore the view
+             * that opened it.
              */
 
             if (
@@ -1044,15 +1098,32 @@ document.addEventListener("DOMContentLoaded", async () => {
                 )
             ) {
 
-                closeCourseDetails(
-                    true
+                courseDetails.classList.remove(
+                    "visible"
+                );
+
+                courseDetails.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+                activeCourse =
+                    null;
+
+                const restoredView =
+                    previousView ||
+                    "courses";
+
+                applyActiveView(
+                    restoredView
                 );
 
                 return;
             }
 
 
-            let viewName = null;
+            let viewName =
+                null;
 
 
             if (
@@ -1074,6 +1145,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
+            if (
+                viewName === "course"
+            ) {
+
+                return;
+            }
+
+
             viewName =
                 normalizeView(
                     viewName
@@ -1092,15 +1171,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         () => {
 
             /*
-             * Do not let a hash navigation destroy
-             * the course details screen unexpectedly.
+             * Course details has its own history state.
+             * Do not treat #course as a normal view.
              */
 
             if (
-                courseDetails &&
-                courseDetails.classList.contains(
-                    "visible"
-                )
+                window.location.hash ===
+                "#course"
             ) {
 
                 return;
@@ -1123,7 +1200,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     viewName
                 );
             }
-
         }
     );
 
@@ -1144,10 +1220,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     event => {
 
                         event.preventDefault();
-
                     }
                 );
-
             }
         );
 
@@ -1161,12 +1235,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadPublishedCourses() {
 
-        if (!coursesGrid) {
+        if (
+            !coursesGrid
+        ) {
+
             return;
         }
 
 
-        if (coursesLoading) {
+        if (
+            coursesLoading
+        ) {
 
             coursesLoading.classList.remove(
                 "hidden"
@@ -1174,10 +1253,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        coursesGrid.innerHTML = "";
+        coursesGrid.innerHTML =
+            "";
 
 
-        if (coursesEmpty) {
+        if (
+            coursesEmpty
+        ) {
 
             coursesEmpty.classList.add(
                 "hidden"
@@ -1199,12 +1281,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .order(
                     "created_at",
                     {
-                        ascending: false
+                        ascending:
+                            false
                     }
                 );
 
 
-        if (coursesLoading) {
+        if (
+            coursesLoading
+        ) {
 
             coursesLoading.classList.add(
                 "hidden"
@@ -1220,7 +1305,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
 
-            if (coursesEmpty) {
+            if (
+                coursesEmpty
+            ) {
 
                 coursesEmpty.classList.remove(
                     "hidden"
@@ -1268,7 +1355,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         if (
-            publishedCourses.length === 0 &&
+            publishedCourses.length ===
+            0 &&
             coursesEmpty
         ) {
 
@@ -1297,22 +1385,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             "student-course-card";
 
 
-        card.setAttribute(
-            "tabindex",
-            "0"
-        );
+        /*
+         * Store the course ID directly on the card.
+         * This is useful for event delegation.
+         */
 
+        if (
+            course.id !== undefined &&
+            course.id !== null
+        ) {
 
-        card.setAttribute(
-            "role",
-            "button"
-        );
-
-
-        card.setAttribute(
-            "aria-label",
-            `Open ${course.title || "course"} information`
-        );
+            card.dataset.courseId =
+                String(
+                    course.id
+                );
+        }
 
 
         const cover =
@@ -1325,7 +1412,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             "student-course-cover";
 
 
-        if (course.cover_image) {
+        if (
+            course.cover_image
+        ) {
 
             const image =
                 document.createElement(
@@ -1454,47 +1543,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
-        /*
-         * FIX:
-         *
-         * The old code only logged the course.
-         * Cards now open the same type of course
-         * information view used on the homepage.
-         */
-
-        function selectCourse() {
-
-            openCourseDetails(
-                course,
-                currentView || "courses"
-            );
-        }
-
-
-        card.addEventListener(
-            "click",
-            selectCourse
-        );
-
-
-        card.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter" ||
-                    event.key === " "
-                ) {
-
-                    event.preventDefault();
-
-                    selectCourse();
-                }
-
-            }
-        );
-
-
         return card;
     }
 
@@ -1504,12 +1552,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         container
     ) {
 
-        if (!container) {
+        if (
+            !container
+        ) {
+
             return;
         }
 
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
 
         courses.forEach(
@@ -1524,8 +1576,128 @@ document.addEventListener("DOMContentLoaded", async () => {
                 container.appendChild(
                     card
                 );
-
             }
+        );
+    }
+
+
+    /* =====================================================
+       COURSE CARD CLICK HANDLER
+       
+       IMPORTANT:
+       This uses event delegation instead of attaching
+       individual click handlers to every card.
+    ===================================================== */
+
+    function handleCourseGridClick(
+        event
+    ) {
+
+        const card =
+            event.target.closest(
+                ".student-course-card"
+            );
+
+
+        if (
+            !card
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * Make sure this card actually belongs
+         * to the current grid.
+         */
+
+        if (
+            !event.currentTarget.contains(
+                card
+            )
+        ) {
+
+            return;
+        }
+
+
+        const courseId =
+            card.dataset.courseId;
+
+
+        if (
+            !courseId
+        ) {
+
+            console.error(
+                "Course card has no course ID."
+            );
+
+            return;
+        }
+
+
+        const course =
+            publishedCourses.find(
+                item =>
+                    String(
+                        item.id
+                    ) ===
+                    String(
+                        courseId
+                    )
+            );
+
+
+        if (
+            !course
+        ) {
+
+            console.error(
+                "Unable to find selected course:",
+                courseId
+            );
+
+            return;
+        }
+
+
+        showCourseDetails(
+            course
+        );
+    }
+
+
+    if (
+        coursesGrid
+    ) {
+
+        coursesGrid.addEventListener(
+            "click",
+            handleCourseGridClick
+        );
+    }
+
+
+    if (
+        searchResults
+    ) {
+
+        searchResults.addEventListener(
+            "click",
+            handleCourseGridClick
+        );
+    }
+
+
+    if (
+        myCoursesGrid
+    ) {
+
+        myCoursesGrid.addEventListener(
+            "click",
+            handleCourseGridClick
         );
     }
 
@@ -1553,7 +1725,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .toLowerCase();
 
 
-        if (!cleanQuery) {
+        if (
+            !cleanQuery
+        ) {
 
             searchResults.innerHTML =
                 "";
@@ -1568,7 +1742,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 searchEmpty.querySelector(
                     ".dashboard-empty-title"
                 );
-
 
             const text =
                 searchEmpty.querySelector(
@@ -1598,28 +1771,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             publishedCourses.filter(
                 course => {
 
-                    const searchableText = [
-
-                        course.title,
-
-                        course.language,
-
-                        course.level,
-
-                        course.description,
-
-                        course.category
-
-                    ]
-                        .filter(Boolean)
-                        .join(" ")
-                        .toLowerCase();
+                    const searchableText =
+                        [
+                            course.title,
+                            course.language,
+                            course.level,
+                            course.description,
+                            course.category
+                        ]
+                            .filter(Boolean)
+                            .join(" ")
+                            .toLowerCase();
 
 
                     return searchableText.includes(
                         cleanQuery
                     );
-
                 }
             );
 
@@ -1629,7 +1796,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         if (
-            results.length === 0
+            results.length ===
+            0
         ) {
 
             searchEmpty.classList.remove(
@@ -1641,7 +1809,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 searchEmpty.querySelector(
                     ".dashboard-empty-title"
                 );
-
 
             const text =
                 searchEmpty.querySelector(
@@ -1679,14 +1846,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    if (searchInput) {
+    if (
+        searchInput
+    ) {
 
         searchInput.addEventListener(
             "input",
             async event => {
 
                 if (
-                    publishedCourses.length === 0
+                    publishedCourses.length ===
+                    0
                 ) {
 
                     await loadPublishedCourses();
@@ -1696,7 +1866,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 renderSearchResults(
                     event.target.value
                 );
-
             }
         );
     }
@@ -1704,7 +1873,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        MY COURSES
-       Enrollment system comes next.
     ===================================================== */
 
     async function loadMyCourses() {
@@ -1739,7 +1907,9 @@ document.addEventListener("DOMContentLoaded", async () => {
        LOGOUT
     ===================================================== */
 
-    if (logoutButton) {
+    if (
+        logoutButton
+    ) {
 
         logoutButton.addEventListener(
             "click",
@@ -1755,9 +1925,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         "Logout failed:",
                         error
                     );
-
                 }
-
             }
         );
     }
@@ -1771,6 +1939,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.hash
             .replace("#", "")
             .trim();
+
+
+    /*
+     * Course details is not a permanent navigation view.
+     * If the page opens with #course, start with Courses.
+     */
+
+    if (
+        initialView === "course"
+    ) {
+
+        initialView =
+            "courses";
+    }
 
 
     if (
@@ -1815,6 +1997,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     ===================================================== */
 
     await loadPublishedCourses();
-
 
 });
