@@ -983,3 +983,50 @@ REDUCED MOTION
 
 
 }
+
+
+/* =====================================================
+   COURSE EXPLORE BUTTON
+===================================================== */
+
+.student-course-explore-button {
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+
+    min-height: 44px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #22c55e;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.student-course-explore-button:hover {
+    background: #16a34a;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 6px 16px rgba(34, 197, 94, 0.22);
+}
+
+.student-course-explore-button:active {
+    transform: translateY(0);
+}
+
+.student-course-explore-button:focus-visible {
+    outline: 3px solid rgba(34, 197, 94, 0.25);
+    outline-offset: 2px;
+}
