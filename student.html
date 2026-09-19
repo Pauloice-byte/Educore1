@@ -1,40 +1,38 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
-<head> 
+<head>
 
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <title>Student Dashboard — EduCore</title>
 
-<title>Student Dashboard — EduCore</title>
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
 
-<link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+        crossorigin
+    >
 
-<link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-    crossorigin
->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
-<link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
-
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/student.css">
-
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/student.css">
 
 </head>
+
 
 <body data-page="student">
 
@@ -84,10 +82,6 @@
 
 
     <nav class="sidebar-navigation">
-
-        <!-- =============================================
-             LEARN
-        ============================================== -->
 
         <div class="navigation-section">
 
@@ -165,10 +159,6 @@
 
         </div>
 
-
-        <!-- =============================================
-             ACCOUNT
-        ============================================== -->
 
         <div class="navigation-section">
 
@@ -299,8 +289,6 @@
             <div class="dashboard-inner">
 
 
-                <!-- WELCOME -->
-
                 <div class="dashboard-welcome">
 
                     <span class="dashboard-label">
@@ -321,8 +309,6 @@
 
                 </div>
 
-
-                <!-- STATISTICS -->
 
                 <div class="dashboard-stats">
 
@@ -407,8 +393,6 @@
 
                 </div>
 
-
-                <!-- CONTINUE LEARNING -->
 
                 <section class="dashboard-section">
 
@@ -495,8 +479,6 @@
 
                 </section>
 
-
-                <!-- RECENT ACTIVITY -->
 
                 <section class="dashboard-section">
 
@@ -739,6 +721,194 @@
                     >
                         Explore Courses
                     </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         COURSE DETAILS VIEW
+    ================================================== -->
+
+    <section
+        id="studentCourseDetails"
+        class="student-course-details"
+        aria-hidden="true"
+    >
+
+        <div class="student-course-details-inner">
+
+
+            <button
+                type="button"
+                id="studentCourseBackButton"
+                class="student-course-back-button"
+            >
+
+                <span>
+                    ←
+                </span>
+
+                <span>
+                    Back
+                </span>
+
+            </button>
+
+
+            <div class="student-course-details-layout">
+
+
+                <!-- COVER -->
+
+                <div class="student-course-details-cover-column">
+
+                    <div class="student-course-details-cover-wrapper">
+
+                        <img
+                            id="studentCourseDetailsCover"
+                            class="student-course-details-cover"
+                            src=""
+                            alt=""
+                        >
+
+                        <div
+                            id="studentCourseDetailsCoverPlaceholder"
+                            class="student-course-details-cover-placeholder"
+                        >
+                            EDUCORE
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- INFORMATION -->
+
+                <div class="student-course-details-information">
+
+                    <div
+                        id="studentCourseDetailsCategory"
+                        class="student-course-details-category"
+                    >
+                        COURSE
+                    </div>
+
+
+                    <h1
+                        id="studentCourseDetailsTitle"
+                        class="student-course-details-title"
+                    >
+                        Course
+                    </h1>
+
+
+                    <div
+                        id="studentCourseDetailsLevel"
+                        class="student-course-details-level"
+                    >
+                        Level
+                    </div>
+
+
+                    <p
+                        id="studentCourseDetailsDescription"
+                        class="student-course-details-description"
+                    >
+                    </p>
+
+
+                    <!-- STATS -->
+
+                    <div class="student-course-details-stats">
+
+                        <div class="student-course-stat">
+
+                            <span class="student-course-stat-label">
+                                LEVEL
+                            </span>
+
+                            <strong
+                                id="studentCourseDetailsStatLevel"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="student-course-stat">
+
+                            <span class="student-course-stat-label">
+                                TIME
+                            </span>
+
+                            <strong
+                                id="studentCourseDetailsTime"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- WHAT YOU WILL LEARN -->
+
+                    <section class="student-course-details-section">
+
+                        <div class="student-details-section-label">
+                            WHAT YOU WILL LEARN
+                        </div>
+
+                        <div
+                            id="studentCourseDetailsLearning"
+                            class="student-course-details-learning"
+                        >
+                            —
+                        </div>
+
+                    </section>
+
+
+                    <!-- COURSE STRUCTURE -->
+
+                    <section class="student-course-details-section">
+
+                        <div class="student-details-section-label">
+                            COURSE STRUCTURE
+                        </div>
+
+                        <div
+                            id="studentCourseDetailsStructure"
+                            class="student-course-details-structure"
+                        >
+                            —
+                        </div>
+
+                    </section>
+
+
+                    <!-- ACTION -->
+
+                    <div class="student-course-details-action">
+
+                        <button
+                            type="button"
+                            id="studentCourseStartButton"
+                            class="student-course-start-button"
+                        >
+                            Explore Course
+                        </button>
+
+                    </div>
 
                 </div>
 
