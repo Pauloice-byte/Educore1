@@ -5024,8 +5024,30 @@ async function init() {
     showLoading();
 
 
+    /*
+     * 1. Get the course ID from the URL.
+     */
+
     state.courseId =
         getCourseId();
+
+
+    console.log(
+        "================================================"
+    );
+
+    console.log(
+        "EDUCORE COURSE PLATFORM"
+    );
+
+    console.log(
+        "Course ID:",
+        state.courseId
+    );
+
+    console.log(
+        "================================================"
+    );
 
 
     setupNavigation();
@@ -5041,11 +5063,107 @@ async function init() {
 
     try {
 
+        /*
+         * 2. Load authenticated student.
+         */
+
         await loadUser();
 
-        await loadCourse();
+
+        /*
+         * 3. Load the selected course.
+         */
+
+        const courseLoaded =
+            await loadCourse();
+
+
+        if (!courseLoaded) {
+
+            console.error(
+                "EduCore: Course could not be loaded."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * 4. Load the complete course tree.
+         *
+         * courses
+         *    ↓
+         * modules
+         *    ↓
+         * lessons
+         *    ↓
+         * sections
+         *    ↓
+         * activities
+         *    ↓
+         * questions
+         *    +
+         * media
+         */
 
         await loadModules();
+
+
+        /*
+         * 5. Render the complete platform.
+         */
+
+        renderEverything();
+
+
+        console.log(
+            "================================================"
+        );
+
+        console.log(
+            "EDUCORE COURSE LOADING COMPLETE"
+        );
+
+        console.log(
+            "Course:",
+            state.course
+        );
+
+        console.log(
+            "Modules:",
+            state.modules.length
+        );
+
+        console.log(
+            "Lessons:",
+            state.lessons.length
+        );
+
+        console.log(
+            "Sections:",
+            state.sections.length
+        );
+
+        console.log(
+            "Activities:",
+            state.activities.length
+        );
+
+        console.log(
+            "Questions:",
+            state.questions.length
+        );
+
+        console.log(
+            "Media:",
+            state.media.length
+        );
+
+        console.log(
+            "================================================"
+        );
+
 
     } catch (error) {
 
