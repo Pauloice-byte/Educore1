@@ -28,10 +28,10 @@
 ===================================================== */
 
 const SUPABASE_URL =
-    "https://kioqhgkpfqdhjqidrlwf.supabase.co/";
+    "https://kioqhgkpfqdhjqidrlwf.supabase.co";
 
 const SUPABASE_ANON_KEY =
-    "Ysb_publishable_ZDAJmFtSl9WNGVlZPyvngA_ZWiv_Q4g";
+    "sb_publishable_ZDAJmFtSl9WNGVlZPyvngA_ZWiv_Q4g";
 
 const supabaseClient =
     window.supabase.createClient(
