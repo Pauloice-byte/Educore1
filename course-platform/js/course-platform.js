@@ -20,10 +20,10 @@
 */
  
 const SUPABASE_URL =
-    "YOUR_SUPABASE_URL";
+    "https://kioqhgkpfqdhjqidrlwf.supabase.co";
  
 const SUPABASE_ANON_KEY =
-    "YOUR_SUPABASE_ANON_KEY";
+    "Ysb_publishable_ZDAJmFtSl9WNGVlZPyvngA_ZWiv_Q4g";
  
  
 const supabaseClient =
