@@ -1,2832 +1,1382 @@
+/* =====================================================
+   EDUCORE COURSE PLATFORM
+===================================================== */
  
-/* =========================================================
-   EDUCORE
-   COURSE CONTENT / STUDENT LEARNING PLATFORM
-   ========================================================= */
- 
-/* =========================================================
-   SUPABASE CONFIGURATION
-   ========================================================= */
- 
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
- 
-const supabaseClient = window.supabase.createClient(
-	SUPABASE_URL,
-	SUPABASE_ANON_KEY
-);
+"use strict";
  
  
-/* =========================================================
-   GLOBAL STATE
-   ========================================================= */
+/* =====================================================
+   SUPABASE
+=====================================================
+ 
+   IMPORTANT:
+   Put the SAME Supabase URL and anon key used by
+   your existing EduCore project here.
+ 
+===================================================== */
+ 
+const SUPABASE_URL =
+    window.EDUCORE_SUPABASE_URL ||
+    localStorage.getItem("educore_supabase_url") ||
+	"";
+ 
+const SUPABASE_ANON_KEY =
+    window.EDUCORE_SUPABASE_ANON_KEY ||
+    localStorage.getItem("educore_supabase_anon_key") ||
+	"";
+ 
+ 
+let supabaseClient = null;
+ 
+if (
+	SUPABASE_URL &&
+	SUPABASE_ANON_KEY &&
+	window.supabase
+) {
+ 
+	supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+    	);
+ 
+}
+ 
+ 
+/* =====================================================
+   STATE
+===================================================== */
  
 const state = {
+ 
 	user: null,
-	profile: null,
  
 	course: null,
+ 
 	modules: [],
+ 
 	lessons: [],
  
-	progress: {},
 	currentLesson: null,
-	currentLessonIndex: -1,
+ 
+    currentLessonIndex: -1,
+ 
+	progress: {},
  
 	currentScreen: "overview",
  
-	savedLessons: new Set(),
+	courseId: null,
  
-	loading: true
+    loadedFromDatabase: false
+ 
 };
  
  
-/* =========================================================
+/* =====================================================
    HELPERS
-   ========================================================= */
+===================================================== */
  
-const $ = (selector) => document.querySelector(selector);
+const $ = selector =>
+    document.querySelector(selector);
  
-const $$ = (selector) => document.querySelectorAll(selector);
+ 
+const $$ = selector =>
+    Array.from(document.querySelectorAll(selector));
  
  
 function escapeHTML(value) {
  
 	if (value === null || value === undefined) {
+ 
     	return "";
+ 
 	}
  
 	return String(value)
-    	.replace(/&/g, "&amp;")
-    	.replace(/</g, "&lt;")
-    	.replace(/>/g, "&gt;")
-    	.replace(/"/g, "&quot;")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
     	.replace(/'/g, "&#039;");
+ 
 }
  
  
 function getInitials(name) {
  
-    if (!name) {
+	if (!name) {
+ 
     	return "U";
+ 
 	}
  
-	const parts = String(name)
-    	.trim()
-    	.split(/\s+/)
-    	.filter(Boolean);
+	const parts =
+    	String(name)
+        	.trim()
+            .split(/\s+/)
+            .filter(Boolean);
+ 
+	if (!parts.length) {
+ 
+    	return "U";
+ 
+	}
  
 	if (parts.length === 1) {
-    	return parts[0].charAt(0).toUpperCase();
+ 
+    	return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+ 
 	}
  
 	return (
-    	parts[0].charAt(0) +
-    	parts[parts.length - 1].charAt(0)
+    	parts[0][0] +
+        parts[parts.length - 1][0]
 	).toUpperCase();
+ 
+}
+ 
+ 
+function getCourseId() {
+ 
+	const params =
+    	new URLSearchParams(
+            window.location.search
+    	);
+ 
+	return (
+        params.get("course_id") ||
+        params.get("courseId") ||
+        params.get("course") ||
+        localStorage.getItem("educore_selected_course") ||
+        sessionStorage.getItem("educore_selected_course") ||
+    	null
+	);
+ 
 }
  
  
 function formatDuration(minutes) {
  
-	const value = Number(minutes);
+	const value =
+        Number(minutes) || 0;
  
-	if (!Number.isFinite(value) || value <= 0) {
-    	return "Self-paced";
+	if (!value) {
+ 
+    	return "0 hours";
+ 
 	}
  
 	if (value < 60) {
-    	return `${Math.round(value)} min`;
+ 
+    	return `${value} min`;
+ 
 	}
  
-	const hours = Math.floor(value / 60);
-	const remaining = Math.round(value % 60);
+	const hours =
+        Math.floor(value / 60);
  
-	if (remaining === 0) {
+	const remaining =
+    	value % 60;
+ 
+	if (!remaining) {
+ 
     	return `${hours}h`;
+ 
 	}
  
 	return `${hours}h ${remaining}m`;
+ 
 }
  
  
-function getCourseIdentifier() {
+function normalizeId(value) {
  
-	const params = new URLSearchParams(window.location.search);
+	return String(value ?? "");
  
-	return {
-    	id: params.get("id"),
-    	slug: params.get("slug"),
-    	courseId: params.get("course_id")
-	};
 }
  
- 
-function getLessonId(lesson) {
- 
-	if (!lesson) {
-    	return null;
-	}
- 
-	return lesson.id ||
-    	lesson.lesson_id ||
-    	lesson.uuid ||
-    	null;
-}
- 
- 
-/* =========================================================
-   LOADING SCREEN
-   ========================================================= */
  
 function hideLoading() {
  
-	const loader = $("#app-loading");
+	const loading =
+        $("#app-loading");
  
-	if (!loader) {
-    	return;
+	if (loading) {
+ 
+        loading.classList.add("hidden");
+ 
 	}
  
-	loader.classList.add("hidden");
- 
-	setTimeout(() => {
-    	loader.style.display = "none";
-	}, 450);
 }
  
  
 function showLoading() {
  
-	const loader = $("#app-loading");
+	const loading =
+        $("#app-loading");
  
-	if (!loader) {
+	if (loading) {
+ 
+        loading.classList.remove("hidden");
+ 
+	}
+ 
+}
+ 
+ 
+function showMessage(title, description) {
+ 
+	const body =
+        $("#lesson-body-content");
+ 
+	if (!body) {
+ 
     	return;
+ 
 	}
  
-	loader.style.display = "flex";
+	body.innerHTML = `
  
-	requestAnimationFrame(() => {
-    	loader.classList.remove("hidden");
-	});
+    	<div class="lesson-placeholder">
+ 
+        	<span class="eyebrow">
+                EDUCORE
+            </span>
+ 
+        	<h1>
+                ${escapeHTML(title)}
+            </h1>
+ 
+        	<p class="lesson-content-description">
+                ${escapeHTML(description)}
+        	</p>
+ 
+    	</div>
+ 
+	`;
+ 
 }
  
  
-/* =========================================================
-   SCREEN NAVIGATION
-   ========================================================= */
+/* =====================================================
+   USER
+===================================================== */
  
-function showScreen(screenName) {
+async function loadUser() {
  
-	if (!screenName) {
-    	return;
-	}
+	if (!supabaseClient) {
  
-	const target = document.getElementById(
-    	`${screenName}-screen`
-	);
+    	const storedName =
+            localStorage.getItem("educore_student_name");
  
-	if (!target) {
-    	return;
-	}
+    	state.user = {
  
-	$$(".screen").forEach(screen => {
-    	screen.classList.remove("active");
-	});
+        	id: null,
  
-	target.classList.add("active");
+        	email:
+                localStorage.getItem("educore_student_email") ||
+                "",
  
-	$$(".rail-button[data-screen]").forEach(button => {
-    	button.classList.toggle(
-        	"active",
-        	button.dataset.screen === screenName
-    	);
-	});
+            user_metadata: {
  
-	$$(".bottom-nav-button[data-screen]").forEach(button => {
-    	button.classList.toggle(
-        	"active",
-        	button.dataset.screen === screenName
-    	);
-	});
+                full_name:
+                    storedName ||
+                    "Student"
  
-	state.currentScreen = screenName;
- 
-	closeMoreMenu();
- 
-	window.scrollTo({
-    	top: 0,
-    	behavior: "smooth"
-	});
-}
- 
- 
-function setupNavigation() {
- 
-	$$(".rail-button[data-screen]").forEach(button => {
- 
-    	button.addEventListener("click", () => {
-        	showScreen(button.dataset.screen);
-    	});
- 
-	});
- 
- 
-	$$(".bottom-nav-button[data-screen]").forEach(button => {
- 
-    	button.addEventListener("click", () => {
-        	showScreen(button.dataset.screen);
-    	});
- 
-	});
- 
- 
-	$$(".menu-option[data-screen]").forEach(button => {
- 
-    	button.addEventListener("click", () => {
-        	showScreen(button.dataset.screen);
-    	});
- 
-	});
- 
- 
-	$$(".text-button[data-screen]").forEach(button => {
- 
-    	button.addEventListener("click", () => {
-        	showScreen(button.dataset.screen);
-    	});
- 
-	});
-}
- 
- 
-/* =========================================================
-   MORE MENU
-   ========================================================= */
- 
-function openMoreMenu() {
- 
-	const menu = $("#more-menu");
-	const backdrop = $("#menu-backdrop");
- 
-	if (menu) {
-    	menu.classList.add("open");
-	}
- 
-	if (backdrop) {
-    	backdrop.classList.add("open");
-	}
- 
-	document.body.classList.add("menu-open");
-}
- 
- 
-function closeMoreMenu() {
- 
-	const menu = $("#more-menu");
-	const backdrop = $("#menu-backdrop");
- 
-	if (menu) {
-    	menu.classList.remove("open");
-	}
- 
-    if (backdrop) {
-    	backdrop.classList.remove("open");
-	}
- 
-	document.body.classList.remove("menu-open");
-}
- 
- 
-function setupMoreMenu() {
- 
-	const moreButton = $("#more-button");
-	const mobileMoreButton = $("#mobile-more-button");
-	const closeButton = $("#more-menu-close");
-	const backdrop = $("#menu-backdrop");
- 
-	if (moreButton) {
-    	moreButton.addEventListener("click", () => {
- 
-        	const menu = $("#more-menu");
- 
-        	if (menu && menu.classList.contains("open")) {
-            	closeMoreMenu();
-        	} else {
-            	openMoreMenu();
         	}
  
-    	});
+    	};
+ 
+        updateUserUI();
+ 
+    	return;
+ 
 	}
  
- 
-	if (mobileMoreButton) {
-    	mobileMoreButton.addEventListener("click", () => {
- 
-        	const menu = $("#more-menu");
- 
-        	if (menu && menu.classList.contains("open")) {
-            	closeMoreMenu();
-        	} else {
-            	openMoreMenu();
-        	}
- 
-    	});
-	}
- 
- 
-	if (closeButton) {
-    	closeButton.addEventListener(
-        	"click",
-        	closeMoreMenu
-    	);
-	}
- 
- 
-	if (backdrop) {
-    	backdrop.addEventListener(
-        	"click",
-        	closeMoreMenu
-    	);
-	}
-}
- 
- 
-/* =========================================================
-   PROFILE
-   ========================================================= */
- 
-function setupProfileButtons() {
- 
-	const buttons = [
-    	$("#profile-button"),
-    	$("#top-profile")
-	];
- 
-	buttons.forEach(button => {
- 
-    	if (!button) {
-        	return;
-    	}
- 
-    	button.addEventListener("click", () => {
-        	showScreen("profile");
-    	});
- 
-	});
-}
- 
- 
-function renderProfile() {
- 
-	const user = state.user;
-	const profile = state.profile || {};
- 
-	const fullName =
-    	profile.full_name ||
-    	profile.name ||
-    	profile.display_name ||
-    	user?.user_metadata?.full_name ||
-    	user?.user_metadata?.name ||
-    	user?.email?.split("@")[0] ||
-    	"Student";
- 
-	const email =
-    	user?.email ||
-    	profile.email ||
-    	"--";
- 
-	const initials = getInitials(fullName);
- 
- 
-	const nameTargets = [
-    	"#top-student-name",
-    	"#profile-name"
-	];
- 
-	nameTargets.forEach(selector => {
- 
-    	const element = $(selector);
- 
-    	if (element) {
-        	element.textContent = fullName;
-    	}
- 
-	});
- 
- 
-	const emailElement = $("#profile-email");
- 
-	if (emailElement) {
-    	emailElement.textContent = email;
-	}
- 
- 
-	const avatarTargets = [
-    	"#student-avatar",
-  	  "#top-avatar",
-    	"#profile-large-avatar"
-	];
- 
-	avatarTargets.forEach(selector => {
- 
-    	const element = $(selector);
- 
-    	if (element) {
-        	element.textContent = initials;
-    	}
- 
-	});
-}
- 
- 
-/* =========================================================
-   AUTHENTICATION
-   ========================================================= */
- 
-async function loadAuthenticatedUser() {
  
 	const {
     	data,
     	error
-	} = await supabaseClient.auth.getUser();
+	} =
+    	await supabaseClient.auth.getUser();
+ 
  
 	if (error) {
-    	console.error(
-        	"Unable to retrieve authenticated user:",
+ 
+    	console.warn(
+            "EduCore user error:",
         	error
     	);
  
-    	return null;
-	}
- 
-	return data?.user || null;
-}
- 
- 
-async function loadStudentProfile(userId) {
- 
-	if (!userId) {
-    	return null;
-	}
- 
-	/*
-   	EduCore normally stores additional user information
-   	inside the profiles table.
- 
-   	If your profile table has a different structure,
-   	this query safely falls back to auth metadata.
-	*/
- 
-	const { data, error } = await supabaseClient
-    	.from("profiles")
-    	.select("*")
-    	.eq("id", userId)
-    	.maybeSingle();
- 
-	if (error) {
- 
-    	console.warn(
-        	"Profile table could not be loaded:",
-        	error.message
-    	);
- 
-    	return null;
-	}
- 
-	return data;
-}
- 
- 
-/* =========================================================
-   COURSE IDENTIFICATION
-   ========================================================= */
- 
-async function resolveCourse() {
- 
-	const identifier = getCourseIdentifier();
- 
-	let course = null;
- 
- 
-	/* -----------------------------------------------------
-   	COURSE BY ID
-   	----------------------------------------------------- */
- 
-	if (identifier.id || identifier.courseId) {
- 
-    	const id =
-        	identifier.id ||
-        	identifier.courseId;
- 
-    	const result = await supabaseClient
-        	.from("courses")
-        	.select("*")
-        	.eq("id", id)
-        	.maybeSingle();
- 
-    	if (result.error) {
-        	throw result.error;
-    	}
- 
-    	course = result.data;
-	}
- 
- 
-	/* -----------------------------------------------------
-   	COURSE BY SLUG
-   	----------------------------------------------------- */
- 
-	else if (identifier.slug) {
- 
-    	const result = await supabaseClient
-        	.from("courses")
-        	.select("*")
-        	.eq("slug", identifier.slug)
-        	.maybeSingle();
- 
-    	if (result.error) {
-        	throw result.error;
-        }
- 
-    	course = result.data;
-	}
- 
- 
-	/*
-   	No URL identifier.
- 
-   	If there is only one published course available,
-   	use it. This is useful while the platform is being
-   	tested before course routing is fully connected.
-	*/
- 
-	else {
- 
-    	const result = await supabaseClient
-        	.from("courses")
-        	.select("*")
-        	.eq("status", "published")
-        	.order("created_at", {
-            	ascending: true
-        	})
-        	.limit(1)
-        	.maybeSingle();
- 
-    	if (result.error) {
-        	throw result.error;
-    	}
- 
-    	course = result.data;
-	}
- 
- 
-	if (!course) {
-    	throw new Error(
-        	"The selected course could not be found."
-    	);
-	}
- 
- 
-	return course;
-}
- 
- 
-/* =========================================================
-   LOAD COURSE MODULES
-   ========================================================= */
- 
-async function loadModules(courseId) {
- 
-	if (!courseId) {
-    	return [];
-	}
- 
- 
-	const { data, error } = await supabaseClient
-    	.from("modules")
-    	.select("*")
-    	.eq("course_id", courseId)
-    	.order("sort_order", {
-        	ascending: true
-    	});
- 
- 
-	if (error) {
-    	throw error;
-	}
- 
- 
-	return data || [];
-}
- 
- 
-/* =========================================================
-   LOAD LESSONS
-   ========================================================= */
- 
-async function loadLessons(moduleIds) {
- 
-	if (!moduleIds || moduleIds.length === 0) {
-        return [];
-	}
- 
- 
-	const { data, error } = await supabaseClient
-    	.from("lessons")
-    	.select("*")
-    	.in("module_id", moduleIds)
-    	.order("sort_order", {
-        	ascending: true
-    	});
- 
- 
-	if (error) {
-    	throw error;
-	}
- 
- 
-	return data || [];
-}
- 
- 
-/* =========================================================
-   LOAD COURSE STRUCTURE
-   ========================================================= */
- 
-async function loadCourseStructure() {
- 
-	if (!state.course?.id) {
     	return;
+ 
 	}
  
  
-	state.modules = await loadModules(
-    	state.course.id
+	state.user =
+    	data?.user || null;
+ 
+ 
+	updateUserUI();
+ 
+}
+ 
+ 
+function getUserName() {
+ 
+	const metadata =
+        state.user?.user_metadata || {};
+ 
+	return (
+        metadata.full_name ||
+    	metadata.name ||
+        metadata.display_name ||
+        state.user?.email?.split("@")[0] ||
+        "Student"
 	);
  
- 
-	const moduleIds = state.modules
-    	.map(module => module.id)
-    	.filter(Boolean);
- 
- 
-	state.lessons = await loadLessons(moduleIds);
- 
- 
-	/*
-   	Add module references to lessons so the student
-   	interface can easily display the learning path.
-	*/
- 
-	state.lessons = state.lessons.map(lesson => {
- 
-    	const module = state.modules.find(
-        	item => item.id === lesson.module_id
-    	);
- 
-    	return {
-        	...lesson,
-        	module
-    	};
- 
-	});
 }
  
  
-/* =========================================================
-   LOAD STUDENT PROGRESS
-   ========================================================= */
+function updateUserUI() {
  
-async function loadProgress() {
+	const name =
+    	getUserName();
  
-	if (!state.user?.id || !state.course?.id) {
-    	return;
+	const initials =
+        getInitials(name);
+ 
+ 
+	const elements = [
+ 
+        $("#rail-avatar"),
+        $("#top-avatar"),
+        $("#profile-large-avatar")
+ 
+	];
+ 
+ 
+    elements.forEach(element => {
+ 
+    	if (element) {
+ 
+            element.textContent =
+                initials;
+ 
+    	}
+ 
+	});
+ 
+ 
+	const topName =
+        $("#top-student-name");
+ 
+	if (topName) {
+ 
+        topName.textContent =
+        	name;
+ 
 	}
  
  
-	/*
-   	Expected table:
-   	progress
+	const profileName =
+        $("#profile-name");
  
-   	Common fields:
-   	user_id
-   	course_id
-   	lesson_id
-   	completed
-   	progress
-   	time_spent
-   	updated_at
-	*/
+	if (profileName) {
  
-	const { data, error } = await supabaseClient
-    	.from("progress")
-    	.select("*")
-    	.eq("user_id", state.user.id)
-    	.eq("course_id", state.course.id);
+        profileName.textContent =
+        	name;
+ 
+	}
+ 
+ 
+	const profileEmail =
+        $("#profile-email");
+ 
+	if (profileEmail) {
+ 
+        profileEmail.textContent =
+            state.user?.email ||
+            "Student account";
+ 
+	}
+ 
+}
+ 
+ 
+/* =====================================================
+   COURSE ID / COURSE
+===================================================== */
+ 
+async function loadCourse() {
+ 
+	state.courseId =
+    	getCourseId();
+ 
+ 
+	if (!state.courseId) {
+ 
+        loadDemoCourse();
+ 
+    	return;
+ 
+	}
+ 
+ 
+	if (!supabaseClient) {
+ 
+        loadDemoCourse();
+ 
+    	return;
+ 
+	}
+ 
+ 
+	const {
+    	data,
+    	error
+	} =
+    	await supabaseClient
+            .from("courses")
+            .select("*")
+            .eq("id", state.courseId)
+            .maybeSingle();
  
  
 	if (error) {
  
-    	console.warn(
-        	"Progress table could not be loaded:",
-        	error.message
+    	console.error(
+            "EduCore course error:",
+        	error
     	);
  
+        loadDemoCourse();
+ 
     	return;
+ 
 	}
  
  
-	state.progress = {};
+	if (!data) {
+ 
+        loadDemoCourse();
+ 
+    	return;
+ 
+	}
  
  
-	(data || []).forEach(row => {
+	state.course =
+    	data;
  
-    	const lessonId =
-        	row.lesson_id ||
-        	row.content_id;
+    state.loadedFromDatabase =
+    	true;
  
-    	if (!lessonId) {
-        	return;
+ 
+	updateCourseUI();
+ 
+	await loadModules();
+ 
+}
+ 
+ 
+/* =====================================================
+   DEMO COURSE
+=====================================================
+ 
+   This keeps the interface usable while the
+   Supabase connection is being configured.
+ 
+===================================================== */
+ 
+function loadDemoCourse() {
+ 
+	state.course = {
+ 
+    	id: "demo-course",
+ 
+    	title:
+            "General English",
+ 
+    	description:
+            "Build practical English through a structured learning journey designed to help you understand, practise, recall and use the language with confidence.",
+ 
+    	category:
+            "English",
+ 
+    	level:
+            "A1",
+ 
+    	duration:
+        	120,
+ 
+    	lesson_count:
+        	8
+ 
+	};
+ 
+ 
+	state.modules = [
+ 
+    	{
+ 
+        	id: "module-1",
+ 
+        	title:
+                "Getting Started",
+ 
+            description:
+                "Your first steps in English.",
+ 
+            sort_order:
+            	1
+ 
+    	},
+ 
+    	{
+ 
+        	id: "module-2",
+ 
+        	title:
+                "Everyday Communication",
+ 
+            description:
+                "Language for real situations.",
+ 
+            sort_order:
+            	2
+ 
     	}
  
-    	state.progress[lessonId] = row;
+	];
  
-	});
+ 
+	state.lessons = [
+ 
+    	{
+ 
+        	id:
+                "lesson-1",
+ 
+        	module_id:
+                "module-1",
+ 
+        	title:
+                "Introducing Yourself",
+ 
+            description:
+                "Learn how to introduce yourself and ask basic questions.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	1
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-2",
+ 
+        	module_id:
+                "module-1",
+ 
+        	title:
+                "Personal Information",
+ 
+            description:
+                "Talk about your name, country and basic information.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	2
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-3",
+ 
+        	module_id:
+                "module-1",
+ 
+        	title:
+                "Numbers and Dates",
+ 
+            description:
+                "Practise numbers, dates and everyday information.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	3
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-4",
+ 
+        	module_id:
+                "module-1",
+ 
+        	title:
+                "Daily Routines",
+ 
+            description:
+                "Talk about everyday activities.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	4
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-5",
+ 
+        	module_id:
+                "module-2",
+ 
+        	title:
+                "At Work",
+ 
+            description:
+                "Use useful English in a workplace context.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	1
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-6",
+ 
+        	module_id:
+                "module-2",
+ 
+        	title:
+                "Making Requests",
+ 
+            description:
+                "Make simple requests politely.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	2
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-7",
+ 
+        	module_id:
+                "module-2",
+ 
+        	title:
+                "Understanding Questions",
+ 
+            description:
+                "Recognise and respond to common questions.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	3
+ 
+    	},
+ 
+    	{
+ 
+        	id:
+                "lesson-8",
+ 
+        	module_id:
+                "module-2",
+ 
+        	title:
+                "Review and Test",
+ 
+            description:
+                "Review the material and check your progress.",
+ 
+        	duration:
+            	15,
+ 
+            sort_order:
+            	4
+ 
+    	}
+ 
+	];
+ 
+ 
+	updateCourseUI();
+ 
+    renderEverything();
+ 
+}
+ 
+ 
+/* =====================================================
+   MODULES
+===================================================== */
+ 
+async function loadModules() {
+ 
+	if (!supabaseClient || !state.courseId) {
+ 
+        renderEverything();
+ 
+    	return;
+ 
+	}
+ 
+ 
+	const {
+    	data,
+    	error
+	} =
+    	await supabaseClient
+            .from("modules")
+            .select("*")
+            .eq("course_id", state.courseId)
+            .order("sort_order", {
+                ascending: true
+        	});
+ 
+ 
+	if (error) {
+ 
+    	console.error(
+            "EduCore modules error:",
+        	error
+    	);
+ 
+    	state.modules = [];
+ 
+        renderEverything();
+ 
+    	return;
+ 
+	}
+ 
+ 
+	state.modules =
+    	data || [];
+ 
+ 
+	await loadLessons();
+ 
+}
+ 
+ 
+/* =====================================================
+   LESSONS
+===================================================== */
+ 
+async function loadLessons() {
+ 
+	if (
+        !supabaseClient ||
+        !state.courseId
+	) {
+ 
+        renderEverything();
+ 
+    	return;
+ 
+	}
  
  
 	/*
-   	Saved lessons may be represented by a saved field
-   	in progress. This keeps the system flexible.
+   	Primary expected structure:
+ 
+   	content
+   	├── id
+   	├── module_id
+   	├── title
+   	├── description
+   	├── duration
+   	├── sort_order
+ 
+   	The platform treats each content record as
+   	a lesson.
 	*/
  
-	state.savedLessons = new Set(
-    	(data || [])
-        	.filter(row => row.saved === true)
-        	.map(row =>
-            	row.lesson_id || row.content_id
+ 
+	const moduleIds =
+    	state.modules
+            .map(module =>
+                module.id
         	)
-        	.filter(Boolean)
-	);
-}
+            .filter(Boolean);
  
  
-/* =========================================================
-   COURSE PROGRESS CALCULATION
-   ========================================================= */
+	if (!moduleIds.length) {
  
-function getCompletedLessonCount() {
+    	state.lessons = [];
  
-	return state.lessons.filter(lesson => {
+        renderEverything();
  
-    	const id = getLessonId(lesson);
+    	return;
  
-    	return Boolean(
-        	id &&
-        	state.progress[id]?.completed === true
+	}
+ 
+ 
+	const {
+    	data,
+    	error
+	} =
+    	await supabaseClient
+            .from("content")
+            .select("*")
+            .in("module_id", moduleIds)
+            .order("sort_order", {
+                ascending: true
+        	});
+ 
+ 
+	if (error) {
+ 
+    	console.error(
+            "EduCore lessons/content error:",
+        	error
     	);
  
-	}).length;
-}
+    	state.lessons = [];
  
+        renderEverything();
  
-function getCourseProgress() {
- 
-	const total = state.lessons.length;
- 
-	if (!total) {
-    	return 0;
-	}
- 
-	const completed = getCompletedLessonCount();
- 
-	return Math.round(
-    	(completed / total) * 100
-	);
-}
- 
- 
-function getCurrentLesson() {
- 
-	if (!state.lessons.length) {
-    	return null;
-	}
- 
- 
-	const incomplete = state.lessons.find(
-    	lesson => {
- 
-        	const id = getLessonId(lesson);
- 
-        	return !(
-            	id &&
-            	state.progress[id]?.completed === true
-        	);
- 
-    	}
-	);
- 
- 
-	return incomplete || state.lessons[0];
-}
- 
- 
-/* =========================================================
-   COURSE HEADER
-   ========================================================= */
- 
-function renderCourseHeader() {
- 
-	const course = state.course;
- 
-	if (!course) {
     	return;
+ 
 	}
+ 
+ 
+	state.lessons =
+    	(data || []).map(
+        	item => ({
+ 
+                ...item,
+ 
+            	title:
+                    item.title ||
+                    item.name ||
+                    "Untitled lesson",
+ 
+                description:
+                    item.description ||
+                    item.summary ||
+                    "",
+ 
+                duration:
+                    Number(
+                        item.duration ||
+                        item.duration_minutes ||
+                        0
+                	)
+ 
+        	})
+    	);
+ 
+ 
+    state.lessons.sort(
+    	(a, b) =>
+            Number(a.sort_order || 0) -
+            Number(b.sort_order || 0)
+	);
+ 
+ 
+    renderEverything();
+ 
+}
+ 
+ 
+/* =====================================================
+   COURSE UI
+===================================================== */
+ 
+function updateCourseUI() {
+ 
+	if (!state.course) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+	const course =
+    	state.course;
  
  
 	const title =
     	course.title ||
     	course.name ||
-    	"Untitled course";
+        "Course";
  
  
 	const description =
-    	course.description ||
+        course.description ||
+        course.short_description ||
     	"Continue your learning journey with EduCore.";
  
  
 	const category =
-    	course.category ||
-    	course.type ||
-    	"COURSE";
+        course.category ||
+    	course.subject ||
+        "Course";
  
  
 	const level =
     	course.level ||
-    	course.cefr_level ||
-    	course.difficulty ||
+        course.cefr_level ||
     	"All levels";
  
  
 	const duration =
-    	course.duration ||
-    	course.duration_minutes ||
-    	course.total_duration ||
-    	null;
- 
- 
-	$("#top-course-name") &&
-    	($("#top-course-name").textContent = title);
- 
- 
-	$("#course-title") &&
-    	($("#course-title").textContent = title);
- 
- 
-	$("#course-description") &&
-    	($("#course-description").textContent = description);
- 
- 
-	$("#course-category") &&
-    	($("#course-category").textContent =
-        	String(category).toUpperCase());
- 
- 
-	$("#course-level") &&
-    	($("#course-level").textContent =
-        	level);
- 
- 
-	$("#course-lesson-count") &&
-    	($("#course-lesson-count").textContent =
-        	`${state.lessons.length} ${
-            	state.lessons.length === 1
-                	? "lesson"
-            	    : "lessons"
-        	}`);
- 
- 
-	$("#course-duration") &&
-    	($("#course-duration").textContent =
-        	formatDuration(duration));
-}
- 
- 
-/* =========================================================
-   PROGRESS DISPLAY
-   ========================================================= */
- 
-function renderProgress() {
- 
-	const progress = getCourseProgress();
-	const completed = getCompletedLessonCount();
- 
- 
-	const topValue = $("#top-progress-value");
- 
-	if (topValue) {
-    	topValue.textContent = `${progress}%`;
-	}
- 
- 
-	const heroValue = $("#hero-progress");
- 
-	if (heroValue) {
-    	heroValue.textContent = `${progress}%`;
-	}
- 
- 
-	const dashboardValue =
-    	$("#progress-dashboard-value");
- 
-	if (dashboardValue) {
-    	dashboardValue.textContent = `${progress}%`;
-	}
- 
- 
-	const completedValue =
-    	$("#stat-completed");
- 
-	if (completedValue) {
-    	completedValue.textContent = completed;
-	}
- 
- 
-	const progressLessons =
-    	$("#progress-lessons");
- 
-	if (progressLessons) {
-    	progressLessons.textContent = completed;
-	}
- 
- 
-	/*
-   	Progress ring.
- 
-   	The CSS can expose a --progress variable for the
-   	visual ring without requiring a specific CSS design.
-	*/
- 
-	const ring = $(".hero-progress-ring");
- 
-	if (ring) {
-    	ring.style.setProperty(
-        	"--progress",
-        	`${progress}%`
-    	);
-	}
- 
- 
-	const progressCircle =
-    	$(".progress-circle");
- 
-	if (progressCircle) {
-        progressCircle.style.setProperty(
-        	"--progress",
-        	`${progress}%`
-    	);
-	}
- 
- 
-	const courseTime =
-    	state.lessons.reduce(
-        	(total, lesson) => {
- 
-            	const id = getLessonId(lesson);
- 
-            	const row =
-                	state.progress[id];
- 
-            	return total +
-                	Number(
-                    	row?.time_spent ||
-                    	row?.time_seconds / 60 ||
-                    	0
-              	  );
- 
-        	},
+    	Number(
+            course.duration ||
+            course.duration_minutes ||
+            course.hours * 60 ||
         	0
     	);
  
  
-	const statTime = $("#stat-time");
- 
-	if (statTime) {
- 
-    	if (courseTime < 60) {
-        	statTime.textContent =
-            	`${Math.round(courseTime)}m`;
-    	} else {
-        	statTime.textContent =
-            	`${(courseTime / 60).toFixed(1)}h`;
-    	}
- 
-	}
+    $("#course-category").textContent =
+    	category;
  
  
-	/*
-   	Streak and XP may later come from a dedicated
-   	learner_stats table. For now, use values available
-   	in progress rows.
-	*/
- 
-	const streak = calculateStreak();
-	const xp = calculateXP();
+    $("#course-title").textContent =
+    	title;
  
  
-	$("#stat-streak") &&
-    	($("#stat-streak").textContent = streak);
+    $("#course-description").textContent =
+    	description;
  
  
-	$("#progress-streak") &&
-    	($("#progress-streak").textContent = streak);
+    $("#course-level").textContent =
+    	level;
  
  
-	$("#stat-xp") &&
-    	($("#stat-xp").textContent = xp);
+    $("#course-lesson-count").textContent =
+        `${state.lessons.length || course.lesson_count || 0} lessons`;
  
  
-	$("#progress-xp") &&
-    	($("#progress-xp").textContent = xp);
+    $("#course-duration").textContent =
+        formatDuration(duration);
+ 
+ 
+    $("#top-course-name").textContent =
+    	title;
+ 
 }
  
  
-/* =========================================================
-   STREAK
-   ========================================================= */
+/* =====================================================
+   PROGRESS
+===================================================== */
  
-function calculateStreak() {
+function isLessonCompleted(lesson) {
  
-	const dates = Object.values(state.progress)
-    	.map(row =>
-        	row.updated_at ||
-        	row.completed_at ||
-        	row.last_accessed_at
+	const id =
+    	normalizeId(
+        	lesson?.id
+    	);
+ 
+	return Boolean(
+        state.progress[id]?.completed
+	);
+ 
+}
+ 
+ 
+function getCompletedCount() {
+ 
+	return state.lessons
+    	.filter(
+        	lesson =>
+                isLessonCompleted(lesson)
     	)
-    	.filter(Boolean)
-    	.map(date =>
-        	new Date(date).toISOString().slice(0, 10)
-    	);
+    	.length;
+ 
+}
  
  
-	const uniqueDates = [
-    	...new Set(dates)
-	].sort().reverse();
+function getCourseProgress() {
  
+	if (!state.lessons.length) {
  
-	if (!uniqueDates.length) {
     	return 0;
-	}
- 
- 
-	let streak = 1;
- 
- 
-	for (let i = 0; i < uniqueDates.length - 1; i++) {
- 
-    	const current =
-        	new Date(uniqueDates[i]);
- 
-    	const previous =
-        	new Date(uniqueDates[i + 1]);
- 
- 
-    	const difference =
-        	Math.round(
-            	(
-                	current - previous
-            	) /
-            	(1000 * 60 * 60 * 24)
-        	);
- 
- 
-    	if (difference === 1) {
-        	streak++;
-    	} else {
-        	break;
-    	}
  
 	}
  
  
-	return streak;
+	return Math.round(
+    	(
+            getCompletedCount() /
+            state.lessons.length
+    	) * 100
+	);
+ 
 }
  
  
-/* =========================================================
-   XP
-   ========================================================= */
+function updateProgressUI() {
  
-function calculateXP() {
- 
-	return Object.values(state.progress)
-    	.reduce(
-        	(total, row) => {
- 
-            	return total +
-                	Number(
-                    	row.xp ||
-                    	row.points ||
-                    	(
-                        	row.completed
-                            	? 10
-                         	   : 0
-                    	)
-                	);
- 
-        	},
-        	0
-    	);
-}
- 
- 
-/* =========================================================
-   OVERVIEW
-   ========================================================= */
- 
-function renderOverview() {
- 
-	const nextLesson = getCurrentLesson();
- 
- 
-	if (!nextLesson) {
- 
-    	$("#continue-lesson") &&
-        	($("#continue-lesson").textContent =
-            	"Your course is ready");
- 
- 
-    	$("#continue-description") &&
-        	($("#continue-description").textContent =
-            	"No lessons have been added yet.");
- 
- 
-    	$("#continue-module") &&
-        	($("#continue-module").textContent =
-            	"Course");
- 
- 
-    	return;
-	}
- 
- 
-	const moduleName =
-    	nextLesson.module?.title ||
-    	nextLesson.module?.name ||
-    	"Module";
- 
- 
-	const lessonTitle =
-    	nextLesson.title ||
-    	nextLesson.name ||
-    	"Untitled lesson";
- 
- 
-	const description =
-    	nextLesson.description ||
-       "Continue with your next learning activity.";
- 
- 
-	$("#continue-module") &&
-    	($("#continue-module").textContent =
-        	moduleName);
- 
- 
-	$("#continue-lesson") &&
-    	($("#continue-lesson").textContent =
-        	lessonTitle);
- 
- 
-	$("#continue-description") &&
-    	($("#continue-description").textContent =
-        	description);
+	const progress =
+        getCourseProgress();
  
  
 	const completed =
-    	state.progress[getLessonId(nextLesson)]
-        	?.completed === true;
+        getCompletedCount();
  
  
-	$("#continue-button-text") &&
-        ($("#continue-button-text").textContent =
-        	completed
-            	? "Review lesson"
-            	: "Continue learning");
+    $("#hero-progress").textContent =
+        `${progress}%`;
+ 
+ 
+    $("#top-progress-value").textContent =
+        `${progress}%`;
+ 
+ 
+    $("#progress-dashboard-value").textContent =
+        `${progress}%`;
+ 
+ 
+    $("#stat-completed").textContent =
+    	completed;
+ 
+ 
+    $("#progress-lessons").textContent =
+    	completed;
+ 
+ 
+    $("#stat-streak").textContent =
+        calculateStreak();
+ 
+ 
+    $("#progress-streak").textContent =
+        calculateStreak();
+ 
+ 
+    $("#stat-xp").textContent =
+    	completed * 50;
+ 
+ 
+    $("#progress-xp").textContent =
+    	completed * 50;
+ 
+ 
+	const ring =
+        $("#hero-progress-ring");
+ 
+ 
+	if (ring) {
+ 
+    	const degrees =
+        	progress * 3.6;
+ 
+        ring.style.background =
+            `conic-gradient(
+                var(--green) 0deg,
+                var(--green) ${degrees}deg,
+                #edf0f2 ${degrees}deg,
+                #edf0f2 360deg
+        	)`;
+ 
+	}
+ 
 }
  
  
-/* =========================================================
-   OVERVIEW LEARNING PATH
-   ========================================================= */
+function calculateStreak() {
  
-function renderOverviewPath() {
+	return Number(
+        localStorage.getItem(
+            "educore_learning_streak"
+    	) || 0
+	);
  
-	const container = $("#overview-path");
+}
+ 
+ 
+/* =====================================================
+   RENDER EVERYTHING
+===================================================== */
+ 
+function renderEverything() {
+ 
+	updateCourseUI();
+ 
+    renderLearningPath();
+ 
+	renderLearnList();
+ 
+	renderContents();
+ 
+    renderProgressModules();
+ 
+    updateProgressUI();
+ 
+    updateContinueCard();
+ 
+}
+ 
+ 
+/* =====================================================
+   LEARNING PATH
+===================================================== */
+ 
+function renderLearningPath() {
+ 
+	const container =
+        $("#overview-path");
+ 
  
 	if (!container) {
+ 
     	return;
+ 
 	}
- 
- 
-	container.innerHTML = "";
  
  
 	if (!state.modules.length) {
  
-    	container.innerHTML = `
+        container.innerHTML = `
+ 
         	<div class="empty-state">
-            	<div class="empty-icon">○</div>
-            	<h2>Your learning path is being prepared.</h2>
-            	<p>Lessons will appear here when they are added.</p>
-        	</div>
+            	Course modules will appear here.
+            </div>
+ 
     	`;
  
     	return;
+ 
 	}
  
  
-	state.modules.forEach((module, index) => {
- 
-    	const moduleLessons =
-        	state.lessons.filter(
-            	lesson =>
-                	lesson.module_id === module.id
-        	);
- 
- 
-    	const completed =
-        	moduleLessons.filter(
-            	lesson =>
-                	state.progress[getLessonId(lesson)]
-                    	?.completed === true
-        	).length;
- 
- 
-    	const percentage =
-        	moduleLessons.length
-            	? Math.round(
-                	(completed /
-                    	moduleLessons.length) *
-                	100
-            	)
-            	: 0;
- 
- 
-    	const item =
-        	document.createElement("div");
- 
-    	item.className = "path-item";
- 
- 
-    	item.innerHTML = `
-        	<div class="path-number">
-            	${String(index + 1).padStart(2, "0")}
-        	</div>
- 
-        	<div class="path-content">
-            	<span>
-                	MODULE ${index + 1}
-            	</span>
- 
-            	<strong>
-                	${escapeHTML(
-                    	module.title ||
-                    	module.name ||
-                    	`Module ${index + 1}`
-                	)}
-   	         </strong>
- 
-            	<small>
-                	${completed}/${moduleLessons.length}
-                	lessons completed
-            	</small>
-        	</div>
- 
-        	<div class="path-progress">
-            	${percentage}%
-        	</div>
-    	`;
- 
- 
-    	item.addEventListener(
-        	"click",
-        	() => {
- 
-            	showScreen("contents");
- 
-        	}
-    	);
- 
- 
-    	container.appendChild(item);
- 
-	});
-}
- 
- 
-/* =========================================================
-   CONTENTS SCREEN
-   ========================================================= */
- 
-function renderContents() {
- 
-	const container = $("#contents-list");
- 
-	if (!container) {
-    	return;
-	}
- 
- 
-	container.innerHTML = "";
- 
- 
-	if (!state.modules.length) {
- 
-    	container.innerHTML = `
-        	<div class="empty-state">
-            	<div class="empty-icon">○</div>
-            	<h2>No course content yet.</h2>
-            	<p>
-                	Your lessons will appear here
-                	once the course is published.
-            	</p>
-        	</div>
-    	`;
- 
-    	return;
-	}
- 
- 
-	state.modules.forEach((module, moduleIndex) => {
- 
-    	const lessons =
-        	state.lessons.filter(
-            	lesson =>
-                	lesson.module_id === module.id
-        	);
- 
- 
-    	const completed =
-        	lessons.filter(
-            	lesson =>
-                	state.progress[getLessonId(lesson)]
-                    	?.completed === true
-        	).length;
- 
- 
-    	const moduleElement =
-        	document.createElement("div");
- 
- 
-    	moduleElement.className =
-        	"content-module";
- 
- 
-    	moduleElement.innerHTML = `
-        	<div class="content-module-header">
- 
-            	<div>
-                	<span class="eyebrow">
-                    	MODULE ${moduleIndex + 1}
-                	</span>
- 
-                	<h2>
-        	            ${escapeHTML(
-                        	module.title ||
-                        	module.name ||
-                        	`Module ${moduleIndex + 1}`
-                    	)}
-                	</h2>
- 
-                	${
-                    	module.description
-                        	? `
-                            	<p>
-                                	${escapeHTML(
-                                    	module.description
-                                	)}
-   	                         </p>
-                          	`
-                        	: ""
-                	}
-            	</div>
- 
-            	<span class="module-completion">
-                	${completed}/${lessons.length}
-            	</span>
- 
-        	</div>
- 
-        	<div class="module-lessons"></div>
-    	`;
- 
- 
-    	const lessonContainer =
-        	moduleElement.querySelector(
-            	".module-lessons"
-        	);
- 
- 
-    	lessons.forEach((lesson, lessonIndex) => {
- 
-        	const id = getLessonId(lesson);
- 
-        	const progress =
-            	state.progress[id];
- 
- 
-        	const isCompleted =
-            	progress?.completed === true;
- 
- 
-        	const isSaved =
-            	state.savedLessons.has(id);
- 
- 
-        	const lessonElement =
-            	document.createElement("button");
- 
- 
-        	lessonElement.type = "button";
- 
-        	lessonElement.className =
-            	"content-lesson";
- 
- 
-        	if (isCompleted) {
-            	lessonElement.classList.add(
-                	"completed"
-            	);
-        	}
- 
- 
-        	lessonElement.innerHTML = `
-            	<span class="lesson-index">
-                	${String(
-                    	lessonIndex + 1
-                	).padStart(2, "0")}
-            	</span>
- 
-            	<span class="lesson-info">
- 
-                	<strong>
-                    	${escapeHTML(
-                        	lesson.title ||
-                        	lesson.name ||
-                        	`Lesson ${lessonIndex + 1}`
-                    	)}
-                	</strong>
- 
-                	<small>
-                    	${
-                        	lesson.duration
-                            	? formatDuration(
-                                	lesson.duration
+    container.innerHTML =
+    	state.modules
+        	.map(
+                (module, index) => {
+ 
+                    const lessons =
+                        getModuleLessons(
+                            module.id
+                        );
+ 
+                    const completed =
+                        lessons.filter(
+                            lesson =>
+                                isLessonCompleted(
+                                	lesson
                             	)
-                            	: "Learning lesson"
-                    	}
-                	</small>
+                        ).length;
  
-            	</span>
+                    const percent =
+                        lessons.length
+                            ? Math.round(
+                            	completed /
+                            	lessons.length *
+                            	100
+                            )
+                            : 0;
  
-            	<span class="lesson-status">
-                	${
-                    	isCompleted
-                        	? "✓"
-                        	: isSaved
-                            	? "☆"
-                            	: "→"
-                	}
-            	</span>
-        	`;
+                    return `
  
+                        <div
+                            class="path-item ${percent === 100 ? "completed" : ""}"
+                        >
  
-        	lessonElement.addEventListener(
-            	"click",
-            	() => openLesson(lesson)
-        	);
+                            <div class="path-number">
  
+                            	${String(index + 1).padStart(2, "0")}
  
-        	lessonContainer.appendChild(
-            	lessonElement
-        	);
- 
-    	});
+                            </div>
  
  
-    	container.appendChild(
-        	moduleElement
-    	);
+                            <div class="path-info">
  
-	});
+                            	<strong>
+                                    ${escapeHTML(
+                                        module.title ||
+                                        module.name ||
+                                    	`Module ${index + 1}`
+                                	)}
+                            	</strong>
+ 
+                            	<span>
+                                    ${completed}/${lessons.length} lessons completed
+                            	</span>
+ 
+                            </div>
+ 
+ 
+                            <div class="path-progress">
+ 
+                            	<div class="path-progress-track">
+ 
+                                	<div
+                                        class="path-progress-fill"
+                                        style="width:${percent}%"
+                                    ></div>
+ 
+                            	</div>
+ 
+                            </div>
+ 
+                        </div>
+ 
+                	`;
+ 
+            	}
+        	)
+            .join("");
+ 
 }
  
  
-/* =========================================================
-   LEARN SCREEN
-   ========================================================= */
+/* =====================================================
+   LEARN LIST
+===================================================== */
  
-function renderLearnScreen() {
+function renderLearnList() {
  
-	const container = $("#learn-list");
+	const container =
+        $("#learn-list");
+ 
  
 	if (!container) {
+ 
     	return;
+ 
 	}
- 
- 
-	container.innerHTML = "";
  
  
 	if (!state.lessons.length) {
  
-    	container.innerHTML = `
+        container.innerHTML = `
+ 
         	<div class="empty-state">
-            	<div class="empty-icon">○</div>
-            	<h2>No lessons available.</h2>
-            	<p>
-                	Your learning activities will appear here.
-            	</p>
-        	</div>
+            	No lessons are available yet.
+            </div>
+ 
     	`;
  
     	return;
-	}
- 
- 
-	state.lessons.forEach(
-    	(lesson, index) => {
- 
-        	const id =
-            	getLessonId(lesson);
- 
- 
-        	const progress =
-            	state.progress[id];
- 
- 
-      	  const completed =
-            	progress?.completed === true;
- 
- 
-        	const item =
-            	document.createElement("button");
- 
- 
-        	item.type = "button";
- 
-        	item.className =
-            	"large-lesson-item";
- 
- 
-        	if (completed) {
-            	item.classList.add(
-                	"completed"
-            	);
-        	}
- 
- 
-        	item.innerHTML = `
-            	<span class="large-lesson-number">
-                	${String(
-                	    index + 1
-                	).padStart(2, "0")}
-            	</span>
- 
-            	<span class="large-lesson-content">
- 
-                	<small>
-                    	${escapeHTML(
-                        	lesson.module?.title ||
-                        	"Module"
-                    	)}
-                	</small>
- 
-                	<strong>
-                    	${escapeHTML(
-                        	lesson.title ||
-                        	lesson.name ||
-          	              `Lesson ${index + 1}`
-                    	)}
-                	</strong>
- 
-                	<span>
-                    	${escapeHTML(
-                        	lesson.description ||
-                        	"Continue your learning activity."
-                    	)}
-                	</span>
- 
-            	</span>
- 
-            	<span class="large-lesson-arrow">
-                	${
-                    	completed
-                        	? "✓"
-              	          : "→"
-                	}
-            	</span>
-        	`;
- 
- 
-        	item.addEventListener(
-            	"click",
-            	() => openLesson(lesson)
-        	);
- 
- 
-        	container.appendChild(item);
- 
-    	}
-	);
-}
- 
- 
-/* =========================================================
-   LESSON RUNNER
-   ========================================================= */
- 
-async function openLesson(lesson) {
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
-	state.currentLesson = lesson;
- 
- 
-	state.currentLessonIndex =
-    	state.lessons.findIndex(
-        	item =>
-            	getLessonId(item) ===
-            	getLessonId(lesson)
-    	);
- 
- 
-	renderLesson();
- 
- 
-	showScreen("lesson");
- 
- 
-	await registerLessonOpened(
-    	lesson
-	);
-}
- 
- 
-/* =========================================================
-   RENDER LESSON
-   ========================================================= */
- 
-function renderLesson() {
- 
-	const lesson =
-    	state.currentLesson;
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
-	const lessonId =
-    	getLessonId(lesson);
- 
- 
-	const moduleName =
-    	lesson.module?.title ||
-    	lesson.module?.name ||
-    	"Module";
- 
- 
-	const lessonIndex =
-    	state.currentLessonIndex >= 0
-        	? state.currentLessonIndex + 1
-        	: 1;
- 
- 
-	$("#lesson-module-name") &&
-    	($("#lesson-module-name").textContent =
-        	moduleName);
- 
- 
-	$("#lesson-position-number") &&
-    	($("#lesson-position-number").textContent =
-        	`Lesson ${lessonIndex}`);
- 
- 
-	const saved =
-    	state.savedLessons.has(
-        	lessonId
-    	);
- 
- 
-	const saveButton =
-    	$("#lesson-save");
- 
- 
-	if (saveButton) {
- 
-    	saveButton.textContent =
-        	saved ? "★" : "☆";
- 
-    	saveButton.classList.toggle(
-        	"saved",
-        	saved
-    	);
  
 	}
  
  
-	renderLessonBody(
-    	lesson
-	);
+    container.innerHTML =
+    	state.lessons
+        	.map(
+                (lesson, index) => {
  
+                    const module =
+                        state.modules.find(
+                            item =>
+                                normalizeId(item.id) ===
+                            	normalizeId(
+                                    lesson.module_id
+                            	)
+                        );
  
-	updateLessonNavigation();
  
+                    const completed =
+                        isLessonCompleted(
+                            lesson
+                        );
  
-	updateLessonProgressBar();
-}
  
+                    return `
  
-/* =========================================================
-   LESSON BODY
-   ========================================================= */
+                        <article
+                            class="lesson-large"
+                            data-lesson-id="${escapeHTML(
+                            	lesson.id
+                            )}"
+                        >
  
-function renderLessonBody(lesson) {
+                            <div class="lesson-large-number">
  
-	const container =
-    	$("#lesson-body");
+                            	${String(index + 1).padStart(2, "0")}
  
+                            </div>
  
-	if (!container) {
-    	return;
-	}
  
+                            <div class="lesson-large-info">
  
-	/*
-   	The admin system can eventually store structured
-   	sections in lesson.content / sections / body.
- 
-   	This renderer supports several formats without
-   	requiring the student page to be rewritten.
-	*/
- 
-	let content =
-    	lesson.content ??
-    	lesson.body ??
-    	lesson.sections ??
-    	lesson.content_data ??
-    	null;
- 
- 
-	if (typeof content === "string") {
- 
-    	try {
-        	content = JSON.parse(content);
-    	} catch {
-        	// Plain text / HTML content.
-    	}
- 
-	}
- 
- 
-	container.innerHTML = "";
- 
- 
-	/*
-   	Structured sections
-	*/
- 
-	if (Array.isArray(content)) {
- 
-    	content.forEach(
-        	(section, index) => {
- 
-            	container.appendChild(
-                	createLessonSection(
-                    	section,
-                    	index
-                	)
-            	);
- 
-        	}
-    	);
- 
-    	return;
-	}
- 
- 
-	/*
-   	Object containing sections
-	*/
- 
-	if (
-    	content &&
-    	typeof content === "object" &&
-    	Array.isArray(content.sections)
-	) {
- 
-    	content.sections.forEach(
-        	(section, index) => {
- 
-            	container.appendChild(
-                	createLessonSection(
-                    	section,
-                    	index
-                	)
-            	);
- 
-        	}
-    	);
- 
-    	return;
-	}
- 
- 
-	/*
-   	Plain lesson body
-	*/
- 
-	const wrapper =
-    	document.createElement("div");
- 
- 
-	wrapper.className =
-    	"lesson-introduction";
- 
- 
-	wrapper.innerHTML = `
-    	<span class="eyebrow">
-        	LESSON
-    	</span>
- 
-    	<h1>
-        	${escapeHTML(
-            	lesson.title ||
-          	  lesson.name ||
-            	"Lesson"
-        	)}
-    	</h1>
- 
-    	${
-        	lesson.description
-            	? `
-                	<p class="lesson-description">
-                    	${escapeHTML(
-                        	lesson.description
-                    	)}
-                	</p>
-              	`
-            	: ""
-    	}
- 
-    	${
-        	typeof content === "string" &&
-        	content.trim()
-            	? `
-                	<div class="lesson-rich-content">
-                    	${content}
-                	</div>
-              	`
-            	: `
-                	<div class="lesson-empty-content">
-                    	<p>
-                        	This lesson is being prepared.
-                    	</p>
-                	</div>
-              	`
-    	}
-	`;
- 
- 
-	container.appendChild(
-    	wrapper
-	);
-}
- 
- 
-/* =========================================================
-   CREATE LESSON SECTION
-   ========================================================= */
- 
-function createLessonSection(
-	section,
-	index
-) {
- 
-	const wrapper =
-    	document.createElement("article");
- 
- 
-	wrapper.className =
-    	"lesson-section";
- 
- 
-	if (typeof section === "string") {
- 
-    	wrapper.innerHTML = `
-        	<div class="section-number">
-            	${String(
-                	index + 1
-            	).padStart(2, "0")}
-        	</div>
- 
-        	<div>
-            	${section}
-   	     </div>
-    	`;
- 
-    	return wrapper;
-	}
- 
- 
-	const type =
-    	section.type ||
-    	section.section_type ||
-    	"content";
- 
- 
-	const title =
-    	section.title ||
-    	section.heading ||
-    	"";
- 
- 
-	const text =
-    	section.text ||
-    	section.content ||
-    	section.body ||
-    	"";
- 
- 
-	let html = `
-    	<div class="lesson-section-number">
-        	${String(
-            	index + 1
-        	).padStart(2, "0")}
-    	</div>
- 
-    	<div class="lesson-section-content">
-	`;
- 
- 
-	if (title) {
- 
-    	html += `
-        	<span class="eyebrow">
-            	${escapeHTML(type)}
-        	</span>
- 
-        	<h2>
-            	${escapeHTML(title)}
-        	</h2>
-    	`;
- 
-	}
- 
- 
-	if (text) {
- 
-    	html += `
-        	<div class="section-text">
-            	${
-                	typeof text === "string"
-                    	? text
-                    	: escapeHTML(text)
-            	}
-        	</div>
-    	`;
- 
-	}
- 
- 
-	/*
-   	Image
-	*/
- 
-	if (section.image_url) {
- 
-    	html += `
-        	<figure class="lesson-image">
-            	<img
-                	src="${escapeHTML(
-                    	section.image_url
-                	)}"
-                	alt="${escapeHTML(
-                    	section.image_alt ||
-                    	title ||
-                    	"Lesson image"
-                	)}"
-                	loading="lazy"
-            	>
-        	</figure>
-    	`;
- 
-	}
- 
- 
-	/*
-   	Audio
-	*/
- 
-	if (section.audio_url) {
- 
-    	html += `
-        	<div class="lesson-audio">
-            	<audio
-                	controls
-                	preload="metadata"
-            	>
-                	<source
-                    	src="${escapeHTML(
-                        	section.audio_url
-                    	)}"
-                	>
-            	</audio>
-        	</div>
-    	`;
- 
-	}
- 
- 
-	/*
-   	Video
-	*/
- 
-	if (section.video_url) {
- 
-    	html += `
-        	<div class="lesson-video">
-            	<video
-                	controls
-                	preload="metadata"
-            	>
-                	<source
-                    	src="${escapeHTML(
-                        	section.video_url
-                    	)}"
-                	>
-            	</video>
-        	</div>
-    	`;
- 
-	}
- 
- 
-	/*
-   	Vocabulary
-	*/
- 
-	if (
-    	type === "vocabulary" &&
-    	Array.isArray(section.items)
-	) {
- 
-    	html += `
-        	<div class="vocabulary-list">
-    	`;
- 
- 
-    	section.items.forEach(item => {
- 
-        	html += `
-            	<div class="vocabulary-item">
- 
-                	<strong>
-                    	${escapeHTML(
-                        	item.word ||
-                        	item.term ||
-                        	""
-                    	)}
-                	</strong>
- 
-                	${
-                    	item.meaning
-                        	? `
-                            	<span>
-                                	${escapeHTML(
-                                    	item.meaning
+                            	<strong>
+                                    ${escapeHTML(
+                                        lesson.title
                                 	)}
+                            	</strong>
+ 
+                            	<span>
+                                    ${escapeHTML(
+                                        module?.title ||
+                                        "Lesson"
+                                	)}
+                                    ${lesson.duration
+                                    	? ` • ${lesson.duration} min`
+                                    	: ""}
                             	</span>
-                          	`
-                        	: ""
-                	}
  
-            	</div>
-        	`;
- 
-    	});
+                            </div>
  
  
-    	html += `
-        	</div>
-    	`;
+                            <div class="lesson-large-status">
  
-	}
+                            	${
+                                	completed
+                                    	? "Completed"
+                                    	: "Start →"
+                            	}
  
+                            </div>
  
-	/*
-   	Dialogue
-	*/
+                        </article>
  
-	if (
-    	type === "dialogue" &&
-    	Array.isArray(section.lines)
-	) {
+                	`;
  
-    	html += `
-        	<div class="dialogue-list">
-    	`;
- 
- 
-    	section.lines.forEach(line => {
- 
-        	html += `
-            	<div class="dialogue-line">
- 
-                	<strong>
-                    	${escapeHTML(
-                        	line.speaker ||
-                        	"Speaker"
-                    	)}
-                	</strong>
- 
-                	<p>
-                    	${escapeHTML(
-                        	line.text ||
-                        	""
-                    	)}
-                	</p>
- 
-            	</div>
-        	`;
- 
-    	});
- 
- 
-    	html += `
-        	</div>
-    	`;
- 
-	}
- 
- 
-	html += `
-    	</div>
-	`;
- 
- 
-	wrapper.innerHTML =
-    	html;
- 
- 
-	return wrapper;
-}
- 
- 
-/* =========================================================
-   LESSON NAVIGATION
-   ========================================================= */
- 
-function updateLessonNavigation() {
- 
-	const index =
-    	state.currentLessonIndex;
- 
- 
-	const previous =
-    	$("#previous-lesson");
- 
- 
-	const next =
-    	$("#next-lesson");
- 
- 
-	if (previous) {
- 
-    	previous.disabled =
-        	index <= 0;
- 
-	}
- 
- 
-	if (next) {
- 
-    	next.textContent =
-        	index >= state.lessons.length - 1
-            	? "Finish →"
-            	: "Continue →";
- 
-	}
- 
- 
-	const status =
-    	$("#lesson-footer-status");
- 
- 
-	if (status) {
- 
-        if (
-        	state.currentLesson &&
-        	state.progress[
-            	getLessonId(
-                	state.currentLesson
-            	)
-        	]?.completed
-    	) {
- 
-        	status.textContent =
-            	"Lesson completed";
- 
-    	} else {
- 
-        	status.textContent =
-            	"Keep going";
- 
-    	}
- 
-	}
-}
- 
- 
-/* =========================================================
-   LESSON PROGRESS BAR
-   ========================================================= */
- 
-function updateLessonProgressBar() {
- 
-	const fill =
-    	$("#lesson-progress-fill");
- 
- 
-	if (!fill) {
-    	return;
-	}
- 
- 
-	const total =
-    	state.lessons.length;
- 
- 
-	const current =
-    	state.currentLessonIndex + 1;
- 
- 
-	const percentage =
-    	total
-        	? Math.round(
-            	(current / total) * 100
+            	}
         	)
-        	: 0;
+            .join("");
  
  
-	fill.style.width =
-    	`${percentage}%`;
-}
+    $$(".lesson-large").forEach(
+    	element => {
  
- 
-/* =========================================================
-   MARK LESSON COMPLETE
-   ========================================================= */
- 
-async function completeCurrentLesson() {
- 
-	const lesson =
-    	state.currentLesson;
- 
- 
-	if (!lesson || !state.user) {
-    	return;
-	}
- 
- 
-	const lessonId =
-    	getLessonId(lesson);
- 
- 
-	if (!lessonId) {
-    	return;
-	}
- 
- 
-	const existing =
-    	state.progress[lessonId];
- 
- 
-	const payload = {
-    	user_id: state.user.id,
-	    course_id: state.course.id,
-    	lesson_id: lessonId,
-    	completed: true,
-    	progress: 100,
-    	updated_at: new Date().toISOString()
-	};
- 
- 
-	/*
-   	Keep fields from an existing progress row when
-   	possible, without sending the primary key back
-   	unnecessarily.
-	*/
- 
-	if (
-    	existing?.time_spent !== undefined
-	) {
- 
-    	payload.time_spent =
-        	existing.time_spent;
- 
-	}
- 
- 
-	const {
-    	data,
-    	error
-	} = await supabaseClient
-        .from("progress")
-    	.upsert(
-        	payload,
-        	{
-            	onConflict:
-                	"user_id,course_id,lesson_id"
-        	}
-    	)
-    	.select()
-    	.maybeSingle();
- 
- 
-	if (error) {
- 
-    	console.error(
-        	"Unable to save lesson progress:",
-        	error
-    	);
- 
-    	return false;
-	}
- 
- 
-	state.progress[lessonId] =
-    	data || {
-        	...existing,
-        	...payload
-    	};
- 
- 
-	renderProgress();
-	renderOverview();
-	renderOverviewPath();
-	renderContents();
-	renderLearnScreen();
-	updateLessonNavigation();
- 
- 
-	return true;
-}
- 
- 
-/* =========================================================
-   REGISTER LESSON OPENED
-   ========================================================= */
- 
-async function registerLessonOpened(lesson) {
- 
-	if (!state.user || !state.course || !lesson) {
-    	return;
-	}
- 
- 
-	const lessonId =
-    	getLessonId(lesson);
- 
- 
-	if (!lessonId) {
-    	return;
-	}
- 
- 
-	const existing =
-    	state.progress[lessonId];
- 
- 
-	const payload = {
-    	user_id: state.user.id,
-    	course_id: state.course.id,
-    	lesson_id: lessonId,
-    	completed:
-        	existing?.completed || false,
-    	progress:
-        	existing?.progress || 0,
-    	updated_at:
-        	new Date().toISOString()
-	};
- 
- 
-	const {
-    	data,
-    	error
-	} = await supabaseClient
-    	.from("progress")
-    	.upsert(
-        	payload,
-        	{
-	            onConflict:
-                	"user_id,course_id,lesson_id"
-        	}
-    	)
-    	.select()
-    	.maybeSingle();
- 
- 
-	if (error) {
- 
-    	console.warn(
-        	"Lesson access could not be recorded:",
-        	error.message
-    	);
- 
-    	return;
-	}
- 
- 
-	if (data) {
-    	state.progress[lessonId] =
-        	data;
-	}
-}
- 
- 
-/* =========================================================
-   NEXT / PREVIOUS LESSON
-   ========================================================= */
- 
-async function goToNextLesson() {
- 
-	if (!state.currentLesson) {
-    	return;
-	}
- 
- 
-	await completeCurrentLesson();
- 
- 
-	const nextIndex =
-    	state.currentLessonIndex + 1;
- 
- 
-	if (
-    	nextIndex >=
-    	state.lessons.length
-	) {
- 
-    	renderProgress();
- 
-    	showScreen("progress");
- 
-    	return;
-	}
- 
- 
-	await openLesson(
-    	state.lessons[nextIndex]
-	);
-}
- 
- 
-async function goToPreviousLesson() {
- 
-    const previousIndex =
-    	state.currentLessonIndex - 1;
- 
- 
-	if (previousIndex < 0) {
-    	return;
-	}
- 
- 
-	await openLesson(
-    	state.lessons[previousIndex]
-	);
-}
- 
- 
-/* =========================================================
-   LESSON ACTIONS
-   ========================================================= */
- 
-async function toggleSaveLesson() {
- 
-	const lesson =
-    	state.currentLesson;
- 
- 
-	if (!lesson || !state.user) {
-    	return;
-	}
- 
- 
-	const lessonId =
-    	getLessonId(lesson);
- 
- 
-	if (!lessonId) {
-    	return;
-	}
- 
- 
-	const currentlySaved =
-    	state.savedLessons.has(
-        	lessonId
-    	);
- 
- 
-	const existing =
-    	state.progress[lessonId] || {};
- 
- 
-	const payload = {
-    	user_id: state.user.id,
-    	course_id: state.course.id,
-    	lesson_id: lessonId,
-    	completed:
-        	existing.completed || false,
-    	progress:
-        	existing.progress || 0,
-    	saved:
-        	!currentlySaved,
-    	updated_at:
-        	new Date().toISOString()
-	};
- 
- 
-	const {
-    	data,
-    	error
-	} = await supabaseClient
-    	.from("progress")
-    	.upsert(
-        	payload,
-        	{
-            	onConflict:
-                	"user_id,course_id,lesson_id"
-        	}
-    	)
-    	.select()
-    	.maybeSingle();
- 
- 
-	if (error) {
- 
-    	console.error(
-        	"Unable to save lesson:",
-        	error
-    	);
- 
-    	return;
-	}
- 
- 
-	if (!currentlySaved) {
- 
-    	state.savedLessons.add(
-        	lessonId
-    	);
- 
-	} else {
- 
-    	state.savedLessons.delete(
-        	lessonId
-    	);
- 
-	}
- 
- 
-	state.progress[lessonId] =
-    	data || {
-        	...existing,
-        	...payload
-    	};
- 
- 
-	const saveButton =
-    	$("#lesson-save");
- 
- 
-	if (saveButton) {
- 
-    	saveButton.textContent =
-        	!currentlySaved
-            	? "★"
-            	: "☆";
- 
-    	saveButton.classList.toggle(
-        	"saved",
-   	     !currentlySaved
-    	);
- 
-	}
- 
- 
-	renderContents();
-}
- 
- 
-/* =========================================================
-   LESSON BACK BUTTON
-   ========================================================= */
- 
-function setupLessonBack() {
- 
-	const button =
-    	$("#lesson-back");
- 
- 
-	if (!button) {
-    	return;
-	}
- 
- 
-	button.addEventListener(
-    	"click",
-    	() => {
- 
-        	showScreen(
-            	state.currentScreenBeforeLesson ||
-            	"overview"
-       	 );
- 
-    	}
-	);
-}
- 
- 
-/* =========================================================
-   CONTINUE BUTTONS
-   ========================================================= */
- 
-function openCurrentLesson() {
- 
-	const lesson =
-    	getCurrentLesson();
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
-	state.currentScreenBeforeLesson =
-    	state.currentScreen;
- 
- 
-	openLesson(
-    	lesson
-	);
-}
- 
- 
-function setupContinueButtons() {
- 
-	const mainButton =
-    	$("#continue-button");
- 
- 
-	const cardButton =
-    	$("#continue-card-button");
- 
- 
-	if (mainButton) {
- 
-    	mainButton.addEventListener(
-        	"click",
-        	openCurrentLesson
-    	);
- 
-	}
- 
- 
-	if (cardButton) {
- 
-    	cardButton.addEventListener(
-        	"click",
-        	openCurrentLesson
-    	);
- 
-	}
-}
- 
- 
-/* =========================================================
-   LESSON FOOTER BUTTONS
-   ========================================================= */
- 
-function setupLessonFooter() {
- 
-	const previous =
-    	$("#previous-lesson");
- 
- 
-	const next =
-    	$("#next-lesson");
- 
- 
-	if (previous) {
- 
-    	previous.addEventListener(
-        	"click",
-        	goToPreviousLesson
-    	);
- 
-	}
- 
- 
-	if (next) {
- 
-    	next.addEventListener(
-        	"click",
-        	goToNextLesson
-    	);
- 
-	}
-}
- 
- 
-/* =========================================================
-   LESSON SAVE
-   ========================================================= */
- 
-function setupLessonSave() {
- 
-	const button =
-    	$("#lesson-save");
- 
- 
-	if (!button) {
-    	return;
-	}
- 
- 
-	button.addEventListener(
-    	"click",
-    	toggleSaveLesson
-	);
-}
- 
- 
-/* =========================================================
-   LESSON MORE
-   ========================================================= */
- 
-function setupLessonMore() {
- 
-	const button =
-    	$("#lesson-more");
- 
- 
-	if (!button) {
-    	return;
-	}
- 
- 
-	button.addEventListener(
-    	"click",
-    	() => {
- 
-        	/*
-           	Reserved for lesson actions such as:
-           	- Report content
-           	- Add note
-           	- Share
-           	- AI assistance
-        	*/
- 
-        	button.classList.toggle(
-            	"active"
-        	);
- 
-    	}
-	);
-}
- 
- 
-/* =========================================================
-   SETTINGS TOGGLES
-   ========================================================= */
- 
-function setupSettings() {
- 
-	$$(".toggle").forEach(
-    	toggle => {
- 
-    	    toggle.addEventListener(
-            	"click",
+            element.addEventListener(
+                "click",
             	() => {
  
-                	toggle.classList.toggle(
-                    	"active"
+                    openLesson(
+                        element.dataset.lessonId
                 	);
  
             	}
@@ -2834,274 +1384,1316 @@ function setupSettings() {
  
     	}
 	);
+ 
 }
  
  
-/* =========================================================
-   EXIT COURSE
-   ========================================================= */
+/* =====================================================
+   CONTENTS
+===================================================== */
  
-function setupExitCourse() {
+function renderContents() {
  
-	const button =
-    	$("#exit-course");
+	const container =
+        $("#contents-list");
  
  
-	if (!button) {
+	if (!container) {
+ 
     	return;
+ 
 	}
  
  
-	button.addEventListener(
-    	"click",
-    	() => {
+	if (!state.modules.length) {
  
-        	window.location.href =
-            	"../student.html";
+        container.innerHTML = `
+ 
+        	<div class="empty-state">
+            	Course contents will appear here.
+            </div>
+ 
+    	`;
+ 
+    	return;
+ 
+	}
+ 
+ 
+    container.innerHTML =
+    	state.modules
+        	.map(
+                (module, moduleIndex) => {
+ 
+                    const lessons =
+                        getModuleLessons(
+                            module.id
+                        );
+ 
+ 
+                    return `
+ 
+                        <div
+                            class="content-module"
+                            data-module-id="${escapeHTML(
+                            	module.id
+                            )}"
+                        >
+ 
+                            <button
+                                class="content-module-header"
+                                type="button"
+                            >
+ 
+                            	<div class="content-module-number">
+ 
+                                	${String(
+                                        moduleIndex + 1
+                                    ).padStart(2, "0")}
+ 
+                            	</div>
+ 
+ 
+                            	<div class="content-module-info">
+ 
+                                    <strong>
+                                        ${escapeHTML(
+                                            module.title ||
+                                            module.name ||
+                                            `Module ${moduleIndex + 1}`
+                                    	)}
+                                    </strong>
+ 
+                                    <span>
+                                        ${lessons.length} lessons
+                                    </span>
+ 
+                            	</div>
+ 
+ 
+                            	<div class="content-module-arrow">
+                                	↓
+                            	</div>
+ 
+                            </button>
+ 
+ 
+                            <div class="module-lessons">
+ 
+                            	${
+                                    lessons.length
+                                    	? lessons
+                                            .map(
+                                                (lesson, index) => `
+ 
+                                                    <div
+                                                        class="content-lesson"
+                                                        data-lesson-id="${escapeHTML(
+                                                            lesson.id
+                                                        )}"
+                                                    >
+ 
+                                                        <div class="content-lesson-number">
+ 
+                                                            ${String(
+                                                                index + 1
+                                                            ).padStart(2, "0")}
+ 
+                                                        </div>
+ 
+ 
+                                                        <div class="content-lesson-info">
+ 
+                                                            <strong>
+                                                                ${escapeHTML(
+                                                                    lesson.title
+                                                                )}
+                                                            </strong>
+ 
+                                                            <span>
+                                                                ${
+                                                                    lesson.duration
+                                                                        ? `${lesson.duration} min`
+                                                                        : "Lesson"
+                                                                }
+                                                            </span>
+ 
+                                                        </div>
+ 
+ 
+                                                        <div class="content-lesson-status">
+ 
+                                                            ${
+                                                                isLessonCompleted(
+                                                                    lesson
+                                                                )
+                                                                    ? "✓"
+                                                                    : "→"
+                                                            }
+ 
+                                                        </div>
+ 
+                                                    </div>
+ 
+                                                `
+                                        	)
+                                            .join("")
+                                    	: `
+                                            <div class="empty-state">
+                                                No lessons in this module yet.
+                                            </div>
+                                    	`
+                            	}
+ 
+                            </div>
+ 
+                        </div>
+ 
+                	`;
+ 
+            	}
+        	)
+            .join("");
+ 
+ 
+    $$(".content-module-header").forEach(
+    	header => {
+ 
+            header.addEventListener(
+                "click",
+            	() => {
+ 
+                    const module =
+                        header.closest(
+                            ".content-module"
+                        );
+ 
+                    module.classList.toggle(
+                        "open"
+                	);
+ 
+            	}
+        	);
  
     	}
 	);
+ 
+ 
+    $$(".content-lesson").forEach(
+    	lesson => {
+ 
+            lesson.addEventListener(
+                "click",
+            	event => {
+ 
+                    event.stopPropagation();
+ 
+                    openLesson(
+                        lesson.dataset.lessonId
+                	);
+ 
+            	}
+        	);
+ 
+    	}
+	);
+ 
 }
  
  
-/* =========================================================
-   BROWSER BACK BUTTON
-   ========================================================= */
+/* =====================================================
+   PROGRESS MODULES
+===================================================== */
  
-function setupBrowserBack() {
+function renderProgressModules() {
  
-	window.addEventListener(
-    	"popstate",
-    	() => {
- 
-        	const lessonScreen =
-            	$("#lesson-screen");
+	const container =
+        $("#progress-module-list");
  
  
-        	if (
-            	lessonScreen &&
-            	lessonScreen.classList.contains(
-                	"active"
+	if (!container) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+    container.innerHTML =
+    	state.modules
+        	.map(
+                (module, index) => {
+ 
+                    const lessons =
+                        getModuleLessons(
+                            module.id
+                        );
+ 
+                    const completed =
+                        lessons.filter(
+                            isLessonCompleted
+                        ).length;
+ 
+                    const percent =
+                        lessons.length
+                            ? Math.round(
+                            	completed /
+                            	lessons.length *
+                            	100
+                            )
+                            : 0;
+ 
+ 
+                    return `
+ 
+                        <div
+                            class="path-item ${percent === 100 ? "completed" : ""}"
+                        >
+ 
+                            <div class="path-number">
+ 
+                            	${String(
+                                	index + 1
+                            	).padStart(2, "0")}
+ 
+                            </div>
+ 
+ 
+                            <div class="path-info">
+ 
+                            	<strong>
+                                    ${escapeHTML(
+                                        module.title ||
+                                        module.name ||
+                                    	`Module ${index + 1}`
+                                	)}
+                            	</strong>
+ 
+                            	<span>
+                                	${percent}% complete
+                            	</span>
+ 
+                            </div>
+ 
+ 
+                            <div class="path-progress">
+ 
+                            	<div class="path-progress-track">
+ 
+                                	<div
+                                        class="path-progress-fill"
+                                        style="width:${percent}%"
+                                    ></div>
+ 
+                            	</div>
+ 
+                            </div>
+ 
+                        </div>
+ 
+                	`;
+ 
+            	}
+        	)
+            .join("");
+ 
+}
+ 
+ 
+/* =====================================================
+   MODULE HELPERS
+===================================================== */
+ 
+function getModuleLessons(moduleId) {
+ 
+	return state.lessons
+    	.filter(
+        	lesson =>
+                normalizeId(
+                    lesson.module_id
+            	) ===
+                normalizeId(moduleId)
+    	)
+    	.sort(
+        	(a, b) =>
+                Number(a.sort_order || 0) -
+                Number(b.sort_order || 0)
+    	);
+ 
+}
+ 
+ 
+/* =====================================================
+   CONTINUE CARD
+===================================================== */
+ 
+function getNextLesson() {
+ 
+	const unfinished =
+        state.lessons.find(
+        	lesson =>
+                !isLessonCompleted(
+                    lesson
             	)
-        	) {
+    	);
  
-            	showScreen(
-                	state.currentScreenBeforeLesson ||
-                	"overview"
-            	);
  
-        	}
+	return unfinished ||
+        state.lessons[0] ||
+    	null;
  
-    	}
-	);
 }
  
  
-/* =========================================================
-   ERROR STATE
-   ========================================================= */
+function updateContinueCard() {
  
-function showCourseError(message) {
- 
-	const page =
-    	$(".page");
+	const lesson =
+        getNextLesson();
  
  
-	if (!page) {
+	if (!lesson) {
+ 
     	return;
+ 
 	}
  
  
-	page.innerHTML = `
-    	<div class="empty-state course-error">
+	const index =
+        state.lessons.findIndex(
+        	item =>
+                normalizeId(item.id) ===
+                normalizeId(lesson.id)
+    	);
  
-        	<div class="empty-icon">
-            	!
-        	</div>
  
-        	<h2>
-            	We couldn't load this course.
-        	</h2>
+	const module =
+        state.modules.find(
+        	item =>
+                normalizeId(item.id) ===
+                normalizeId(
+                    lesson.module_id
+            	)
+    	);
  
-        	<p>
-            	${escapeHTML(
-                	message ||
-                	"Please return to your courses and try again."
+ 
+    $("#continue-number").textContent =
+    	String(index + 1).padStart(2, "0");
+ 
+ 
+    $("#continue-module").textContent =
+    	module?.title ||
+        "LESSON";
+ 
+ 
+    $("#continue-lesson").textContent =
+    	lesson.title ||
+    	"Continue learning";
+ 
+ 
+    $("#continue-description").textContent =
+        lesson.description ||
+    	"Continue your learning journey.";
+ 
+ 
+    $("#continue-button-text").textContent =
+        isLessonCompleted(lesson)
+        	? "Review lesson"
+        	: "Continue learning";
+ 
+ 
+    $("#continue-card-button").onclick =
+    	() =>
+            openLesson(
+                lesson.id
+        	);
+ 
+ 
+    $("#continue-button").onclick =
+    	() =>
+            openLesson(
+                lesson.id
+        	);
+ 
+}
+ 
+ 
+/* =====================================================
+   LESSON RUNNER
+===================================================== */
+ 
+function openLesson(lessonId) {
+ 
+	const index =
+        state.lessons.findIndex(
+        	lesson =>
+                normalizeId(lesson.id) ===
+                normalizeId(lessonId)
+    	);
+ 
+ 
+	if (index === -1) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+    state.currentLessonIndex =
+    	index;
+ 
+ 
+    state.currentLesson =
+        state.lessons[index];
+ 
+ 
+	renderLesson();
+ 
+	showScreen(
+        "lesson"
+	);
+ 
+}
+ 
+ 
+function renderLesson() {
+ 
+	const lesson =
+        state.currentLesson;
+ 
+ 
+	if (!lesson) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+	const module =
+        state.modules.find(
+        	item =>
+                normalizeId(item.id) ===
+                normalizeId(
+                    lesson.module_id
+            	)
+    	);
+ 
+ 
+    $("#lesson-module-name").textContent =
+    	module?.title ||
+        "LESSON";
+ 
+ 
+    $("#lesson-position-number").textContent =
+        state.currentLessonIndex + 1;
+ 
+ 
+	const progress =
+        state.lessons.length
+        	? (
+                state.currentLessonIndex /
+                state.lessons.length
+        	) * 100
+        	: 0;
+ 
+ 
+    $("#lesson-progress-fill").style.width =
+        `${progress}%`;
+ 
+ 
+	const body =
+        $("#lesson-body-content");
+ 
+ 
+	body.innerHTML = `
+ 
+    	<div class="lesson-placeholder">
+ 
+        	<span class="eyebrow">
+                ${escapeHTML(
+                    module?.title ||
+                    "LESSON"
+            	)}
+            </span>
+ 
+        	<h1 class="lesson-content-title">
+                ${escapeHTML(
+                    lesson.title ||
+                    "Untitled lesson"
+            	)}
+            </h1>
+ 
+        	<p class="lesson-content-description">
+                ${escapeHTML(
+                    lesson.description ||
+                    "Begin this lesson and work through the learning activities."
             	)}
         	</p>
  
-        	<button
-            	class="primary-button"
-            	id="course-error-back"
+        	<div
+                style="
+                    margin-top:28px;
+                    padding:20px;
+                    border:1px solid var(--border);
+                    border-radius:16px;
+                    background:var(--surface-soft);
+            	"
         	>
-            	Back to my courses
-        	</button>
+ 
+                <strong style="font-size:13px;">
+                    Your learning journey
+                </strong>
+ 
+            	<p
+                    style="
+                        margin-top:8px;
+                        color:var(--text-muted);
+                        font-size:12px;
+                        line-height:1.7;
+                    "
+            	>
+                    This lesson area is ready for the structured
+                    EduCore learning experience: Understand → See →
+                    Hear → Practice → Recall → Speak → Test → Review.
+                </p>
+ 
+            </div>
  
     	</div>
+ 
 	`;
  
  
-	const button =
-    	$("#course-error-back");
+    $("#lesson-footer-status").textContent =
+        isLessonCompleted(lesson)
+        	? "Completed"
+        	: lesson.duration
+            	? `${lesson.duration} min`
+            	: "Ready";
  
  
-	if (button) {
+    $("#previous-lesson").disabled =
+        state.currentLessonIndex <= 0;
  
-    	button.addEventListener(
-        	"click",
-        	() => {
  
-            	window.location.href =
-                	"../student.html";
+    $("#next-lesson").textContent =
+        state.currentLessonIndex >=
+        state.lessons.length - 1
+        	? "Finish ✓"
+        	: "Next →";
+ 
+}
+ 
+ 
+/* =====================================================
+   COMPLETE LESSON
+===================================================== */
+ 
+async function completeCurrentLesson() {
+ 
+	const lesson =
+        state.currentLesson;
+ 
+ 
+	if (!lesson) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+	state.progress[
+        normalizeId(lesson.id)
+	] = {
+ 
+    	completed:
+        	true,
+ 
+    	completed_at:
+        	new Date().toISOString()
+ 
+	};
+ 
+ 
+    saveLocalProgress();
+ 
+ 
+	if (
+    	supabaseClient &&
+    	state.user?.id
+	) {
+ 
+    	/*
+       	This is intentionally prepared for the
+       	existing EduCore progress table.
+ 
+       	If your actual progress table has a
+       	different name/column structure, keep
+       	the local progress behavior and connect
+       	this section to that schema later.
+    	*/
+ 
+    	try {
+ 
+        	await supabaseClient
+                .from("progress")
+                .upsert({
+ 
+                    user_id:
+                        state.user.id,
+ 
+                    course_id:
+                        state.courseId,
+ 
+                    lesson_id:
+                        lesson.id,
+ 
+                    completed:
+                        true,
+ 
+                    completed_at:
+                        new Date().toISOString()
+ 
+            	});
+ 
+    	} catch (error) {
+ 
+            console.warn(
+                "Progress sync skipped:",
+            	error
+        	);
+ 
+    	}
+ 
+	}
+ 
+ 
+    updateProgressUI();
+ 
+    renderEverything();
+ 
+}
+ 
+ 
+/* =====================================================
+   LOCAL PROGRESS
+===================================================== */
+ 
+function progressStorageKey() {
+ 
+	return `educore_progress_${
+    	state.courseId || "default"
+	}`;
+ 
+}
+ 
+ 
+function loadLocalProgress() {
+ 
+	try {
+ 
+    	const raw =
+            localStorage.getItem(
+                progressStorageKey()
+        	);
+ 
+ 
+    	state.progress =
+        	raw
+            	? JSON.parse(raw)
+            	: {};
+ 
+	} catch {
+ 
+    	state.progress = {};
+ 
+	}
+ 
+}
+ 
+ 
+function saveLocalProgress() {
+ 
+	try {
+ 
+        localStorage.setItem(
+            progressStorageKey(),
+            JSON.stringify(
+                state.progress
+        	)
+    	);
+ 
+	} catch {
+ 
+    	/* Ignore storage errors */
+ 
+	}
+ 
+}
+ 
+ 
+/* =====================================================
+   NAVIGATION
+===================================================== */
+ 
+function showScreen(screenName) {
+ 
+	const screen =
+        $(`#${screenName}-screen`);
+ 
+ 
+	if (!screen) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+    $$(".screen").forEach(
+    	item =>
+            item.classList.remove(
+                "active"
+        	)
+	);
+ 
+ 
+    screen.classList.add(
+        "active"
+	);
+ 
+ 
+    state.currentScreen =
+    	screenName;
+ 
+ 
+    updateNavigationState(
+    	screenName
+	);
+ 
+ 
+	closeMoreMenu();
+ 
+ 
+	window.scrollTo({
+    	top: 0,
+    	behavior: "smooth"
+	});
+ 
+}
+ 
+ 
+function updateNavigationState(screenName) {
+ 
+    $$(".rail-button[data-screen], .bottom-nav-button[data-screen]")
+    	.forEach(
+        	button => {
+ 
+                button.classList.toggle(
+                    "active",
+                    button.dataset.screen ===
+                    screenName
+            	);
  
         	}
     	);
  
-	}
 }
  
  
-/* =========================================================
-   AUTH STATE LISTENER
-   ========================================================= */
+/* =====================================================
+   MORE MENU
+===================================================== */
  
-function setupAuthListener() {
+function openMoreMenu() {
  
-	supabaseClient.auth.onAuthStateChange(
-    	async (event, session) => {
+	const menu =
+        $("#more-menu");
+ 
+ 
+	if (!menu) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+	const desktopButton =
+        $("#more-button");
+ 
+ 
+	const mobileButton =
+        $("#mobile-more-button");
+ 
+ 
+	const activeButton =
+        window.innerWidth <= 800
+        	? mobileButton
+        	: desktopButton;
+ 
+ 
+	if (
+        window.innerWidth > 800 &&
+    	desktopButton
+	) {
+ 
+    	const rect =
+            desktopButton.getBoundingClientRect();
+ 
+ 
+    	menu.style.top =
+            `${rect.bottom + 8}px`;
+ 
+ 
+        menu.style.right =
+            `${window.innerWidth - rect.right}px`;
+ 
+	}
+ 
+ 
+    menu.classList.add(
+        "open"
+	);
+ 
+ 
+	menu.setAttribute(
+        "aria-hidden",
+        "false"
+	);
+ 
+ 
+	if (desktopButton) {
+ 
+        desktopButton.setAttribute(
+            "aria-expanded",
+            "true"
+    	);
+ 
+	}
+ 
+ 
+	if (activeButton) {
+ 
+        activeButton.classList.add(
+            "active"
+    	);
+ 
+	}
+ 
+}
+ 
+ 
+function closeMoreMenu() {
+ 
+	const menu =
+        $("#more-menu");
+ 
+ 
+	if (!menu) {
+ 
+    	return;
+ 
+	}
+ 
+ 
+    menu.classList.remove(
+        "open"
+	);
+ 
+ 
+	menu.setAttribute(
+        "aria-hidden",
+        "true"
+	);
+ 
+ 
+	const desktopButton =
+        $("#more-button");
+ 
+ 
+	if (desktopButton) {
+ 
+        desktopButton.setAttribute(
+            "aria-expanded",
+            "false"
+    	);
+ 
+	}
+ 
+ 
+    $("#mobile-more-button")
+        ?.classList.remove(
+            "active"
+    	);
+ 
+}
+ 
+ 
+function toggleMoreMenu() {
+ 
+	const menu =
+        $("#more-menu");
+ 
+ 
+	if (
+        menu?.classList.contains(
+            "open"
+    	)
+	) {
+ 
+        closeMoreMenu();
+ 
+	} else {
+ 
+        openMoreMenu();
+ 
+	}
+ 
+}
+ 
+ 
+/* =====================================================
+   EVENT SETUP
+===================================================== */
+ 
+function setupNavigation() {
+ 
+    $$("[data-screen]")
+    	.forEach(
+        	button => {
+ 
+                button.addEventListener(
+                    "click",
+                	() => {
+ 
+                        const screen =
+                            button.dataset.screen;
+ 
+ 
+                        if (
+                            screen &&
+                            $(`#${screen}-screen`)
+                        ) {
+ 
+                            showScreen(
+                            	screen
+                            );
+ 
+                        }
+ 
+                	}
+            	);
+ 
+        	}
+    	);
+ 
+ 
+    $("#brand-button")
+        ?.addEventListener(
+            "click",
+        	() =>
+                showScreen(
+                    "overview"
+            	)
+    	);
+ 
+ 
+    $("#mobile-brand-button")
+        ?.addEventListener(
+            "click",
+        	() =>
+                showScreen(
+                    "overview"
+            	)
+    	);
+ 
+ 
+    $("#profile-button")
+        ?.addEventListener(
+            "click",
+        	() =>
+                showScreen(
+                    "profile"
+            	)
+    	);
+ 
+ 
+    $("#top-profile-button")
+        ?.addEventListener(
+            "click",
+        	() =>
+                showScreen(
+                    "profile"
+            	)
+    	);
+ 
+ 
+    $("#more-button")
+        ?.addEventListener(
+            "click",
+        	event => {
+ 
+                event.stopPropagation();
+ 
+                toggleMoreMenu();
+ 
+        	}
+    	);
+ 
+ 
+    $("#mobile-more-button")
+        ?.addEventListener(
+            "click",
+        	event => {
+ 
+                event.stopPropagation();
+ 
+                toggleMoreMenu();
+ 
+        	}
+    	);
+ 
+ 
+    document.addEventListener(
+        "click",
+    	event => {
+ 
+        	const menu =
+                $("#more-menu");
+ 
  
         	if (
-            	event === "SIGNED_OUT"
+            	menu &&
+                !menu.contains(
+                    event.target
+            	) &&
+                !event.target.closest(
+                    "#more-button"
+            	) &&
+                !event.target.closest(
+                    "#mobile-more-button"
+            	)
         	) {
  
-            	window.location.href =
-                	"../index.html";
+                closeMoreMenu();
  
         	}
  
     	}
 	);
+ 
 }
  
  
-/* =========================================================
-   INITIAL DATA LOAD
-   ========================================================= */
+function setupLessonControls() {
  
-async function loadApplication() {
+    $("#lesson-back")
+        ?.addEventListener(
+            "click",
+        	() => {
+ 
+                showScreen(
+                    "learn"
+            	);
+ 
+        	}
+    	);
+ 
+ 
+    $("#previous-lesson")
+        ?.addEventListener(
+            "click",
+        	() => {
+ 
+            	if (
+                    state.currentLessonIndex <= 0
+            	) {
+ 
+                    return;
+ 
+            	}
+ 
+ 
+                openLesson(
+                    state.lessons[
+                        state.currentLessonIndex - 1
+                    ].id
+            	);
+ 
+        	}
+    	);
+ 
+ 
+    $("#next-lesson")
+        ?.addEventListener(
+            "click",
+        	async () => {
+ 
+            	await completeCurrentLesson();
+ 
+ 
+            	if (
+                    state.currentLessonIndex <
+                    state.lessons.length - 1
+            	) {
+ 
+                    openLesson(
+                        state.lessons[
+                            state.currentLessonIndex + 1
+                        ].id
+                	);
+ 
+            	} else {
+ 
+                    showScreen(
+                        "overview"
+                	);
+ 
+            	}
+ 
+        	}
+    	);
+ 
+ 
+    $("#lesson-save")
+        ?.addEventListener(
+            "click",
+        	() => {
+ 
+            	const lesson =
+                    state.currentLesson;
+ 
+ 
+            	if (!lesson) {
+ 
+                    return;
+ 
+            	}
+ 
+ 
+            	const key =
+                    `educore_saved_${lesson.id}`;
+ 
+ 
+            	const saved =
+                    localStorage.getItem(
+                        key
+                	);
+ 
+ 
+            	if (saved) {
+ 
+                    localStorage.removeItem(
+                        key
+                	);
+ 
+                    $("#lesson-save").textContent =
+                        "Save";
+ 
+            	} else {
+ 
+                    localStorage.setItem(
+                        key,
+                        "true"
+                	);
+ 
+                    $("#lesson-save").textContent =
+                        "Saved ✓";
+ 
+            	}
+ 
+        	}
+    	);
+ 
+}
+ 
+ 
+/* =====================================================
+   EXIT COURSE
+===================================================== */
+ 
+function setupExitCourse() {
+ 
+    $("#exit-course")
+        ?.addEventListener(
+            "click",
+        	() => {
+ 
+                closeMoreMenu();
+ 
+ 
+            	/*
+                   Return to the public course catalogue.
+               	If the public homepage is located elsewhere,
+                   change only this path.
+            	*/
+ 
+                window.location.href =
+                    "../index.html";
+ 
+        	}
+    	);
+ 
+}
+ 
+ 
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+ 
+function setupBrowserBack() {
+ 
+    window.addEventListener(
+        "popstate",
+    	event => {
+ 
+        	if (
+                state.currentScreen !==
+                "overview"
+        	) {
+ 
+                showScreen(
+                    "overview"
+            	);
+ 
+                return;
+ 
+        	}
+ 
+        	/*
+           	Allow the browser to perform its
+           	normal history behavior when already
+           	at the main course screen.
+        	*/
+ 
+    	}
+	);
+ 
+}
+ 
+ 
+/* =====================================================
+   INITIALIZE
+===================================================== */
+ 
+async function init() {
  
 	try {
  
     	showLoading();
  
  
-    	/* -------------------------------------------------
-       	USER
-    	------------------------------------------------- */
+        setupNavigation();
  
-    	state.user =
-        	await loadAuthenticatedUser();
+        setupLessonControls();
  
+        setupExitCourse();
  
-    	if (!state.user) {
- 
-        	window.location.href =
-            	"../index.html";
- 
-        	return;
-    	}
+        setupBrowserBack();
  
  
-    	/* -------------------------------------------------
-       	PROFILE
-    	------------------------------------------------- */
+        loadLocalProgress();
  
-    	state.profile =
-        	await loadStudentProfile(
-            	state.user.id
-        	);
+    	await loadUser();
  
- 
-    	renderProfile();
- 
- 
-    	/* -------------------------------------------------
-       	COURSE
-    	------------------------------------------------- */
- 
-    	state.course =
-        	await resolveCourse();
- 
- 
-    	/* -------------------------------------------------
-       	STRUCTURE
-    	------------------------------------------------- */
- 
-    	await loadCourseStructure();
- 
- 
-    	/* -------------------------------------------------
-       	PROGRESS
-    	------------------------------------------------- */
- 
-    	await loadProgress();
- 
- 
-    	/* -------------------------------------------------
-       	RENDER
-    	------------------------------------------------- */
- 
-    	renderCourseHeader();
- 
-    	renderProgress();
- 
-    	renderOverview();
- 
-    	renderOverviewPath();
- 
-    	renderContents();
- 
-    	renderLearnScreen();
- 
- 
-    	/*
-       	Open the lesson specified in the URL if present.
-    	*/
- 
-    	const params =
-        	new URLSearchParams(
-            	window.location.search
-        	);
- 
- 
-    	const lessonId =
-        	params.get("lesson");
- 
- 
-    	if (lessonId) {
- 
-        	const lesson =
-            	state.lessons.find(
-                	item =>
-                    	String(
-                       	 getLessonId(item)
-                    	) ===
-                    	String(lessonId)
-            	);
- 
- 
-        	if (lesson) {
- 
-            	state.currentScreenBeforeLesson =
-                	"overview";
- 
-            	await openLesson(
-                	lesson
-            	);
- 
-        	}
- 
-    	}
+    	await loadCourse();
  
  
     	hideLoading();
@@ -3110,74 +2702,29 @@ async function loadApplication() {
 	} catch (error) {
  
     	console.error(
-        	"EduCore course loading error:",
+            "EduCore initialization error:",
         	error
     	);
  
  
     	hideLoading();
  
- 
-    	showCourseError(
-        	error?.message ||
-        	"An unexpected error occurred while loading the course."
-    	);
- 
-	} finally {
- 
-    	state.loading = false;
- 
 	}
-}
- 
- 
-/* =========================================================
-   INITIALIZATION
-   ========================================================= */
- 
-async function init() {
- 
-	setupNavigation();
- 
-	setupMoreMenu();
- 
-	setupProfileButtons();
- 
-	setupContinueButtons();
- 
-	setupLessonBack();
- 
-	setupLessonFooter();
- 
-    setupLessonSave();
- 
-	setupLessonMore();
- 
-	setupSettings();
- 
-	setupExitCourse();
- 
-	setupBrowserBack();
- 
-	setupAuthListener();
- 
- 
-	await loadApplication();
  
 }
  
  
-/* =========================================================
+/* =====================================================
    START
-   ========================================================= */
+===================================================== */
  
 if (
-	document.readyState ===
-	"loading"
+    document.readyState ===
+    "loading"
 ) {
  
-	document.addEventListener(
-    	"DOMContentLoaded",
+    document.addEventListener(
+        "DOMContentLoaded",
     	init
 	);
  
@@ -3186,5 +2733,4 @@ if (
 	init();
  
 }
- 
 
