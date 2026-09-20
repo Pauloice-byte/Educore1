@@ -1035,46 +1035,94 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     if (
-        courseStartButton
-    ) {
+    courseStartButton
+) {
 
-        courseStartButton.addEventListener(
-            "click",
-            () => {
+    courseStartButton.addEventListener(
+        "click",
+        () => {
 
-                if (
-                    !activeCourse
-                ) {
+            if (
+                !activeCourse
+            ) {
 
-                    return;
-                }
-
-
-                if (
-                    activeCourse.slug
-                ) {
-
-                    window.location.href =
-                        `course.html?slug=${encodeURIComponent(
-                            activeCourse.slug
-                        )}`;
-
-                    return;
-                }
-
-
-                if (
-                    activeCourse.id
-                ) {
-
-                    window.location.href =
-                        `course.html?id=${encodeURIComponent(
-                            activeCourse.id
-                        )}`;
-                }
+                return;
             }
-        );
-    }
+
+
+            /*
+             * Every course displayed in the student
+             * dashboard comes from the Supabase
+             * courses table.
+             *
+             * The Supabase course ID is therefore
+             * the permanent identifier used to tell
+             * the shared course platform which course
+             * the student selected.
+             */
+
+            if (
+                activeCourse.id === undefined ||
+                activeCourse.id === null
+            ) {
+
+                console.error(
+                    "EduCore: Selected course has no Supabase course ID.",
+                    activeCourse
+                );
+
+                return;
+            }
+
+
+            const courseId =
+                String(
+                    activeCourse.id
+                );
+
+
+            /*
+             * Save the selected course locally as a
+             * convenience for the course platform and
+             * future student-dashboard functionality.
+             */
+
+            try {
+
+                localStorage.setItem(
+                    "educore_course_id",
+                    courseId
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "EduCore: Unable to save selected course ID.",
+                    error
+                );
+            }
+
+
+            /*
+             * All courses use the SAME course platform.
+             *
+             * Example:
+             *
+             * course-platform/course-platform.html?course_id=12
+             *
+             * The course platform will use this ID to
+             * load the correct course, modules, lessons,
+             * sections and activities from Supabase.
+             */
+
+            window.location.href =
+                `course-platform/course-platform.html?course_id=${encodeURIComponent(
+                    courseId
+                )}`;
+
+        }
+    );
+}
 
 
     /* =====================================================
