@@ -3497,67 +3497,432 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =====================================================
-       BUILDER MODAL
-    ===================================================== */
+   BUILDER MODAL
+===================================================== */
 
-    function openBuilderModal(
-        kind,
-        record = null,
-        forcedParentId = null
-    ) {
-        builderModal?.remove();
+function openBuilderModal(
+    kind,
+    record = null,
+    forcedParentId = null
+) {
+    builderModal?.remove();
 
-        builderModal =
-            document.createElement(
-                "div"
-            );
+    builderModal =
+        document.createElement(
+            "div"
+        );
 
-        builderModal.className =
-            "course-modal";
+    builderModal.className =
+        "course-modal";
 
-        let title = "";
-        let fields = "";
+    let title = "";
+    let fields = "";
 
-        if (kind === "module") {
-            title =
-                record
-                    ? "Edit Module"
-                    : "Add Module";
+    if (kind === "module") {
+        title =
+            record
+                ? "Edit Module"
+                : "Add Module";
 
-            fields = `
-                <div class="course-form-field">
+        fields = `
+            <div class="course-form-field">
 
-                    <label for="builder-title">
-                        Module Title *
-                    </label>
+                <label for="builder-title">
+                    Module Title *
+                </label>
 
-                    <input
-                        id="builder-title"
-                        required
-                        maxlength="200"
-                        value="${escapeAttribute(
-                            record?.title ||
-                            ""
-                        )}"
-                    >
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-description">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="builder-description"
-                        rows="4"
-                    >${escapeHTML(
-                        record?.description ||
+                <input
+                    id="builder-title"
+                    required
+                    maxlength="200"
+                    value="${escapeAttribute(
+                        record?.title ||
                         ""
-                    )}</textarea>
+                    )}"
+                >
 
-                </div>
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-description">
+                    Description
+                </label>
+
+                <textarea
+                    id="builder-description"
+                    rows="4"
+                >${escapeHTML(
+                    record?.description ||
+                    ""
+                )}</textarea>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-sort-order">
+                    Sort Order
+                </label>
+
+                <input
+                    type="number"
+                    id="builder-sort-order"
+                    min="0"
+                    step="1"
+                    value="${record?.sort_order ?? 0}"
+                >
+
+            </div>
+        `;
+    }
+
+    if (kind === "lesson") {
+        title =
+            record
+                ? "Edit Lesson"
+                : "Add Lesson";
+
+        const moduleId =
+            record?.module_id ||
+            forcedParentId ||
+            builderSelectedModuleId;
+
+        fields = `
+            <input
+                type="hidden"
+                id="builder-parent-id"
+                value="${escapeAttribute(
+                    moduleId || ""
+                )}"
+            >
+
+            <div class="course-form-field">
+
+                <label for="builder-title">
+                    Lesson Title *
+                </label>
+
+                <input
+                    id="builder-title"
+                    required
+                    maxlength="200"
+                    value="${escapeAttribute(
+                        record?.title ||
+                        ""
+                    )}"
+                >
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-description">
+                    Description
+                </label>
+
+                <textarea
+                    id="builder-description"
+                    rows="4"
+                >${escapeHTML(
+                    record?.description ||
+                    ""
+                )}</textarea>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-sort-order">
+                    Sort Order
+                </label>
+
+                <input
+                    type="number"
+                    id="builder-sort-order"
+                    min="0"
+                    step="1"
+                    value="${record?.sort_order ?? 0}"
+                >
+
+            </div>
+        `;
+    }
+
+    if (kind === "section") {
+        title =
+            record
+                ? "Edit Section"
+                : "Add Section";
+
+        const lessonId =
+            record?.lesson_id ||
+            forcedParentId ||
+            builderSelectedLessonId;
+
+        /*
+           Supabase allows ONLY these section types:
+           welcome
+           vocabulary
+           exercise
+           practice
+           listening
+           grammar
+           speaking
+           review
+        */
+
+        const sectionTypes = [
+            "welcome",
+            "vocabulary",
+            "exercise",
+            "practice",
+            "listening",
+            "grammar",
+            "speaking",
+            "review"
+        ];
+
+        const currentSectionType =
+            record?.section_type ||
+            "welcome";
+
+        fields = `
+            <input
+                type="hidden"
+                id="builder-parent-id"
+                value="${escapeAttribute(
+                    lessonId || ""
+                )}"
+            >
+
+            <div class="course-form-field">
+
+                <label for="builder-title">
+                    Section Title *
+                </label>
+
+                <input
+                    id="builder-title"
+                    required
+                    maxlength="200"
+                    value="${escapeAttribute(
+                        record?.title ||
+                        ""
+                    )}"
+                >
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-section-type">
+                    Section Type
+                </label>
+
+                <select id="builder-section-type">
+
+                    ${sectionTypes
+                        .map(
+                            value => `
+                                <option
+                                    value="${escapeAttribute(
+                                        value
+                                    )}"
+                                    ${
+                                        currentSectionType ===
+                                        value
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    ${escapeHTML(
+                                        formatSectionType(
+                                            value
+                                        )
+                                    )}
+                                </option>
+                            `
+                        )
+                        .join("")}
+
+                </select>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-description">
+                    Description
+                </label>
+
+                <textarea
+                    id="builder-description"
+                    rows="4"
+                >${escapeHTML(
+                    record?.description ||
+                    ""
+                )}</textarea>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-sort-order">
+                    Sort Order
+                </label>
+
+                <input
+                    type="number"
+                    id="builder-sort-order"
+                    min="0"
+                    step="1"
+                    value="${record?.sort_order ?? 0}"
+                >
+
+            </div>
+        `;
+    }
+
+    if (kind === "activity") {
+        title =
+            record
+                ? "Edit Activity"
+                : "Add Activity";
+
+        const sectionId =
+            record?.section_id ||
+            forcedParentId ||
+            builderSelectedSectionId;
+
+        fields = `
+            <input
+                type="hidden"
+                id="builder-parent-id"
+                value="${escapeAttribute(
+                    sectionId || ""
+                )}"
+            >
+
+            <div class="course-form-field">
+
+                <label for="builder-activity-type">
+                    Activity Type *
+                </label>
+
+                <select
+                    id="builder-activity-type"
+                >
+
+                    ${[
+                        "text",
+                        "image",
+                        "audio",
+                        "video",
+                        "exercise",
+                        "quiz",
+                        "ai",
+                        "speaking"
+                    ]
+                        .map(
+                            value => `
+                                <option
+                                    value="${value}"
+                                    ${
+                                        (
+                                            record?.activity_type ||
+                                            "text"
+                                        ) === value
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    ${escapeHTML(
+                                        formatActivityType(
+                                            value
+                                        )
+                                    )}
+                                </option>
+                            `
+                        )
+                        .join("")}
+
+                </select>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-title">
+                    Activity Title *
+                </label>
+
+                <input
+                    id="builder-title"
+                    required
+                    maxlength="200"
+                    value="${escapeAttribute(
+                        record?.title ||
+                        ""
+                    )}"
+                >
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-instructions">
+                    Instructions
+                </label>
+
+                <textarea
+                    id="builder-instructions"
+                    rows="4"
+                    placeholder="What should the learner do?"
+                >${escapeHTML(
+                    record?.instructions ||
+                    ""
+                )}</textarea>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-content">
+                    Content
+                </label>
+
+                <textarea
+                    id="builder-content"
+                    rows="7"
+                    placeholder="Enter the activity content..."
+                >${escapeHTML(
+                    record?.content ||
+                    ""
+                )}</textarea>
+
+            </div>
+
+            <div class="course-form-field">
+
+                <label for="builder-media-url">
+                    Media URL
+                </label>
+
+                <input
+                    id="builder-media-url"
+                    type="url"
+                    placeholder="Optional image/audio/video URL"
+                    value="${escapeAttribute(
+                        record?.settings
+                            ?.media_url ||
+                        ""
+                    )}"
+                >
+
+            </div>
+
+            <div class="course-form-grid">
 
                 <div class="course-form-field">
 
@@ -3574,967 +3939,647 @@ document.addEventListener("DOMContentLoaded", () => {
                     >
 
                 </div>
-            `;
-        }
-
-        if (kind === "lesson") {
-            title =
-                record
-                    ? "Edit Lesson"
-                    : "Add Lesson";
-
-            const moduleId =
-                record?.module_id ||
-                forcedParentId ||
-                builderSelectedModuleId;
-
-            fields = `
-                <input
-                    type="hidden"
-                    id="builder-parent-id"
-                    value="${escapeAttribute(
-                        moduleId || ""
-                    )}"
-                >
 
                 <div class="course-form-field">
 
-                    <label for="builder-title">
-                        Lesson Title *
-                    </label>
-
-                    <input
-                        id="builder-title"
-                        required
-                        maxlength="200"
-                        value="${escapeAttribute(
-                            record?.title ||
-                            ""
-                        )}"
-                    >
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-description">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="builder-description"
-                        rows="4"
-                    >${escapeHTML(
-                        record?.description ||
-                        ""
-                    )}</textarea>
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-sort-order">
-                        Sort Order
-                    </label>
-
-                    <input
-                        type="number"
-                        id="builder-sort-order"
-                        min="0"
-                        step="1"
-                        value="${record?.sort_order ?? 0}"
-                    >
-
-                </div>
-            `;
-        }
-
-        if (kind === "section") {
-            title =
-                record
-                    ? "Edit Section"
-                    : "Add Section";
-
-            const lessonId =
-                record?.lesson_id ||
-                builderSelectedLessonId;
-
-            fields = `
-                <input
-                    type="hidden"
-                    id="builder-parent-id"
-                    value="${escapeAttribute(
-                        lessonId || ""
-                    )}"
-                >
-
-                <div class="course-form-field">
-
-                    <label for="builder-title">
-                        Section Title *
-                    </label>
-
-                    <input
-                        id="builder-title"
-                        required
-                        maxlength="200"
-                        value="${escapeAttribute(
-                            record?.title ||
-                            ""
-                        )}"
-                    >
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-section-type">
-                        Section Type
-                    </label>
-
-                    <select id="builder-section-type">
-
-                        ${[
-                            "content",
-                            "introduction",
-                            "vocabulary",
-                            "dialogue",
-                            "practice",
-                            "speaking",
-                            "review",
-                            "test"
-                        ]
-                            .map(
-                                value => `
-                                    <option
-                                        value="${value}"
-                                        ${
-                                            (
-                                                record?.section_type ||
-                                                "content"
-                                            ) === value
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${escapeHTML(
-                                            formatSectionType(
-                                                value
-                                            )
-                                        )}
-                                    </option>
-                                `
-                            )
-                            .join("")}
-
-                    </select>
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-description">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="builder-description"
-                        rows="4"
-                    >${escapeHTML(
-                        record?.description ||
-                        ""
-                    )}</textarea>
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-sort-order">
-                        Sort Order
-                    </label>
-
-                    <input
-                        type="number"
-                        id="builder-sort-order"
-                        min="0"
-                        step="1"
-                        value="${record?.sort_order ?? 0}"
-                    >
-
-                </div>
-            `;
-        }
-
-        if (kind === "activity") {
-            title =
-                record
-                    ? "Edit Activity"
-                    : "Add Activity";
-
-            const sectionId =
-                record?.section_id ||
-                builderSelectedSectionId;
-
-            fields = `
-                <input
-                    type="hidden"
-                    id="builder-parent-id"
-                    value="${escapeAttribute(
-                        sectionId || ""
-                    )}"
-                >
-
-                <div class="course-form-field">
-
-                    <label for="builder-activity-type">
-                        Activity Type *
+                    <label for="builder-required">
+                        Required
                     </label>
 
                     <select
-                        id="builder-activity-type"
+                        id="builder-required"
                     >
 
-                        ${[
-                            "text",
-                            "image",
-                            "audio",
-                            "video",
-                            "exercise",
-                            "quiz",
-                            "ai",
-                            "speaking"
-                        ]
-                            .map(
-                                value => `
-                                    <option
-                                        value="${value}"
-                                        ${
-                                            (
-                                                record?.activity_type ||
-                                                "text"
-                                            ) === value
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${escapeHTML(
-                                            formatActivityType(
-                                                value
-                                            )
-                                        )}
-                                    </option>
-                                `
-                            )
-                            .join("")}
+                        <option
+                            value="true"
+                            ${
+                                record?.required !== false
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            Yes
+                        </option>
+
+                        <option
+                            value="false"
+                            ${
+                                record?.required === false
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            No
+                        </option>
 
                     </select>
 
                 </div>
 
-                <div class="course-form-field">
+            </div>
+        `;
+    }
 
-                    <label for="builder-title">
-                        Activity Title *
-                    </label>
+    builderModal.innerHTML = `
+        <div class="course-modal-backdrop"></div>
 
-                    <input
-                        id="builder-title"
-                        required
-                        maxlength="200"
-                        value="${escapeAttribute(
-                            record?.title ||
-                            ""
-                        )}"
-                    >
+        <div
+            class="course-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+        >
 
-                </div>
+            <div class="course-modal-header">
 
-                <div class="course-form-field">
+                <div>
 
-                    <label for="builder-instructions">
-                        Instructions
-                    </label>
-
-                    <textarea
-                        id="builder-instructions"
-                        rows="4"
-                        placeholder="What should the learner do?"
-                    >${escapeHTML(
-                        record?.instructions ||
-                        ""
-                    )}</textarea>
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-content">
-                        Content
-                    </label>
-
-                    <textarea
-                        id="builder-content"
-                        rows="7"
-                        placeholder="Enter the activity content..."
-                    >${escapeHTML(
-                        record?.content ||
-                        ""
-                    )}</textarea>
-
-                </div>
-
-                <div class="course-form-field">
-
-                    <label for="builder-media-url">
-                        Media URL
-                    </label>
-
-                    <input
-                        id="builder-media-url"
-                        type="url"
-                        placeholder="Optional image/audio/video URL"
-                        value="${escapeAttribute(
-                            record?.settings
-                                ?.media_url ||
-                            ""
-                        )}"
-                    >
-
-                </div>
-
-                <div class="course-form-grid">
-
-                    <div class="course-form-field">
-
-                        <label for="builder-sort-order">
-                            Sort Order
-                        </label>
-
-                        <input
-                            type="number"
-                            id="builder-sort-order"
-                            min="0"
-                            step="1"
-                            value="${record?.sort_order ?? 0}"
-                        >
-
+                    <div class="course-modal-kicker">
+                        COURSE BUILDER
                     </div>
 
-                    <div class="course-form-field">
-
-                        <label for="builder-required">
-                            Required
-                        </label>
-
-                        <select
-                            id="builder-required"
-                        >
-
-                            <option
-                                value="true"
-                                ${
-                                    record?.required !== false
-                                        ? "selected"
-                                        : ""
-                                }
-                            >
-                                Yes
-                            </option>
-
-                            <option
-                                value="false"
-                                ${
-                                    record?.required === false
-                                        ? "selected"
-                                        : ""
-                                }
-                            >
-                                No
-                            </option>
-
-                        </select>
-
-                    </div>
+                    <h2>
+                        ${escapeHTML(title)}
+                    </h2>
 
                 </div>
-            `;
-        }
 
-        builderModal.innerHTML = `
-            <div class="course-modal-backdrop"></div>
+                <button
+                    type="button"
+                    class="course-modal-close"
+                    id="builder-modal-close"
+                >
+                    ×
+                </button>
 
-            <div
-                class="course-modal-dialog"
-                role="dialog"
-                aria-modal="true"
+            </div>
+
+            <form
+                id="builder-form"
+                class="course-form"
             >
 
-                <div class="course-modal-header">
+                ${fields}
 
-                    <div>
+                <div
+                    id="builder-form-error"
+                    class="course-form-error"
+                    hidden
+                ></div>
 
-                        <div class="course-modal-kicker">
-                            COURSE BUILDER
-                        </div>
-
-                        <h2>
-                            ${escapeHTML(title)}
-                        </h2>
-
-                    </div>
+                <div class="course-form-actions">
 
                     <button
                         type="button"
-                        class="course-modal-close"
-                        id="builder-modal-close"
+                        class="secondary-button"
+                        id="builder-cancel"
                     >
-                        ×
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                        id="builder-save-button"
+                    >
+                        ${
+                            record
+                                ? "Save Changes"
+                                : "Create"
+                        }
                     </button>
 
                 </div>
 
-                <form
-                    id="builder-form"
-                    class="course-form"
-                >
+            </form>
 
-                    ${fields}
+        </div>
+    `;
 
-                    <div
-                        id="builder-form-error"
-                        class="course-form-error"
-                        hidden
-                    ></div>
-
-                    <div class="course-form-actions">
-
-                        <button
-                            type="button"
-                            class="secondary-button"
-                            id="builder-cancel"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            class="primary-button"
-                            id="builder-save-button"
-                        >
-                            ${
-                                record
-                                    ? "Save Changes"
-                                    : "Create"
-                            }
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-        `;
-
-        document.body.appendChild(
-            builderModal
-        );
-
-        requestAnimationFrame(() => {
-            builderModal?.classList.add(
-                "open"
-            );
-        });
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-        $("#builder-modal-close")
-            ?.addEventListener(
-                "click",
-                closeBuilderModal
-            );
-
-        $("#builder-cancel")
-            ?.addEventListener(
-                "click",
-                closeBuilderModal
-            );
-
+    document.body.appendChild(
         builderModal
-            .querySelector(
-                ".course-modal-backdrop"
-            )
-            ?.addEventListener(
-                "click",
-                closeBuilderModal
-            );
+    );
 
-        $("#builder-form")
-            ?.addEventListener(
-                "submit",
-                event =>
-                    saveBuilderRecord(
-                        event,
-                        kind,
-                        record
-                    )
-            );
+    requestAnimationFrame(() => {
+        builderModal?.classList.add(
+            "open"
+        );
+    });
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+    $("#builder-modal-close")
+        ?.addEventListener(
+            "click",
+            closeBuilderModal
+        );
+
+    $("#builder-cancel")
+        ?.addEventListener(
+            "click",
+            closeBuilderModal
+        );
+
+    builderModal
+        .querySelector(
+            ".course-modal-backdrop"
+        )
+        ?.addEventListener(
+            "click",
+            closeBuilderModal
+        );
+
+    $("#builder-form")
+        ?.addEventListener(
+            "submit",
+            event =>
+                saveBuilderRecord(
+                    event,
+                    kind,
+                    record
+                )
+        );
+}
+
+
+/* =====================================================
+   SAVE BUILDER RECORD
+===================================================== */
+
+async function saveBuilderRecord(
+    event,
+    kind,
+    record
+) {
+    event.preventDefault();
+
+    const saveButton =
+        $("#builder-save-button");
+
+    const errorElement =
+        $("#builder-form-error");
+
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent =
+            record
+                ? "Saving..."
+                : "Creating...";
     }
 
-    /* =====================================================
-       SAVE BUILDER RECORD
-    ===================================================== */
+    if (errorElement) {
+        errorElement.hidden = true;
+    }
 
-    async function saveBuilderRecord(
-        event,
-        kind,
-        record
-    ) {
-        event.preventDefault();
+    try {
+        const title =
+            $("#builder-title")
+                ?.value
+                .trim();
 
-        const saveButton =
-            $("#builder-save-button");
-
-        const errorElement =
-            $("#builder-form-error");
-
-        if (saveButton) {
-            saveButton.disabled = true;
-            saveButton.textContent =
-                record
-                    ? "Saving..."
-                    : "Creating...";
+        if (!title) {
+            throw new Error(
+                "Title is required."
+            );
         }
 
-        if (errorElement) {
-            errorElement.hidden = true;
-        }
+        const sortOrder =
+            Number(
+                $("#builder-sort-order")
+                    ?.value || 0
+            );
 
-        try {
-            const title =
-                $("#builder-title")
-                    ?.value
-                    .trim();
+        /*
+           MODULE
+        */
 
-            if (!title) {
-                throw new Error(
-                    "Title is required."
-                );
-            }
+        if (kind === "module") {
+            const data = {
+                course_id:
+                    builderCourseId,
 
-            const sortOrder =
-                Number(
-                    $("#builder-sort-order")
-                        ?.value || 0
-                );
+                title,
 
-            /*
-               MODULE
-            */
-
-            if (kind === "module") {
-                const data = {
-                    course_id:
-                        builderCourseId,
-
-                    title,
-
-                    description:
-                        $("#builder-description")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    sort_order:
-                        sortOrder
-                };
-
-                let result;
-
-                if (record) {
-                    result =
-                        await client
-                            .from("modules")
-                            .update(data)
-                            .eq(
-                                "id",
-                                record.id
-                            );
-                } else {
-                    result =
-                        await client
-                            .from("modules")
-                            .insert(data);
-                }
-
-                if (result.error) {
-                    throw result.error;
-                }
-            }
-
-            /*
-               LESSON
-            */
-
-            if (kind === "lesson") {
-                const moduleId =
-                    record?.module_id ||
-                    $("#builder-parent-id")
-                        ?.value ||
-                    builderSelectedModuleId;
-
-                if (!moduleId) {
-                    throw new Error(
-                        "A module must be selected before creating a lesson."
-                    );
-                }
-
-                const data = {
-                    module_id:
-                        moduleId,
-
-                    title,
-
-                    description:
-                        $("#builder-description")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    sort_order:
-                        sortOrder
-                };
-
-                let result;
-
-                if (record) {
-                    result =
-                        await client
-                            .from("lessons")
-                            .update(data)
-                            .eq(
-                                "id",
-                                record.id
-                            );
-                } else {
-                    result =
-                        await client
-                            .from("lessons")
-                            .insert(data);
-                }
-
-                if (result.error) {
-                    throw result.error;
-                }
-            }
-
-            /*
-               SECTION
-            */
-
-            if (kind === "section") {
-                const lessonId =
-                    record?.lesson_id ||
-                    $("#builder-parent-id")
-                        ?.value ||
-                    builderSelectedLessonId;
-
-                if (!lessonId) {
-                    throw new Error(
-                        "A lesson must be selected before creating a section."
-                    );
-                }
-
-                const data = {
-                    lesson_id:
-                        lessonId,
-
-                    section_type:
-                        $("#builder-section-type")
-                            ?.value ||
-                        "content",
-
-                    title,
-
-                    description:
-                        $("#builder-description")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    sort_order:
-                        sortOrder,
-
-                    content: {}
-                };
-
-                let result;
-
-                if (record) {
-                    result =
-                        await client
-                            .from(
-                                "lesson_sections"
-                            )
-                            .update(data)
-                            .eq(
-                                "id",
-                                record.id
-                            );
-                } else {
-                    result =
-                        await client
-                            .from(
-                                "lesson_sections"
-                            )
-                            .insert(data);
-                }
-
-                if (result.error) {
-                    throw result.error;
-                }
-            }
-
-            /*
-               ACTIVITY
-            */
-
-            if (kind === "activity") {
-                const sectionId =
-                    record?.section_id ||
-                    $("#builder-parent-id")
-                        ?.value ||
-                    builderSelectedSectionId;
-
-                if (!sectionId) {
-                    throw new Error(
-                        "Select a section before creating an activity."
-                    );
-                }
-
-                const activityType =
-                    $("#builder-activity-type")
-                        ?.value ||
-                    "text";
-
-                const mediaUrl =
-                    $("#builder-media-url")
+                description:
+                    $("#builder-description")
                         ?.value
                         .trim() ||
-                    null;
+                    null,
 
-                const existingSettings =
-                    record?.settings &&
-                    typeof record.settings ===
-                        "object"
-                        ? record.settings
-                        : {};
+                sort_order:
+                    sortOrder
+            };
 
-                const settings = {
-                    ...existingSettings
-                };
+            let result;
 
-                if (mediaUrl) {
-                    settings.media_url =
-                        mediaUrl;
-                } else {
-                    delete settings.media_url;
-                }
-
-                const data = {
-                    section_id:
-                        sectionId,
-
-                    activity_type:
-                        activityType,
-
-                    title,
-
-                    instructions:
-                        $("#builder-instructions")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    content:
-                        $("#builder-content")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    sort_order:
-                        sortOrder,
-
-                    required:
-                        $("#builder-required")
-                            ?.value !==
-                        "false",
-
-                    settings
-                };
-
-                let result;
-
-                if (record) {
-                    result =
-                        await client
-                            .from(
-                                "activities"
-                            )
-                            .update(data)
-                            .eq(
-                                "id",
-                                record.id
-                            );
-                } else {
-                    result =
-                        await client
-                            .from(
-                                "activities"
-                            )
-                            .insert(data);
-                }
-
-                if (result.error) {
-                    throw result.error;
-                }
+            if (record) {
+                result =
+                    await client
+                        .from("modules")
+                        .update(data)
+                        .eq(
+                            "id",
+                            record.id
+                        );
+            } else {
+                result =
+                    await client
+                        .from("modules")
+                        .insert(data);
             }
 
-            closeBuilderModal();
-
-            await loadBuilderCourse(
-                builderCourseId
-            );
-
-            await loadDashboard();
-        } catch (error) {
-            console.error(
-                "Could not save builder record:",
-                error
-            );
-
-            if (errorElement) {
-                errorElement.textContent =
-                    error.message ||
-                    "Could not save this item.";
-
-                errorElement.hidden =
-                    false;
-            }
-        } finally {
-            if (saveButton) {
-                saveButton.disabled =
-                    false;
-
-                saveButton.textContent =
-                    record
-                        ? "Save Changes"
-                        : "Create";
+            if (result.error) {
+                throw result.error;
             }
         }
-    }
 
-    /* =====================================================
-       DELETE ACTIVITY
-    ===================================================== */
+        /*
+           LESSON
+        */
 
-    async function deleteBuilderActivity(
-        activityId
-    ) {
-        const activity =
-            builderActivities.find(
-                item =>
-                    String(item.id) ===
-                    String(activityId)
-            );
+        if (kind === "lesson") {
+            const moduleId =
+                record?.module_id ||
+                $("#builder-parent-id")
+                    ?.value ||
+                builderSelectedModuleId;
 
-        if (!activity) return;
-
-        if (
-            !confirm(
-                `Delete "${activity.title || "this activity"}"?\n\nAny questions or media attached to it will also be removed.`
-            )
-        ) {
-            return;
-        }
-
-        try {
-            /*
-               Delete questions first.
-            */
-
-            const {
-                error: questionsError
-            } =
-                await client
-                    .from("questions")
-                    .delete()
-                    .eq(
-                        "activity_id",
-                        activityId
-                    );
-
-            if (questionsError) {
-                console.warn(
-                    "Question deletion:",
-                    questionsError
+            if (!moduleId) {
+                throw new Error(
+                    "A module must be selected before creating a lesson."
                 );
             }
 
-            /*
-               Delete media records.
-            */
+            const data = {
+                module_id:
+                    moduleId,
 
-            const {
-                error: mediaError
-            } =
-                await client
-                    .from("media")
-                    .delete()
-                    .eq(
-                        "activity_id",
-                        activityId
-                    );
+                title,
 
-            if (mediaError) {
-                console.warn(
-                    "Media deletion:",
-                    mediaError
+                description:
+                    $("#builder-description")
+                        ?.value
+                        .trim() ||
+                    null,
+
+                sort_order:
+                    sortOrder
+            };
+
+            let result;
+
+            if (record) {
+                result =
+                    await client
+                        .from("lessons")
+                        .update(data)
+                        .eq(
+                            "id",
+                            record.id
+                        );
+            } else {
+                result =
+                    await client
+                        .from("lessons")
+                        .insert(data);
+            }
+
+            if (result.error) {
+                throw result.error;
+            }
+        }
+
+        /*
+           SECTION
+        */
+
+        if (kind === "section") {
+            const lessonId =
+                record?.lesson_id ||
+                $("#builder-parent-id")
+                    ?.value ||
+                builderSelectedLessonId;
+
+            if (!lessonId) {
+                throw new Error(
+                    "A lesson must be selected before creating a section."
                 );
             }
 
-            /*
-               Delete activity.
-            */
+            const sectionType =
+                $("#builder-section-type")
+                    ?.value ||
+                "welcome";
 
-            const { error } =
-                await client
-                    .from("activities")
-                    .delete()
-                    .eq(
-                        "id",
-                        activityId
-                    );
+            const allowedSectionTypes = [
+                "welcome",
+                "vocabulary",
+                "exercise",
+                "practice",
+                "listening",
+                "grammar",
+                "speaking",
+                "review"
+            ];
 
-            if (error) throw error;
+            if (
+                !allowedSectionTypes.includes(
+                    sectionType
+                )
+            ) {
+                throw new Error(
+                    `Invalid section type: ${sectionType}`
+                );
+            }
 
-            builderSelectedActivityId =
+            const data = {
+                lesson_id:
+                    lessonId,
+
+                section_type:
+                    sectionType,
+
+                title,
+
+                description:
+                    $("#builder-description")
+                        ?.value
+                        .trim() ||
+                    null,
+
+                sort_order:
+                    sortOrder,
+
+                content: {}
+            };
+
+            let result;
+
+            if (record) {
+                result =
+                    await client
+                        .from(
+                            "lesson_sections"
+                        )
+                        .update(data)
+                        .eq(
+                            "id",
+                            record.id
+                        );
+            } else {
+                result =
+                    await client
+                        .from(
+                            "lesson_sections"
+                        )
+                        .insert(data);
+            }
+
+            if (result.error) {
+                throw result.error;
+            }
+        }
+
+        /*
+           ACTIVITY
+        */
+
+        if (kind === "activity") {
+            const sectionId =
+                record?.section_id ||
+                $("#builder-parent-id")
+                    ?.value ||
+                builderSelectedSectionId;
+
+            if (!sectionId) {
+                throw new Error(
+                    "Select a section before creating an activity."
+                );
+            }
+
+            const activityType =
+                $("#builder-activity-type")
+                    ?.value ||
+                "text";
+
+            const mediaUrl =
+                $("#builder-media-url")
+                    ?.value
+                    .trim() ||
                 null;
 
-            await loadBuilderCourse(
-                builderCourseId
-            );
-        } catch (error) {
-            console.error(error);
+            const existingSettings =
+                record?.settings &&
+                typeof record.settings ===
+                    "object"
+                    ? record.settings
+                    : {};
 
-            alert(
+            const settings = {
+                ...existingSettings
+            };
+
+            if (mediaUrl) {
+                settings.media_url =
+                    mediaUrl;
+            } else {
+                delete settings.media_url;
+            }
+
+            const data = {
+                section_id:
+                    sectionId,
+
+                activity_type:
+                    activityType,
+
+                title,
+
+                instructions:
+                    $("#builder-instructions")
+                        ?.value
+                        .trim() ||
+                    null,
+
+                content:
+                    $("#builder-content")
+                        ?.value
+                        .trim() ||
+                    null,
+
+                sort_order:
+                    sortOrder,
+
+                required:
+                    $("#builder-required")
+                        ?.value !==
+                    "false",
+
+                settings
+            };
+
+            let result;
+
+            if (record) {
+                result =
+                    await client
+                        .from(
+                            "activities"
+                        )
+                        .update(data)
+                        .eq(
+                            "id",
+                            record.id
+                        );
+            } else {
+                result =
+                    await client
+                        .from(
+                            "activities"
+                        )
+                        .insert(data);
+            }
+
+            if (result.error) {
+                throw result.error;
+            }
+        }
+
+        closeBuilderModal();
+
+        await loadBuilderCourse(
+            builderCourseId
+        );
+
+        await loadDashboard();
+    } catch (error) {
+        console.error(
+            "Could not save builder record:",
+            error
+        );
+
+        if (errorElement) {
+            errorElement.textContent =
                 error.message ||
-                "Could not delete the activity."
-            );
+                "Could not save this item.";
+
+            errorElement.hidden =
+                false;
+        }
+    } finally {
+        if (saveButton) {
+            saveButton.disabled =
+                false;
+
+            saveButton.textContent =
+                record
+                    ? "Save Changes"
+                    : "Create";
         }
     }
+}
 
+
+/* =====================================================
+   DELETE ACTIVITY
+===================================================== */
+
+async function deleteBuilderActivity(
+    activityId
+) {
+    const activity =
+        builderActivities.find(
+            item =>
+                String(item.id) ===
+                String(activityId)
+        );
+
+    if (!activity) return;
+
+    if (
+        !confirm(
+            `Delete "${activity.title || "this activity"}"?\n\nAny questions or media attached to it will also be removed.`
+        )
+    ) {
+        return;
+    }
+
+    try {
+        /*
+           Delete questions first.
+        */
+
+        const {
+            error: questionsError
+        } =
+            await client
+                .from("questions")
+                .delete()
+                .eq(
+                    "activity_id",
+                    activityId
+                );
+
+        if (questionsError) {
+            console.warn(
+                "Question deletion:",
+                questionsError
+            );
+        }
+
+        /*
+           Delete media records.
+        */
+
+        const {
+            error: mediaError
+        } =
+            await client
+                .from("media")
+                .delete()
+                .eq(
+                    "activity_id",
+                    activityId
+                );
+
+        if (mediaError) {
+            console.warn(
+                "Media deletion:",
+                mediaError
+            );
+        }
+
+        /*
+           Delete activity.
+        */
+
+        const { error } =
+            await client
+                .from("activities")
+                .delete()
+                .eq(
+                    "id",
+                    activityId
+                );
+
+        if (error) throw error;
+
+        builderSelectedActivityId =
+            null;
+
+        await loadBuilderCourse(
+            builderCourseId
+        );
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            error.message ||
+            "Could not delete the activity."
+        );
+    }
+}
     /* =====================================================
        DELETE SECTION
     ===================================================== */
