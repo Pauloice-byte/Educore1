@@ -1,6634 +1,4666 @@
 /* =========================================================
    EDUCORE ADMIN
-   COURSE MANAGEMENT + COURSE BUILDER
+   PHASE 4 — COURSE MANAGEMENT + CAROUSEL
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-        "use strict";
+    "use strict";
 
 
-        /* =====================================================
-           SUPABASE
-        ===================================================== */
+    /* =====================================================
+       SUPABASE
+    ===================================================== */
 
-        const client =
-            window.supabaseClient ||
-            window.supabase ||
+    const client =
+        window.supabaseClient ||
+        window.supabase ||
+        null;
+
+
+    if (!client || typeof client.from !== "function") {
+
+        console.error(
+            "Supabase client is not available."
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let allCourses = [];
+
+    let editingCourseId = null;
+
+    let courseModal = null;
+
+    let allCarouselItems = [];
+
+    let editingCarouselItemId = null;
+
+    let carouselModal = null;
+
+    let removeCarouselImage = false;
+
+
+    /* =====================================================
+       DOM HELPERS
+    ===================================================== */
+
+    const $ = selector =>
+        document.querySelector(selector);
+
+
+    const $$ = selector =>
+        document.querySelectorAll(selector);
+
+
+    /* =====================================================
+       INITIALISE
+    ===================================================== */
+
+    init();
+
+
+    async function init() {
+
+        setupNavigation();
+
+        setupSidebar();
+
+        setupLogout();
+
+        setupCourseControls();
+
+        setupCarouselControls();
+
+        setupDashboardRetry();
+
+        await loadAdminUser();
+
+        await loadDashboard();
+
+        await loadCourses();
+
+        await loadCarouselItems();
+    }
+
+
+    /* =====================================================
+       CAROUSEL CONTROLS
+    ===================================================== */
+
+    function setupCarouselControls() {
+
+        const createButton =
+            $("#create-carousel-button");
+
+        const searchInput =
+            $("#carousel-search");
+
+        const filterSelect =
+            $("#carousel-filter");
+
+
+        /* =================================================
+           CREATE PROMOTION
+        ================================================= */
+
+        if (createButton) {
+
+            createButton.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    console.log(
+                        "Create Promotion button clicked."
+                    );
+
+                    openCarouselModal();
+
+                }
+            );
+
+        } else {
+
+            console.warn(
+                'Create Promotion button not found: "#create-carousel-button"'
+            );
+        }
+
+
+        /* =================================================
+           SEARCH
+        ================================================= */
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                renderCarouselItems
+            );
+        }
+
+
+        /* =================================================
+           FILTER
+        ================================================= */
+
+        if (filterSelect) {
+
+            filterSelect.addEventListener(
+                "change",
+                renderCarouselItems
+            );
+        }
+    }
+
+
+    /* =====================================================
+       NAVIGATION
+    ===================================================== */
+
+    function setupNavigation() {
+
+        $$(".nav-item").forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const section =
+                        button.dataset.section;
+
+                    if (!section) return;
+
+                    showSection(section);
+
+                    closeMobileSidebar();
+                }
+            );
+
+        });
+    }
+
+
+    function showSection(section) {
+
+        $$(".nav-item").forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.section === section
+            );
+
+        });
+
+
+        $$(".admin-section").forEach(element => {
+
+            element.classList.toggle(
+                "active",
+                element.id === `${section}-section`
+            );
+
+        });
+
+
+        const pageTitle =
+            $("#page-title");
+
+
+        if (pageTitle) {
+
+            pageTitle.textContent =
+                section.charAt(0).toUpperCase() +
+                section.slice(1);
+        }
+
+
+        if (section === "courses") {
+
+            loadCourses();
+        }
+
+
+        if (section === "carousel") {
+
+            loadCarouselItems();
+        }
+    }
+
+
+    /* =====================================================
+       SIDEBAR
+    ===================================================== */
+
+    function setupSidebar() {
+
+        const app =
+            $("#admin-app");
+
+        const toggle =
+            $("#sidebar-toggle");
+
+        const close =
+            $("#mobile-sidebar-close");
+
+        const overlay =
+            $("#sidebar-overlay");
+
+
+        if (toggle) {
+
+            toggle.addEventListener(
+                "click",
+                () => {
+
+                    if (window.innerWidth <= 768) {
+
+                        app?.classList.toggle(
+                            "sidebar-open"
+                        );
+
+                    } else {
+
+                        app?.classList.toggle(
+                            "sidebar-collapsed"
+                        );
+                    }
+
+                }
+            );
+        }
+
+
+        close?.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
+
+
+        overlay?.addEventListener(
+            "click",
+            closeMobileSidebar
+        );
+
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+                if (window.innerWidth > 768) {
+
+                    app?.classList.remove(
+                        "sidebar-open"
+                    );
+                }
+
+            }
+        );
+    }
+
+
+    function closeMobileSidebar() {
+
+        $("#admin-app")
+            ?.classList.remove("sidebar-open");
+    }
+
+
+    /* =====================================================
+       LOGOUT
+    ===================================================== */
+
+    function setupLogout() {
+
+        const button =
+            $("#logout-button");
+
+        if (!button) return;
+
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    if (
+                        typeof window.logout ===
+                        "function"
+                    ) {
+
+                        await window.logout();
+
+                        return;
+                    }
+
+
+                    await client.auth.signOut();
+
+
+                    window.location.href =
+                        "index.html";
+
+                } catch (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+                }
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       ADMIN USER
+    ===================================================== */
+
+    async function loadAdminUser() {
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client.auth.getUser();
+
+
+            if (error || !data?.user) return;
+
+
+            const user =
+                data.user;
+
+
+            const metadata =
+                user.user_metadata || {};
+
+
+            const name =
+                metadata.name ||
+                metadata.full_name ||
+                metadata.display_name ||
+                user.email?.split("@")[0] ||
+                "Administrator";
+
+
+            $("#admin-name") &&
+                ($("#admin-name").textContent = name);
+
+
+            $("#admin-role") &&
+                ($("#admin-role").textContent = "Admin");
+
+
+            $("#admin-avatar") &&
+                ($("#admin-avatar").textContent =
+                    name.charAt(0).toUpperCase());
+
+        } catch (error) {
+
+            console.error(
+                "Could not load admin user:",
+                error
+            );
+        }
+    }
+
+
+    /* =====================================================
+       DASHBOARD
+    ===================================================== */
+
+    async function loadDashboard() {
+
+        try {
+
+            await Promise.all([
+                loadCourseCount(),
+                loadUnitCount(),
+                loadLessonCount(),
+                loadStudentCount(),
+                loadContentCounts(),
+                loadRecentActivity()
+            ]);
+
+            hideDashboardError();
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard error:",
+                error
+            );
+
+            showDashboardError();
+        }
+    }
+
+
+    async function loadCourseCount() {
+
+        const {
+            count,
+            error
+        } =
+            await client
+                .from("courses")
+                .select("id", {
+                    count: "exact",
+                    head: true
+                })
+                .neq("status", "archived");
+
+
+        if (error) throw error;
+
+
+        const element =
+            $("#total-courses");
+
+
+        if (element) {
+
+            element.textContent =
+                count ?? 0;
+        }
+    }
+
+
+    async function loadUnitCount() {
+
+        const element =
+            $("#total-units");
+
+        if (!element) return;
+
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("units")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    });
+
+
+            if (error) throw error;
+
+
+            element.textContent =
+                count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load units:",
+                error
+            );
+
+            element.textContent = "—";
+        }
+    }
+
+
+    async function loadLessonCount() {
+
+        const element =
+            $("#total-lessons");
+
+        if (!element) return;
+
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("lessons")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    });
+
+
+            if (error) throw error;
+
+
+            element.textContent =
+                count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load lessons:",
+                error
+            );
+
+            element.textContent = "—";
+        }
+    }
+
+
+    async function loadStudentCount() {
+
+        const element =
+            $("#total-students");
+
+        if (!element) return;
+
+
+        try {
+
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("profiles")
+                    .select("id", {
+                        count: "exact",
+                        head: true
+                    })
+                    .eq("role", "student");
+
+
+            if (error) throw error;
+
+
+            element.textContent =
+                count ?? 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load students:",
+                error
+            );
+
+            element.textContent = "—";
+        }
+    }
+
+
+    async function loadContentCounts() {
+
+        const published =
+            $("#published-content");
+
+        const draft =
+            $("#draft-content");
+
+
+        try {
+
+            const [
+                publishedResult,
+                draftResult
+            ] =
+                await Promise.all([
+
+                    client
+                        .from("courses")
+                        .select("id", {
+                            count: "exact",
+                            head: true
+                        })
+                        .eq(
+                            "status",
+                            "published"
+                        ),
+
+                    client
+                        .from("courses")
+                        .select("id", {
+                            count: "exact",
+                            head: true
+                        })
+                        .eq(
+                            "status",
+                            "draft"
+                        )
+                ]);
+
+
+            if (publishedResult.error)
+                throw publishedResult.error;
+
+
+            if (draftResult.error)
+                throw draftResult.error;
+
+
+            if (published) {
+
+                published.textContent =
+                    publishedResult.count ?? 0;
+            }
+
+
+            if (draft) {
+
+                draft.textContent =
+                    draftResult.count ?? 0;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load content counts:",
+                error
+            );
+
+            if (published)
+                published.textContent = "—";
+
+            if (draft)
+                draft.textContent = "—";
+        }
+    }
+
+
+    async function loadRecentActivity() {
+
+        const list =
+            $("#activity-list");
+
+        if (!list) return;
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select(
+                        "id,title,status,created_at"
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(6);
+
+
+            if (error) throw error;
+
+
+            if (!data?.length) {
+
+                list.innerHTML = `
+                    <div class="activity-empty">
+                        No recent course activity.
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            list.innerHTML =
+                data.map(course => {
+
+                    let action =
+                        "Course created";
+
+
+                    if (
+                        course.status ===
+                        "published"
+                    ) {
+
+                        action =
+                            "Course published";
+
+                    } else if (
+                        course.status ===
+                        "archived"
+                    ) {
+
+                        action =
+                            "Course archived";
+                    }
+
+
+                    return `
+                        <div class="activity-item">
+
+                            <div class="activity-icon">
+                                ▣
+                            </div>
+
+                            <div class="activity-content">
+
+                                <div class="activity-title">
+                                    ${escapeHTML(action)}
+                                </div>
+
+                                <div class="activity-meta">
+                                    ${escapeHTML(course.title)}
+                                    ·
+                                    ${formatDate(course.created_at)}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                }).join("");
+
+
+        } catch (error) {
+
+            console.warn(
+                "Could not load activity:",
+                error
+            );
+
+            list.innerHTML = `
+                <div class="activity-error">
+                    Could not load recent activity.
+                </div>
+            `;
+        }
+    }
+
+
+    function setupDashboardRetry() {
+
+        $("#dashboard-retry")
+            ?.addEventListener(
+                "click",
+                loadDashboard
+            );
+    }
+
+
+    function showDashboardError() {
+
+        $("#dashboard-error")
+            ?.classList.remove("admin-hidden");
+    }
+
+
+    function hideDashboardError() {
+
+        $("#dashboard-error")
+            ?.classList.add("admin-hidden");
+    }
+
+
+    /* =====================================================
+       COURSE CONTROLS
+    ===================================================== */
+
+    function setupCourseControls() {
+
+        $("#course-search")
+            ?.addEventListener(
+                "input",
+                renderCourses
+            );
+
+
+        $("#course-filter")
+            ?.addEventListener(
+                "change",
+                renderCourses
+            );
+
+
+        $("#create-course-button")
+            ?.addEventListener(
+                "click",
+                () => openCourseModal()
+            );
+    }
+
+
+    /* =====================================================
+       LOAD COURSES
+    ===================================================== */
+
+    async function loadCourses() {
+
+        const list =
+            $("#courses-list");
+
+        if (!list) return;
+
+
+        list.innerHTML = `
+            <div class="courses-loading">
+                Loading courses...
+            </div>
+        `;
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select(`
+                        id,
+                        title,
+                        description,
+                        category,
+                        level,
+                        cover_image,
+                        status,
+                        sort_order,
+                        created_at,
+                        slug,
+                        archived_at
+                    `)
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true,
+                            nullsFirst: false
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) throw error;
+
+
+            allCourses =
+                data || [];
+
+
+            renderCourses();
+
+        } catch (error) {
+
+            console.error(
+                "Could not load courses:",
+                error
+            );
+
+
+            list.innerHTML = `
+                <div class="courses-empty">
+
+                    <h3>
+                        Could not load courses
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(
+                            error.message ||
+                            "Please try again."
+                        )}
+                    </p>
+
+                </div>
+            `;
+        }
+    }
+
+
+    /* =====================================================
+       LOAD CAROUSEL ITEMS
+    ===================================================== */
+
+    async function loadCarouselItems() {
+
+        const list =
+            $("#carousel-list");
+
+
+        if (list) {
+
+            list.innerHTML = `
+                <div class="courses-loading">
+                    Loading promotions...
+                </div>
+            `;
+        }
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("carousel_items")
+                    .select("*")
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: false
+                        }
+                    );
+
+
+            if (error) throw error;
+
+
+            allCarouselItems =
+                data || [];
+
+
+            renderCarouselItems();
+
+        } catch (error) {
+
+            console.error(
+                "Error loading carousel items:",
+                error
+            );
+
+
+            if (list) {
+
+                list.innerHTML = `
+                    <div class="courses-loading">
+                        Unable to load promotions.
+                    </div>
+                `;
+            }
+        }
+    }
+
+
+    /* =====================================================
+       RENDER CAROUSEL ITEMS
+    ===================================================== */
+
+    function renderCarouselItems() {
+
+        const list =
+            $("#carousel-list");
+
+        const count =
+            $("#carousel-count");
+
+
+        if (!list) return;
+
+
+        const searchInput =
+            $("#carousel-search");
+
+        const filterSelect =
+            $("#carousel-filter");
+
+
+        const searchTerm =
+            searchInput
+                ? searchInput.value
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+
+        const filter =
+            filterSelect
+                ? filterSelect.value
+                : "all";
+
+
+        let filteredItems =
+            [...allCarouselItems];
+
+
+        if (filter !== "all") {
+
+            filteredItems =
+                filteredItems.filter(
+                    item =>
+                        item.status === filter
+                );
+        }
+
+
+        if (searchTerm) {
+
+            filteredItems =
+                filteredItems.filter(item => {
+
+                    const title =
+                        (item.title || "")
+                            .toLowerCase();
+
+                    const description =
+                        (item.description || "")
+                            .toLowerCase();
+
+                    const area =
+                        (item.area || "")
+                            .toLowerCase();
+
+
+                    return (
+                        title.includes(searchTerm) ||
+                        description.includes(searchTerm) ||
+                        area.includes(searchTerm)
+                    );
+                });
+        }
+
+
+        if (count) {
+
+            count.textContent =
+                `${filteredItems.length} ${
+                    filteredItems.length === 1
+                        ? "promotion"
+                        : "promotions"
+                }`;
+        }
+
+
+        if (!filteredItems.length) {
+
+            list.innerHTML = `
+                <div class="courses-loading">
+                    No promotions found.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        list.innerHTML =
+            filteredItems
+                .map(renderCarouselRow)
+                .join("");
+
+
+        attachCarouselActions();
+    }
+
+
+    /* =====================================================
+       CAROUSEL ROW
+    ===================================================== */
+
+    function renderCarouselRow(item) {
+
+        const startDate =
+            item.start_date
+                ? formatDate(item.start_date)
+                : "—";
+
+
+        const endDate =
+            item.end_date
+                ? formatDate(item.end_date)
+                : "—";
+
+
+        const status =
+            normalizeCarouselStatus(
+                item.status
+            );
+
+
+        const image =
+            item.image_url
+                ? `
+                    <img
+                        src="${escapeAttribute(item.image_url)}"
+                        alt="${escapeAttribute(item.title)}"
+                        onerror="this.style.display='none';"
+                    >
+                `
+                : `
+                    <div class="course-cover-placeholder">
+                        ▤
+                    </div>
+                `;
+
+
+        return `
+            <div
+                class="course-row carousel-row"
+                data-carousel-id="${escapeAttribute(item.id)}"
+            >
+
+                <div class="course-main">
+
+                    <div class="course-cover">
+                        ${image}
+                    </div>
+
+                    <div class="course-info">
+
+                        <div class="course-title">
+                            ${escapeHTML(
+                                item.title ||
+                                "Untitled Promotion"
+                            )}
+                        </div>
+
+                        <div class="course-description">
+                            ${escapeHTML(
+                                item.description ||
+                                "Promotional content."
+                            )}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="course-category">
+                    ${escapeHTML(
+                        formatCarouselArea(
+                            item.area
+                        )
+                    )}
+                </div>
+
+
+                <div class="course-level">
+                    <span class="course-status ${status}">
+                        ${escapeHTML(status)}
+                    </span>
+                </div>
+
+
+                <div class="course-updated">
+                    ${startDate}
+                </div>
+
+
+                <div class="course-updated">
+                    ${endDate}
+                </div>
+
+
+                <div class="course-actions">
+
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-carousel-action="edit"
+                        data-carousel-id="${escapeAttribute(item.id)}"
+                    >
+                        Edit
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="course-action-button danger"
+                        data-carousel-action="delete"
+                        data-carousel-id="${escapeAttribute(item.id)}"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       CAROUSEL ACTIONS
+    ===================================================== */
+
+    function attachCarouselActions() {
+
+        $$(".course-action-button").forEach(button => {
+
+            const action =
+                button.dataset.carouselAction;
+
+
+            if (!action) return;
+
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const id =
+                        button.dataset.carouselId;
+
+
+                    if (!id) return;
+
+
+                    const item =
+                        allCarouselItems.find(
+                            carouselItem =>
+                                String(carouselItem.id) ===
+                                String(id)
+                        );
+
+
+                    if (!item) return;
+
+
+                    if (action === "edit") {
+
+                        openCarouselModal(item);
+
+                        return;
+                    }
+
+
+                    if (action === "delete") {
+
+                        await deleteCarouselItem(item);
+                    }
+
+                }
+            );
+        });
+    }
+
+
+    /* =====================================================
+       DELETE CAROUSEL ITEM
+    ===================================================== */
+
+    async function deleteCarouselItem(item) {
+
+        const confirmed =
+            confirm(
+                `Delete "${item.title}"?`
+            );
+
+
+        if (!confirmed) return;
+
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("carousel_items")
+                    .delete()
+                    .eq(
+                        "id",
+                        item.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await loadCarouselItems();
+
+        } catch (error) {
+
+            console.error(
+                "Error deleting carousel item:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to delete this promotion."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       OPEN CAROUSEL MODAL
+    ===================================================== */
+
+    function openCarouselModal(item = null) {
+
+        editingCarouselItemId =
+            item?.id || null;
+
+
+        removeCarouselImage =
+            false;
+
+
+        if (carouselModal) {
+
+            carouselModal.remove();
+
+            carouselModal = null;
+        }
+
+
+        carouselModal =
+            document.createElement("div");
+
+
+        carouselModal.className =
+            "course-modal";
+
+
+        carouselModal.innerHTML = `
+
+            <div
+                class="course-modal-backdrop"
+                data-close-carousel-modal="true"
+            ></div>
+
+
+            <div
+                class="course-modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="carousel-modal-title"
+            >
+
+                <div class="course-modal-header">
+
+                    <div>
+
+                        <div class="course-modal-kicker">
+                            FEATURED CONTENT
+                        </div>
+
+                        <h2 id="carousel-modal-title">
+                            ${
+                                item
+                                    ? "Edit Promotion"
+                                    : "Create Promotion"
+                            }
+                        </h2>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="course-modal-close"
+                        id="close-carousel-modal"
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form
+                    id="carousel-form"
+                    class="course-form"
+                    novalidate
+                >
+
+                    <!-- TITLE -->
+
+                    <div class="course-form-field">
+
+                        <label for="carousel-title">
+                            Title *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="carousel-title"
+                            required
+                            maxlength="200"
+                            value="${escapeAttribute(
+                                item?.title || ""
+                            )}"
+                            placeholder="Promotion title"
+                        >
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="course-form-field">
+
+                        <label for="carousel-description">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="carousel-description"
+                            rows="4"
+                            maxlength="5000"
+                            placeholder="Short promotional message"
+                        >${escapeHTML(
+                            item?.description || ""
+                        )}</textarea>
+
+                    </div>
+
+
+                    <!-- PROMOTION IMAGE -->
+
+                    <div class="course-form-field">
+
+                        <label>
+                            Promotion Image
+                        </label>
+
+
+                        <label
+                            for="carousel-image-file"
+                            class="course-upload-area"
+                            id="carousel-upload-area"
+                        >
+
+                            <div class="upload-icon">
+                                ↑
+                            </div>
+
+                            <strong>
+                                Choose an image
+                            </strong>
+
+                            <span>
+                                JPG, JPEG, PNG or WebP · Max 5 MB
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="carousel-image-file"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                        >
+
+
+                        <div
+                            id="carousel-image-preview"
+                            class="course-cover-preview"
+                            ${
+                                item?.image_url
+                                    ? ""
+                                    : "hidden"
+                            }
+                        >
+
+                            <img
+                                id="carousel-image-preview-image"
+                                src="${
+                                    item?.image_url
+                                        ? escapeAttribute(
+                                            item.image_url
+                                        )
+                                        : ""
+                                }"
+                                alt="Promotion image preview"
+                            >
+
+                            <button
+                                type="button"
+                                id="carousel-remove-image"
+                                class="course-remove-cover"
+                            >
+                                Remove image
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- AREA + STATUS -->
+
+                    <div class="course-form-grid">
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-area">
+                                Area
+                            </label>
+
+                            <select id="carousel-area">
+
+                                <option
+                                    value="all"
+                                    ${
+                                        !item?.area ||
+                                        item?.area === "all"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    All Areas
+                                </option>
+
+                                <option
+                                    value="language"
+                                    ${
+                                        item?.area === "language"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Language
+                                </option>
+
+                                <option
+                                    value="ms-office"
+                                    ${
+                                        item?.area === "ms-office"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    MS Office
+                                </option>
+
+                                <option
+                                    value="trading"
+                                    ${
+                                        item?.area === "trading"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Trading
+                                </option>
+
+                                <option
+                                    value="business"
+                                    ${
+                                        item?.area === "business"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Business
+                                </option>
+
+                                <option
+                                    value="technology"
+                                    ${
+                                        item?.area === "technology"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Technology
+                                </option>
+
+                                <option
+                                    value="finance"
+                                    ${
+                                        item?.area === "finance"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Finance
+                                </option>
+
+                                <option
+                                    value="personal-development"
+                                    ${
+                                        item?.area === "personal-development"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Personal Development
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-status">
+                                Status
+                            </label>
+
+                            <select id="carousel-status">
+
+                                <option
+                                    value="draft"
+                                    ${
+                                        item?.status !== "published"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Draft
+                                </option>
+
+                                <option
+                                    value="published"
+                                    ${
+                                        item?.status === "published"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Published
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DATES -->
+
+                    <div class="course-form-grid">
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-start-date">
+                                Start Date
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                id="carousel-start-date"
+                                value="${formatDateTimeLocal(
+                                    item?.start_date
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-end-date">
+                                End Date
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                id="carousel-end-date"
+                                value="${formatDateTimeLocal(
+                                    item?.end_date
+                                )}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BUTTON + SORT ORDER -->
+
+                    <div class="course-form-grid">
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-button-text">
+                                Button Text
+                            </label>
+
+                            <input
+                                type="text"
+                                id="carousel-button-text"
+                                maxlength="100"
+                                value="${escapeAttribute(
+                                    item?.button_text ||
+                                    "Learn More"
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label for="carousel-sort-order">
+                                Sort Order
+                            </label>
+
+                            <input
+                                type="number"
+                                id="carousel-sort-order"
+                                min="0"
+                                step="1"
+                                value="${item?.sort_order ?? 0}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BUTTON URL -->
+
+                    <div class="course-form-field">
+
+                        <label for="carousel-button-url">
+                            Button URL
+                        </label>
+
+                        <input
+                            type="url"
+                            id="carousel-button-url"
+                            value="${escapeAttribute(
+                                item?.button_url || ""
+                            )}"
+                            placeholder="https://..."
+                        >
+
+                    </div>
+
+
+                    <!-- ERROR -->
+
+                    <div
+                        id="carousel-form-error"
+                        class="course-form-error"
+                        hidden
+                    ></div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="course-form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="cancel-carousel-modal"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="carousel-save-button"
+                        >
+                            ${
+                                item
+                                    ? "Save Changes"
+                                    : "Create Promotion"
+                            }
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        `;
+
+
+        document.body.appendChild(
+            carouselModal
+        );
+
+
+        requestAnimationFrame(() => {
+
+            if (carouselModal) {
+
+                carouselModal.classList.add(
+                    "open"
+                );
+            }
+
+        });
+
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+
+        /* =================================================
+           MODAL EVENTS
+        ================================================= */
+
+        const closeButton =
+            carouselModal.querySelector(
+                "#close-carousel-modal"
+            );
+
+
+        closeButton?.addEventListener(
+            "click",
+            closeCarouselModal
+        );
+
+
+        const cancelButton =
+            carouselModal.querySelector(
+                "#cancel-carousel-modal"
+            );
+
+
+        cancelButton?.addEventListener(
+            "click",
+            closeCarouselModal
+        );
+
+
+        const backdrop =
+            carouselModal.querySelector(
+                ".course-modal-backdrop"
+            );
+
+
+        backdrop?.addEventListener(
+            "click",
+            closeCarouselModal
+        );
+
+
+        const form =
+            carouselModal.querySelector(
+                "#carousel-form"
+            );
+
+
+        form?.addEventListener(
+            "submit",
+            saveCarouselItem
+        );
+
+
+        /* =================================================
+           IMAGE EVENTS
+        ================================================= */
+
+        const imageFileInput =
+            carouselModal.querySelector(
+                "#carousel-image-file"
+            );
+
+
+        imageFileInput?.addEventListener(
+            "change",
+            handleCarouselImageFile
+        );
+
+
+        const removeImageButton =
+            carouselModal.querySelector(
+                "#carousel-remove-image"
+            );
+
+
+        removeImageButton?.addEventListener(
+            "click",
+            removeCarouselImageFile
+        );
+
+
+        setTimeout(() => {
+
+            carouselModal
+                ?.querySelector(
+                    "#carousel-title"
+                )
+                ?.focus();
+
+        }, 50);
+    }
+
+
+    /* =====================================================
+       CAROUSEL IMAGE FILE
+    ===================================================== */
+
+    function handleCarouselImageFile(event) {
+
+        const file =
+            event.target.files?.[0];
+
+
+        if (!file) return;
+
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (!allowedTypes.includes(file.type)) {
+
+            showCarouselFormError(
+                "Please select a JPG, PNG or WebP image."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            showCarouselFormError(
+                "The promotion image must be smaller than 5 MB."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        removeCarouselImage =
+            false;
+
+
+        clearCarouselFormError();
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = () => {
+
+            showCarouselImagePreview(
+                reader.result
+            );
+        };
+
+
+        reader.readAsDataURL(file);
+    }
+
+
+    /* =====================================================
+       SHOW CAROUSEL IMAGE PREVIEW
+    ===================================================== */
+
+    function showCarouselImagePreview(src) {
+
+        if (!carouselModal) return;
+
+
+        const preview =
+            carouselModal.querySelector(
+                "#carousel-image-preview"
+            );
+
+
+        const image =
+            carouselModal.querySelector(
+                "#carousel-image-preview-image"
+            );
+
+
+        if (!src) {
+
+            clearCarouselImagePreview();
+
+            return;
+        }
+
+
+        image.src =
+            src;
+
+
+        preview.hidden =
+            false;
+    }
+
+
+    /* =====================================================
+       CLEAR CAROUSEL IMAGE PREVIEW
+    ===================================================== */
+
+    function clearCarouselImagePreview() {
+
+        if (!carouselModal) return;
+
+
+        const preview =
+            carouselModal.querySelector(
+                "#carousel-image-preview"
+            );
+
+
+        const image =
+            carouselModal.querySelector(
+                "#carousel-image-preview-image"
+            );
+
+
+        preview.hidden =
+            true;
+
+
+        image.removeAttribute(
+            "src"
+        );
+    }
+
+
+    /* =====================================================
+       REMOVE CAROUSEL IMAGE
+    ===================================================== */
+
+    function removeCarouselImageFile() {
+
+        if (!carouselModal) return;
+
+
+        const fileInput =
+            carouselModal.querySelector(
+                "#carousel-image-file"
+            );
+
+
+        if (fileInput) {
+
+            fileInput.value = "";
+        }
+
+
+        removeCarouselImage =
+            true;
+
+
+        clearCarouselImagePreview();
+    }
+
+
+    /* =====================================================
+       UPLOAD CAROUSEL IMAGE
+    ===================================================== */
+
+    async function uploadCarouselImage(file) {
+
+        if (!file) {
+
+            throw new Error(
+                "No promotion image was selected."
+            );
+        }
+
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+        const randomName =
+            `${crypto.randomUUID()}.${extension}`;
+
+
+        const filePath =
+            `carousel-images/${randomName}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await client.storage
+                .from("carousel-images")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        cacheControl: "3600",
+                        upsert: false,
+                        contentType: file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            throw new Error(
+                `Promotion image upload failed: ${uploadError.message}`
+            );
+        }
+
+
+        const {
+            data
+        } =
+            client.storage
+                .from("carousel-images")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        if (!data?.publicUrl) {
+
+            throw new Error(
+                "The promotion image was uploaded but its public URL could not be generated."
+            );
+        }
+
+
+        return data.publicUrl;
+    }
+
+
+    /* =====================================================
+       CLOSE CAROUSEL MODAL
+    ===================================================== */
+
+    function closeCarouselModal() {
+
+        if (!carouselModal) return;
+
+
+        carouselModal.classList.remove(
+            "open"
+        );
+
+
+        carouselModal.remove();
+
+        carouselModal = null;
+
+
+        editingCarouselItemId =
             null;
 
 
-        if (
-            !client ||
-            typeof client.from !== "function"
-        ) {
+        removeCarouselImage =
+            false;
 
-            console.error(
-                "Supabase client is not available."
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+    }
+
+
+    /* =====================================================
+       SAVE CAROUSEL ITEM
+    ===================================================== */
+
+    async function saveCarouselItem(event) {
+
+        event.preventDefault();
+
+
+        const title =
+            $("#carousel-title")
+                ?.value
+                .trim();
+
+
+        const description =
+            $("#carousel-description")
+                ?.value
+                .trim();
+
+
+        const imageFile =
+            $("#carousel-image-file")
+                ?.files?.[0] ||
+            null;
+
+
+        const area =
+            $("#carousel-area")
+                ?.value ||
+            "all";
+
+
+        const status =
+            $("#carousel-status")
+                ?.value ||
+            "draft";
+
+
+        const startDate =
+            $("#carousel-start-date")
+                ?.value;
+
+
+        const endDate =
+            $("#carousel-end-date")
+                ?.value;
+
+
+        const buttonText =
+            $("#carousel-button-text")
+                ?.value
+                .trim() ||
+            "Learn More";
+
+
+        const buttonUrl =
+            $("#carousel-button-url")
+                ?.value
+                .trim();
+
+
+        const sortOrderRaw =
+            $("#carousel-sort-order")
+                ?.value
+                .trim();
+
+
+        const sortOrder =
+            sortOrderRaw === ""
+                ? 0
+                : Number(sortOrderRaw);
+
+
+        const errorElement =
+            $("#carousel-form-error");
+
+
+        const saveButton =
+            $("#carousel-save-button");
+
+
+        if (errorElement) {
+
+            errorElement.textContent =
+                "";
+
+            errorElement.hidden =
+                true;
+        }
+
+
+        if (!title) {
+
+            showCarouselFormError(
+                "Promotion title is required."
             );
 
             return;
         }
 
 
-        /* =====================================================
-           STATE
-        ===================================================== */
-
-        let allCourses = [];
-
-        let allCarouselItems = [];
-
-        let editingCourseId = null;
-
-        let courseModal = null;
-
-        let editingCarouselItemId = null;
-
-        let carouselModal = null;
-
-
-        let builderCourse = null;
-
-        let builderModules = [];
-
-        let selectedModule = null;
-
-        let selectedLesson = null;
-
-        let moduleModal = null;
-
-        let lessonModal = null;
-
-        let contentModal = null;
-
-
-        /* =====================================================
-           HELPERS
-        ===================================================== */
-
-        const $ =
-            selector =>
-                document.querySelector(selector);
-
-
-        const $$ =
-            selector =>
-                document.querySelectorAll(selector);
-
-
-        const escapeHTML =
-            value =>
-                String(value ?? "")
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-
-
-        const escapeAttribute =
-            value =>
-                escapeHTML(value);
-
-
-        function formatDate(value) {
-
-            if (!value) return "—";
-
-            const date =
-                new Date(value);
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return "—";
-            }
-
-            return date.toLocaleDateString(
-                undefined,
-                {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric"
-                }
-            );
-        }
-
-
-        function showError(message) {
-
-            console.error(message);
-
-            alert(message);
-        }
-
-
-        function closeModalElement(
-            modal
+        if (
+            Number.isNaN(sortOrder) ||
+            sortOrder < 0
         ) {
 
-            if (!modal) return;
-
-            modal.classList.remove("open");
-
-            setTimeout(
-                () => modal.remove(),
-                180
+            showCarouselFormError(
+                "Sort order must be a valid number."
             );
 
-            document.body.classList.remove(
-                "modal-open"
+            return;
+        }
+
+
+        if (
+            startDate &&
+            endDate &&
+            new Date(startDate) >
+            new Date(endDate)
+        ) {
+
+            showCarouselFormError(
+                "The end date cannot be earlier than the start date."
             );
+
+            return;
         }
 
 
-        /* =====================================================
-           INITIALISE
-        ===================================================== */
+        if (saveButton) {
 
-        init();
+            saveButton.disabled =
+                true;
 
-
-        async function init() {
-
-            setupNavigation();
-
-            setupSidebar();
-
-            setupLogout();
-
-            setupCourseControls();
-
-            setupCarouselControls();
-
-            setupDashboardRetry();
-
-            setupBuilderControls();
-
-            await loadAdminUser();
-
-            await loadDashboard();
-
-            await loadCourses();
-
-            await loadCarouselItems();
-
-            await loadBuilderCourses();
-
+            saveButton.textContent =
+                editingCarouselItemId
+                    ? "Saving..."
+                    : "Creating...";
         }
 
 
-        /* =====================================================
-           NAVIGATION
-        ===================================================== */
+        try {
 
-        function setupNavigation() {
+            /* =============================================
+               DETERMINE IMAGE URL
+            ============================================= */
 
-            $$(".nav-item")
-                .forEach(button => {
+            let finalImageUrl =
+                null;
 
-                    button.addEventListener(
-                        "click",
-                        () => {
 
-                            const section =
-                                button.dataset.section;
+            /*
+                Editing an existing promotion:
+                keep its current image unless the admin
+                selected a new image or explicitly removed it.
+            */
 
-                            if (!section) return;
+            if (editingCarouselItemId) {
 
-                            showSection(section);
-
-                            closeMobileSidebar();
-
-                        }
+                const existingItem =
+                    allCarouselItems.find(
+                        item =>
+                            String(item.id) ===
+                            String(editingCarouselItemId)
                     );
 
-                });
 
-        }
+                finalImageUrl =
+                    existingItem?.image_url ||
+                    null;
+            }
 
 
-        function showSection(section) {
+            /*
+                Remove image if requested.
+            */
 
-            $$(".nav-item")
-                .forEach(button => {
+            if (removeCarouselImage) {
 
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.section ===
-                        section
+                finalImageUrl =
+                    null;
+            }
+
+
+            /*
+                Upload a new image if selected.
+            */
+
+            if (
+                imageFile &&
+                imageFile instanceof File &&
+                imageFile.size > 0
+            ) {
+
+                finalImageUrl =
+                    await uploadCarouselImage(
+                        imageFile
                     );
-
-                });
-
-
-            $$(".admin-section")
-                .forEach(element => {
-
-                    element.classList.toggle(
-                        "active",
-                        element.id ===
-                        `${section}-section`
-                    );
-
-                });
+            }
 
 
-            const pageTitle =
-                $("#page-title");
+            /* =============================================
+               BUILD DATABASE RECORD
+            ============================================= */
 
+            const carouselData = {
 
-            const titles = {
+                title,
 
-                dashboard:
-                    "Dashboard",
+                description:
+                    description || null,
 
-                courses:
-                    "Courses",
+                image_url:
+                    finalImageUrl,
 
-                personalise:
-                    "Personalise Course",
+                area,
 
-                carousel:
-                    "Carousel",
+                button_text:
+                    buttonText,
 
-                students:
-                    "Students",
+                button_url:
+                    buttonUrl || null,
 
-                settings:
-                    "Settings"
+                status,
 
+                start_date:
+                    startDate
+                        ? new Date(
+                            startDate
+                        ).toISOString()
+                        : null,
+
+                end_date:
+                    endDate
+                        ? new Date(
+                            endDate
+                        ).toISOString()
+                        : null,
+
+                sort_order:
+                    sortOrder
             };
 
 
-            if (pageTitle) {
+            /* =============================================
+               UPDATE EXISTING PROMOTION
+            ============================================= */
 
-                pageTitle.textContent =
-                    titles[section] ||
-                    "Dashboard";
-            }
-
-
-            if (section === "courses") {
-
-                loadCourses();
-
-            }
-
-
-            if (section === "carousel") {
-
-                loadCarouselItems();
-
-            }
-
-
-            if (section === "personalise") {
-
-                loadBuilderCourses();
-
-            }
-
-        }
-
-
-        /* =====================================================
-           SIDEBAR
-        ===================================================== */
-
-        function setupSidebar() {
-
-            const app =
-                $("#admin-app");
-
-            const toggle =
-                $("#sidebar-toggle");
-
-            const close =
-                $("#mobile-sidebar-close");
-
-            const overlay =
-                $("#sidebar-overlay");
-
-
-            toggle?.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        window.innerWidth <= 900
-                    ) {
-
-                        app?.classList.toggle(
-                            "sidebar-open"
-                        );
-
-                    }
-
-                }
-            );
-
-
-            close?.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-
-
-            overlay?.addEventListener(
-                "click",
-                closeMobileSidebar
-            );
-
-
-            window.addEventListener(
-                "resize",
-                () => {
-
-                    if (
-                        window.innerWidth > 900
-                    ) {
-
-                        app?.classList.remove(
-                            "sidebar-open"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        function closeMobileSidebar() {
-
-            $("#admin-app")
-                ?.classList.remove(
-                    "sidebar-open"
-                );
-
-        }
-
-
-        /* =====================================================
-           LOGOUT
-        ===================================================== */
-
-        function setupLogout() {
-
-            $("#logout-button")
-                ?.addEventListener(
-                    "click",
-                    async () => {
-
-                        try {
-
-                            if (
-                                typeof window.logout ===
-                                "function"
-                            ) {
-
-                                await window.logout();
-
-                                return;
-                            }
-
-
-                            await client.auth.signOut();
-
-                            window.location.href =
-                                "index.html";
-
-                        } catch (error) {
-
-                            console.error(
-                                "Logout error:",
-                                error
-                            );
-
-                        }
-
-                    }
-                );
-
-        }
-
-
-        /* =====================================================
-           ADMIN USER
-        ===================================================== */
-
-        async function loadAdminUser() {
-
-            try {
+            if (editingCarouselItemId) {
 
                 const {
-                    data,
-                    error
-                } =
-                    await client.auth.getUser();
-
-
-                if (
-                    error ||
-                    !data?.user
-                ) {
-
-                    return;
-                }
-
-
-                const user =
-                    data.user;
-
-
-                const metadata =
-                    user.user_metadata ||
-                    {};
-
-
-                const name =
-                    metadata.name ||
-                    metadata.full_name ||
-                    metadata.display_name ||
-                    user.email?.split("@")[0] ||
-                    "Administrator";
-
-
-                const avatar =
-                    name
-                        .charAt(0)
-                        .toUpperCase();
-
-
-                if ($("#admin-name")) {
-
-                    $("#admin-name")
-                        .textContent =
-                        name;
-
-                }
-
-
-                if ($("#admin-role")) {
-
-                    $("#admin-role")
-                        .textContent =
-                        "Admin";
-
-                }
-
-
-                if ($("#admin-avatar")) {
-
-                    $("#admin-avatar")
-                        .textContent =
-                        avatar;
-
-                }
-
-
-                if (
-                    $("#topbar-admin-avatar")
-                ) {
-
-                    $("#topbar-admin-avatar")
-                        .textContent =
-                        avatar;
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Could not load admin:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           DASHBOARD
-        ===================================================== */
-
-        async function loadDashboard() {
-
-            try {
-
-                await Promise.all([
-
-                    loadCourseCount(),
-
-                    loadModuleCount(),
-
-                    loadLessonCount(),
-
-                    loadStudentCount(),
-
-                    loadContentCounts(),
-
-                    loadRecentActivity()
-
-                ]);
-
-                hideDashboardError();
-
-            } catch (error) {
-
-                console.error(
-                    "Dashboard error:",
-                    error
-                );
-
-                showDashboardError();
-
-            }
-
-        }
-
-
-        async function loadCourseCount() {
-
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("courses")
-                    .select(
-                        "id",
-                        {
-                            count: "exact",
-                            head: true
-                        }
-                    )
-                    .neq(
-                        "status",
-                        "archived"
-                    );
-
-
-            if (error) throw error;
-
-
-            if ($("#total-courses")) {
-
-                $("#total-courses")
-                    .textContent =
-                    count ?? 0;
-
-            }
-
-        }
-
-
-        async function loadModuleCount() {
-
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("modules")
-                    .select(
-                        "id",
-                        {
-                            count: "exact",
-                            head: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.warn(
-                    "Modules count:",
-                    error
-                );
-
-                if ($("#total-units")) {
-
-                    $("#total-units")
-                        .textContent =
-                        "—";
-
-                }
-
-                return;
-            }
-
-
-            if ($("#total-units")) {
-
-                $("#total-units")
-                    .textContent =
-                    count ?? 0;
-
-            }
-
-        }
-
-
-        async function loadLessonCount() {
-
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("lessons")
-                    .select(
-                        "id",
-                        {
-                            count: "exact",
-                            head: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.warn(
-                    "Lessons count:",
-                    error
-                );
-
-                if ($("#total-lessons")) {
-
-                    $("#total-lessons")
-                        .textContent =
-                        "—";
-
-                }
-
-                return;
-            }
-
-
-            if ($("#total-lessons")) {
-
-                $("#total-lessons")
-                    .textContent =
-                    count ?? 0;
-
-            }
-
-        }
-
-
-        async function loadStudentCount() {
-
-            try {
-
-                const {
-                    count,
                     error
                 } =
                     await client
-                        .from("profiles")
-                        .select(
-                            "id",
-                            {
-                                count: "exact",
-                                head: true
-                            }
-                        )
+                        .from("carousel_items")
+                        .update(carouselData)
                         .eq(
-                            "role",
-                            "student"
+                            "id",
+                            editingCarouselItemId
                         );
 
 
                 if (error) throw error;
 
 
-                if ($("#total-students")) {
-
-                    $("#total-students")
-                        .textContent =
-                        count ?? 0;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Students count:",
-                    error
-                );
-
-                if ($("#total-students")) {
-
-                    $("#total-students")
-                        .textContent =
-                        "—";
-
-                }
-
-            }
-
-        }
+            } else {
 
 
-        async function loadContentCounts() {
-
-            const published =
-                $("#published-content");
-
-            const draft =
-                $("#draft-content");
-
-
-            try {
-
-                const [
-                    publishedResult,
-                    draftResult
-                ] =
-                    await Promise.all([
-
-                        client
-                            .from("courses")
-                            .select(
-                                "id",
-                                {
-                                    count:
-                                        "exact",
-                                    head:
-                                        true
-                                }
-                            )
-                            .eq(
-                                "status",
-                                "published"
-                            ),
-
-                        client
-                            .from("courses")
-                            .select(
-                                "id",
-                                {
-                                    count:
-                                        "exact",
-                                    head:
-                                        true
-                                }
-                            )
-                            .eq(
-                                "status",
-                                "draft"
-                            )
-
-                    ]);
-
-
-                if (published) {
-
-                    published.textContent =
-                        publishedResult.count ??
-                        0;
-
-                }
-
-
-                if (draft) {
-
-                    draft.textContent =
-                        draftResult.count ??
-                        0;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Content counts:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        async function loadRecentActivity() {
-
-            const list =
-                $("#activity-list");
-
-            if (!list) return;
-
-
-            try {
+                /* =========================================
+                   CREATE NEW PROMOTION
+                ========================================= */
 
                 const {
-                    data,
                     error
                 } =
                     await client
-                        .from("courses")
-                        .select(
-                            "id,title,status,created_at"
-                        )
-                        .order(
-                            "created_at",
-                            {
-                                ascending:
-                                    false
-                            }
-                        )
-                        .limit(6);
-
-
-                if (error) throw error;
-
-
-                if (!data?.length) {
-
-                    list.innerHTML =
-                        `<div class="activity-empty">
-                            No recent activity.
-                        </div>`;
-
-                    return;
-                }
-
-
-                list.innerHTML =
-                    data
-                        .map(course => {
-
-                            let action =
-                                "Course created";
-
-                            if (
-                                course.status ===
-                                "published"
-                            ) {
-
-                                action =
-                                    "Course published";
-
-                            } else if (
-                                course.status ===
-                                "archived"
-                            ) {
-
-                                action =
-                                    "Course archived";
-
-                            }
-
-
-                            return `
-                                <div class="activity-item">
-
-                                    <div class="activity-icon">
-                                        ▣
-                                    </div>
-
-                                    <div>
-
-                                        <div class="activity-title">
-                                            ${escapeHTML(action)}
-                                        </div>
-
-                                        <div class="activity-meta">
-                                            ${escapeHTML(course.title)}
-                                            ·
-                                            ${formatDate(course.created_at)}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            `;
-
-                        })
-                        .join("");
-
-            } catch (error) {
-
-                list.innerHTML =
-                    `<div class="activity-empty">
-                        Unable to load activity.
-                    </div>`;
-
-            }
-
-        }
-
-
-        function setupDashboardRetry() {
-
-            $("#dashboard-retry")
-                ?.addEventListener(
-                    "click",
-                    loadDashboard
-                );
-
-        }
-
-
-        function showDashboardError() {
-
-            $("#dashboard-error")
-                ?.classList.remove(
-                    "admin-hidden"
-                );
-
-        }
-
-
-        function hideDashboardError() {
-
-            $("#dashboard-error")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-        }
-
-
-        /* =====================================================
-           COURSE CONTROLS
-        ===================================================== */
-
-        function setupCourseControls() {
-
-            $("#course-search")
-                ?.addEventListener(
-                    "input",
-                    renderCourses
-                );
-
-
-            $("#course-filter")
-                ?.addEventListener(
-                    "change",
-                    renderCourses
-                );
-
-
-            $("#create-course-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openCourseModal()
-                );
-
-        }
-
-
-        /* =====================================================
-           LOAD COURSES
-        ===================================================== */
-
-        async function loadCourses() {
-
-            const list =
-                $("#courses-list");
-
-            if (!list) return;
-
-
-            list.innerHTML =
-                `<div class="courses-loading">
-                    Loading courses...
-                </div>`;
-
-
-            try {
-
-                const {
-                    data,
-                    error
-                } =
-                    await client
-                        .from("courses")
-                        .select(`
-                            id,
-                            title,
-                            description,
-                            category,
-                            level,
-                            language,
-                            cover_image,
-                            status,
-                            sort_order,
-                            created_at,
-                            slug,
-                            archived_at
-                        `)
-                        .order(
-                            "sort_order",
-                            {
-                                ascending: true,
-                                nullsFirst: false
-                            }
-                        )
-                        .order(
-                            "created_at",
-                            {
-                                ascending: false
-                            }
+                        .from("carousel_items")
+                        .insert(
+                            carouselData
                         );
 
 
                 if (error) throw error;
+            }
 
 
-                allCourses =
-                    data || [];
+            closeCarouselModal();
 
 
-                renderCourses();
+            await loadCarouselItems();
 
-            } catch (error) {
 
-                console.error(
-                    "Could not load courses:",
-                    error
+        } catch (error) {
+
+            console.error(
+                "Could not save carousel item:",
+                error
+            );
+
+
+            showCarouselFormError(
+                error.message ||
+                "Could not save the promotion."
+            );
+
+
+        } finally {
+
+            if (saveButton) {
+
+                saveButton.disabled =
+                    false;
+
+                saveButton.textContent =
+                    editingCarouselItemId
+                        ? "Save Changes"
+                        : "Create Promotion";
+            }
+        }
+    }
+
+
+    /* =====================================================
+       CAROUSEL FORM ERROR
+    ===================================================== */
+
+    function showCarouselFormError(message) {
+
+        const element =
+            $("#carousel-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+            message;
+
+
+        element.hidden =
+            false;
+    }
+
+
+    function clearCarouselFormError() {
+
+        const element =
+            $("#carousel-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+        "";
+
+
+        element.hidden =
+            true;
+    }
+
+
+    /* =====================================================
+       CAROUSEL UTILITIES
+    ===================================================== */
+
+    function normalizeCarouselStatus(status) {
+
+        return status === "published"
+            ? "published"
+            : "draft";
+    }
+
+
+    function formatCarouselArea(area) {
+
+        const areas = {
+
+            "all":
+                "All Areas",
+
+            "language":
+                "Language",
+
+            "ms-office":
+                "MS Office",
+
+            "trading":
+                "Trading",
+
+            "business":
+                "Business",
+
+            "technology":
+                "Technology",
+
+            "finance":
+                "Finance",
+
+            "personal-development":
+                "Personal Development"
+        };
+
+
+        return areas[area] ||
+            "All Areas";
+    }
+
+
+    function formatDateTimeLocal(dateValue) {
+
+        if (!dateValue) return "";
+
+
+        const date =
+            new Date(dateValue);
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "";
+        }
+
+
+        const year =
+            date.getFullYear();
+
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const hours =
+            String(
+                date.getHours()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const minutes =
+            String(
+                date.getMinutes()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+
+    /* =====================================================
+       RENDER COURSES
+    ===================================================== */
+
+    function renderCourses() {
+
+        const list =
+            $("#courses-list");
+
+        const count =
+            $("#course-count");
+
+
+        if (!list) return;
+
+
+        const search =
+            ($("#course-search")?.value || "")
+                .trim()
+                .toLowerCase();
+
+
+        const filter =
+            $("#course-filter")?.value ||
+            "all";
+
+
+        let courses =
+            [...allCourses];
+
+
+        if (filter !== "all") {
+
+            courses =
+                courses.filter(
+                    course =>
+                        normalizeStatus(
+                            course.status
+                        ) === filter
                 );
+        }
 
 
-                list.innerHTML = `
-                    <div class="courses-empty">
+        if (search) {
 
-                        <strong>
-                            Could not load courses
-                        </strong>
+            courses =
+                courses.filter(course => {
 
-                        <p style="margin-top:8px;">
-                            ${escapeHTML(
-                                error.message ||
-                                "Please try again."
-                            )}
-                        </p>
+                    const text = [
 
+                        course.title,
+                        course.description,
+                        course.category,
+                        course.level
+
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return text.includes(search);
+                });
+        }
+
+
+        if (count) {
+
+            count.textContent =
+                `${courses.length} ${
+                    courses.length === 1
+                        ? "course"
+                        : "courses"
+                }`;
+        }
+
+
+        if (!courses.length) {
+
+            list.innerHTML = `
+                <div class="courses-empty">
+
+                    <div class="courses-empty-icon">
+                        ▣
+                    </div>
+
+                    <h3>
+                        No courses found
+                    </h3>
+
+                    <p>
+                        ${
+                            search ||
+                            filter !== "all"
+                                ? "Try changing your search or filter."
+                                : "Create your first course to get started."
+                        }
+                    </p>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        list.innerHTML =
+            courses
+                .map(renderCourseRow)
+                .join("");
+
+
+        attachCourseActions();
+    }
+
+
+    /* =====================================================
+       COURSE ROW
+    ===================================================== */
+
+    function renderCourseRow(course) {
+
+        const status =
+            normalizeStatus(
+                course.status
+            );
+
+
+        const cover =
+            course.cover_image
+                ? `
+                    <img
+                        src="${escapeAttribute(
+                            course.cover_image
+                        )}"
+                        alt="${escapeAttribute(
+                            course.title ||
+                            "Course cover"
+                        )}"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='flex';
+                        "
+                    >
+
+                    <div
+                        class="course-cover-placeholder"
+                        style="display:none;"
+                    >
+                        ▣
+                    </div>
+                `
+                : `
+                    <div class="course-cover-placeholder">
+                        ▣
                     </div>
                 `;
 
-            }
 
-        }
+        return `
+            <div
+                class="course-row"
+                data-course-id="${escapeAttribute(course.id)}"
+            >
 
-
-        /* =====================================================
-           RENDER COURSES
-        ===================================================== */
-
-        function renderCourses() {
-
-            const list =
-                $("#courses-list");
-
-            if (!list) return;
-
-
-            const search =
-                (
-                    $("#course-search")
-                        ?.value ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-
-            const filter =
-                $("#course-filter")
-                    ?.value ||
-                "all";
-
-
-            let courses =
-                [...allCourses];
-
-
-            if (filter !== "all") {
-
-                courses =
-                    courses.filter(
-                        course =>
-                            course.status ===
-                            filter
-                    );
-
-            }
-
-
-            if (search) {
-
-                courses =
-                    courses.filter(
-                        course =>
-                            (
-                                course.title ||
-                                ""
-                            )
-                                .toLowerCase()
-                                .includes(search) ||
-
-                            (
-                                course.description ||
-                                ""
-                            )
-                                .toLowerCase()
-                                .includes(search) ||
-
-                            (
-                                course.category ||
-                                ""
-                            )
-                                .toLowerCase()
-                                .includes(search)
-                    );
-
-            }
-
-
-            if (!courses.length) {
-
-                list.innerHTML =
-                    `<div class="courses-empty">
-                        No courses found.
-                    </div>`;
-
-                return;
-            }
-
-
-            list.innerHTML =
-                courses
-                    .map(
-                        renderCourseRow
-                    )
-                    .join("");
-
-
-            attachCourseActions();
-
-        }
-
-
-        function renderCourseRow(course) {
-
-            const image =
-                course.cover_image
-                    ? `
-                        <img
-                            src="${escapeAttribute(
-                                course.cover_image
-                            )}"
-                            alt=""
-                        >
-                    `
-                    : `
-                        <div class="course-cover-placeholder">
-                            E
-                        </div>
-                    `;
-
-
-            const status =
-                course.status ||
-                "draft";
-
-
-            return `
-                <article class="course-row">
+                <div class="course-main">
 
                     <div class="course-cover">
-                        ${image}
+                        ${cover}
                     </div>
 
+                    <div class="course-info">
 
-                    <div>
-
-                        <div class="course-row-title">
+                        <div class="course-title">
                             ${escapeHTML(
                                 course.title ||
-                                "Untitled course"
+                                "Untitled Course"
                             )}
                         </div>
 
-                        <div class="course-row-description">
+                        <div class="course-description">
                             ${escapeHTML(
                                 course.description ||
                                 "No description."
                             )}
                         </div>
 
+                    </div>
 
-                        <div class="course-row-meta">
+                </div>
 
-                            ${
-                                course.category
-                                    ? `
-                                        <span class="course-badge">
-                                            ${escapeHTML(
-                                                course.category
-                                            )}
-                                        </span>
-                                    `
-                                    : ""
-                            }
 
-                            ${
-                                course.level
-                                    ? `
-                                        <span class="course-badge">
-                                            ${escapeHTML(
-                                                course.level
-                                            )}
-                                        </span>
-                                    `
-                                    : ""
-                            }
+                <div class="course-category">
+                    ${escapeHTML(
+                        course.category ||
+                        "General"
+                    )}
+                </div>
 
-                            <span
-                                class="course-badge ${escapeHTML(
-                                    status
-                                )}"
+
+                <div class="course-level">
+                    ${escapeHTML(
+                        course.level ||
+                        "All levels"
+                    )}
+                </div>
+
+
+                <div>
+                    <span
+                        class="course-status ${status}"
+                    >
+                        ${escapeHTML(status)}
+                    </span>
+                </div>
+
+
+                <div class="course-updated">
+                    ${formatDate(
+                        course.created_at
+                    )}
+                </div>
+
+
+                <div class="course-actions">
+
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-action="edit"
+                        data-id="${escapeAttribute(course.id)}"
+                    >
+                        Edit
+                    </button>
+
+
+                    ${
+                        status === "draft"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="publish"
+                                    data-id="${escapeAttribute(course.id)}"
+                                >
+                                    Publish
+                                </button>
+                            `
+                            : ""
+                    }
+
+
+                    ${
+                        status === "published"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="unpublish"
+                                    data-id="${escapeAttribute(course.id)}"
+                                >
+                                    Unpublish
+                                </button>
+                            `
+                            : ""
+                    }
+
+
+                    <button
+                        type="button"
+                        class="course-action-button"
+                        data-action="duplicate"
+                        data-id="${escapeAttribute(course.id)}"
+                    >
+                        Duplicate
+                    </button>
+
+
+                    ${
+                        status !== "archived"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="course-action-button danger"
+                                    data-action="archive"
+                                    data-id="${escapeAttribute(course.id)}"
+                                >
+                                    Archive
+                                </button>
+                            `
+                            : `
+                                <button
+                                    type="button"
+                                    class="course-action-button"
+                                    data-action="restore"
+                                    data-id="${escapeAttribute(course.id)}"
+                                >
+                                    Restore
+                                </button>
+                            `
+                    }
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    /* =====================================================
+       COURSE ACTIONS
+    ===================================================== */
+
+    function attachCourseActions() {
+
+        $$(".course-action-button")
+            .forEach(button => {
+
+                /*
+                    Carousel buttons also use
+                    .course-action-button.
+
+                    If a carousel action exists,
+                    this is not a course button.
+                */
+
+                if (button.dataset.carouselAction) {
+                    return;
+                }
+
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const action =
+                            button.dataset.action;
+
+                        const id =
+                            button.dataset.id;
+
+
+                        if (!action || !id)
+                            return;
+
+
+                        const course =
+                            allCourses.find(
+                                item =>
+                                    String(item.id) ===
+                                    String(id)
+                            );
+
+
+                        if (!course) return;
+
+
+                        switch (action) {
+
+                            case "edit":
+                                openCourseModal(course);
+                                break;
+
+                            case "publish":
+                                await publishCourse(course);
+                                break;
+
+                            case "unpublish":
+                                await unpublishCourse(course);
+                                break;
+
+                            case "archive":
+                                await archiveCourse(course);
+                                break;
+
+                            case "restore":
+                                await restoreCourse(course);
+                                break;
+
+                            case "duplicate":
+                                await duplicateCourse(course);
+                                break;
+                        }
+
+                    }
+                );
+
+            });
+    }
+
+
+    /* =====================================================
+       COURSE MODAL
+    ===================================================== */
+
+    function getCourseModal() {
+
+        if (courseModal) {
+
+            return courseModal;
+        }
+
+
+        courseModal =
+            document.createElement("div");
+
+
+        courseModal.id =
+            "course-modal";
+
+
+        courseModal.className =
+            "course-modal";
+
+
+        courseModal.innerHTML = `
+
+            <div
+                class="course-modal-backdrop"
+                data-close-modal="true"
+            ></div>
+
+
+            <div
+                class="course-modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="course-modal-title"
+            >
+
+                <div class="course-modal-header">
+
+                    <div>
+
+                        <div class="course-modal-kicker">
+                            COURSE MANAGEMENT
+                        </div>
+
+                        <h2 id="course-modal-title">
+                            Create Course
+                        </h2>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="course-modal-close"
+                        id="course-modal-close"
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form
+                    id="course-form"
+                    class="course-form"
+                    novalidate
+                >
+
+                    <div class="course-form-field">
+
+                        <label for="course-title-input">
+                            Course title *
+                        </label>
+
+                        <input
+                            id="course-title-input"
+                            name="title"
+                            type="text"
+                            required
+                            maxlength="200"
+                            placeholder="Enter course title"
+                        >
+
+                    </div>
+
+
+                    <div class="course-form-field">
+
+                        <label for="course-description-input">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="course-description-input"
+                            name="description"
+                            rows="4"
+                            maxlength="5000"
+                            placeholder="Describe this course..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="course-form-grid">
+
+                        <div class="course-form-field">
+
+                            <label for="course-category-input">
+                                Category
+                            </label>
+
+                            <select
+                                id="course-category-input"
+                                name="category"
+                                required
                             >
-                                ${escapeHTML(
-                                    status
-                                )}
-                            </span>
+
+                                <option value="">
+                                    Select a category
+                                </option>
+
+                                <option value="Language">
+                                    Language
+                                </option>
+
+                                <option value="MS Office">
+                                    MS Office
+                                </option>
+
+                                <option value="Trading">
+                                    Trading
+                                </option>
+
+                                <option value="Business">
+                                    Business
+                                </option>
+
+                                <option value="Technology">
+                                    Technology
+                                </option>
+
+                                <option value="Finance">
+                                    Finance
+                                </option>
+
+                                <option value="Personal Development">
+                                    Personal Development
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label for="course-level-input">
+                                Level
+                            </label>
+
+                            <input
+                                id="course-level-input"
+                                name="level"
+                                type="text"
+                                maxlength="100"
+                                placeholder="e.g. Beginner, Intermediate"
+                            >
 
                         </div>
 
                     </div>
 
 
-                    <div class="course-actions">
+                    <!-- COVER IMAGE -->
 
-                        <button
-                            type="button"
-                            class="course-action-button primary"
-                            data-action="personalise"
-                            data-id="${escapeAttribute(
-                                course.id
-                            )}"
+                    <div class="course-form-field">
+
+                        <label>
+                            Course cover
+                        </label>
+
+
+                        <div class="course-cover-tabs">
+
+                            <button
+                                type="button"
+                                class="cover-tab active"
+                                data-cover-tab="upload"
+                            >
+                                Upload from computer
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="cover-tab"
+                                data-cover-tab="url"
+                            >
+                                Use image URL
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="cover-tab-panel active"
+                            data-cover-panel="upload"
                         >
-                            Personalise
-                        </button>
+
+                            <label
+                                for="course-cover-file"
+                                class="course-upload-area"
+                                id="course-upload-area"
+                            >
+
+                                <div class="upload-icon">
+                                    ↑
+                                </div>
+
+                                <strong>
+                                    Choose an image
+                                </strong>
+
+                                <span>
+                                    JPG, JPEG, PNG or WebP
+                                </span>
+
+                            </label>
 
 
-                        <button
-                            type="button"
-                            class="course-action-button"
-                            data-action="edit"
-                            data-id="${escapeAttribute(
-                                course.id
-                            )}"
+                            <input
+                                id="course-cover-file"
+                                name="cover_file"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                hidden
+                            >
+
+                        </div>
+
+
+                        <div
+                            class="cover-tab-panel"
+                            data-cover-panel="url"
                         >
-                            Edit
-                        </button>
+
+                            <input
+                                id="course-cover-url"
+                                name="cover_url"
+                                type="url"
+                                placeholder="https://example.com/course-cover.jpg"
+                            >
+
+                            <small>
+                                Enter a publicly accessible image URL.
+                            </small>
+
+                        </div>
 
 
-                        ${
-                            status === "published"
-                                ? `
-                                    <button
-                                        type="button"
-                                        class="course-action-button"
-                                        data-action="unpublish"
-                                        data-id="${escapeAttribute(
-                                            course.id
-                                        )}"
-                                    >
-                                        Unpublish
-                                    </button>
-                                `
-                                : `
-                                    <button
-                                        type="button"
-                                        class="course-action-button"
-                                        data-action="publish"
-                                        data-id="${escapeAttribute(
-                                            course.id
-                                        )}"
-                                    >
-                                        Publish
-                                    </button>
-                                `
-                        }
+                        <div
+                            id="course-cover-preview"
+                            class="course-cover-preview"
+                            hidden
+                        >
+
+                            <img
+                                id="course-cover-preview-image"
+                                alt="Course cover preview"
+                            >
 
 
-                        ${
-                            status !== "archived"
-                                ? `
-                                    <button
-                                        type="button"
-                                        class="course-action-button danger"
-                                        data-action="archive"
-                                        data-id="${escapeAttribute(
-                                            course.id
-                                        )}"
-                                    >
-                                        Archive
-                                    </button>
-                                `
-                                : `
-                                    <button
-                                        type="button"
-                                        class="course-action-button"
-                                        data-action="restore"
-                                        data-id="${escapeAttribute(
-                                            course.id
-                                        )}"
-                                    >
-                                        Restore
-                                    </button>
-                                `
-                        }
+                            <button
+                                type="button"
+                                id="course-remove-cover"
+                                class="course-remove-cover"
+                            >
+                                Remove image
+                            </button>
+
+                        </div>
 
                     </div>
 
-                </article>
-            `;
 
+                    <div class="course-form-field">
+
+                        <label for="course-sort-input">
+                            Display order
+                        </label>
+
+                        <input
+                            id="course-sort-input"
+                            name="sort_order"
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="course-form-error"
+                        class="course-form-error"
+                        hidden
+                    ></div>
+
+
+                    <div class="course-form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="course-cancel-button"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="course-save-button"
+                        >
+                            Save Course
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        `;
+
+
+        document.body.appendChild(
+            courseModal
+        );
+
+
+        courseModal
+            .querySelector("#course-form")
+            .addEventListener(
+                "submit",
+                saveCourse
+            );
+
+
+        courseModal
+            .querySelector("#course-modal-close")
+            .addEventListener(
+                "click",
+                closeCourseModal
+            );
+
+
+        courseModal
+            .querySelector("#course-cancel-button")
+            .addEventListener(
+                "click",
+                closeCourseModal
+            );
+
+
+        courseModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target.dataset
+                        .closeModal === "true"
+                ) {
+
+                    closeCourseModal();
+                }
+            }
+        );
+
+
+        courseModal
+            .querySelectorAll(".cover-tab")
+            .forEach(tab => {
+
+                tab.addEventListener(
+                    "click",
+                    () => {
+
+                        switchCoverTab(
+                            tab.dataset.coverTab
+                        );
+                    }
+                );
+
+            });
+
+
+        courseModal
+            .querySelector("#course-cover-file")
+            .addEventListener(
+                "change",
+                handleCoverFile
+            );
+
+
+        courseModal
+            .querySelector("#course-cover-url")
+            .addEventListener(
+                "input",
+                handleCoverUrl
+            );
+
+
+        courseModal
+            .querySelector("#course-remove-cover")
+            .addEventListener(
+                "click",
+                removeCover
+            );
+
+
+        return courseModal;
+    }
+
+
+    /* =====================================================
+       OPEN COURSE MODAL
+    ===================================================== */
+
+    function openCourseModal(course = null) {
+
+        editingCourseId =
+            course?.id || null;
+
+
+        const modal =
+            getCourseModal();
+
+
+        const form =
+            modal.querySelector("#course-form");
+
+
+        const title =
+            modal.querySelector(
+                "#course-modal-title"
+            );
+
+
+        form.reset();
+
+        clearFormError();
+
+        clearCoverPreview();
+
+
+        title.textContent =
+            course
+                ? "Edit Course"
+                : "Create Course";
+
+
+        form.elements.title.value =
+            course?.title || "";
+
+
+        form.elements.description.value =
+            course?.description || "";
+
+
+        form.elements.category.value =
+            course?.category || "";
+
+
+        form.elements.level.value =
+            course?.level || "";
+
+
+        form.elements.sort_order.value =
+            course?.sort_order ?? "";
+
+
+        if (course?.cover_image) {
+
+            switchCoverTab("url");
+
+            form.elements.cover_url.value =
+                course.cover_image;
+
+            showCoverPreview(
+                course.cover_image
+            );
+
+        } else {
+
+            switchCoverTab("upload");
         }
 
 
-        function attachCourseActions() {
-
-            $$(".course-action-button")
-                .forEach(button => {
-
-                    button.addEventListener(
-                        "click",
-                        async () => {
-
-                            const action =
-                                button.dataset.action;
-
-                            const id =
-                                button.dataset.id;
+        modal.classList.add("open");
 
 
-                            const course =
-                                allCourses.find(
-                                    item =>
-                                        String(item.id) ===
-                                        String(id)
-                                );
+        document.body.classList.add(
+            "modal-open"
+        );
 
 
-                            if (!course) return;
+        setTimeout(() => {
+
+            form.elements.title.focus();
+
+        }, 50);
+    }
 
 
-                            if (
-                                action ===
-                                "edit"
-                            ) {
+    /* =====================================================
+       CLOSE COURSE MODAL
+    ===================================================== */
 
-                                openCourseModal(
-                                    course
-                                );
+    function closeCourseModal() {
 
-                                return;
-                            }
+        if (!courseModal) return;
 
 
-                            if (
-                                action ===
-                                "personalise"
-                            ) {
-
-                                openCourseBuilder(
-                                    course.id
-                                );
-
-                                return;
-                            }
+        courseModal.classList.remove(
+            "open"
+        );
 
 
-                            if (
-                                action ===
-                                "publish"
-                            ) {
-
-                                await updateCourseStatus(
-                                    course,
-                                    "published"
-                                );
-
-                                return;
-                            }
+        document.body.classList.remove(
+            "modal-open"
+        );
 
 
-                            if (
-                                action ===
-                                "unpublish"
-                            ) {
-
-                                await updateCourseStatus(
-                                    course,
-                                    "draft"
-                                );
-
-                                return;
-                            }
+        editingCourseId =
+            null;
 
 
-                            if (
-                                action ===
-                                "archive"
-                            ) {
-
-                                await updateCourseStatus(
-                                    course,
-                                    "archived"
-                                );
-
-                                return;
-                            }
+        clearFormError();
+    }
 
 
-                            if (
-                                action ===
-                                "restore"
-                            ) {
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
 
-                                await updateCourseStatus(
-                                    course,
-                                    "draft"
-                                );
+    document.addEventListener(
+        "keydown",
+        event => {
 
-                            }
+            if (
+                event.key === "Escape" &&
+                courseModal &&
+                courseModal.classList.contains("open")
+            ) {
 
-                        }
-                    );
+                closeCourseModal();
 
-                });
+                return;
+            }
 
+
+            if (
+                event.key === "Escape" &&
+                carouselModal
+            ) {
+
+                closeCarouselModal();
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       COVER TABS
+    ===================================================== */
+
+    function switchCoverTab(tabName) {
+
+        if (!courseModal) return;
+
+
+        courseModal
+            .querySelectorAll(".cover-tab")
+            .forEach(tab => {
+
+                tab.classList.toggle(
+                    "active",
+                    tab.dataset.coverTab ===
+                    tabName
+                );
+            });
+
+
+        courseModal
+            .querySelectorAll(".cover-tab-panel")
+            .forEach(panel => {
+
+                panel.classList.toggle(
+                    "active",
+                    panel.dataset.coverPanel ===
+                    tabName
+                );
+            });
+    }
+
+
+    /* =====================================================
+       COVER FILE
+    ===================================================== */
+
+    function handleCoverFile(event) {
+
+        const file =
+            event.target.files?.[0];
+
+
+        if (!file) return;
+
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (!allowedTypes.includes(file.type)) {
+
+            showFormError(
+                "Please select a JPG, PNG or WebP image."
+            );
+
+            event.target.value = "";
+
+            return;
         }
 
 
-        async function updateCourseStatus(
-            course,
-            status
+        if (file.size > 5 * 1024 * 1024) {
+
+            showFormError(
+                "The cover image must be smaller than 5 MB."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        clearFormError();
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = () => {
+
+            showCoverPreview(
+                reader.result
+            );
+        };
+
+
+        reader.readAsDataURL(file);
+    }
+
+
+    /* =====================================================
+       COVER URL
+    ===================================================== */
+
+    function handleCoverUrl(event) {
+
+        const url =
+            event.target.value.trim();
+
+
+        if (!url) {
+
+            clearCoverPreview();
+
+            return;
+        }
+
+
+        showCoverPreview(url);
+    }
+
+
+    /* =====================================================
+       COVER PREVIEW
+    ===================================================== */
+
+    function showCoverPreview(src) {
+
+        if (!courseModal) return;
+
+
+        const preview =
+            courseModal.querySelector(
+                "#course-cover-preview"
+            );
+
+
+        const image =
+            courseModal.querySelector(
+                "#course-cover-preview-image"
+            );
+
+
+        if (!src) {
+
+            clearCoverPreview();
+
+            return;
+        }
+
+
+        image.src =
+            src;
+
+
+        preview.hidden =
+            false;
+    }
+
+
+    function clearCoverPreview() {
+
+        if (!courseModal) return;
+
+
+        const preview =
+            courseModal.querySelector(
+                "#course-cover-preview"
+            );
+
+
+        const image =
+            courseModal.querySelector(
+                "#course-cover-preview-image"
+            );
+
+
+        preview.hidden =
+            true;
+
+
+        image.removeAttribute(
+            "src"
+        );
+    }
+
+
+    function removeCover() {
+
+        if (!courseModal) return;
+
+
+        const fileInput =
+            courseModal.querySelector(
+                "#course-cover-file"
+            );
+
+
+        const urlInput =
+            courseModal.querySelector(
+                "#course-cover-url"
+            );
+
+
+        fileInput.value = "";
+
+        urlInput.value = "";
+
+
+        clearCoverPreview();
+    }
+
+
+    /* =====================================================
+       SAVE COURSE
+    ===================================================== */
+
+    async function saveCourse(event) {
+
+        event.preventDefault();
+
+
+        const form =
+            event.currentTarget;
+
+
+        const saveButton =
+            $("#course-save-button");
+
+
+        clearFormError();
+
+
+        const formData =
+            new FormData(form);
+
+
+        const title =
+            String(
+                formData.get("title") || ""
+            ).trim();
+
+
+        const description =
+            String(
+                formData.get("description") || ""
+            ).trim();
+
+
+        const category =
+            String(
+                formData.get("category") || ""
+            ).trim();
+
+
+        const level =
+            String(
+                formData.get("level") || ""
+            ).trim();
+
+
+        const coverUrl =
+            String(
+                formData.get("cover_url") || ""
+            ).trim();
+
+
+        const coverFile =
+            formData.get("cover_file");
+
+
+        const sortOrderRaw =
+            String(
+                formData.get("sort_order") || ""
+            ).trim();
+
+
+        const sortOrder =
+            sortOrderRaw === ""
+                ? 0
+                : Number(sortOrderRaw);
+
+
+        if (!title) {
+
+            showFormError(
+                "Course title is required."
+            );
+
+            return;
+        }
+
+
+        if (
+            Number.isNaN(sortOrder) ||
+            sortOrder < 0
         ) {
 
-            try {
+            showFormError(
+                "Display order must be a valid number."
+            );
+
+            return;
+        }
+
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.textContent =
+                editingCourseId
+                    ? "Saving..."
+                    : "Creating...";
+        }
+
+
+        try {
+
+            let finalCoverUrl =
+                coverUrl || null;
+
+
+            if (
+                coverFile &&
+                coverFile instanceof File &&
+                coverFile.size > 0
+            ) {
+
+                finalCoverUrl =
+                    await uploadCourseCover(
+                        coverFile
+                    );
+            }
+
+
+            const courseData = {
+
+                title,
+
+                description:
+                    description || null,
+
+                category:
+                    category || null,
+
+                level:
+                    level || null,
+
+                cover_image:
+                    finalCoverUrl,
+
+                sort_order:
+                    sortOrder
+            };
+
+
+            if (editingCourseId) {
 
                 const {
                     error
                 } =
                     await client
                         .from("courses")
-                        .update({
-                            status,
-                            updated_at:
-                                new Date()
-                                    .toISOString(),
-                            archived_at:
-                                status ===
-                                "archived"
-                                    ? new Date()
-                                        .toISOString()
-                                    : null
-                        })
+                        .update(courseData)
                         .eq(
                             "id",
-                            course.id
+                            editingCourseId
                         );
 
 
                 if (error) throw error;
 
+            } else {
 
-                await loadCourses();
+                courseData.status =
+                    "draft";
 
-                await loadDashboard();
 
-            } catch (error) {
-
-                showError(
-                    error.message ||
-                    "Unable to update course."
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           COURSE MODAL
-        ===================================================== */
-
-        function openCourseModal(
-            course = null
-        ) {
-
-            editingCourseId =
-                course?.id ||
-                null;
-
-
-            if (courseModal) {
-
-                courseModal.remove();
-
-            }
-
-
-            courseModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            courseModal.className =
-                "course-modal";
-
-
-            courseModal.innerHTML = `
-
-                <div
-                    class="course-modal-backdrop"
-                ></div>
-
-
-                <div
-                    class="course-modal-dialog"
-                    role="dialog"
-                    aria-modal="true"
-                >
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                COURSE MANAGEMENT
-                            </div>
-
-                            <h2>
-                                ${
-                                    course
-                                        ? "Edit Course"
-                                        : "Create Course"
-                                }
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-course-modal"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <form
-                        id="course-form"
-                        class="course-form"
-                        novalidate
-                    >
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Course Title *
-                            </label>
-
-                            <input
-                                id="course-title-input"
-                                type="text"
-                                maxlength="200"
-                                required
-                                value="${escapeAttribute(
-                                    course?.title ||
-                                    ""
-                                )}"
-                                placeholder="Example: English Beginner"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Description
-                            </label>
-
-                            <textarea
-                                id="course-description-input"
-                                maxlength="5000"
-                                placeholder="Describe this course."
-                            >${escapeHTML(
-                                course?.description ||
-                                ""
-                            )}</textarea>
-
-                        </div>
-
-
-                        <div class="course-form-grid">
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Category
-                                </label>
-
-                                <input
-                                    id="course-category-input"
-                                    type="text"
-                                    value="${escapeAttribute(
-                                        course?.category ||
-                                        ""
-                                    )}"
-                                    placeholder="Language"
-                                >
-
-                            </div>
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Level
-                                </label>
-
-                                <input
-                                    id="course-level-input"
-                                    type="text"
-                                    value="${escapeAttribute(
-                                        course?.level ||
-                                        ""
-                                    )}"
-                                    placeholder="A1"
-                                >
-
-                            </div>
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Language
-                                </label>
-
-                                <input
-                                    id="course-language-input"
-                                    type="text"
-                                    value="${escapeAttribute(
-                                        course?.language ||
-                                        ""
-                                    )}"
-                                    placeholder="English"
-                                >
-
-                            </div>
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Status
-                                </label>
-
-                                <select id="course-status-input">
-
-                                    <option
-                                        value="draft"
-                                        ${
-                                            (
-                                                course?.status ||
-                                                "draft"
-                                            ) === "draft"
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        Draft
-                                    </option>
-
-                                    <option
-                                        value="published"
-                                        ${
-                                            course?.status ===
-                                            "published"
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        Published
-                                    </option>
-
-                                    <option
-                                        value="archived"
-                                        ${
-                                            course?.status ===
-                                            "archived"
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        Archived
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Course Cover
-                            </label>
-
-                            <div class="file-drop">
-
-                                <input
-                                    id="course-cover-input"
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/webp"
-                                >
-
-                                <strong>
-                                    Choose a course image
-                                </strong>
-
-                                <span>
-                                    PNG, JPG or WebP
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="course-form-error"
-                            class="course-form-error"
-                            hidden
-                        ></div>
-
-
-                        <div class="course-form-actions">
-
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancel-course-modal"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="primary-button"
-                                id="course-save-button"
-                            >
-                                ${
-                                    course
-                                        ? "Save Changes"
-                                        : "Create Course"
-                                }
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                courseModal
-            );
-
-
-            requestAnimationFrame(
-                () =>
-                    courseModal.classList.add(
-                        "open"
-                    )
-            );
-
-
-            document.body.classList.add(
-                "modal-open"
-            );
-
-
-            $("#close-course-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            courseModal
-                        )
-                );
-
-
-            $("#cancel-course-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            courseModal
-                        )
-                );
-
-
-            $(".course-modal-backdrop")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            courseModal
-                        )
-                );
-
-
-            $("#course-form")
-                ?.addEventListener(
-                    "submit",
-                    saveCourse
-                );
-
-        }
-
-
-        async function saveCourse(
-            event
-        ) {
-
-            event.preventDefault();
-
-
-            const title =
-                $("#course-title-input")
-                    ?.value
-                    .trim();
-
-
-            const description =
-                $("#course-description-input")
-                    ?.value
-                    .trim();
-
-
-            const category =
-                $("#course-category-input")
-                    ?.value
-                    .trim();
-
-
-            const level =
-                $("#course-level-input")
-                    ?.value
-                    .trim();
-
-
-            const language =
-                $("#course-language-input")
-                    ?.value
-                    .trim();
-
-
-            const status =
-                $("#course-status-input")
-                    ?.value ||
-                "draft";
-
-
-            const errorElement =
-                $("#course-form-error");
-
-
-            const saveButton =
-                $("#course-save-button");
-
-
-            if (!title) {
-
-                if (errorElement) {
-
-                    errorElement.textContent =
-                        "Course title is required.";
-
-                    errorElement.hidden =
-                        false;
-
-                }
-
-                return;
-            }
-
-
-            try {
-
-                saveButton.disabled =
-                    true;
-
-
-                let coverImage =
-                    null;
-
-
-                const file =
-                    $("#course-cover-input")
-                        ?.files?.[0];
-
-
-                if (
-                    editingCourseId
-                ) {
-
-                    const existing =
-                        allCourses.find(
-                            item =>
-                                String(item.id) ===
-                                String(
-                                    editingCourseId
-                                )
-                        );
-
-                    coverImage =
-                        existing?.cover_image ||
-                        null;
-
-                }
-
-
-                if (file) {
-
-                    coverImage =
-                        await uploadFile(
-                            file,
-                            "course-covers"
-                        );
-
-                }
-
-
-                const payload = {
-
-                    title,
-
-                    description,
-
-                    category,
-
-                    level,
-
-                    language,
-
-                    status,
-
-                    cover_image:
-                        coverImage,
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
-
-                };
-
-
-                let result;
-
-
-                if (
-                    editingCourseId
-                ) {
-
-                    result =
-                        await client
-                            .from("courses")
-                            .update(payload)
-                            .eq(
-                                "id",
-                                editingCourseId
-                            )
-                            .select()
-                            .single();
-
-                } else {
-
-                    const {
-                        data: {
-                            user
-                        } =
-                            await client.auth
-                                .getUser();
-
-
-                    if (!user) {
-
-                        throw new Error(
-                            "Your session has expired."
-                        );
-
-                    }
-
-
-                    payload.teacher_id =
-                        user.id;
-
-
-                    result =
-                        await client
-                            .from("courses")
-                            .insert(
-                                payload
-                            )
-                            .select()
-                            .single();
-
-                }
-
-
-                if (result.error) {
-
-                    throw result.error;
-
-                }
-
-
-                closeModalElement(
-                    courseModal
-                );
-
-
-                await loadCourses();
-
-                await loadDashboard();
-
-            } catch (error) {
-
-                console.error(
-                    "Course save error:",
-                    error
-                );
-
-
-                if (errorElement) {
-
-                    errorElement.textContent =
-                        error.message ||
-                        "Could not save course.";
-
-                    errorElement.hidden =
-                        false;
-
-                }
-
-            } finally {
-
-                if (saveButton) {
-
-                    saveButton.disabled =
-                        false;
-
-                }
-
-            }
-
-        }
-
-
-        /* =====================================================
-           FILE UPLOAD
-        ===================================================== */
-
-        async function uploadFile(
-            file,
-            bucket,
-            folder = ""
-        ) {
-
-            const extension =
-                file.name
-                    .split(".")
-                    .pop()
-                    .toLowerCase();
-
-
-            const safeName =
-                file.name
-                    .replace(
-                        /[^a-zA-Z0-9._-]/g,
-                        "-"
+                courseData.slug =
+                    await createUniqueSlug(
+                        title
                     );
 
 
-            const path =
-                `${folder ? folder + "/" : ""}` +
-                `${Date.now()}-${crypto.randomUUID()}` +
-                `-${safeName}`;
+                const {
+                    error
+                } =
+                    await client
+                        .from("courses")
+                        .insert(
+                            courseData
+                        );
 
+
+                if (error) throw error;
+            }
+
+
+            closeCourseModal();
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not save course:",
+                error
+            );
+
+
+            showFormError(
+                error.message ||
+                "Could not save the course."
+            );
+
+        } finally {
+
+            if (saveButton) {
+
+                saveButton.disabled =
+                    false;
+
+                saveButton.textContent =
+                    "Save Course";
+            }
+        }
+    }
+
+
+    /* =====================================================
+       UPLOAD COURSE COVER
+    ===================================================== */
+
+    async function uploadCourseCover(file) {
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+        const randomName =
+            `${crypto.randomUUID()}.${extension}`;
+
+
+        const filePath =
+            `course-covers/${randomName}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await client.storage
+                .from("course-covers")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        cacheControl: "3600",
+                        upsert: false,
+                        contentType: file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            throw new Error(
+                `Cover upload failed: ${uploadError.message}`
+            );
+        }
+
+
+        const {
+            data
+        } =
+            client.storage
+                .from("course-covers")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        if (!data?.publicUrl) {
+
+            throw new Error(
+                "The cover was uploaded but its public URL could not be generated."
+            );
+        }
+
+
+        return data.publicUrl;
+    }
+
+
+    /* =====================================================
+       PUBLISH
+    ===================================================== */
+
+    async function publishCourse(course) {
+
+        if (
+            !confirm(
+                `Publish "${course.title}"?`
+            )
+        ) return;
+
+
+        await updateCourseStatus(
+            course,
+            "published"
+        );
+    }
+
+
+    /* =====================================================
+       UNPUBLISH
+    ===================================================== */
+
+    async function unpublishCourse(course) {
+
+        if (
+            !confirm(
+                `Unpublish "${course.title}" and return it to Draft?`
+            )
+        ) return;
+
+
+        await updateCourseStatus(
+            course,
+            "draft"
+        );
+    }
+
+
+    /* =====================================================
+       ARCHIVE
+    ===================================================== */
+
+    async function archiveCourse(course) {
+
+        if (
+            !confirm(
+                `Archive "${course.title}"?\n\nThe course will not be permanently deleted.`
+            )
+        ) return;
+
+
+        try {
 
             const {
                 error
             } =
-                await client.storage
-                    .from(bucket)
-                    .upload(
-                        path,
-                        file,
-                        {
-                            cacheControl:
-                                "3600",
-                            upsert:
-                                false,
-                            contentType:
-                                file.type ||
-                                `application/${extension}`
-                        }
+                await client
+                    .from("courses")
+                    .update({
+                        status: "archived",
+                        archived_at:
+                            new Date().toISOString()
+                    })
+                    .eq(
+                        "id",
+                        course.id
                     );
 
 
             if (error) throw error;
 
 
-            const {
-                data
-            } =
-                client.storage
-                    .from(bucket)
-                    .getPublicUrl(path);
+            await refreshCoursesAndDashboard();
 
 
-            return data.publicUrl;
+        } catch (error) {
 
-        }
-
-
-        /* =====================================================
-           BUILDER
-        ===================================================== */
-
-        function setupBuilderControls() {
-
-            $("#builder-course-select")
-                ?.addEventListener(
-                    "change",
-                    async event => {
-
-                        const courseId =
-                            event.target.value;
-
-                        if (!courseId) {
-
-                            resetBuilder();
-
-                            return;
-                        }
-
-                        await openCourseBuilder(
-                            courseId
-                        );
-
-                    }
-                );
-
-
-            $("#add-module-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openModuleModal()
-                );
-
-
-            $("#edit-module-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openModuleModal(
-                            selectedModule
-                        )
-                );
-
-
-            $("#delete-module-button")
-                ?.addEventListener(
-                    "click",
-                    deleteSelectedModule
-                );
-
-
-            $("#add-lesson-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openLessonModal()
-                );
-
-
-            $("#edit-lesson-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openLessonModal(
-                            selectedLesson
-                        )
-                );
-
-
-            $("#delete-lesson-button")
-                ?.addEventListener(
-                    "click",
-                    deleteSelectedLesson
-                );
-
-
-            $("#add-content-button")
-                ?.addEventListener(
-                    "click",
-                    openContentTypeModal
-                );
-
-        }
-
-
-        async function loadBuilderCourses() {
-
-            const select =
-                $("#builder-course-select");
-
-            if (!select) return;
-
-
-            try {
-
-                const {
-                    data,
-                    error
-                } =
-                    await client
-                        .from("courses")
-                        .select(
-                            "id,title,status"
-                        )
-                        .neq(
-                            "status",
-                            "archived"
-                        )
-                        .order(
-                            "title",
-                            {
-                                ascending: true
-                            }
-                        );
-
-
-                if (error) throw error;
-
-
-                const current =
-                    select.value;
-
-
-                select.innerHTML =
-                    `<option value="">
-                        Select a course...
-                    </option>` +
-                    (data || [])
-                        .map(
-                            course =>
-                                `
-                                <option
-                                    value="${escapeAttribute(
-                                        course.id
-                                    )}"
-                                >
-                                    ${escapeHTML(
-                                        course.title
-                                    )}
-                                </option>
-                                `
-                        )
-                        .join("");
-
-
-                if (current) {
-
-                    select.value =
-                        current;
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Builder courses:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        async function openCourseBuilder(
-            courseId
-        ) {
-
-            const course =
-                allCourses.find(
-                    item =>
-                        String(item.id) ===
-                        String(courseId)
-                );
-
-
-            if (!course) {
-
-                await loadCourses();
-
-                builderCourse =
-                    allCourses.find(
-                        item =>
-                            String(item.id) ===
-                            String(courseId)
-                    );
-
-            } else {
-
-                builderCourse =
-                    course;
-
-            }
-
-
-            if (!builderCourse) {
-
-                showError(
-                    "Course could not be loaded."
-                );
-
-                return;
-            }
-
-
-            const select =
-                $("#builder-course-select");
-
-
-            if (select) {
-
-                select.value =
-                    builderCourse.id;
-
-            }
-
-
-            await loadBuilderStructure();
-
-            showSection("personalise");
-
-        }
-
-
-        async function loadBuilderStructure() {
-
-            if (!builderCourse) return;
-
-
-            $("#course-builder")
-                ?.classList.remove(
-                    "disabled"
-                );
-
-
-            $("#add-module-button")
-                ?.removeAttribute(
-                    "disabled"
-                );
-
-
-            $("#builder-course-title")
-                &&
-                (
-                    $("#builder-course-title")
-                        .textContent =
-                        builderCourse.title
-                );
-
-
-            const summary =
-                $("#builder-course-summary");
-
-
-            if (summary) {
-
-                summary.innerHTML = `
-                    <span>
-                        ${escapeHTML(
-                            builderCourse.level ||
-                            "Course"
-                        )}
-                        ·
-                        ${escapeHTML(
-                            builderCourse.status ||
-                            "draft"
-                        )}
-                        ·
-                        Build modules, lessons and content
-                    </span>
-                `;
-
-            }
-
-
-            const {
-                data,
+            console.error(
+                "Could not archive course:",
                 error
-            } =
-                await client
-                    .from("modules")
-                    .select("*")
-                    .eq(
-                        "course_id",
-                        builderCourse.id
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(
-                    "Could not load modules:",
-                    error
-                );
-
-
-                $("#builder-tree").innerHTML =
-                    `<div class="builder-empty">
-                        ${escapeHTML(
-                            error.message
-                        )}
-                    </div>`;
-
-                return;
-
-            }
-
-
-            builderModules =
-                data || [];
-
-
-            for (
-                const module
-                of builderModules
-            ) {
-
-                await loadModuleLessons(
-                    module
-                );
-
-            }
-
-
-            selectedModule =
-                null;
-
-            selectedLesson =
-                null;
-
-
-            renderBuilderTree();
-
-            showBuilderWelcome();
-
-        }
-
-
-        async function loadModuleLessons(
-            module
-        ) {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("lessons")
-                    .select("*")
-                    .eq(
-                        "module_id",
-                        module.id
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(
-                    "Lessons:",
-                    error
-                );
-
-                module.lessons = [];
-
-                return;
-
-            }
-
-
-            module.lessons =
-                data || [];
-
-
-            for (
-                const lesson
-                of module.lessons
-            ) {
-
-                await loadLessonContent(
-                    lesson
-                );
-
-            }
-
-        }
-
-
-        async function loadLessonContent(
-            lesson
-        ) {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("content")
-                    .select("*")
-                    .eq(
-                        "lesson_id",
-                        lesson.id
-                    )
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(
-                    "Content:",
-                    error
-                );
-
-                lesson.content =
-                    [];
-
-                return;
-
-            }
-
-
-            lesson.content =
-                data || [];
-
-        }
-
-
-        function renderBuilderTree() {
-
-            const tree =
-                $("#builder-tree");
-
-            if (!tree) return;
-
-
-            if (!builderModules.length) {
-
-                tree.innerHTML =
-                    `<div class="builder-empty">
-                        No modules yet.<br>
-                        Create your first module.
-                    </div>`;
-
-                return;
-            }
-
-
-            tree.innerHTML =
-                builderModules
-                    .map(
-                        (module, moduleIndex) => {
-
-                            const active =
-                                selectedModule &&
-                                String(
-                                    selectedModule.id
-                                ) ===
-                                String(
-                                    module.id
-                                );
-
-
-                            return `
-                                <div class="tree-module">
-
-                                    <div
-                                        class="
-                                            tree-module-header
-                                            ${
-                                                active
-                                                    ? "active"
-                                                    : ""
-                                            }
-                                        "
-                                        data-module-id="${escapeAttribute(
-                                            module.id
-                                        )}"
-                                    >
-
-                                        <span class="tree-module-toggle">
-                                            ▾
-                                        </span>
-
-                                        <span class="tree-module-title">
-                                            ${escapeHTML(
-                                                module.title
-                                            )}
-                                        </span>
-
-                                        <button
-                                            type="button"
-                                            class="tree-module-menu"
-                                            data-module-edit="${escapeAttribute(
-                                                module.id
-                                            )}"
-                                            aria-label="Edit module"
-                                        >
-                                            ⋯
-                                        </button>
-
-                                    </div>
-
-
-                                    <div class="tree-lessons">
-
-                                        ${
-                                            module.lessons?.length
-                                                ? module.lessons
-                                                    .map(
-                                                        (
-                                                            lesson,
-                                                            lessonIndex
-                                                        ) =>
-                                                            `
-                                                            <button
-                                                                type="button"
-                                                                class="
-                                                                    tree-lesson
-                                                                    ${
-                                                                        selectedLesson &&
-                                                                        String(
-                                                                            selectedLesson.id
-                                                                        ) ===
-                                                                        String(
-                                                                            lesson.id
-                                                                        )
-                                                                            ? "active"
-                                                                            : ""
-                                                                    }
-                                                                "
-                                                                data-lesson-id="${escapeAttribute(
-                                                                    lesson.id
-                                                                )}"
-                                                                data-module-id="${escapeAttribute(
-                                                                    module.id
-                                                                )}"
-                                                            >
-
-                                                                ${escapeHTML(
-                                                                    lesson.title
-                                                                )}
-
-                                                                <span class="tree-lesson-count">
-                                                                    ${
-                                                                        lesson.content?.length ||
-                                                                        0
-                                                                    }
-                                                                </span>
-
-                                                            </button>
-                                                            `
-                                                    )
-                                                    .join("")
-                                                : `
-                                                    <div
-                                                        style="
-                                                            padding:8px;
-                                                            color:#98a2b3;
-                                                            font-size:9px;
-                                                        "
-                                                    >
-                                                        No lessons
-                                                    </div>
-                                                `
-                                        }
-
-                                    </div>
-
-                                </div>
-                            `;
-
-                        }
-                    )
-                    .join("");
-
-
-            $$(".tree-module-header")
-                .forEach(
-                    element => {
-
-                        element.addEventListener(
-                            "click",
-                            event => {
-
-                                if (
-                                    event.target.closest(
-                                        "[data-module-edit]"
-                                    )
-                                ) {
-
-                                    return;
-
-                                }
-
-
-                                const module =
-                                    builderModules.find(
-                                        item =>
-                                            String(
-                                                item.id
-                                            ) ===
-                                            String(
-                                                element.dataset.moduleId
-                                            )
-                                    );
-
-
-                                if (!module) return;
-
-
-                                selectedModule =
-                                    module;
-
-                                selectedLesson =
-                                    null;
-
-                                renderBuilderTree();
-
-                                renderModuleEditor();
-
-                            }
-                        );
-
-                    }
-                );
-
-
-            $$("[data-module-edit]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            event => {
-
-                                event.stopPropagation();
-
-                                const module =
-                                    builderModules.find(
-                                        item =>
-                                            String(
-                                                item.id
-                                            ) ===
-                                            String(
-                                                button.dataset.moduleEdit
-                                            )
-                                    );
-
-
-                                if (module) {
-
-                                    openModuleModal(
-                                        module
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    }
-                );
-
-
-            $$(".tree-lesson")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            () => {
-
-                                const module =
-                                    builderModules.find(
-                                        item =>
-                                            String(
-                                                item.id
-                                            ) ===
-                                            String(
-                                                button.dataset.moduleId
-                                            )
-                                    );
-
-
-                                const lesson =
-                                    module?.lessons?.find(
-                                        item =>
-                                            String(
-                                                item.id
-                                            ) ===
-                                            String(
-                                                button.dataset.lessonId
-                                            )
-                                    );
-
-
-                                if (
-                                    !module ||
-                                    !lesson
-                                ) return;
-
-
-                                selectedModule =
-                                    module;
-
-                                selectedLesson =
-                                    lesson;
-
-                                renderBuilderTree();
-
-                                renderLessonEditor();
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        function showBuilderWelcome() {
-
-            $("#builder-welcome")
-                ?.classList.remove(
-                    "admin-hidden"
-                );
-
-            $("#module-editor")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-            $("#lesson-editor")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-        }
-
-
-        function renderModuleEditor() {
-
-            if (!selectedModule) return;
-
-
-            $("#builder-welcome")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-
-            $("#lesson-editor")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-
-            $("#module-editor")
-                ?.classList.remove(
-                    "admin-hidden"
-                );
-
-
-            $("#module-editor-title")
-                &&
-                (
-                    $("#module-editor-title")
-                        .textContent =
-                        selectedModule.title
-                );
-
-
-            const list =
-                $("#lesson-list");
-
-
-            if (!list) return;
-
-
-            if (
-                !selectedModule.lessons?.length
-            ) {
-
-                list.innerHTML =
-                    `<div class="content-empty">
-                        This module has no lessons yet.
-                    </div>`;
-
-                return;
-
-            }
-
-
-            list.innerHTML =
-                selectedModule.lessons
-                    .map(
-                        (
-                            lesson,
-                            index
-                        ) =>
-                            `
-                            <article
-                                class="
-                                    lesson-card
-                                    ${
-                                        selectedLesson &&
-                                        String(
-                                            selectedLesson.id
-                                        ) ===
-                                        String(
-                                            lesson.id
-                                        )
-                                            ? "active"
-                                            : ""
-                                    }
-                                "
-                                data-editor-lesson="${escapeAttribute(
-                                    lesson.id
-                                )}"
-                            >
-
-                                <div class="lesson-number">
-                                    ${index + 1}
-                                </div>
-
-                                <div class="lesson-card-content">
-
-                                    <div class="lesson-card-title">
-                                        ${escapeHTML(
-                                            lesson.title
-                                        )}
-                                    </div>
-
-                                    <div class="lesson-card-description">
-                                        ${
-                                            escapeHTML(
-                                                lesson.description ||
-                                                "No description."
-                                            )
-                                        }
-                                        ·
-                                        ${
-                                            lesson.content?.length ||
-                                            0
-                                        }
-                                        content blocks
-                                    </div>
-
-                                </div>
-
-                                <div class="lesson-card-arrow">
-                                    →
-                                </div>
-
-                            </article>
-                            `
-                    )
-                    .join("");
-
-
-            $$("[data-editor-lesson]")
-                .forEach(
-                    element => {
-
-                        element.addEventListener(
-                            "click",
-                            () => {
-
-                                const lesson =
-                                    selectedModule
-                                        .lessons
-                                        .find(
-                                            item =>
-                                                String(
-                                                    item.id
-                                                ) ===
-                                                String(
-                                                    element.dataset
-                                                        .editorLesson
-                                                )
-                                        );
-
-
-                                if (!lesson) return;
-
-
-                                selectedLesson =
-                                    lesson;
-
-                                renderBuilderTree();
-
-                                renderLessonEditor();
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        function renderLessonEditor() {
-
-            if (!selectedLesson) return;
-
-
-            $("#builder-welcome")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-
-            $("#module-editor")
-                ?.classList.add(
-                    "admin-hidden"
-                );
-
-
-            $("#lesson-editor")
-                ?.classList.remove(
-                    "admin-hidden"
-                );
-
-
-            $("#lesson-editor-title")
-                &&
-                (
-                    $("#lesson-editor-title")
-                        .textContent =
-                        selectedLesson.title
-                );
-
-
-            $("#lesson-editor-description")
-                &&
-                (
-                    $("#lesson-editor-description")
-                        .textContent =
-                        selectedLesson.description ||
-                        "Build this lesson using learning content blocks."
-                );
-
-
-            renderContentList();
-
-        }
-
-
-        /* =====================================================
-           MODULE MODAL
-        ===================================================== */
-
-        function openModuleModal(
-            module = null
-        ) {
-
-            if (!builderCourse) {
-
-                showError(
-                    "Select a course first."
-                );
-
-                return;
-            }
-
-
-            if (moduleModal) {
-
-                moduleModal.remove();
-
-            }
-
-
-            moduleModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            moduleModal.className =
-                "course-modal";
-
-
-            moduleModal.innerHTML = `
-
-                <div class="course-modal-backdrop"></div>
-
-
-                <div class="course-modal-dialog">
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                COURSE STRUCTURE
-                            </div>
-
-                            <h2>
-                                ${
-                                    module
-                                        ? "Edit Module"
-                                        : "Create Module"
-                                }
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-module-modal"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <form
-                        id="module-form"
-                        class="course-form"
-                    >
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Module Title *
-                            </label>
-
-                            <input
-                                id="module-title-input"
-                                type="text"
-                                required
-                                maxlength="200"
-                                value="${escapeAttribute(
-                                    module?.title ||
-                                    ""
-                                )}"
-                                placeholder="Example: Getting Started"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Module Description
-                            </label>
-
-                            <textarea
-                                id="module-description-input"
-                                maxlength="2000"
-                                placeholder="Describe what students will learn in this module."
-                            >${escapeHTML(
-                                module?.description ||
-                                ""
-                            )}</textarea>
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Order
-                            </label>
-
-                            <input
-                                id="module-order-input"
-                                type="number"
-                                min="0"
-                                value="${escapeAttribute(
-                                    module?.sort_order ??
-                                    builderModules.length
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div
-                            id="module-form-error"
-                            class="course-form-error"
-                            hidden
-                        ></div>
-
-
-                        <div class="course-form-actions">
-
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancel-module-modal"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="primary-button"
-                            >
-                                ${
-                                    module
-                                        ? "Save Module"
-                                        : "Create Module"
-                                }
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                moduleModal
             );
 
 
-            requestAnimationFrame(
-                () =>
-                    moduleModal.classList.add(
-                        "open"
-                    )
+            alert(
+                error.message ||
+                "Could not archive the course."
             );
-
-
-            $("#close-module-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            moduleModal
-                        )
-                );
-
-
-            $("#cancel-module-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            moduleModal
-                        )
-                );
-
-
-            moduleModal
-                .querySelector(
-                    ".course-modal-backdrop"
-                )
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            moduleModal
-                        )
-                );
-
-
-            $("#module-form")
-                ?.addEventListener(
-                    "submit",
-                    event =>
-                        saveModule(
-                            event,
-                            module
-                        )
-                );
-
         }
-
-
-        async function saveModule(
-            event,
-            module
-        ) {
-
-            event.preventDefault();
-
-
-            const title =
-                $("#module-title-input")
-                    ?.value
-                    .trim();
-
-
-            const description =
-                $("#module-description-input")
-                    ?.value
-                    .trim();
-
-
-            const sortOrder =
-                Number(
-                    $("#module-order-input")
-                        ?.value ||
-                    0
-                );
-
-
-            const errorElement =
-                $("#module-form-error");
-
-
-            if (!title) {
-
-                errorElement.textContent =
-                    "Module title is required.";
-
-                errorElement.hidden =
-                    false;
-
-                return;
-
-            }
-
-
-            try {
-
-                const payload = {
-
-                    title,
-
-                    description,
-
-                    sort_order:
-                        Number.isFinite(
-                            sortOrder
-                        )
-                            ? sortOrder
-                            : 0,
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
-
-                };
-
-
-                let result;
-
-
-                if (module) {
-
-                    result =
-                        await client
-                            .from("modules")
-                            .update(
-                                payload
-                            )
-                            .eq(
-                                "id",
-                                module.id
-                            )
-                            .select()
-                            .single();
-
-                } else {
-
-                    result =
-                        await client
-                            .from("modules")
-                            .insert({
-
-                                ...payload,
-
-                                course_id:
-                                    builderCourse.id
-
-                            })
-                            .select()
-                            .single();
-
-                }
-
-
-                if (result.error) {
-
-                    throw result.error;
-
-                }
-
-
-                closeModalElement(
-                    moduleModal
-                );
-
-
-                await loadBuilderStructure();
-
-            } catch (error) {
-
-                console.error(
-                    "Module save:",
-                    error
-                );
-
-
-                errorElement.textContent =
-                    error.message ||
-                    "Could not save module.";
-
-                errorElement.hidden =
-                    false;
-
-            }
-
-        }
-
-
-        async function deleteSelectedModule() {
-
-            if (!selectedModule) return;
-
-
-            const confirmed =
-                confirm(
-                    `Delete "${selectedModule.title}" and all its lessons and content?`
-                );
-
-
-            if (!confirmed) return;
-
-
-            try {
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("modules")
-                        .delete()
-                        .eq(
-                            "id",
-                            selectedModule.id
-                        );
-
-
-                if (error) throw error;
-
-
-                selectedModule =
-                    null;
-
-                selectedLesson =
-                    null;
-
-
-                await loadBuilderStructure();
-
-
-            } catch (error) {
-
-                showError(
-                    error.message ||
-                    "Could not delete module."
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           LESSON MODAL
-        ===================================================== */
-
-        function openLessonModal(
-            lesson = null
-        ) {
-
-            if (!selectedModule) {
-
-                showError(
-                    "Select a module first."
-                );
-
-                return;
-            }
-
-
-            if (lessonModal) {
-
-                lessonModal.remove();
-
-            }
-
-
-            lessonModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            lessonModal.className =
-                "course-modal";
-
-
-            lessonModal.innerHTML = `
-
-                <div class="course-modal-backdrop"></div>
-
-
-                <div class="course-modal-dialog">
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                LESSON
-                            </div>
-
-                            <h2>
-                                ${
-                                    lesson
-                                        ? "Edit Lesson"
-                                        : "Create Lesson"
-                                }
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-lesson-modal"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <form
-                        id="lesson-form"
-                        class="course-form"
-                    >
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Lesson Title *
-                            </label>
-
-                            <input
-                                id="lesson-title-input"
-                                type="text"
-                                maxlength="200"
-                                required
-                                value="${escapeAttribute(
-                                    lesson?.title ||
-                                    ""
-                                )}"
-                                placeholder="Example: Introducing Yourself"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Lesson Description
-                            </label>
-
-                            <textarea
-                                id="lesson-description-input"
-                                maxlength="3000"
-                                placeholder="Explain what this lesson covers."
-                            >${escapeHTML(
-                                lesson?.description ||
-                                ""
-                            )}</textarea>
-
-                        </div>
-
-
-                        <div class="course-form-grid">
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Order
-                                </label>
-
-                                <input
-                                    id="lesson-order-input"
-                                    type="number"
-                                    min="0"
-                                    value="${escapeAttribute(
-                                        lesson?.sort_order ??
-                                        (
-                                            selectedModule
-                                                .lessons
-                                                ?.length ||
-                                            0
-                                        )
-                                    )}"
-                                >
-
-                            </div>
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Status
-                                </label>
-
-                                <select id="lesson-status-input">
-
-                                    <option
-                                        value="draft"
-                                        ${
-                                            (
-                                                lesson?.status ||
-                                                "draft"
-                                            ) ===
-                                            "draft"
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        Draft
-                                    </option>
-
-                                    <option
-                                        value="published"
-                                        ${
-                                            lesson?.status ===
-                                            "published"
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        Published
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="lesson-form-error"
-                            class="course-form-error"
-                            hidden
-                        ></div>
-
-
-                        <div class="course-form-actions">
-
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancel-lesson-modal"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="primary-button"
-                            >
-                                ${
-                                    lesson
-                                        ? "Save Lesson"
-                                        : "Create Lesson"
-                                }
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                lessonModal
-            );
-
-
-            requestAnimationFrame(
-                () =>
-                    lessonModal.classList.add(
-                        "open"
-                    )
-            );
-
-
-            $("#close-lesson-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            lessonModal
-                        )
-                );
-
-
-            $("#cancel-lesson-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            lessonModal
-                        )
-                );
-
-
-            lessonModal
-                .querySelector(
-                    ".course-modal-backdrop"
-                )
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            lessonModal
-                        )
-                );
-
-
-            $("#lesson-form")
-                ?.addEventListener(
-                    "submit",
-                    event =>
-                        saveLesson(
-                            event,
-                            lesson
-                        )
-                );
-
-        }
-
-
-        async function saveLesson(
-            event,
-            lesson
-        ) {
-
-            event.preventDefault();
-
-
-            const title =
-                $("#lesson-title-input")
-                    ?.value
-                    .trim();
-
-
-            const description =
-                $("#lesson-description-input")
-                    ?.value
-                    .trim();
-
-
-            const sortOrder =
-                Number(
-                    $("#lesson-order-input")
-                        ?.value ||
-                    0
-                );
-
-
-            const status =
-                $("#lesson-status-input")
-                    ?.value ||
-                "draft";
-
-
-            const errorElement =
-                $("#lesson-form-error");
-
-
-            if (!title) {
-
-                errorElement.textContent =
-                    "Lesson title is required.";
-
-                errorElement.hidden =
-                    false;
-
-                return;
-
-            }
-
-
-            try {
-
-                const payload = {
-
-                    title,
-
-                    description,
-
-                    sort_order:
-                        Number.isFinite(
-                            sortOrder
-                        )
-                            ? sortOrder
-                            : 0,
-
-                    status,
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
-
-                };
-
-
-                let result;
-
-
-                if (lesson) {
-
-                    result =
-                        await client
-                            .from("lessons")
-                            .update(
-                                payload
-                            )
-                            .eq(
-                                "id",
-                                lesson.id
-                            )
-                            .select()
-                            .single();
-
-                } else {
-
-                    result =
-                        await client
-                            .from("lessons")
-                            .insert({
-
-                                ...payload,
-
-                                module_id:
-                                    selectedModule.id
-
-                            })
-                            .select()
-                            .single();
-
-                }
-
-
-                if (result.error) {
-
-                    throw result.error;
-
-                }
-
-
-                closeModalElement(
-                    lessonModal
-                );
-
-
-                await loadBuilderStructure();
-
-
-                selectedModule =
-                    builderModules.find(
-                        item =>
-                            String(item.id) ===
-                            String(
-                                selectedModule?.id
-                            )
-                    ) ||
-                    builderModules[0] ||
-                    null;
-
-
-            } catch (error) {
-
-                console.error(
-                    "Lesson save:",
-                    error
-                );
-
-
-                errorElement.textContent =
-                    error.message ||
-                    "Could not save lesson.";
-
-                errorElement.hidden =
-                    false;
-
-            }
-
-        }
-
-
-        async function deleteSelectedLesson() {
-
-            if (!selectedLesson) return;
-
-
-            const confirmed =
-                confirm(
-                    `Delete "${selectedLesson.title}" and all its content?`
-                );
-
-
-            if (!confirmed) return;
-
-
-            try {
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("lessons")
-                        .delete()
-                        .eq(
-                            "id",
-                            selectedLesson.id
-                        );
-
-
-                if (error) throw error;
-
-
-                selectedLesson =
-                    null;
-
-
-                await loadBuilderStructure();
-
-            } catch (error) {
-
-                showError(
-                    error.message ||
-                    "Could not delete lesson."
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           CONTENT TYPE MODAL
-        ===================================================== */
-
-        function openContentTypeModal() {
-
-            if (!selectedLesson) {
-
-                showError(
-                    "Select a lesson first."
-                );
-
-                return;
-            }
-
-
-            if (contentModal) {
-
-                contentModal.remove();
-
-            }
-
-
-            contentModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            contentModal.className =
-                "course-modal";
-
-
-            const types = [
-
-                [
-                    "text",
-                    "T",
-                    "Text",
-                    "Reading, explanations and instructions."
-                ],
-
-                [
-                    "image",
-                    "▧",
-                    "Image",
-                    "Visual learning material."
-                ],
-
-                [
-                    "audio",
-                    "♫",
-                    "Audio",
-                    "Listening and pronunciation."
-                ],
-
-                [
-                    "video",
-                    "▶",
-                    "Video",
-                    "Video lessons and demonstrations."
-                ],
-
-                [
-                    "pdf",
-                    "▤",
-                    "PDF",
-                    "Documents and downloadable resources."
-                ],
-
-                [
-                    "exercise",
-                    "✓",
-                    "Exercise",
-                    "Practice activities."
-                ],
-
-                [
-                    "quiz",
-                    "?",
-                    "Quiz",
-                    "Questions and assessment."
-                ],
-
-                [
-                    "ai",
-                    "✦",
-                    "AI Interaction",
-                    "AI-powered learning activity."
-                ]
-
-            ];
-
-
-            contentModal.innerHTML = `
-
-                <div class="course-modal-backdrop"></div>
-
-
-                <div class="course-modal-dialog">
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                LESSON BUILDER
-                            </div>
-
-                            <h2>
-                                Add Content
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-content-type-modal"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <div class="course-form">
-
-                        <p
-                            style="
-                                color:#667085;
-                                font-size:11px;
-                                line-height:1.6;
-                                margin-bottom:18px;
-                            "
-                        >
-                            Choose the type of learning block
-                            you want to add to this lesson.
-                        </p>
-
-
-                        <div class="content-type-grid">
-
-                            ${
-                                types
-                                    .map(
-                                        type =>
-                                            `
-                                            <button
-                                                type="button"
-                                                class="content-type-option"
-                                                data-content-type="${type[0]}"
-                                            >
-
-                                                <div
-                                                    class="content-type-option-icon"
-                                                >
-                                                    ${type[1]}
-                                                </div>
-
-                                                <strong>
-                                                    ${type[2]}
-                                                </strong>
-
-                                                <span>
-                                                    ${type[3]}
-                                                </span>
-
-                                            </button>
-                                            `
-                                    )
-                                    .join("")
-                            }
-
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                contentModal
-            );
-
-
-            requestAnimationFrame(
-                () =>
-                    contentModal.classList.add(
-                        "open"
-                    )
-            );
-
-
-            $("#close-content-type-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            contentModal
-                        )
-                );
-
-
-            contentModal
-                .querySelector(
-                    ".course-modal-backdrop"
-                )
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            contentModal
-                        )
-                );
-
-
-            $$("[data-content-type]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            () => {
-
-                                const type =
-                                    button.dataset
-                                        .contentType;
-
-                                closeModalElement(
-                                    contentModal
-                                );
-
-                                openContentEditor(
-                                    type
-                                );
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        /* =====================================================
-           CONTENT EDITOR
-        ===================================================== */
-
-        function openContentEditor(
-            type,
-            content = null
-        ) {
-
-            const labels = {
-
-                text:
-                    [
-                        "Text",
-                        "Create written learning material."
-                    ],
-
-                image:
-                    [
-                        "Image",
-                        "Upload an image for the lesson."
-                    ],
-
-                audio:
-                    [
-                        "Audio",
-                        "Upload an audio recording."
-                    ],
-
-                video:
-                    [
-                        "Video",
-                        "Upload a video lesson."
-                    ],
-
-                pdf:
-                    [
-                        "PDF",
-                        "Upload a PDF resource."
-                    ],
-
-                exercise:
-                    [
-                        "Exercise",
-                        "Create a practice activity."
-                    ],
-
-                quiz:
-                    [
-                        "Quiz",
-                        "Create a structured quiz."
-                    ],
-
-                ai:
-                    [
-                        "AI Interaction",
-                        "Configure an AI-powered learning activity."
-                    ]
-
-            };
-
-
-            const label =
-                labels[type] ||
-                ["Content", "Learning content."];
-
-
-            const body =
-                content?.body ||
-                "";
-
-
-            const metadata =
-                content?.metadata ||
-                {};
-
-
-            if (contentModal) {
-
-                contentModal.remove();
-
-            }
-
-
-            contentModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            contentModal.className =
-                "course-modal";
-
-
-            contentModal.innerHTML = `
-
-                <div class="course-modal-backdrop"></div>
-
-
-                <div class="course-modal-dialog">
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                ${escapeHTML(
-                                    label[0]
-                                )}
-                            </div>
-
-                            <h2>
-                                ${
-                                    content
-                                        ? "Edit Content"
-                                        : "Add Content"
-                                }
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-content-editor"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <form
-                        id="content-editor-form"
-                        class="course-form"
-                    >
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Title
-                            </label>
-
-                            <input
-                                id="content-title-input"
-                                type="text"
-                                maxlength="200"
-                                value="${escapeAttribute(
-                                    content?.title ||
-                                    ""
-                                )}"
-                                placeholder="${escapeAttribute(
-                                    label[0]
-                                )}"
-                            >
-
-                        </div>
-
-
-                        ${
-                            type === "text"
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Content *
-                                        </label>
-
-                                        <textarea
-                                            id="content-body-input"
-                                            required
-                                            style="min-height:220px;"
-                                            placeholder="Write the learning content here..."
-                                        >${escapeHTML(
-                                            body
-                                        )}</textarea>
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            type === "exercise"
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Instructions *
-                                        </label>
-
-                                        <textarea
-                                            id="content-body-input"
-                                            required
-                                            style="min-height:150px;"
-                                            placeholder="Describe the activity..."
-                                        >${escapeHTML(
-                                            body
-                                        )}</textarea>
-
-                                    </div>
-
-                                    <div class="course-form-grid">
-
-                                        <div class="course-form-field">
-
-                                            <label>
-                                                Expected Answer
-                                            </label>
-
-                                            <input
-                                                id="exercise-answer-input"
-                                                value="${escapeAttribute(
-                                                    metadata.answer ||
-                                                    ""
-                                                )}"
-                                                placeholder="Optional"
-                                            >
-
-                                        </div>
-
-                                        <div class="course-form-field">
-
-                                            <label>
-                                                Hint
-                                            </label>
-
-                                            <input
-                                                id="exercise-hint-input"
-                                                value="${escapeAttribute(
-                                                    metadata.hint ||
-                                                    ""
-                                                )}"
-                                                placeholder="Optional"
-                                            >
-
-                                        </div>
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            type === "quiz"
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Question *
-                                        </label>
-
-                                        <textarea
-                                            id="content-body-input"
-                                            required
-                                            style="min-height:130px;"
-                                            placeholder="Write the quiz question..."
-                                        >${escapeHTML(
-                                            body
-                                        )}</textarea>
-
-                                    </div>
-
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Options
-                                        </label>
-
-                                        <textarea
-                                            id="quiz-options-input"
-                                            style="min-height:100px;"
-                                            placeholder="One option per line"
-                                        >${escapeHTML(
-                                            Array.isArray(
-                                                metadata.options
-                                            )
-                                                ? metadata.options.join(
-                                                    "\n"
-                                                )
-                                                : ""
-                                        )}</textarea>
-
-                                    </div>
-
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Correct Answer
-                                        </label>
-
-                                        <input
-                                            id="quiz-answer-input"
-                                            value="${escapeAttribute(
-                                                metadata.answer ||
-                                                ""
-                                            )}"
-                                            placeholder="Enter the correct option"
-                                        >
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            type === "ai"
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            AI Instructions *
-                                        </label>
-
-                                        <textarea
-                                            id="content-body-input"
-                                            required
-                                            style="min-height:170px;"
-                                            placeholder="Tell the AI what the student should practise..."
-                                        >${escapeHTML(
-                                            body
-                                        )}</textarea>
-
-                                    </div>
-
-                                    <div class="course-form-grid">
-
-                                        <div class="course-form-field">
-
-                                            <label>
-                                                AI Mode
-                                            </label>
-
-                                            <select id="ai-mode-input">
-
-                                                <option
-                                                    value="conversation"
-                                                    ${
-                                                        (
-                                                            metadata.mode ||
-                                                            "conversation"
-                                                        ) ===
-                                                        "conversation"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Conversation
-                                                </option>
-
-                                                <option
-                                                    value="speaking"
-                                                    ${
-                                                        metadata.mode ===
-                                                        "speaking"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Speaking
-                                                </option>
-
-                                                <option
-                                                    value="roleplay"
-                                                    ${
-                                                        metadata.mode ===
-                                                        "roleplay"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Role Play
-                                                </option>
-
-                                            </select>
-
-                                        </div>
-
-                                        <div class="course-form-field">
-
-                                            <label>
-                                                Objective
-                                            </label>
-
-                                            <input
-                                                id="ai-objective-input"
-                                                value="${escapeAttribute(
-                                                    metadata.objective ||
-                                                    ""
-                                                )}"
-                                                placeholder="What should the student achieve?"
-                                            >
-
-                                        </div>
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            (
-                                type === "image" ||
-                                type === "audio" ||
-                                type === "video" ||
-                                type === "pdf"
-                            )
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            File *
-                                        </label>
-
-                                        <div class="file-drop">
-
-                                            <input
-                                                id="content-file-input"
-                                                type="file"
-                                                accept="${
-                                                    type ===
-                                                    "image"
-                                                        ? "image/*"
-                                                        :
-                                                    type ===
-                                                    "audio"
-                                                        ? "audio/*"
-                                                        :
-                                                    type ===
-                                                    "video"
-                                                        ? "video/*"
-                                                        :
-                                                        "application/pdf"
-                                                }"
-                                            >
-
-                                            <strong>
-                                                ${
-                                                    content
-                                                        ? "Choose a replacement file"
-                                                        : "Choose file"
-                                                }
-                                            </strong>
-
-                                            <span>
-                                                ${escapeHTML(
-                                                    label[1]
-                                                )}
-                                            </span>
-
-                                        </div>
-
-                                        ${
-                                            content?.media_url
-                                                ? `
-                                                    <div
-                                                        style="
-                                                            margin-top:9px;
-                                                            color:#667085;
-                                                            font-size:9px;
-                                                            word-break:break-all;
-                                                        "
-                                                    >
-                                                        Existing:
-                                                        ${escapeHTML(
-                                                            content.media_url
-                                                        )}
-                                                    </div>
-                                                `
-                                                : ""
-                                        }
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            (
-                                type === "image" ||
-                                type === "audio" ||
-                                type === "video" ||
-                                type === "pdf"
-                            )
-                                ? `
-                                    <div class="course-form-field">
-
-                                        <label>
-                                            Description
-                                        </label>
-
-                                        <textarea
-                                            id="content-body-input"
-                                            placeholder="Optional description..."
-                                        >${escapeHTML(
-                                            body
-                                        )}</textarea>
-
-                                    </div>
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            type === "text" ||
-                            type === "exercise" ||
-                            type === "quiz" ||
-                            type === "ai"
-                                ? ""
-                                : ""
-                        }
-
-
-                        <div
-                            id="content-form-error"
-                            class="course-form-error"
-                            hidden
-                        ></div>
-
-
-                        <div class="course-form-actions">
-
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancel-content-editor"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="primary-button"
-                                id="content-save-button"
-                            >
-                                ${
-                                    content
-                                        ? "Save Changes"
-                                        : "Add Content"
-                                }
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                contentModal
-            );
-
-
-            requestAnimationFrame(
-                () =>
-                    contentModal.classList.add(
-                        "open"
-                    )
-            );
-
-
-            $("#close-content-editor")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            contentModal
-                        )
-                );
-
-
-            $("#cancel-content-editor")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            contentModal
-                        )
-                );
-
-
-            contentModal
-                .querySelector(
-                    ".course-modal-backdrop"
-                )
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            contentModal
-                        )
-                );
-
-
-            $("#content-editor-form")
-                ?.addEventListener(
-                    "submit",
-                    event =>
-                        saveContent(
-                            event,
-                            type,
-                            content
-                        )
-                );
-
-        }
-
-
-        /* =====================================================
-           SAVE CONTENT
-        ===================================================== */
-
-        async function saveContent(
-            event,
-            type,
-            existingContent
-        ) {
-
-            event.preventDefault();
-
-
-            const errorElement =
-                $("#content-form-error");
-
-
-            const saveButton =
-                $("#content-save-button");
-
-
-            try {
-
-                saveButton.disabled =
-                    true;
-
-
-                const title =
-                    $("#content-title-input")
-                        ?.value
-                        .trim() ||
-                    "";
-
-
-                const body =
-                    $("#content-body-input")
-                        ?.value ||
-                    "";
-
-
-                let mediaUrl =
-                    existingContent?.media_url ||
-                    null;
-
-
-                let metadata =
-                    {
-                        ...(existingContent?.metadata ||
-                            {})
-                    };
-
-
-                if (
-                    type === "exercise"
-                ) {
-
-                    metadata.answer =
-                        $("#exercise-answer-input")
-                            ?.value
-                            .trim() ||
-                        "";
-
-                    metadata.hint =
-                        $("#exercise-hint-input")
-                            ?.value
-                            .trim() ||
-                        "";
-
-                }
-
-
-                if (
-                    type === "quiz"
-                ) {
-
-                    metadata.options =
-                        (
-                            $("#quiz-options-input")
-                                ?.value ||
-                            ""
-                        )
-                            .split("\n")
-                            .map(
-                                value =>
-                                    value.trim()
-                            )
-                            .filter(Boolean);
-
-
-                    metadata.answer =
-                        $("#quiz-answer-input")
-                            ?.value
-                            .trim() ||
-                        "";
-
-                }
-
-
-                if (
-                    type === "ai"
-                ) {
-
-                    metadata.mode =
-                        $("#ai-mode-input")
-                            ?.value ||
-                        "conversation";
-
-
-                    metadata.objective =
-                        $("#ai-objective-input")
-                            ?.value
-                            .trim() ||
-                        "";
-
-                }
-
-
-                const file =
-                    $("#content-file-input")
-                        ?.files?.[0];
-
-
-                if (
-                    (
-                        type === "image" ||
-                        type === "audio" ||
-                        type === "video" ||
-                        type === "pdf"
-                    ) &&
-                    !file &&
-                    !mediaUrl
-                ) {
-
-                    throw new Error(
-                        "Please select a file."
-                    );
-
-                }
-
-
-                if (file) {
-
-                    mediaUrl =
-                        await uploadFile(
-                            file,
-                            "course-content",
-                            builderCourse.id
-                        );
-
-                }
-
-
-                if (
-                    type === "text" &&
-                    !body.trim()
-                ) {
-
-                    throw new Error(
-                        "Please enter the text content."
-                    );
-
-                }
-
-
-                if (
-                    type === "exercise" &&
-                    !body.trim()
-                ) {
-
-                    throw new Error(
-                        "Please enter the exercise instructions."
-                    );
-
-                }
-
-
-                if (
-                    type === "quiz" &&
-                    !body.trim()
-                ) {
-
-                    throw new Error(
-                        "Please enter the quiz question."
-                    );
-
-                }
-
-
-                if (
-                    type === "ai" &&
-                    !body.trim()
-                ) {
-
-                    throw new Error(
-                        "Please enter the AI instructions."
-                    );
-
-                }
-
-
-                const payload = {
-
-                    title:
-                        title ||
-                        typeLabel(type),
-
-                    type,
-
-                    body,
-
-                    media_url:
-                        mediaUrl,
-
-                    metadata,
-
-                    updated_at:
-                        new Date()
-                            .toISOString()
-
-                };
-
-
-                let result;
-
-
-                if (existingContent) {
-
-                    result =
-                        await client
-                            .from("content")
-                            .update(
-                                payload
-                            )
-                            .eq(
-                                "id",
-                                existingContent.id
-                            )
-                            .select()
-                            .single();
-
-                } else {
-
-                    const nextOrder =
-                        selectedLesson
-                            .content
-                            ?.length ||
-                        0;
-
-
-                    result =
-                        await client
-                            .from("content")
-                            .insert({
-
-                                ...payload,
-
-                                lesson_id:
-                                    selectedLesson.id,
-
-                                sort_order:
-                                    nextOrder
-
-                            })
-                            .select()
-                            .single();
-
-                }
-
-
-                if (result.error) {
-
-                    throw result.error;
-
-                }
-
-
-                closeModalElement(
-                    contentModal
-                );
-
-
-                await loadBuilderStructure();
-
-
-                const refreshedModule =
-                    builderModules.find(
-                        module =>
-                            String(
-                                module.id
-                            ) ===
-                            String(
-                                selectedModule?.id
-                            )
-                    );
-
-
-                selectedModule =
-                    refreshedModule ||
-                    builderModules[0] ||
-                    null;
-
-
-                if (selectedModule) {
-
-                    selectedLesson =
-                        selectedModule.lessons.find(
-                            lesson =>
-                                String(
-                                    lesson.id
-                                ) ===
-                                String(
-                                    selectedLesson?.id
-                                )
-                        ) ||
-                        selectedModule.lessons[0] ||
-                        null;
-
-                }
-
-
-                renderBuilderTree();
-
-
-                if (selectedLesson) {
-
-                    renderLessonEditor();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Content save:",
-                    error
-                );
-
-
-                if (errorElement) {
-
-                    errorElement.textContent =
-                        error.message ||
-                        "Could not save content.";
-
-                    errorElement.hidden =
-                        false;
-
-                }
-
-            } finally {
-
-                if (saveButton) {
-
-                    saveButton.disabled =
-                        false;
-
-                }
-
-            }
-
-        }
-
-
-        function typeLabel(type) {
-
-            const labels = {
-
-                text: "Text",
-
-                image: "Image",
-
-                audio: "Audio",
-
-                video: "Video",
-
-                pdf: "PDF",
-
-                exercise: "Exercise",
-
-                quiz: "Quiz",
-
-                ai: "AI Interaction"
-
-            };
-
-
-            return (
-                labels[type] ||
-                "Content"
-            );
-
-        }
-
-
-        /* =====================================================
-           CONTENT LIST
-        ===================================================== */
-
-        function renderContentList() {
-
-            const list =
-                $("#content-list");
-
-            if (!list) return;
-
-
-            const content =
-                selectedLesson?.content ||
-                [];
-
-
-            if (!content.length) {
-
-                list.innerHTML =
-                    `<div class="content-empty">
-                        This lesson has no content yet.
-                        Click <strong>+ Add Content</strong>
-                        to start building it.
-                    </div>`;
-
-                return;
-
-            }
-
-
-            list.innerHTML =
-                content
-                    .map(
-                        item =>
-                            renderContentCard(
-                                item
-                            )
-                    )
-                    .join("");
-
-
-            $$("[data-edit-content]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            () => {
-
-                                const item =
-                                    content.find(
-                                        contentItem =>
-                                            String(
-                                                contentItem.id
-                                            ) ===
-                                            String(
-                                                button.dataset
-                                                    .editContent
-                                            )
-                                    );
-
-
-                                if (item) {
-
-                                    openContentEditor(
-                                        item.type,
-                                        item
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    }
-                );
-
-
-            $$("[data-delete-content]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            async () => {
-
-                                const item =
-                                    content.find(
-                                        contentItem =>
-                                            String(
-                                                contentItem.id
-                                            ) ===
-                                            String(
-                                                button.dataset
-                                                    .deleteContent
-                                            )
-                                    );
-
-
-                                if (item) {
-
-                                    await deleteContent(
-                                        item
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        function renderContentCard(
-            item
-        ) {
-
-            const icon = {
-
-                text: "T",
-
-                image: "▧",
-
-                audio: "♫",
-
-                video: "▶",
-
-                pdf: "▤",
-
-                exercise: "✓",
-
-                quiz: "?",
-
-                ai: "✦"
-
-            }[item.type] || "•";
-
-
-            let preview = "";
-
-
-            if (
-                item.type ===
-                "image" &&
-                item.media_url
-            ) {
-
-                preview =
-                    `
-                    <img
-                        class="content-media-preview"
-                        src="${escapeAttribute(
-                            item.media_url
-                        )}"
-                        alt=""
-                    >
-                    `;
-
-            } else if (
-                item.type ===
-                "audio" &&
-                item.media_url
-            ) {
-
-                preview =
-                    `
-                    <audio
-                        controls
-                        style="width:100%;"
-                    >
-                        <source
-                            src="${escapeAttribute(
-                                item.media_url
-                            )}"
-                        >
-                    </audio>
-                    `;
-
-            } else if (
-                item.type ===
-                "video" &&
-                item.media_url
-            ) {
-
-                preview =
-                    `
-                    <video
-                        class="content-media-preview"
-                        controls
-                        style="width:100%;"
-                    >
-                        <source
-                            src="${escapeAttribute(
-                                item.media_url
-                            )}"
-                        >
-                    </video>
-                    `;
-
-            } else if (
-                item.type ===
-                "pdf" &&
-                item.media_url
-            ) {
-
-                preview =
-                    `
-                    <div class="content-file">
-                        ▤
-                        <span>
-                            PDF resource attached
-                        </span>
-                    </div>
-                    `;
-
-            } else {
-
-                preview =
-                    `
-                    <div class="content-preview">
-                        ${escapeHTML(
-                            item.body ||
-                            "No preview available."
-                        )}
-                    </div>
-                    `;
-
-            }
-
-
-            return `
-                <article class="content-card">
-
-                    <div class="content-card-header">
-
-                        <div class="content-type-icon">
-                            ${icon}
-                        </div>
-
-                        <strong>
-                            ${escapeHTML(
-                                item.title ||
-                                typeLabel(
-                                    item.type
-                                )
-                            )}
-                        </strong>
-
-                        <div class="content-card-actions">
-
-                            <button
-                                type="button"
-                                class="content-mini-button"
-                                data-edit-content="${escapeAttribute(
-                                    item.id
-                                )}"
-                            >
-                                ✎
-                            </button>
-
-                            <button
-                                type="button"
-                                class="content-mini-button danger"
-                                data-delete-content="${escapeAttribute(
-                                    item.id
-                                )}"
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="content-card-body">
-
-                        <div
-                            style="
-                                margin-bottom:8px;
-                                color:#7c3aed;
-                                font-size:8px;
-                                font-weight:800;
-                                text-transform:uppercase;
-                                letter-spacing:.1em;
-                            "
-                        >
-                            ${escapeHTML(
-                                typeLabel(
-                                    item.type
-                                )
-                            )}
-                        </div>
-
-                        ${preview}
-
-                    </div>
-
-                </article>
-            `;
-
-        }
-
-
-        async function deleteContent(
-            item
-        ) {
-
-            const confirmed =
-                confirm(
-                    `Delete "${item.title || typeLabel(item.type)}"?`
-                );
-
-
-            if (!confirmed) return;
-
-
-            try {
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("content")
-                        .delete()
-                        .eq(
-                            "id",
-                            item.id
-                        );
-
-
-                if (error) throw error;
-
-
-                await loadBuilderStructure();
-
-
-                const module =
-                    builderModules.find(
-                        itemModule =>
-                            String(
-                                itemModule.id
-                            ) ===
-                            String(
-                                selectedModule?.id
-                            )
-                    );
-
-
-                selectedModule =
-                    module ||
-                    builderModules[0] ||
-                    null;
-
-
-                if (selectedModule) {
-
-                    selectedLesson =
-                        selectedModule.lessons.find(
-                            lesson =>
-                                String(
-                                    lesson.id
-                                ) ===
-                                String(
-                                    selectedLesson?.id
-                                )
-                        ) ||
-                        selectedModule.lessons[0] ||
-                        null;
-
-                }
-
-
-                renderBuilderTree();
-
-
-                if (selectedLesson) {
-
-                    renderLessonEditor();
-
-                }
-
-            } catch (error) {
-
-                showError(
-                    error.message ||
-                    "Could not delete content."
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           RESET BUILDER
-        ===================================================== */
-
-        function resetBuilder() {
-
-            builderCourse =
-                null;
-
-            builderModules =
-                [];
-
-            selectedModule =
-                null;
-
-            selectedLesson =
-                null;
-
-
-            $("#course-builder")
-                ?.classList.add(
-                    "disabled"
-                );
-
-
-            $("#add-module-button")
-                ?.setAttribute(
-                    "disabled",
-                    "disabled"
-                );
-
-
-            $("#builder-course-title")
-                &&
-                (
-                    $("#builder-course-title")
-                        .textContent =
-                        "Select a course"
-                );
-
-
-            $("#builder-course-summary")
-                &&
-                (
-                    $("#builder-course-summary")
-                        .innerHTML =
-                        "<span>Select a course to begin.</span>"
-                );
-
-
-            $("#builder-tree")
-                &&
-                (
-                    $("#builder-tree")
-                        .innerHTML =
-                        `
-                        <div class="builder-empty">
-                            Select a course to view its structure.
-                        </div>
-                        `
-                );
-
-
-            showBuilderWelcome();
-
-        }
-
-
-        /* =====================================================
-           OPEN BUILDER FROM COURSE LIST
-        ===================================================== */
-
-        function openCourseBuilderFromCourse(
-            courseId
-        ) {
-
-            showSection(
-                "personalise"
-            );
-
-            setTimeout(
-                async () => {
-
-                    await loadBuilderCourses();
-
-                    await openCourseBuilder(
-                        courseId
-                    );
-
-                },
-                50
-            );
-
-        }
-
-
-        /* =====================================================
-           CAROUSEL
-        ===================================================== */
-
-        function setupCarouselControls() {
-
-            $("#create-carousel-button")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        openCarouselModal()
-                );
-
-
-            $("#carousel-search")
-                ?.addEventListener(
-                    "input",
-                    renderCarouselItems
-                );
-
-
-            $("#carousel-filter")
-                ?.addEventListener(
-                    "change",
-                    renderCarouselItems
-                );
-
-        }
-
-
-        async function loadCarouselItems() {
-
-            const list =
-                $("#carousel-list");
-
-            if (!list) return;
-
-
-            try {
-
-                const {
-                    data,
-                    error
-                } =
-                    await client
-                        .from(
-                            "carousel_items"
-                        )
-                        .select("*")
-                        .order(
-                            "sort_order",
-                            {
-                                ascending:
-                                    true
-                            }
-                        )
-                        .order(
-                            "created_at",
-                            {
-                                ascending:
-                                    false
-                            }
-                        );
-
-
-                if (error) throw error;
-
-
-                allCarouselItems =
-                    data || [];
-
-
-                renderCarouselItems();
-
-            } catch (error) {
-
-                console.error(
-                    "Carousel:",
-                    error
-                );
-
-
-                list.innerHTML =
-                    `
-                    <div class="courses-empty">
-                        Unable to load promotions.
-                    </div>
-                    `;
-
-            }
-
-        }
-
-
-        function renderCarouselItems() {
-
-            const list =
-                $("#carousel-list");
-
-            if (!list) return;
-
-
-            const search =
-                (
-                    $("#carousel-search")
-                        ?.value ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-
-            const filter =
-                $("#carousel-filter")
-                    ?.value ||
-                "all";
-
-
-            let items =
-                [...allCarouselItems];
-
-
-            if (filter !== "all") {
-
-                items =
-                    items.filter(
-                        item =>
-                            item.status ===
-                            filter
-                    );
-
-            }
-
-
-            if (search) {
-
-                items =
-                    items.filter(
-                        item =>
-                            (
-                                item.title ||
-                                ""
-                            )
-                                .toLowerCase()
-                                .includes(search) ||
-
-                            (
-                                item.description ||
-                                ""
-                            )
-                                .toLowerCase()
-                                .includes(search)
-                    );
-
-            }
-
-
-            if (!items.length) {
-
-                list.innerHTML =
-                    `
-                    <div class="courses-empty">
-                        No promotions found.
-                    </div>
-                    `;
-
-                return;
-
-            }
-
-
-            list.innerHTML =
-                items
-                    .map(
-                        item =>
-                            `
-                            <article class="course-row">
-
-                                <div class="course-cover">
-
-                                    ${
-                                        item.image_url
-                                            ? `
-                                                <img
-                                                    src="${escapeAttribute(
-                                                        item.image_url
-                                                    )}"
-                                                    alt=""
-                                                >
-                                            `
-                                            :
-                                            `
-                                                <div class="course-cover-placeholder">
-                                                    E
-                                                </div>
-                                            `
-                                    }
-
-                                </div>
-
-
-                                <div>
-
-                                    <div class="course-row-title">
-                                        ${escapeHTML(
-                                            item.title
-                                        )}
-                                    </div>
-
-                                    <div class="course-row-description">
-                                        ${escapeHTML(
-                                            item.description ||
-                                            ""
-                                        )}
-                                    </div>
-
-                                    <div class="course-row-meta">
-
-                                        <span class="course-badge">
-                                            ${escapeHTML(
-                                                item.area ||
-                                                "all"
-                                            )}
-                                        </span>
-
-                                        <span
-                                            class="
-                                                course-badge
-                                                ${
-                                                    item.status ===
-                                                    "published"
-                                                        ? "published"
-                                                        : "draft"
-                                                }
-                                            "
-                                        >
-                                            ${escapeHTML(
-                                                item.status ||
-                                                "draft"
-                                            )}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="course-actions">
-
-                                    <button
-                                        type="button"
-                                        class="course-action-button"
-                                        data-carousel-edit="${escapeAttribute(
-                                            item.id
-                                        )}"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="course-action-button danger"
-                                        data-carousel-delete="${escapeAttribute(
-                                            item.id
-                                        )}"
-                                    >
-                                        Delete
-                                    </button>
-
-                                </div>
-
-                            </article>
-                            `
-                    )
-                    .join("");
-
-
-            $$("[data-carousel-edit]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            () => {
-
-                                const item =
-                                    allCarouselItems.find(
-                                        carouselItem =>
-                                            String(
-                                                carouselItem.id
-                                            ) ===
-                                            String(
-                                                button.dataset
-                                                    .carouselEdit
-                                            )
-                                    );
-
-
-                                if (item) {
-
-                                    openCarouselModal(
-                                        item
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    }
-                );
-
-
-            $$("[data-carousel-delete]")
-                .forEach(
-                    button => {
-
-                        button.addEventListener(
-                            "click",
-                            async () => {
-
-                                const item =
-                                    allCarouselItems.find(
-                                        carouselItem =>
-                                            String(
-                                                carouselItem.id
-                                            ) ===
-                                            String(
-                                                button.dataset
-                                                    .carouselDelete
-                                            )
-                                    );
-
-
-                                if (!item) return;
-
-
-                                if (
-                                    !confirm(
-                                        `Delete "${item.title}"?`
-                                    )
-                                ) {
-
-                                    return;
-
-                                }
-
-
-                                const {
-                                    error
-                                } =
-                                    await client
-                                        .from(
-                                            "carousel_items"
-                                        )
-                                        .delete()
-                                        .eq(
-                                            "id",
-                                            item.id
-                                        );
-
-
-                                if (error) {
-
-                                    showError(
-                                        error.message
-                                    );
-
-                                    return;
-
-                                }
-
-
-                                await loadCarouselItems();
-
-                            }
-                        );
-
-                    }
-                );
-
-        }
-
-
-        function openCarouselModal(
-            item = null
-        ) {
-
-            editingCarouselItemId =
-                item?.id ||
-                null;
-
-
-            if (carouselModal) {
-
-                carouselModal.remove();
-
-            }
-
-
-            carouselModal =
-                document.createElement(
-                    "div"
-                );
-
-
-            carouselModal.className =
-                "course-modal";
-
-
-            carouselModal.innerHTML = `
-
-                <div class="course-modal-backdrop"></div>
-
-
-                <div class="course-modal-dialog">
-
-                    <div class="course-modal-header">
-
-                        <div>
-
-                            <div class="course-modal-kicker">
-                                HOMEPAGE
-                            </div>
-
-                            <h2>
-                                ${
-                                    item
-                                        ? "Edit Promotion"
-                                        : "Create Promotion"
-                                }
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="course-modal-close"
-                            id="close-carousel-modal"
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-
-                    <form
-                        id="carousel-form"
-                        class="course-form"
-                    >
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Title *
-                            </label>
-
-                            <input
-                                id="carousel-title"
-                                required
-                                maxlength="200"
-                                value="${escapeAttribute(
-                                    item?.title ||
-                                    ""
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Description
-                            </label>
-
-                            <textarea
-                                id="carousel-description"
-                            >${escapeHTML(
-                                item?.description ||
-                                ""
-                            )}</textarea>
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label>
-                                Image URL
-                            </label>
-
-                            <input
-                                id="carousel-image"
-                                type="url"
-                                value="${escapeAttribute(
-                                    item?.image_url ||
-                                    ""
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-grid">
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Area
-                                </label>
-
-                                <select id="carousel-area">
-
-                                    <option value="all">
-                                        All Areas
-                                    </option>
-
-                                    <option value="language">
-                                        Language
-                                    </option>
-
-                                    <option value="business">
-                                        Business
-                                    </option>
-
-                                    <option value="technology">
-                                        Technology
-                                    </option>
-
-                                    <option value="finance">
-                                        Finance
-                                    </option>
-
-                                    <option value="personal-development">
-                                        Personal Development
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            <div class="course-form-field">
-
-                                <label>
-                                    Status
-                                </label>
-
-                                <select id="carousel-status">
-
-                                    <option value="draft">
-                                        Draft
-                                    </option>
-
-                                    <option value="published">
-                                        Published
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="carousel-form-error"
-                            class="course-form-error"
-                            hidden
-                        ></div>
-
-
-                        <div class="course-form-actions">
-
-                            <button
-                                type="button"
-                                class="secondary-button"
-                                id="cancel-carousel-modal"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                type="submit"
-                                class="primary-button"
-                            >
-                                ${
-                                    item
-                                        ? "Save Changes"
-                                        : "Create Promotion"
-                                }
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            `;
-
-
-            document.body.appendChild(
-                carouselModal
-            );
-
-
-            requestAnimationFrame(
-                () =>
-                    carouselModal.classList.add(
-                        "open"
-                    )
-            );
-
-
-            if (item?.area) {
-
-                $("#carousel-area")
-                    .value =
-                    item.area;
-
-            }
-
-
-            if (item?.status) {
-
-                $("#carousel-status")
-                    .value =
-                    item.status;
-
-            }
-
-
-            $("#close-carousel-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            carouselModal
-                        )
-                );
-
-
-            $("#cancel-carousel-modal")
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            carouselModal
-                        )
-                );
-
-
-            carouselModal
-                .querySelector(
-                    ".course-modal-backdrop"
-                )
-                ?.addEventListener(
-                    "click",
-                    () =>
-                        closeModalElement(
-                            carouselModal
-                        )
-                );
-
-
-            $("#carousel-form")
-                ?.addEventListener(
-                    "submit",
-                    saveCarouselItem
-                );
-
-        }
-
-
-        async function saveCarouselItem(
-            event
-        ) {
-
-            event.preventDefault();
-
-
-            const title =
-                $("#carousel-title")
-                    ?.value
-                    .trim();
-
-
-            if (!title) {
-
-                $("#carousel-form-error")
-                    .textContent =
-                    "Promotion title is required.";
-
-                $("#carousel-form-error")
-                    .hidden =
-                    false;
-
-                return;
-
-            }
-
-
-            try {
-
-                const payload = {
-
-                    title,
-
-                    description:
-                        $("#carousel-description")
-                            ?.value
-                            .trim() ||
-                        "",
-
-                    image_url:
-                        $("#carousel-image")
-                            ?.value
-                            .trim() ||
-                        null,
-
-                    area:
-                        $("#carousel-area")
-                            ?.value ||
-                        "all",
-
-                    status:
-                        $("#carousel-status")
-                            ?.value ||
-                        "draft"
-
-                };
-
-
-                let result;
-
-
-                if (
-                    editingCarouselItemId
-                ) {
-
-                    result =
-                        await client
-                            .from(
-                                "carousel_items"
-                            )
-                            .update(
-                                payload
-                            )
-                            .eq(
-                                "id",
-                                editingCarouselItemId
-                            );
-
-                } else {
-
-                    result =
-                        await client
-                            .from(
-                                "carousel_items"
-                            )
-                            .insert(
-                                payload
-                            );
-
-                }
-
-
-                if (result.error) {
-
-                    throw result.error;
-
-                }
-
-
-                closeModalElement(
-                    carouselModal
-                );
-
-
-                await loadCarouselItems();
-
-            } catch (error) {
-
-                $("#carousel-form-error")
-                    .textContent =
-                    error.message ||
-                    "Could not save promotion.";
-
-                $("#carousel-form-error")
-                    .hidden =
-                    false;
-
-            }
-
-        }
-
     }
-);
+
+
+    /* =====================================================
+       RESTORE
+    ===================================================== */
+
+    async function restoreCourse(course) {
+
+        if (
+            !confirm(
+                `Restore "${course.title}" to Draft?`
+            )
+        ) return;
+
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("courses")
+                    .update({
+                        status: "draft",
+                        archived_at: null
+                    })
+                    .eq(
+                        "id",
+                        course.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not restore course:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Could not restore the course."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    async function updateCourseStatus(
+        course,
+        status
+    ) {
+
+        try {
+
+            const {
+                error
+            } =
+                await client
+                    .from("courses")
+                    .update({
+                        status,
+                        archived_at:
+                            status === "archived"
+                                ? new Date().toISOString()
+                                : null
+                    })
+                    .eq(
+                        "id",
+                        course.id
+                    );
+
+
+            if (error) throw error;
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not update course status:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Could not update the course."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       DUPLICATE
+    ===================================================== */
+
+    async function duplicateCourse(course) {
+
+        if (
+            !confirm(
+                `Duplicate "${course.title}"?\n\nThe duplicate will be created as a Draft.`
+            )
+        ) return;
+
+
+        try {
+
+            const duplicateTitle =
+                `${course.title} Copy`;
+
+
+            const duplicate = {
+
+                title:
+                    duplicateTitle,
+
+                description:
+                    course.description || null,
+
+                category:
+                    course.category || null,
+
+                level:
+                    course.level || null,
+
+                cover_image:
+                    course.cover_image || null,
+
+                status:
+                    "draft",
+
+                sort_order:
+                    course.sort_order ?? 0,
+
+                slug:
+                    await createUniqueSlug(
+                        duplicateTitle
+                    ),
+
+                archived_at:
+                    null
+            };
+
+
+            const {
+                error
+            } =
+                await client
+                    .from("courses")
+                    .insert(
+                        duplicate
+                    );
+
+
+            if (error) throw error;
+
+
+            await refreshCoursesAndDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not duplicate course:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Could not duplicate the course."
+            );
+        }
+    }
+
+
+    /* =====================================================
+       SLUG
+    ===================================================== */
+
+    async function createUniqueSlug(title) {
+
+        const base =
+            slugify(title) ||
+            "course";
+
+
+        let slug =
+            base;
+
+
+        let counter =
+            1;
+
+
+        while (true) {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select("id")
+                    .eq(
+                        "slug",
+                        slug
+                    )
+                    .limit(1);
+
+
+            if (error) throw error;
+
+
+            if (
+                !data ||
+                data.length === 0
+            ) {
+
+                return slug;
+            }
+
+
+            counter++;
+
+
+            slug =
+                `${base}-${counter}`;
+        }
+    }
+
+
+    function slugify(value) {
+
+        return String(value)
+
+            .normalize("NFD")
+
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+
+            .toLowerCase()
+
+            .trim()
+
+            .replace(
+                /[^a-z0-9]+/g,
+                "-"
+            )
+
+            .replace(
+                /^-+|-+$/g,
+                ""
+            );
+    }
+
+
+    /* =====================================================
+       REFRESH
+    ===================================================== */
+
+    async function refreshCoursesAndDashboard() {
+
+        await Promise.all([
+            loadCourses(),
+            loadDashboard()
+        ]);
+    }
+
+
+    /* =====================================================
+       FORM ERROR
+    ===================================================== */
+
+    function showFormError(message) {
+
+        const element =
+            $("#course-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+            message;
+
+
+        element.hidden =
+            false;
+    }
+
+
+    function clearFormError() {
+
+        const element =
+            $("#course-form-error");
+
+
+        if (!element) return;
+
+
+        element.textContent =
+            "";
+
+
+        element.hidden =
+            true;
+    }
+
+
+    /* =====================================================
+       UTILITIES
+    ===================================================== */
+
+    function normalizeStatus(status) {
+
+        if (
+            status === "published" ||
+            status === "archived"
+        ) {
+
+            return status;
+        }
+
+
+        return "draft";
+    }
+
+
+    function formatDate(value) {
+
+        if (!value)
+            return "—";
+
+
+        const date =
+            new Date(value);
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "—";
+        }
+
+
+        return date.toLocaleDateString(
+            undefined,
+            {
+                year: "numeric",
+                month: "short",
+                day: "numeric"
+            }
+        );
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(value ?? "")
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+    }
+
+
+    function escapeAttribute(value) {
+
+        return escapeHTML(value);
+    }
+
+});
