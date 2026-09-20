@@ -1,4666 +1,3233 @@
 /* =========================================================
    EDUCORE ADMIN
-   PHASE 4 — COURSE MANAGEMENT + CAROUSEL
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+:root {
 
-    "use strict";
+    --purple: #7c3aed;
+    --purple-dark: #6d28d9;
+    --purple-soft: #f3e8ff;
+    --purple-wash: #faf7ff;
+
+    --background: #f6f7fb;
+    --surface: #ffffff;
+    --surface-soft: #f9fafc;
+
+    --text: #171a21;
+    --text-secondary: #667085;
+    --text-muted: #98a2b3;
+
+    --border: #e7e9ef;
+
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+
+    --success: #16a34a;
+    --success-soft: #ecfdf3;
+
+    --sidebar: #11121a;
+
+    --shadow:
+        0 12px 40px rgba(16, 24, 40, 0.07);
+
+    --shadow-small:
+        0 4px 18px rgba(16, 24, 40, 0.06);
+
+    --radius: 18px;
+    --radius-small: 12px;
+
+}
 
 
-    /* =====================================================
-       SUPABASE
-    ===================================================== */
-
-    const client =
-        window.supabaseClient ||
-        window.supabase ||
-        null;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 
-    if (!client || typeof client.from !== "function") {
+html {
+    scroll-behavior: smooth;
+}
 
-        console.error(
-            "Supabase client is not available."
+
+body {
+
+    min-height: 100vh;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+}
+
+
+button,
+input,
+select,
+textarea {
+
+    font: inherit;
+
+}
+
+
+button {
+
+    cursor: pointer;
+
+}
+
+
+button:disabled {
+
+    cursor: not-allowed;
+
+    opacity: .5;
+
+}
+
+
+.admin-hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.admin-app {
+
+    min-height: 100vh;
+
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.admin-sidebar {
+
+    position: fixed;
+
+    inset:
+        0 auto 0 0;
+
+    width: 270px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #151522 0%,
+            #0f1017 100%
         );
 
-        return;
-    }
+    color: white;
 
+    display: flex;
 
-    /* =====================================================
-       STATE
-    ===================================================== */
+    flex-direction: column;
 
-    let allCourses = [];
+    z-index: 100;
 
-    let editingCourseId = null;
+    transition:
+        width .3s ease,
+        transform .3s ease;
 
-    let courseModal = null;
+}
 
-    let allCarouselItems = [];
 
-    let editingCarouselItemId = null;
+.sidebar-brand {
 
-    let carouselModal = null;
+    min-height: 90px;
 
-    let removeCarouselImage = false;
+    padding:
+        22px 22px;
 
+    display: flex;
 
-    /* =====================================================
-       DOM HELPERS
-    ===================================================== */
+    align-items: center;
 
-    const $ = selector =>
-        document.querySelector(selector);
+    gap: 12px;
 
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.07);
 
-    const $$ = selector =>
-        document.querySelectorAll(selector);
+}
 
 
-    /* =====================================================
-       INITIALISE
-    ===================================================== */
+.brand-mark {
 
-    init();
+    width: 38px;
+    height: 38px;
 
+    border-radius: 11px;
 
-    async function init() {
+    display: grid;
 
-        setupNavigation();
+    place-items: center;
 
-        setupSidebar();
-
-        setupLogout();
-
-        setupCourseControls();
-
-        setupCarouselControls();
-
-        setupDashboardRetry();
-
-        await loadAdminUser();
-
-        await loadDashboard();
-
-        await loadCourses();
-
-        await loadCarouselItems();
-    }
-
-
-    /* =====================================================
-       CAROUSEL CONTROLS
-    ===================================================== */
-
-    function setupCarouselControls() {
-
-        const createButton =
-            $("#create-carousel-button");
-
-        const searchInput =
-            $("#carousel-search");
-
-        const filterSelect =
-            $("#carousel-filter");
-
-
-        /* =================================================
-           CREATE PROMOTION
-        ================================================= */
-
-        if (createButton) {
-
-            createButton.addEventListener(
-                "click",
-                event => {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    console.log(
-                        "Create Promotion button clicked."
-                    );
-
-                    openCarouselModal();
-
-                }
-            );
-
-        } else {
-
-            console.warn(
-                'Create Promotion button not found: "#create-carousel-button"'
-            );
-        }
-
-
-        /* =================================================
-           SEARCH
-        ================================================= */
-
-        if (searchInput) {
-
-            searchInput.addEventListener(
-                "input",
-                renderCarouselItems
-            );
-        }
-
-
-        /* =================================================
-           FILTER
-        ================================================= */
-
-        if (filterSelect) {
-
-            filterSelect.addEventListener(
-                "change",
-                renderCarouselItems
-            );
-        }
-    }
-
-
-    /* =====================================================
-       NAVIGATION
-    ===================================================== */
-
-    function setupNavigation() {
-
-        $$(".nav-item").forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const section =
-                        button.dataset.section;
-
-                    if (!section) return;
-
-                    showSection(section);
-
-                    closeMobileSidebar();
-                }
-            );
-
-        });
-    }
-
-
-    function showSection(section) {
-
-        $$(".nav-item").forEach(button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.section === section
-            );
-
-        });
-
-
-        $$(".admin-section").forEach(element => {
-
-            element.classList.toggle(
-                "active",
-                element.id === `${section}-section`
-            );
-
-        });
-
-
-        const pageTitle =
-            $("#page-title");
-
-
-        if (pageTitle) {
-
-            pageTitle.textContent =
-                section.charAt(0).toUpperCase() +
-                section.slice(1);
-        }
-
-
-        if (section === "courses") {
-
-            loadCourses();
-        }
-
-
-        if (section === "carousel") {
-
-            loadCarouselItems();
-        }
-    }
-
-
-    /* =====================================================
-       SIDEBAR
-    ===================================================== */
-
-    function setupSidebar() {
-
-        const app =
-            $("#admin-app");
-
-        const toggle =
-            $("#sidebar-toggle");
-
-        const close =
-            $("#mobile-sidebar-close");
-
-        const overlay =
-            $("#sidebar-overlay");
-
-
-        if (toggle) {
-
-            toggle.addEventListener(
-                "click",
-                () => {
-
-                    if (window.innerWidth <= 768) {
-
-                        app?.classList.toggle(
-                            "sidebar-open"
-                        );
-
-                    } else {
-
-                        app?.classList.toggle(
-                            "sidebar-collapsed"
-                        );
-                    }
-
-                }
-            );
-        }
-
-
-        close?.addEventListener(
-            "click",
-            closeMobileSidebar
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            #9b5cf6
         );
 
+    font-size: 18px;
 
-        overlay?.addEventListener(
-            "click",
-            closeMobileSidebar
+    font-weight: 800;
+
+    box-shadow:
+        0 8px 20px
+        rgba(124,58,237,.25);
+
+}
+
+
+.brand-copy {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+}
+
+
+.brand-copy strong {
+
+    font-size: 17px;
+
+}
+
+
+.brand-copy span {
+
+    margin-top: 2px;
+
+    color:
+        rgba(255,255,255,.5);
+
+    font-size: 10px;
+
+}
+
+
+.mobile-sidebar-close {
+
+    display: none;
+
+    margin-left: auto;
+
+    border: 0;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 28px;
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.admin-navigation {
+
+    flex: 1;
+
+    padding: 22px 14px;
+
+    overflow-y: auto;
+
+}
+
+
+.navigation-label {
+
+    padding:
+        0 12px 10px;
+
+    color:
+        rgba(255,255,255,.35);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: .12em;
+
+}
+
+
+.navigation-label-spaced {
+
+    margin-top: 26px;
+
+}
+
+
+.nav-item {
+
+    width: 100%;
+
+    min-height: 48px;
+
+    margin-bottom: 4px;
+
+    border: 0;
+
+    border-radius: 12px;
+
+    background: transparent;
+
+    color:
+        rgba(255,255,255,.62);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        0 13px;
+
+    text-align: left;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
+
+}
+
+
+.nav-item:hover {
+
+    background:
+        rgba(255,255,255,.06);
+
+    color: white;
+
+}
+
+
+.nav-item.active {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(124,58,237,.28),
+            rgba(124,58,237,.1)
         );
 
+    color: white;
 
-        window.addEventListener(
-            "resize",
-            () => {
+}
 
-                if (window.innerWidth > 768) {
 
-                    app?.classList.remove(
-                        "sidebar-open"
-                    );
-                }
+.nav-icon {
 
-            }
-        );
+    width: 25px;
+
+    display: grid;
+
+    place-items: center;
+
+    color:
+        rgba(255,255,255,.55);
+
+    font-size: 17px;
+
+}
+
+
+.nav-item.active .nav-icon {
+
+    color:
+        #b99aff;
+
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
+
+.sidebar-footer {
+
+    padding: 16px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.07);
+
+}
+
+
+.admin-mini-profile {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 14px;
+
+}
+
+
+.admin-avatar {
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: 50%;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-weight: 700;
+
+}
+
+
+.admin-mini-copy {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+}
+
+
+.admin-mini-copy strong {
+
+    max-width: 170px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    font-size: 12px;
+
+}
+
+
+.admin-mini-copy span {
+
+    color:
+        rgba(255,255,255,.4);
+
+    font-size: 10px;
+
+    margin-top: 2px;
+
+}
+
+
+.logout-button {
+
+    width: 100%;
+
+    height: 42px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    color:
+        rgba(255,255,255,.65);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 13px;
+
+}
+
+
+.logout-button:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.08);
+
+}
+
+
+/* =========================================================
+   SIDEBAR OVERLAY
+========================================================= */
+
+.sidebar-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(8,9,15,.55);
+
+    backdrop-filter:
+        blur(3px);
+
+    z-index: 90;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity .25s ease;
+
+}
+
+
+.sidebar-open .sidebar-overlay {
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.admin-main {
+
+    min-height: 100vh;
+
+    margin-left: 270px;
+
+    transition:
+        margin-left .3s ease;
+
+}
+
+
+.admin-topbar {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 50;
+
+    min-height: 84px;
+
+    padding:
+        0 34px;
+
+    background:
+        rgba(255,255,255,.92);
+
+    backdrop-filter:
+        blur(18px);
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+}
+
+
+.topbar-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+
+.sidebar-toggle {
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: white;
+
+    color: var(--text);
+
+}
+
+
+.topbar-eyebrow {
+
+    color:
+        var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .14em;
+
+}
+
+
+.topbar-left h1 {
+
+    margin-top: 3px;
+
+    font-size: 20px;
+
+}
+
+
+.topbar-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+}
+
+
+.topbar-brand {
+
+    color:
+        var(--purple);
+
+    font-weight: 800;
+
+}
+
+
+.topbar-avatar {
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.admin-content {
+
+    max-width: 1600px;
+
+    margin: 0 auto;
+
+    padding:
+        38px 38px 70px;
+
+}
+
+
+.admin-section {
+
+    display: none;
+
+    animation:
+        sectionIn .28s ease;
+
+}
+
+
+.admin-section.active {
+
+    display: block;
+
+}
+
+
+@keyframes sectionIn {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(8px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================================================
+   HEADINGS
+========================================================= */
+
+.page-introduction {
+
+    margin-bottom: 30px;
+
+}
+
+
+.page-introduction h2,
+.page-heading-row h2 {
+
+    margin-top: 5px;
+
+    font-size: 28px;
+
+    letter-spacing: -.03em;
+
+}
+
+
+.page-introduction p,
+.page-heading-row p {
+
+    margin-top: 7px;
+
+    color:
+        var(--text-secondary);
+
+    max-width: 650px;
+
+    line-height: 1.6;
+
+}
+
+
+.section-kicker {
+
+    display: block;
+
+    color:
+        var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: .14em;
+
+}
+
+
+.page-heading-row {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 24px;
+
+    margin-bottom: 28px;
+
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.primary-button,
+.small-primary-button,
+.secondary-button,
+.danger-button {
+
+    border: 0;
+
+    border-radius: 10px;
+
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+.primary-button {
+
+    min-height: 44px;
+
+    padding:
+        0 18px;
+
+    background:
+        var(--purple);
+
+    color: white;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 7px 18px
+        rgba(124,58,237,.18);
+
+}
+
+
+.primary-button:hover {
+
+    background:
+        var(--purple-dark);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.small-primary-button {
+
+    min-height: 36px;
+
+    padding:
+        0 13px;
+
+    background:
+        var(--purple);
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.secondary-button {
+
+    min-height: 38px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid
+        var(--border);
+
+    background: white;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+.secondary-button:hover {
+
+    background:
+        var(--surface-soft);
+
+}
+
+
+.danger-button {
+
+    min-height: 38px;
+
+    padding:
+        0 13px;
+
+    background:
+        var(--danger-soft);
+
+    color:
+        var(--danger);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 24px;
+
+}
+
+
+.stat-card {
+
+    min-height: 145px;
+
+    padding: 22px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    box-shadow:
+        var(--shadow-small);
+
+}
+
+
+.stat-card-icon {
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 11px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    margin-bottom: 15px;
+
+}
+
+
+.stat-card span {
+
+    display: block;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 12px;
+
+}
+
+
+.stat-card strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 27px;
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 20px;
+
+}
+
+
+.dashboard-panel {
+
+    min-height: 230px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    padding: 24px;
+
+    box-shadow:
+        var(--shadow-small);
+
+}
+
+
+.panel-heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+}
+
+
+.panel-heading h3 {
+
+    margin-top: 5px;
+
+    font-size: 17px;
+
+}
+
+
+.publishing-summary {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 12px;
+
+    margin-top: 25px;
+
+}
+
+
+.publishing-summary > div {
+
+    padding: 18px;
+
+    border-radius: 14px;
+
+    background:
+        var(--surface-soft);
+
+}
+
+
+.publishing-summary span {
+
+    display: block;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+}
+
+
+.publishing-summary strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 24px;
+
+}
+
+
+.activity-list {
+
+    margin-top: 20px;
+
+}
+
+
+.activity-item {
+
+    display: flex;
+
+    gap: 12px;
+
+    padding:
+        11px 0;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+}
+
+
+.activity-icon {
+
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    border-radius: 9px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+}
+
+
+.activity-title {
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+.activity-meta {
+
+    margin-top: 3px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 10px;
+
+}
+
+
+.activity-empty {
+
+    color:
+        var(--text-muted);
+
+    font-size: 12px;
+
+}
+
+
+.dashboard-error {
+
+    margin-top: 20px;
+
+    padding: 15px 18px;
+
+    background:
+        var(--danger-soft);
+
+    color:
+        var(--danger);
+
+    border-radius: 12px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.toolbar {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.search-box {
+
+    flex: 1;
+
+    height: 44px;
+
+    max-width: 500px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        0 13px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 10px;
+
+}
+
+
+.search-box span {
+
+    color:
+        var(--text-muted);
+
+}
+
+
+.search-box input {
+
+    width: 100%;
+
+    border: 0;
+
+    outline: 0;
+
+    color: var(--text);
+
+    background: transparent;
+
+}
+
+
+.toolbar select,
+.builder-course-selector select {
+
+    min-height: 44px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 10px;
+
+    background: white;
+
+    color:
+        var(--text);
+
+    outline: 0;
+
+}
+
+
+/* =========================================================
+   COURSES
+========================================================= */
+
+.courses-list {
+
+    display: grid;
+
+    gap: 12px;
+
+}
+
+
+.course-row {
+
+    display: grid;
+
+    grid-template-columns:
+        72px 1fr auto;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 14px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 15px;
+
+    box-shadow:
+        var(--shadow-small);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+.course-row:hover {
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+.course-cover {
+
+    width: 72px;
+    height: 54px;
+
+    border-radius: 9px;
+
+    overflow: hidden;
+
+    background:
+        var(--purple-soft);
+
+}
+
+
+.course-cover img {
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+
+.course-cover-placeholder {
+
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+
+    place-items: center;
+
+    color:
+        var(--purple);
+
+    font-weight: 800;
+
+}
+
+
+.course-row-title {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+}
+
+
+.course-row-description {
+
+    margin-top: 4px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 1;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+
+}
+
+
+.course-row-meta {
+
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 7px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.course-badge {
+
+    padding:
+        4px 7px;
+
+    border-radius: 20px;
+
+    background:
+        var(--surface-soft);
+
+    color:
+        var(--text-secondary);
+
+    font-size: 9px;
+
+}
+
+
+.course-badge.published {
+
+    background:
+        var(--success-soft);
+
+    color:
+        var(--success);
+
+}
+
+
+.course-badge.draft {
+
+    background:
+        #f2f4f7;
+
+    color:
+        #667085;
+
+}
+
+
+.course-badge.archived {
+
+    background:
+        var(--danger-soft);
+
+    color:
+        var(--danger);
+
+}
+
+
+.course-actions {
+
+    display: flex;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+}
+
+
+.course-action-button {
+
+    min-height: 34px;
+
+    padding:
+        0 10px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 8px;
+
+    background: white;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+.course-action-button:hover {
+
+    border-color:
+        #d6c7f8;
+
+    color:
+        var(--purple);
+
+}
+
+
+.course-action-button.primary {
+
+    border-color:
+        var(--purple);
+
+    background:
+        var(--purple);
+
+    color: white;
+
+}
+
+
+.course-action-button.danger {
+
+    color:
+        var(--danger);
+
+    background:
+        var(--danger-soft);
+
+    border-color:
+        #fecaca;
+
+}
+
+
+.courses-loading,
+.courses-empty {
+
+    padding: 45px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    color:
+        var(--text-secondary);
+
+    text-align: center;
+
+}
+
+
+/* =========================================================
+   COURSE BUILDER
+========================================================= */
+
+.builder-course-selector {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(260px, 380px) 1fr;
+
+    gap: 18px;
+
+    padding: 18px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        var(--shadow-small);
+
+}
+
+
+.builder-course-selector label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.builder-course-selector select {
+
+    width: 100%;
+
+}
+
+
+.builder-course-summary {
+
+    min-height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+}
+
+
+.course-builder {
+
+    min-height: 650px;
+
+    display: grid;
+
+    grid-template-columns:
+        320px 1fr;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    overflow: hidden;
+
+    box-shadow:
+        var(--shadow-small);
+
+}
+
+
+.course-builder.disabled {
+
+    opacity: .65;
+
+}
+
+
+/* =========================================================
+   BUILDER SIDEBAR
+========================================================= */
+
+.builder-sidebar {
+
+    background:
+        #fbfbfd;
+
+    border-right:
+        1px solid
+        var(--border);
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+.builder-sidebar-heading {
+
+    padding: 19px;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.builder-sidebar-heading span {
+
+    display: block;
+
+    color:
+        var(--text-muted);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .12em;
+
+}
+
+
+.builder-sidebar-heading strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 12px;
+
+}
+
+
+.builder-tree {
+
+    padding: 12px;
+
+    overflow-y: auto;
+
+}
+
+
+.builder-empty {
+
+    padding: 25px 12px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 11px;
+
+    line-height: 1.6;
+
+    text-align: center;
+
+}
+
+
+.tree-module {
+
+    margin-bottom: 8px;
+
+}
+
+
+.tree-module-header {
+
+    min-height: 43px;
+
+    padding:
+        0 9px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease;
+
+}
+
+
+.tree-module-header:hover {
+
+    background:
+        var(--purple-soft);
+
+}
+
+
+.tree-module-header.active {
+
+    background:
+        var(--purple-soft);
+
+}
+
+
+.tree-module-toggle {
+
+    width: 20px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 10px;
+
+}
+
+
+.tree-module-title {
+
+    flex: 1;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.tree-module-menu {
+
+    width: 25px;
+
+    height: 25px;
+
+    border: 0;
+
+    border-radius: 6px;
+
+    background: transparent;
+
+    color:
+        var(--text-muted);
+
+}
+
+
+.tree-lessons {
+
+    margin-left: 20px;
+
+    padding:
+        3px 0 5px 8px;
+
+    border-left:
+        1px solid
+        #e5e7eb;
+
+}
+
+
+.tree-lesson {
+
+    width: 100%;
+
+    min-height: 37px;
+
+    padding:
+        0 8px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color:
+        var(--text-secondary);
+
+    text-align: left;
+
+    font-size: 10px;
+
+}
+
+
+.tree-lesson:hover {
+
+    background:
+        #f0ecfa;
+
+}
+
+
+.tree-lesson.active {
+
+    background:
+        #eee7fc;
+
+    color:
+        var(--purple);
+
+    font-weight: 700;
+
+}
+
+
+.tree-lesson-count {
+
+    float: right;
+
+    color:
+        var(--text-muted);
+
+    font-size: 8px;
+
+}
+
+
+/* =========================================================
+   BUILDER WORKSPACE
+========================================================= */
+
+.builder-workspace {
+
+    min-width: 0;
+
+    padding: 28px;
+
+    overflow-y: auto;
+
+}
+
+
+.builder-welcome {
+
+    max-width: 600px;
+
+    margin:
+        80px auto;
+
+    text-align: center;
+
+}
+
+
+.builder-welcome-icon {
+
+    width: 62px;
+    height: 62px;
+
+    margin:
+        0 auto 20px;
+
+    border-radius: 18px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 26px;
+
+}
+
+
+.builder-welcome h3 {
+
+    margin-top: 7px;
+
+    font-size: 23px;
+
+}
+
+
+.builder-welcome p {
+
+    margin-top: 10px;
+
+    color:
+        var(--text-secondary);
+
+    line-height: 1.7;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================================
+   EDITORS
+========================================================= */
+
+.editor-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+
+    padding-bottom: 20px;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+}
+
+
+.editor-header h3 {
+
+    margin-top: 5px;
+
+    font-size: 22px;
+
+}
+
+
+.editor-subtitle {
+
+    margin-top: 5px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+}
+
+
+.editor-actions {
+
+    display: flex;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.lesson-heading,
+.content-builder-toolbar {
+
+    margin-top: 24px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.lesson-heading h4,
+.content-builder-toolbar h4 {
+
+    margin-top: 5px;
+
+    font-size: 15px;
+
+}
+
+
+.lesson-list {
+
+    display: grid;
+
+    gap: 10px;
+
+    margin-top: 13px;
+
+}
+
+
+.lesson-card {
+
+    padding: 14px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    cursor: pointer;
+
+    transition:
+        border-color .18s ease,
+        background .18s ease;
+
+}
+
+
+.lesson-card:hover,
+.lesson-card.active {
+
+    border-color:
+        #d7c7f7;
+
+    background:
+        var(--purple-wash);
+
+}
+
+
+.lesson-number {
+
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    border-radius: 10px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+}
+
+
+.lesson-card-content {
+
+    min-width: 0;
+
+    flex: 1;
+
+}
+
+
+.lesson-card-title {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+}
+
+
+.lesson-card-description {
+
+    margin-top: 3px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 10px;
+
+}
+
+
+.lesson-card-arrow {
+
+    color:
+        var(--text-muted);
+
+}
+
+
+/* =========================================================
+   CONTENT BLOCKS
+========================================================= */
+
+.content-list {
+
+    display: grid;
+
+    gap: 12px;
+
+    margin-top: 14px;
+
+}
+
+
+.content-card {
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    background: white;
+
+}
+
+
+.content-card-header {
+
+    min-height: 48px;
+
+    padding:
+        0 14px;
+
+    background:
+        #fafafa;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.content-type-icon {
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 8px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 11px;
+
+}
+
+
+.content-card-header strong {
+
+    flex: 1;
+
+    font-size: 11px;
+
+}
+
+
+.content-card-actions {
+
+    display: flex;
+
+    gap: 5px;
+
+}
+
+
+.content-mini-button {
+
+    width: 28px;
+    height: 28px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 7px;
+
+    background: white;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 10px;
+
+}
+
+
+.content-mini-button.danger {
+
+    color:
+        var(--danger);
+
+}
+
+
+.content-card-body {
+
+    padding: 15px;
+
+}
+
+
+.content-preview {
+
+    color:
+        var(--text-secondary);
+
+    font-size: 11px;
+
+    line-height: 1.65;
+
+}
+
+
+.content-media-preview {
+
+    max-width: 100%;
+
+    border-radius: 10px;
+
+    background: #111;
+
+}
+
+
+.content-file {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    background:
+        var(--surface-soft);
+
+    border-radius: 9px;
+
+    font-size: 11px;
+
+}
+
+
+.content-empty {
+
+    padding: 30px;
+
+    border:
+        1px dashed
+        var(--border);
+
+    border-radius: 12px;
+
+    color:
+        var(--text-muted);
+
+    text-align: center;
+
+    font-size: 11px;
+
+}
+
+
+/* =========================================================
+   EMPTY SECTION
+========================================================= */
+
+.empty-section {
+
+    min-height: 360px;
+
+    background: white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    box-shadow:
+        var(--shadow-small);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    text-align: center;
+
+    padding: 35px;
+
+}
+
+
+.empty-section-icon {
+
+    width: 60px;
+    height: 60px;
+
+    margin-bottom: 18px;
+
+    border-radius: 18px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 25px;
+
+}
+
+
+.empty-section h3 {
+
+    font-size: 19px;
+
+}
+
+
+.empty-section p {
+
+    max-width: 500px;
+
+    margin-top: 8px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+.phase-badge {
+
+    margin-top: 18px;
+
+    padding:
+        6px 9px;
+
+    border-radius: 20px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+}
+
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+.course-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 500;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity .2s ease;
+
+}
+
+
+.course-modal.open {
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+}
+
+
+.course-modal-backdrop {
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(12,13,20,.58);
+
+    backdrop-filter:
+        blur(5px);
+
+}
+
+
+.course-modal-dialog {
+
+    position: relative;
+
+    z-index: 1;
+
+    width: min(720px, 100%);
+
+    max-height:
+        calc(100vh - 40px);
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 30px 80px
+        rgba(0,0,0,.22);
+
+}
+
+
+.course-modal-header {
+
+    padding:
+        22px 24px;
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+}
+
+
+.course-modal-kicker {
+
+    color:
+        var(--purple);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .13em;
+
+}
+
+
+.course-modal-header h2 {
+
+    margin-top: 4px;
+
+    font-size: 20px;
+
+}
+
+
+.course-modal-close {
+
+    width: 34px;
+    height: 34px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background:
+        #f2f4f7;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 21px;
+
+}
+
+
+.course-form {
+
+    padding: 24px;
+
+}
+
+
+.course-form-field {
+
+    margin-bottom: 17px;
+
+}
+
+
+.course-form-field label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.course-form-field input,
+.course-form-field textarea,
+.course-form-field select {
+
+    width: 100%;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 9px;
+
+    background: white;
+
+    color:
+        var(--text);
+
+    outline: none;
+
+    padding:
+        11px 12px;
+
+    font-size: 12px;
+
+}
+
+
+.course-form-field textarea {
+
+    min-height: 105px;
+
+    resize: vertical;
+
+}
+
+
+.course-form-field input:focus,
+.course-form-field textarea:focus,
+.course-form-field select:focus {
+
+    border-color:
+        #c7aef4;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(124,58,237,.08);
+
+}
+
+
+.course-form-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 15px;
+
+}
+
+
+.course-form-error {
+
+    padding: 11px 12px;
+
+    margin-bottom: 15px;
+
+    border-radius: 9px;
+
+    background:
+        var(--danger-soft);
+
+    color:
+        var(--danger);
+
+    font-size: 10px;
+
+}
+
+
+.course-form-actions {
+
+    padding-top: 5px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+}
+
+
+/* =========================================================
+   CONTENT TYPE SELECTOR
+========================================================= */
+
+.content-type-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 9px;
+
+}
+
+
+.content-type-option {
+
+    min-height: 82px;
+
+    padding: 10px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 11px;
+
+    background: white;
+
+    text-align: left;
+
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        transform .18s ease;
+
+}
+
+
+.content-type-option:hover {
+
+    border-color:
+        #cbb7ef;
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+.content-type-option strong {
+
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 10px;
+
+}
+
+
+.content-type-option span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 8px;
+
+    line-height: 1.35;
+
+}
+
+
+.content-type-option-icon {
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 8px;
+
+    background:
+        var(--purple-soft);
+
+    color:
+        var(--purple);
+
+    display: grid;
+
+    place-items: center;
+
+}
+
+
+/* =========================================================
+   MEDIA UPLOAD
+========================================================= */
+
+.file-drop {
+
+    position: relative;
+
+    border:
+        1px dashed
+        #cfd3dc;
+
+    border-radius: 11px;
+
+    padding: 22px;
+
+    text-align: center;
+
+    background:
+        #fbfbfd;
+
+}
+
+
+.file-drop input {
+
+    position: absolute;
+
+    inset: 0;
+
+    opacity: 0;
+
+    cursor: pointer;
+
+}
+
+
+.file-drop strong {
+
+    display: block;
+
+    font-size: 11px;
+
+}
+
+
+.file-drop span {
+
+    display: block;
+
+    margin-top: 5px;
+
+    color:
+        var(--text-muted);
+
+    font-size: 9px;
+
+}
+
+
+.upload-progress {
+
+    height: 5px;
+
+    margin-top: 12px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background:
+        #e9e9ee;
+
+}
+
+
+.upload-progress-fill {
+
+    width: 0;
+
+    height: 100%;
+
+    background:
+        var(--purple);
+
+    transition:
+        width .2s ease;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .stats-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .course-builder {
+
+        grid-template-columns:
+            280px 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .admin-sidebar {
+
+        width: 270px;
+
+        transform:
+            translateX(-100%);
+
     }
 
 
-    function closeMobileSidebar() {
+    .sidebar-open .admin-sidebar {
 
-        $("#admin-app")
-            ?.classList.remove("sidebar-open");
+        transform:
+            translateX(0);
+
     }
 
 
-    /* =====================================================
-       LOGOUT
-    ===================================================== */
+    .mobile-sidebar-close {
 
-    function setupLogout() {
+        display: block;
 
-        const button =
-            $("#logout-button");
-
-        if (!button) return;
-
-
-        button.addEventListener(
-            "click",
-            async () => {
-
-                try {
-
-                    if (
-                        typeof window.logout ===
-                        "function"
-                    ) {
-
-                        await window.logout();
-
-                        return;
-                    }
-
-
-                    await client.auth.signOut();
-
-
-                    window.location.href =
-                        "index.html";
-
-                } catch (error) {
-
-                    console.error(
-                        "Logout error:",
-                        error
-                    );
-                }
-
-            }
-        );
     }
 
 
-    /* =====================================================
-       ADMIN USER
-    ===================================================== */
+    .admin-main {
 
-    async function loadAdminUser() {
+        margin-left: 0;
 
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await client.auth.getUser();
-
-
-            if (error || !data?.user) return;
-
-
-            const user =
-                data.user;
-
-
-            const metadata =
-                user.user_metadata || {};
-
-
-            const name =
-                metadata.name ||
-                metadata.full_name ||
-                metadata.display_name ||
-                user.email?.split("@")[0] ||
-                "Administrator";
-
-
-            $("#admin-name") &&
-                ($("#admin-name").textContent = name);
-
-
-            $("#admin-role") &&
-                ($("#admin-role").textContent = "Admin");
-
-
-            $("#admin-avatar") &&
-                ($("#admin-avatar").textContent =
-                    name.charAt(0).toUpperCase());
-
-        } catch (error) {
-
-            console.error(
-                "Could not load admin user:",
-                error
-            );
-        }
     }
 
 
-    /* =====================================================
-       DASHBOARD
-    ===================================================== */
+    .sidebar-toggle {
 
-    async function loadDashboard() {
+        display: grid;
 
-        try {
+        place-items: center;
 
-            await Promise.all([
-                loadCourseCount(),
-                loadUnitCount(),
-                loadLessonCount(),
-                loadStudentCount(),
-                loadContentCounts(),
-                loadRecentActivity()
-            ]);
-
-            hideDashboardError();
-
-        } catch (error) {
-
-            console.error(
-                "Dashboard error:",
-                error
-            );
-
-            showDashboardError();
-        }
     }
 
 
-    async function loadCourseCount() {
+    .dashboard-grid {
 
-        const {
-            count,
-            error
-        } =
-            await client
-                .from("courses")
-                .select("id", {
-                    count: "exact",
-                    head: true
-                })
-                .neq("status", "archived");
+        grid-template-columns: 1fr;
 
-
-        if (error) throw error;
-
-
-        const element =
-            $("#total-courses");
-
-
-        if (element) {
-
-            element.textContent =
-                count ?? 0;
-        }
     }
 
 
-    async function loadUnitCount() {
+    .course-builder {
 
-        const element =
-            $("#total-units");
+        grid-template-columns: 1fr;
 
-        if (!element) return;
-
-
-        try {
-
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("units")
-                    .select("id", {
-                        count: "exact",
-                        head: true
-                    });
-
-
-            if (error) throw error;
-
-
-            element.textContent =
-                count ?? 0;
-
-        } catch (error) {
-
-            console.warn(
-                "Could not load units:",
-                error
-            );
-
-            element.textContent = "—";
-        }
     }
 
 
-    async function loadLessonCount() {
+    .builder-sidebar {
 
-        const element =
-            $("#total-lessons");
+        max-height: 350px;
 
-        if (!element) return;
+        border-right: 0;
 
+        border-bottom:
+            1px solid
+            var(--border);
 
-        try {
+    }
 
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("lessons")
-                    .select("id", {
-                        count: "exact",
-                        head: true
-                    });
+}
 
 
-            if (error) throw error;
+@media (min-width: 901px) {
+
+    .sidebar-overlay {
+
+        display: none;
+
+    }
+
+}
 
 
-            element.textContent =
-                count ?? 0;
+@media (max-width: 700px) {
 
-        } catch (error) {
+    .admin-content {
 
-            console.warn(
-                "Could not load lessons:",
-                error
-            );
+        padding:
+            25px 16px 50px;
 
-            element.textContent = "—";
-        }
     }
 
 
-    async function loadStudentCount() {
+    .admin-topbar {
 
-        const element =
-            $("#total-students");
+        padding:
+            0 16px;
 
-        if (!element) return;
-
-
-        try {
-
-            const {
-                count,
-                error
-            } =
-                await client
-                    .from("profiles")
-                    .select("id", {
-                        count: "exact",
-                        head: true
-                    })
-                    .eq("role", "student");
-
-
-            if (error) throw error;
-
-
-            element.textContent =
-                count ?? 0;
-
-        } catch (error) {
-
-            console.warn(
-                "Could not load students:",
-                error
-            );
-
-            element.textContent = "—";
-        }
     }
 
 
-    async function loadContentCounts() {
+    .topbar-brand {
 
-        const published =
-            $("#published-content");
+        display: none;
 
-        const draft =
-            $("#draft-content");
-
-
-        try {
-
-            const [
-                publishedResult,
-                draftResult
-            ] =
-                await Promise.all([
-
-                    client
-                        .from("courses")
-                        .select("id", {
-                            count: "exact",
-                            head: true
-                        })
-                        .eq(
-                            "status",
-                            "published"
-                        ),
-
-                    client
-                        .from("courses")
-                        .select("id", {
-                            count: "exact",
-                            head: true
-                        })
-                        .eq(
-                            "status",
-                            "draft"
-                        )
-                ]);
-
-
-            if (publishedResult.error)
-                throw publishedResult.error;
-
-
-            if (draftResult.error)
-                throw draftResult.error;
-
-
-            if (published) {
-
-                published.textContent =
-                    publishedResult.count ?? 0;
-            }
-
-
-            if (draft) {
-
-                draft.textContent =
-                    draftResult.count ?? 0;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Could not load content counts:",
-                error
-            );
-
-            if (published)
-                published.textContent = "—";
-
-            if (draft)
-                draft.textContent = "—";
-        }
     }
 
 
-    async function loadRecentActivity() {
+    .page-heading-row {
 
-        const list =
-            $("#activity-list");
+        align-items: flex-start;
 
-        if (!list) return;
+        flex-direction: column;
 
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("courses")
-                    .select(
-                        "id,title,status,created_at"
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    )
-                    .limit(6);
-
-
-            if (error) throw error;
-
-
-            if (!data?.length) {
-
-                list.innerHTML = `
-                    <div class="activity-empty">
-                        No recent course activity.
-                    </div>
-                `;
-
-                return;
-            }
-
-
-            list.innerHTML =
-                data.map(course => {
-
-                    let action =
-                        "Course created";
-
-
-                    if (
-                        course.status ===
-                        "published"
-                    ) {
-
-                        action =
-                            "Course published";
-
-                    } else if (
-                        course.status ===
-                        "archived"
-                    ) {
-
-                        action =
-                            "Course archived";
-                    }
-
-
-                    return `
-                        <div class="activity-item">
-
-                            <div class="activity-icon">
-                                ▣
-                            </div>
-
-                            <div class="activity-content">
-
-                                <div class="activity-title">
-                                    ${escapeHTML(action)}
-                                </div>
-
-                                <div class="activity-meta">
-                                    ${escapeHTML(course.title)}
-                                    ·
-                                    ${formatDate(course.created_at)}
-                                </div>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                }).join("");
-
-
-        } catch (error) {
-
-            console.warn(
-                "Could not load activity:",
-                error
-            );
-
-            list.innerHTML = `
-                <div class="activity-error">
-                    Could not load recent activity.
-                </div>
-            `;
-        }
     }
 
 
-    function setupDashboardRetry() {
+    .stats-grid {
 
-        $("#dashboard-retry")
-            ?.addEventListener(
-                "click",
-                loadDashboard
-            );
+        grid-template-columns: 1fr;
+
     }
 
 
-    function showDashboardError() {
+    .toolbar {
 
-        $("#dashboard-error")
-            ?.classList.remove("admin-hidden");
+        flex-direction: column;
+
+        align-items: stretch;
+
     }
 
 
-    function hideDashboardError() {
+    .search-box {
 
-        $("#dashboard-error")
-            ?.classList.add("admin-hidden");
+        max-width: none;
+
     }
 
 
-    /* =====================================================
-       COURSE CONTROLS
-    ===================================================== */
+    .course-row {
 
-    function setupCourseControls() {
+        grid-template-columns:
+            56px 1fr;
 
-        $("#course-search")
-            ?.addEventListener(
-                "input",
-                renderCourses
-            );
-
-
-        $("#course-filter")
-            ?.addEventListener(
-                "change",
-                renderCourses
-            );
-
-
-        $("#create-course-button")
-            ?.addEventListener(
-                "click",
-                () => openCourseModal()
-            );
     }
 
 
-    /* =====================================================
-       LOAD COURSES
-    ===================================================== */
+    .course-cover {
 
-    async function loadCourses() {
+        width: 56px;
+        height: 48px;
 
-        const list =
-            $("#courses-list");
-
-        if (!list) return;
-
-
-        list.innerHTML = `
-            <div class="courses-loading">
-                Loading courses...
-            </div>
-        `;
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("courses")
-                    .select(`
-                        id,
-                        title,
-                        description,
-                        category,
-                        level,
-                        cover_image,
-                        status,
-                        sort_order,
-                        created_at,
-                        slug,
-                        archived_at
-                    `)
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true,
-                            nullsFirst: false
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    );
-
-
-            if (error) throw error;
-
-
-            allCourses =
-                data || [];
-
-
-            renderCourses();
-
-        } catch (error) {
-
-            console.error(
-                "Could not load courses:",
-                error
-            );
-
-
-            list.innerHTML = `
-                <div class="courses-empty">
-
-                    <h3>
-                        Could not load courses
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            error.message ||
-                            "Please try again."
-                        )}
-                    </p>
-
-                </div>
-            `;
-        }
     }
 
 
-    /* =====================================================
-       LOAD CAROUSEL ITEMS
-    ===================================================== */
+    .course-actions {
 
-    async function loadCarouselItems() {
+        grid-column: 1 / -1;
 
-        const list =
-            $("#carousel-list");
+        justify-content: flex-start;
 
-
-        if (list) {
-
-            list.innerHTML = `
-                <div class="courses-loading">
-                    Loading promotions...
-                </div>
-            `;
-        }
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("carousel_items")
-                    .select("*")
-                    .order(
-                        "sort_order",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    );
-
-
-            if (error) throw error;
-
-
-            allCarouselItems =
-                data || [];
-
-
-            renderCarouselItems();
-
-        } catch (error) {
-
-            console.error(
-                "Error loading carousel items:",
-                error
-            );
-
-
-            if (list) {
-
-                list.innerHTML = `
-                    <div class="courses-loading">
-                        Unable to load promotions.
-                    </div>
-                `;
-            }
-        }
     }
 
 
-    /* =====================================================
-       RENDER CAROUSEL ITEMS
-    ===================================================== */
+    .builder-course-selector {
 
-    function renderCarouselItems() {
+        grid-template-columns: 1fr;
 
-        const list =
-            $("#carousel-list");
-
-        const count =
-            $("#carousel-count");
-
-
-        if (!list) return;
-
-
-        const searchInput =
-            $("#carousel-search");
-
-        const filterSelect =
-            $("#carousel-filter");
-
-
-        const searchTerm =
-            searchInput
-                ? searchInput.value
-                    .trim()
-                    .toLowerCase()
-                : "";
-
-
-        const filter =
-            filterSelect
-                ? filterSelect.value
-                : "all";
-
-
-        let filteredItems =
-            [...allCarouselItems];
-
-
-        if (filter !== "all") {
-
-            filteredItems =
-                filteredItems.filter(
-                    item =>
-                        item.status === filter
-                );
-        }
-
-
-        if (searchTerm) {
-
-            filteredItems =
-                filteredItems.filter(item => {
-
-                    const title =
-                        (item.title || "")
-                            .toLowerCase();
-
-                    const description =
-                        (item.description || "")
-                            .toLowerCase();
-
-                    const area =
-                        (item.area || "")
-                            .toLowerCase();
-
-
-                    return (
-                        title.includes(searchTerm) ||
-                        description.includes(searchTerm) ||
-                        area.includes(searchTerm)
-                    );
-                });
-        }
-
-
-        if (count) {
-
-            count.textContent =
-                `${filteredItems.length} ${
-                    filteredItems.length === 1
-                        ? "promotion"
-                        : "promotions"
-                }`;
-        }
-
-
-        if (!filteredItems.length) {
-
-            list.innerHTML = `
-                <div class="courses-loading">
-                    No promotions found.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        list.innerHTML =
-            filteredItems
-                .map(renderCarouselRow)
-                .join("");
-
-
-        attachCarouselActions();
     }
 
 
-    /* =====================================================
-       CAROUSEL ROW
-    ===================================================== */
+    .builder-workspace {
 
-    function renderCarouselRow(item) {
+        padding: 18px;
 
-        const startDate =
-            item.start_date
-                ? formatDate(item.start_date)
-                : "—";
-
-
-        const endDate =
-            item.end_date
-                ? formatDate(item.end_date)
-                : "—";
-
-
-        const status =
-            normalizeCarouselStatus(
-                item.status
-            );
-
-
-        const image =
-            item.image_url
-                ? `
-                    <img
-                        src="${escapeAttribute(item.image_url)}"
-                        alt="${escapeAttribute(item.title)}"
-                        onerror="this.style.display='none';"
-                    >
-                `
-                : `
-                    <div class="course-cover-placeholder">
-                        ▤
-                    </div>
-                `;
-
-
-        return `
-            <div
-                class="course-row carousel-row"
-                data-carousel-id="${escapeAttribute(item.id)}"
-            >
-
-                <div class="course-main">
-
-                    <div class="course-cover">
-                        ${image}
-                    </div>
-
-                    <div class="course-info">
-
-                        <div class="course-title">
-                            ${escapeHTML(
-                                item.title ||
-                                "Untitled Promotion"
-                            )}
-                        </div>
-
-                        <div class="course-description">
-                            ${escapeHTML(
-                                item.description ||
-                                "Promotional content."
-                            )}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="course-category">
-                    ${escapeHTML(
-                        formatCarouselArea(
-                            item.area
-                        )
-                    )}
-                </div>
-
-
-                <div class="course-level">
-                    <span class="course-status ${status}">
-                        ${escapeHTML(status)}
-                    </span>
-                </div>
-
-
-                <div class="course-updated">
-                    ${startDate}
-                </div>
-
-
-                <div class="course-updated">
-                    ${endDate}
-                </div>
-
-
-                <div class="course-actions">
-
-                    <button
-                        type="button"
-                        class="course-action-button"
-                        data-carousel-action="edit"
-                        data-carousel-id="${escapeAttribute(item.id)}"
-                    >
-                        Edit
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="course-action-button danger"
-                        data-carousel-action="delete"
-                        data-carousel-id="${escapeAttribute(item.id)}"
-                    >
-                        Delete
-                    </button>
-
-                </div>
-
-            </div>
-        `;
     }
 
 
-    /* =====================================================
-       CAROUSEL ACTIONS
-    ===================================================== */
+    .editor-header {
 
-    function attachCarouselActions() {
+        flex-direction: column;
 
-        $$(".course-action-button").forEach(button => {
-
-            const action =
-                button.dataset.carouselAction;
-
-
-            if (!action) return;
-
-
-            button.addEventListener(
-                "click",
-                async () => {
-
-                    const id =
-                        button.dataset.carouselId;
-
-
-                    if (!id) return;
-
-
-                    const item =
-                        allCarouselItems.find(
-                            carouselItem =>
-                                String(carouselItem.id) ===
-                                String(id)
-                        );
-
-
-                    if (!item) return;
-
-
-                    if (action === "edit") {
-
-                        openCarouselModal(item);
-
-                        return;
-                    }
-
-
-                    if (action === "delete") {
-
-                        await deleteCarouselItem(item);
-                    }
-
-                }
-            );
-        });
     }
 
 
-    /* =====================================================
-       DELETE CAROUSEL ITEM
-    ===================================================== */
+    .content-type-grid {
 
-    async function deleteCarouselItem(item) {
+        grid-template-columns:
+            repeat(2, 1fr);
 
-        const confirmed =
-            confirm(
-                `Delete "${item.title}"?`
-            );
-
-
-        if (!confirmed) return;
-
-
-        try {
-
-            const {
-                error
-            } =
-                await client
-                    .from("carousel_items")
-                    .delete()
-                    .eq(
-                        "id",
-                        item.id
-                    );
-
-
-            if (error) throw error;
-
-
-            await loadCarouselItems();
-
-        } catch (error) {
-
-            console.error(
-                "Error deleting carousel item:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Unable to delete this promotion."
-            );
-        }
     }
 
 
-    /* =====================================================
-       OPEN CAROUSEL MODAL
-    ===================================================== */
+    .course-form-grid {
 
-    function openCarouselModal(item = null) {
+        grid-template-columns: 1fr;
 
-        editingCarouselItemId =
-            item?.id || null;
+    }
 
+}
 
-        removeCarouselImage =
-            false;
 
+@media (max-width: 500px) {
 
-        if (carouselModal) {
+    .admin-topbar {
 
-            carouselModal.remove();
+        min-height: 72px;
 
-            carouselModal = null;
-        }
-
-
-        carouselModal =
-            document.createElement("div");
-
-
-        carouselModal.className =
-            "course-modal";
-
-
-        carouselModal.innerHTML = `
-
-            <div
-                class="course-modal-backdrop"
-                data-close-carousel-modal="true"
-            ></div>
-
-
-            <div
-                class="course-modal-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="carousel-modal-title"
-            >
-
-                <div class="course-modal-header">
-
-                    <div>
-
-                        <div class="course-modal-kicker">
-                            FEATURED CONTENT
-                        </div>
-
-                        <h2 id="carousel-modal-title">
-                            ${
-                                item
-                                    ? "Edit Promotion"
-                                    : "Create Promotion"
-                            }
-                        </h2>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="course-modal-close"
-                        id="close-carousel-modal"
-                        aria-label="Close"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form
-                    id="carousel-form"
-                    class="course-form"
-                    novalidate
-                >
-
-                    <!-- TITLE -->
-
-                    <div class="course-form-field">
-
-                        <label for="carousel-title">
-                            Title *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="carousel-title"
-                            required
-                            maxlength="200"
-                            value="${escapeAttribute(
-                                item?.title || ""
-                            )}"
-                            placeholder="Promotion title"
-                        >
-
-                    </div>
-
-
-                    <!-- DESCRIPTION -->
-
-                    <div class="course-form-field">
-
-                        <label for="carousel-description">
-                            Description
-                        </label>
-
-                        <textarea
-                            id="carousel-description"
-                            rows="4"
-                            maxlength="5000"
-                            placeholder="Short promotional message"
-                        >${escapeHTML(
-                            item?.description || ""
-                        )}</textarea>
-
-                    </div>
-
-
-                    <!-- PROMOTION IMAGE -->
-
-                    <div class="course-form-field">
-
-                        <label>
-                            Promotion Image
-                        </label>
-
-
-                        <label
-                            for="carousel-image-file"
-                            class="course-upload-area"
-                            id="carousel-upload-area"
-                        >
-
-                            <div class="upload-icon">
-                                ↑
-                            </div>
-
-                            <strong>
-                                Choose an image
-                            </strong>
-
-                            <span>
-                                JPG, JPEG, PNG or WebP · Max 5 MB
-                            </span>
-
-                        </label>
-
-
-                        <input
-                            id="carousel-image-file"
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            hidden
-                        >
-
-
-                        <div
-                            id="carousel-image-preview"
-                            class="course-cover-preview"
-                            ${
-                                item?.image_url
-                                    ? ""
-                                    : "hidden"
-                            }
-                        >
-
-                            <img
-                                id="carousel-image-preview-image"
-                                src="${
-                                    item?.image_url
-                                        ? escapeAttribute(
-                                            item.image_url
-                                        )
-                                        : ""
-                                }"
-                                alt="Promotion image preview"
-                            >
-
-                            <button
-                                type="button"
-                                id="carousel-remove-image"
-                                class="course-remove-cover"
-                            >
-                                Remove image
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- AREA + STATUS -->
-
-                    <div class="course-form-grid">
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-area">
-                                Area
-                            </label>
-
-                            <select id="carousel-area">
-
-                                <option
-                                    value="all"
-                                    ${
-                                        !item?.area ||
-                                        item?.area === "all"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    All Areas
-                                </option>
-
-                                <option
-                                    value="language"
-                                    ${
-                                        item?.area === "language"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Language
-                                </option>
-
-                                <option
-                                    value="ms-office"
-                                    ${
-                                        item?.area === "ms-office"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    MS Office
-                                </option>
-
-                                <option
-                                    value="trading"
-                                    ${
-                                        item?.area === "trading"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Trading
-                                </option>
-
-                                <option
-                                    value="business"
-                                    ${
-                                        item?.area === "business"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Business
-                                </option>
-
-                                <option
-                                    value="technology"
-                                    ${
-                                        item?.area === "technology"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Technology
-                                </option>
-
-                                <option
-                                    value="finance"
-                                    ${
-                                        item?.area === "finance"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Finance
-                                </option>
-
-                                <option
-                                    value="personal-development"
-                                    ${
-                                        item?.area === "personal-development"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Personal Development
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-status">
-                                Status
-                            </label>
-
-                            <select id="carousel-status">
-
-                                <option
-                                    value="draft"
-                                    ${
-                                        item?.status !== "published"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Draft
-                                </option>
-
-                                <option
-                                    value="published"
-                                    ${
-                                        item?.status === "published"
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    Published
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- DATES -->
-
-                    <div class="course-form-grid">
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-start-date">
-                                Start Date
-                            </label>
-
-                            <input
-                                type="datetime-local"
-                                id="carousel-start-date"
-                                value="${formatDateTimeLocal(
-                                    item?.start_date
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-end-date">
-                                End Date
-                            </label>
-
-                            <input
-                                type="datetime-local"
-                                id="carousel-end-date"
-                                value="${formatDateTimeLocal(
-                                    item?.end_date
-                                )}"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- BUTTON + SORT ORDER -->
-
-                    <div class="course-form-grid">
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-button-text">
-                                Button Text
-                            </label>
-
-                            <input
-                                type="text"
-                                id="carousel-button-text"
-                                maxlength="100"
-                                value="${escapeAttribute(
-                                    item?.button_text ||
-                                    "Learn More"
-                                )}"
-                            >
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label for="carousel-sort-order">
-                                Sort Order
-                            </label>
-
-                            <input
-                                type="number"
-                                id="carousel-sort-order"
-                                min="0"
-                                step="1"
-                                value="${item?.sort_order ?? 0}"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- BUTTON URL -->
-
-                    <div class="course-form-field">
-
-                        <label for="carousel-button-url">
-                            Button URL
-                        </label>
-
-                        <input
-                            type="url"
-                            id="carousel-button-url"
-                            value="${escapeAttribute(
-                                item?.button_url || ""
-                            )}"
-                            placeholder="https://..."
-                        >
-
-                    </div>
-
-
-                    <!-- ERROR -->
-
-                    <div
-                        id="carousel-form-error"
-                        class="course-form-error"
-                        hidden
-                    ></div>
-
-
-                    <!-- ACTIONS -->
-
-                    <div class="course-form-actions">
-
-                        <button
-                            type="button"
-                            class="secondary-button"
-                            id="cancel-carousel-modal"
-                        >
-                            Cancel
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            class="primary-button"
-                            id="carousel-save-button"
-                        >
-                            ${
-                                item
-                                    ? "Save Changes"
-                                    : "Create Promotion"
-                            }
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-        `;
-
-
-        document.body.appendChild(
-            carouselModal
-        );
-
-
-        requestAnimationFrame(() => {
-
-            if (carouselModal) {
-
-                carouselModal.classList.add(
-                    "open"
-                );
-            }
-
-        });
-
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-
-        /* =================================================
-           MODAL EVENTS
-        ================================================= */
-
-        const closeButton =
-            carouselModal.querySelector(
-                "#close-carousel-modal"
-            );
-
-
-        closeButton?.addEventListener(
-            "click",
-            closeCarouselModal
-        );
-
-
-        const cancelButton =
-            carouselModal.querySelector(
-                "#cancel-carousel-modal"
-            );
-
-
-        cancelButton?.addEventListener(
-            "click",
-            closeCarouselModal
-        );
-
-
-        const backdrop =
-            carouselModal.querySelector(
-                ".course-modal-backdrop"
-            );
-
-
-        backdrop?.addEventListener(
-            "click",
-            closeCarouselModal
-        );
-
-
-        const form =
-            carouselModal.querySelector(
-                "#carousel-form"
-            );
-
-
-        form?.addEventListener(
-            "submit",
-            saveCarouselItem
-        );
-
-
-        /* =================================================
-           IMAGE EVENTS
-        ================================================= */
-
-        const imageFileInput =
-            carouselModal.querySelector(
-                "#carousel-image-file"
-            );
-
-
-        imageFileInput?.addEventListener(
-            "change",
-            handleCarouselImageFile
-        );
-
-
-        const removeImageButton =
-            carouselModal.querySelector(
-                "#carousel-remove-image"
-            );
-
-
-        removeImageButton?.addEventListener(
-            "click",
-            removeCarouselImageFile
-        );
-
-
-        setTimeout(() => {
-
-            carouselModal
-                ?.querySelector(
-                    "#carousel-title"
-                )
-                ?.focus();
-
-        }, 50);
     }
 
 
-    /* =====================================================
-       CAROUSEL IMAGE FILE
-    ===================================================== */
+    .topbar-left h1 {
 
-    function handleCarouselImageFile(event) {
+        font-size: 17px;
 
-        const file =
-            event.target.files?.[0];
-
-
-        if (!file) return;
-
-
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
-
-
-        if (!allowedTypes.includes(file.type)) {
-
-            showCarouselFormError(
-                "Please select a JPG, PNG or WebP image."
-            );
-
-            event.target.value = "";
-
-            return;
-        }
-
-
-        if (file.size > 5 * 1024 * 1024) {
-
-            showCarouselFormError(
-                "The promotion image must be smaller than 5 MB."
-            );
-
-            event.target.value = "";
-
-            return;
-        }
-
-
-        removeCarouselImage =
-            false;
-
-
-        clearCarouselFormError();
-
-
-        const reader =
-            new FileReader();
-
-
-        reader.onload = () => {
-
-            showCarouselImagePreview(
-                reader.result
-            );
-        };
-
-
-        reader.readAsDataURL(file);
     }
 
 
-    /* =====================================================
-       SHOW CAROUSEL IMAGE PREVIEW
-    ===================================================== */
+    .content-type-grid {
 
-    function showCarouselImagePreview(src) {
+        grid-template-columns: 1fr 1fr;
 
-        if (!carouselModal) return;
-
-
-        const preview =
-            carouselModal.querySelector(
-                "#carousel-image-preview"
-            );
-
-
-        const image =
-            carouselModal.querySelector(
-                "#carousel-image-preview-image"
-            );
-
-
-        if (!src) {
-
-            clearCarouselImagePreview();
-
-            return;
-        }
-
-
-        image.src =
-            src;
-
-
-        preview.hidden =
-            false;
     }
 
 
-    /* =====================================================
-       CLEAR CAROUSEL IMAGE PREVIEW
-    ===================================================== */
+    .course-modal {
 
-    function clearCarouselImagePreview() {
+        padding: 10px;
 
-        if (!carouselModal) return;
-
-
-        const preview =
-            carouselModal.querySelector(
-                "#carousel-image-preview"
-            );
-
-
-        const image =
-            carouselModal.querySelector(
-                "#carousel-image-preview-image"
-            );
-
-
-        preview.hidden =
-            true;
-
-
-        image.removeAttribute(
-            "src"
-        );
     }
 
 
-    /* =====================================================
-       REMOVE CAROUSEL IMAGE
-    ===================================================== */
+    .course-modal-dialog {
 
-    function removeCarouselImageFile() {
+        max-height:
+            calc(100vh - 20px);
 
-        if (!carouselModal) return;
+        border-radius: 14px;
 
-
-        const fileInput =
-            carouselModal.querySelector(
-                "#carousel-image-file"
-            );
-
-
-        if (fileInput) {
-
-            fileInput.value = "";
-        }
-
-
-        removeCarouselImage =
-            true;
-
-
-        clearCarouselImagePreview();
     }
 
 
-    /* =====================================================
-       UPLOAD CAROUSEL IMAGE
-    ===================================================== */
+    .course-form {
 
-    async function uploadCarouselImage(file) {
+        padding: 18px;
 
-        if (!file) {
-
-            throw new Error(
-                "No promotion image was selected."
-            );
-        }
-
-
-        const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
-
-
-        const randomName =
-            `${crypto.randomUUID()}.${extension}`;
-
-
-        const filePath =
-            `carousel-images/${randomName}`;
-
-
-        const {
-            error: uploadError
-        } =
-            await client.storage
-                .from("carousel-images")
-                .upload(
-                    filePath,
-                    file,
-                    {
-                        cacheControl: "3600",
-                        upsert: false,
-                        contentType: file.type
-                    }
-                );
-
-
-        if (uploadError) {
-
-            throw new Error(
-                `Promotion image upload failed: ${uploadError.message}`
-            );
-        }
-
-
-        const {
-            data
-        } =
-            client.storage
-                .from("carousel-images")
-                .getPublicUrl(
-                    filePath
-                );
-
-
-        if (!data?.publicUrl) {
-
-            throw new Error(
-                "The promotion image was uploaded but its public URL could not be generated."
-            );
-        }
-
-
-        return data.publicUrl;
     }
 
 
-    /* =====================================================
-       CLOSE CAROUSEL MODAL
-    ===================================================== */
+    .course-modal-header {
 
-    function closeCarouselModal() {
+        padding:
+            18px;
 
-        if (!carouselModal) return;
-
-
-        carouselModal.classList.remove(
-            "open"
-        );
-
-
-        carouselModal.remove();
-
-        carouselModal = null;
-
-
-        editingCarouselItemId =
-            null;
-
-
-        removeCarouselImage =
-            false;
-
-
-        document.body.classList.remove(
-            "modal-open"
-        );
     }
 
-
-    /* =====================================================
-       SAVE CAROUSEL ITEM
-    ===================================================== */
-
-    async function saveCarouselItem(event) {
-
-        event.preventDefault();
-
-
-        const title =
-            $("#carousel-title")
-                ?.value
-                .trim();
-
-
-        const description =
-            $("#carousel-description")
-                ?.value
-                .trim();
-
-
-        const imageFile =
-            $("#carousel-image-file")
-                ?.files?.[0] ||
-            null;
-
-
-        const area =
-            $("#carousel-area")
-                ?.value ||
-            "all";
-
-
-        const status =
-            $("#carousel-status")
-                ?.value ||
-            "draft";
-
-
-        const startDate =
-            $("#carousel-start-date")
-                ?.value;
-
-
-        const endDate =
-            $("#carousel-end-date")
-                ?.value;
-
-
-        const buttonText =
-            $("#carousel-button-text")
-                ?.value
-                .trim() ||
-            "Learn More";
-
-
-        const buttonUrl =
-            $("#carousel-button-url")
-                ?.value
-                .trim();
-
-
-        const sortOrderRaw =
-            $("#carousel-sort-order")
-                ?.value
-                .trim();
-
-
-        const sortOrder =
-            sortOrderRaw === ""
-                ? 0
-                : Number(sortOrderRaw);
-
-
-        const errorElement =
-            $("#carousel-form-error");
-
-
-        const saveButton =
-            $("#carousel-save-button");
-
-
-        if (errorElement) {
-
-            errorElement.textContent =
-                "";
-
-            errorElement.hidden =
-                true;
-        }
-
-
-        if (!title) {
-
-            showCarouselFormError(
-                "Promotion title is required."
-            );
-
-            return;
-        }
-
-
-        if (
-            Number.isNaN(sortOrder) ||
-            sortOrder < 0
-        ) {
-
-            showCarouselFormError(
-                "Sort order must be a valid number."
-            );
-
-            return;
-        }
-
-
-        if (
-            startDate &&
-            endDate &&
-            new Date(startDate) >
-            new Date(endDate)
-        ) {
-
-            showCarouselFormError(
-                "The end date cannot be earlier than the start date."
-            );
-
-            return;
-        }
-
-
-        if (saveButton) {
-
-            saveButton.disabled =
-                true;
-
-            saveButton.textContent =
-                editingCarouselItemId
-                    ? "Saving..."
-                    : "Creating...";
-        }
-
-
-        try {
-
-            /* =============================================
-               DETERMINE IMAGE URL
-            ============================================= */
-
-            let finalImageUrl =
-                null;
-
-
-            /*
-                Editing an existing promotion:
-                keep its current image unless the admin
-                selected a new image or explicitly removed it.
-            */
-
-            if (editingCarouselItemId) {
-
-                const existingItem =
-                    allCarouselItems.find(
-                        item =>
-                            String(item.id) ===
-                            String(editingCarouselItemId)
-                    );
-
-
-                finalImageUrl =
-                    existingItem?.image_url ||
-                    null;
-            }
-
-
-            /*
-                Remove image if requested.
-            */
-
-            if (removeCarouselImage) {
-
-                finalImageUrl =
-                    null;
-            }
-
-
-            /*
-                Upload a new image if selected.
-            */
-
-            if (
-                imageFile &&
-                imageFile instanceof File &&
-                imageFile.size > 0
-            ) {
-
-                finalImageUrl =
-                    await uploadCarouselImage(
-                        imageFile
-                    );
-            }
-
-
-            /* =============================================
-               BUILD DATABASE RECORD
-            ============================================= */
-
-            const carouselData = {
-
-                title,
-
-                description:
-                    description || null,
-
-                image_url:
-                    finalImageUrl,
-
-                area,
-
-                button_text:
-                    buttonText,
-
-                button_url:
-                    buttonUrl || null,
-
-                status,
-
-                start_date:
-                    startDate
-                        ? new Date(
-                            startDate
-                        ).toISOString()
-                        : null,
-
-                end_date:
-                    endDate
-                        ? new Date(
-                            endDate
-                        ).toISOString()
-                        : null,
-
-                sort_order:
-                    sortOrder
-            };
-
-
-            /* =============================================
-               UPDATE EXISTING PROMOTION
-            ============================================= */
-
-            if (editingCarouselItemId) {
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("carousel_items")
-                        .update(carouselData)
-                        .eq(
-                            "id",
-                            editingCarouselItemId
-                        );
-
-
-                if (error) throw error;
-
-
-            } else {
-
-
-                /* =========================================
-                   CREATE NEW PROMOTION
-                ========================================= */
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("carousel_items")
-                        .insert(
-                            carouselData
-                        );
-
-
-                if (error) throw error;
-            }
-
-
-            closeCarouselModal();
-
-
-            await loadCarouselItems();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not save carousel item:",
-                error
-            );
-
-
-            showCarouselFormError(
-                error.message ||
-                "Could not save the promotion."
-            );
-
-
-        } finally {
-
-            if (saveButton) {
-
-                saveButton.disabled =
-                    false;
-
-                saveButton.textContent =
-                    editingCarouselItemId
-                        ? "Save Changes"
-                        : "Create Promotion";
-            }
-        }
-    }
-
-
-    /* =====================================================
-       CAROUSEL FORM ERROR
-    ===================================================== */
-
-    function showCarouselFormError(message) {
-
-        const element =
-            $("#carousel-form-error");
-
-
-        if (!element) return;
-
-
-        element.textContent =
-            message;
-
-
-        element.hidden =
-            false;
-    }
-
-
-    function clearCarouselFormError() {
-
-        const element =
-            $("#carousel-form-error");
-
-
-        if (!element) return;
-
-
-        element.textContent =
-        "";
-
-
-        element.hidden =
-            true;
-    }
-
-
-    /* =====================================================
-       CAROUSEL UTILITIES
-    ===================================================== */
-
-    function normalizeCarouselStatus(status) {
-
-        return status === "published"
-            ? "published"
-            : "draft";
-    }
-
-
-    function formatCarouselArea(area) {
-
-        const areas = {
-
-            "all":
-                "All Areas",
-
-            "language":
-                "Language",
-
-            "ms-office":
-                "MS Office",
-
-            "trading":
-                "Trading",
-
-            "business":
-                "Business",
-
-            "technology":
-                "Technology",
-
-            "finance":
-                "Finance",
-
-            "personal-development":
-                "Personal Development"
-        };
-
-
-        return areas[area] ||
-            "All Areas";
-    }
-
-
-    function formatDateTimeLocal(dateValue) {
-
-        if (!dateValue) return "";
-
-
-        const date =
-            new Date(dateValue);
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "";
-        }
-
-
-        const year =
-            date.getFullYear();
-
-
-        const month =
-            String(
-                date.getMonth() + 1
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        const day =
-            String(
-                date.getDate()
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        const hours =
-            String(
-                date.getHours()
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        const minutes =
-            String(
-                date.getMinutes()
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-
-
-    /* =====================================================
-       RENDER COURSES
-    ===================================================== */
-
-    function renderCourses() {
-
-        const list =
-            $("#courses-list");
-
-        const count =
-            $("#course-count");
-
-
-        if (!list) return;
-
-
-        const search =
-            ($("#course-search")?.value || "")
-                .trim()
-                .toLowerCase();
-
-
-        const filter =
-            $("#course-filter")?.value ||
-            "all";
-
-
-        let courses =
-            [...allCourses];
-
-
-        if (filter !== "all") {
-
-            courses =
-                courses.filter(
-                    course =>
-                        normalizeStatus(
-                            course.status
-                        ) === filter
-                );
-        }
-
-
-        if (search) {
-
-            courses =
-                courses.filter(course => {
-
-                    const text = [
-
-                        course.title,
-                        course.description,
-                        course.category,
-                        course.level
-
-                    ]
-                        .filter(Boolean)
-                        .join(" ")
-                        .toLowerCase();
-
-
-                    return text.includes(search);
-                });
-        }
-
-
-        if (count) {
-
-            count.textContent =
-                `${courses.length} ${
-                    courses.length === 1
-                        ? "course"
-                        : "courses"
-                }`;
-        }
-
-
-        if (!courses.length) {
-
-            list.innerHTML = `
-                <div class="courses-empty">
-
-                    <div class="courses-empty-icon">
-                        ▣
-                    </div>
-
-                    <h3>
-                        No courses found
-                    </h3>
-
-                    <p>
-                        ${
-                            search ||
-                            filter !== "all"
-                                ? "Try changing your search or filter."
-                                : "Create your first course to get started."
-                        }
-                    </p>
-
-                </div>
-            `;
-
-            return;
-        }
-
-
-        list.innerHTML =
-            courses
-                .map(renderCourseRow)
-                .join("");
-
-
-        attachCourseActions();
-    }
-
-
-    /* =====================================================
-       COURSE ROW
-    ===================================================== */
-
-    function renderCourseRow(course) {
-
-        const status =
-            normalizeStatus(
-                course.status
-            );
-
-
-        const cover =
-            course.cover_image
-                ? `
-                    <img
-                        src="${escapeAttribute(
-                            course.cover_image
-                        )}"
-                        alt="${escapeAttribute(
-                            course.title ||
-                            "Course cover"
-                        )}"
-                        onerror="
-                            this.style.display='none';
-                            this.nextElementSibling.style.display='flex';
-                        "
-                    >
-
-                    <div
-                        class="course-cover-placeholder"
-                        style="display:none;"
-                    >
-                        ▣
-                    </div>
-                `
-                : `
-                    <div class="course-cover-placeholder">
-                        ▣
-                    </div>
-                `;
-
-
-        return `
-            <div
-                class="course-row"
-                data-course-id="${escapeAttribute(course.id)}"
-            >
-
-                <div class="course-main">
-
-                    <div class="course-cover">
-                        ${cover}
-                    </div>
-
-                    <div class="course-info">
-
-                        <div class="course-title">
-                            ${escapeHTML(
-                                course.title ||
-                                "Untitled Course"
-                            )}
-                        </div>
-
-                        <div class="course-description">
-                            ${escapeHTML(
-                                course.description ||
-                                "No description."
-                            )}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="course-category">
-                    ${escapeHTML(
-                        course.category ||
-                        "General"
-                    )}
-                </div>
-
-
-                <div class="course-level">
-                    ${escapeHTML(
-                        course.level ||
-                        "All levels"
-                    )}
-                </div>
-
-
-                <div>
-                    <span
-                        class="course-status ${status}"
-                    >
-                        ${escapeHTML(status)}
-                    </span>
-                </div>
-
-
-                <div class="course-updated">
-                    ${formatDate(
-                        course.created_at
-                    )}
-                </div>
-
-
-                <div class="course-actions">
-
-                    <button
-                        type="button"
-                        class="course-action-button"
-                        data-action="edit"
-                        data-id="${escapeAttribute(course.id)}"
-                    >
-                        Edit
-                    </button>
-
-
-                    ${
-                        status === "draft"
-                            ? `
-                                <button
-                                    type="button"
-                                    class="course-action-button"
-                                    data-action="publish"
-                                    data-id="${escapeAttribute(course.id)}"
-                                >
-                                    Publish
-                                </button>
-                            `
-                            : ""
-                    }
-
-
-                    ${
-                        status === "published"
-                            ? `
-                                <button
-                                    type="button"
-                                    class="course-action-button"
-                                    data-action="unpublish"
-                                    data-id="${escapeAttribute(course.id)}"
-                                >
-                                    Unpublish
-                                </button>
-                            `
-                            : ""
-                    }
-
-
-                    <button
-                        type="button"
-                        class="course-action-button"
-                        data-action="duplicate"
-                        data-id="${escapeAttribute(course.id)}"
-                    >
-                        Duplicate
-                    </button>
-
-
-                    ${
-                        status !== "archived"
-                            ? `
-                                <button
-                                    type="button"
-                                    class="course-action-button danger"
-                                    data-action="archive"
-                                    data-id="${escapeAttribute(course.id)}"
-                                >
-                                    Archive
-                                </button>
-                            `
-                            : `
-                                <button
-                                    type="button"
-                                    class="course-action-button"
-                                    data-action="restore"
-                                    data-id="${escapeAttribute(course.id)}"
-                                >
-                                    Restore
-                                </button>
-                            `
-                    }
-
-                </div>
-
-            </div>
-        `;
-    }
-
-
-    /* =====================================================
-       COURSE ACTIONS
-    ===================================================== */
-
-    function attachCourseActions() {
-
-        $$(".course-action-button")
-            .forEach(button => {
-
-                /*
-                    Carousel buttons also use
-                    .course-action-button.
-
-                    If a carousel action exists,
-                    this is not a course button.
-                */
-
-                if (button.dataset.carouselAction) {
-                    return;
-                }
-
-
-                button.addEventListener(
-                    "click",
-                    async () => {
-
-                        const action =
-                            button.dataset.action;
-
-                        const id =
-                            button.dataset.id;
-
-
-                        if (!action || !id)
-                            return;
-
-
-                        const course =
-                            allCourses.find(
-                                item =>
-                                    String(item.id) ===
-                                    String(id)
-                            );
-
-
-                        if (!course) return;
-
-
-                        switch (action) {
-
-                            case "edit":
-                                openCourseModal(course);
-                                break;
-
-                            case "publish":
-                                await publishCourse(course);
-                                break;
-
-                            case "unpublish":
-                                await unpublishCourse(course);
-                                break;
-
-                            case "archive":
-                                await archiveCourse(course);
-                                break;
-
-                            case "restore":
-                                await restoreCourse(course);
-                                break;
-
-                            case "duplicate":
-                                await duplicateCourse(course);
-                                break;
-                        }
-
-                    }
-                );
-
-            });
-    }
-
-
-    /* =====================================================
-       COURSE MODAL
-    ===================================================== */
-
-    function getCourseModal() {
-
-        if (courseModal) {
-
-            return courseModal;
-        }
-
-
-        courseModal =
-            document.createElement("div");
-
-
-        courseModal.id =
-            "course-modal";
-
-
-        courseModal.className =
-            "course-modal";
-
-
-        courseModal.innerHTML = `
-
-            <div
-                class="course-modal-backdrop"
-                data-close-modal="true"
-            ></div>
-
-
-            <div
-                class="course-modal-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="course-modal-title"
-            >
-
-                <div class="course-modal-header">
-
-                    <div>
-
-                        <div class="course-modal-kicker">
-                            COURSE MANAGEMENT
-                        </div>
-
-                        <h2 id="course-modal-title">
-                            Create Course
-                        </h2>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="course-modal-close"
-                        id="course-modal-close"
-                        aria-label="Close"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form
-                    id="course-form"
-                    class="course-form"
-                    novalidate
-                >
-
-                    <div class="course-form-field">
-
-                        <label for="course-title-input">
-                            Course title *
-                        </label>
-
-                        <input
-                            id="course-title-input"
-                            name="title"
-                            type="text"
-                            required
-                            maxlength="200"
-                            placeholder="Enter course title"
-                        >
-
-                    </div>
-
-
-                    <div class="course-form-field">
-
-                        <label for="course-description-input">
-                            Description
-                        </label>
-
-                        <textarea
-                            id="course-description-input"
-                            name="description"
-                            rows="4"
-                            maxlength="5000"
-                            placeholder="Describe this course..."
-                        ></textarea>
-
-                    </div>
-
-
-                    <div class="course-form-grid">
-
-                        <div class="course-form-field">
-
-                            <label for="course-category-input">
-                                Category
-                            </label>
-
-                            <select
-                                id="course-category-input"
-                                name="category"
-                                required
-                            >
-
-                                <option value="">
-                                    Select a category
-                                </option>
-
-                                <option value="Language">
-                                    Language
-                                </option>
-
-                                <option value="MS Office">
-                                    MS Office
-                                </option>
-
-                                <option value="Trading">
-                                    Trading
-                                </option>
-
-                                <option value="Business">
-                                    Business
-                                </option>
-
-                                <option value="Technology">
-                                    Technology
-                                </option>
-
-                                <option value="Finance">
-                                    Finance
-                                </option>
-
-                                <option value="Personal Development">
-                                    Personal Development
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="course-form-field">
-
-                            <label for="course-level-input">
-                                Level
-                            </label>
-
-                            <input
-                                id="course-level-input"
-                                name="level"
-                                type="text"
-                                maxlength="100"
-                                placeholder="e.g. Beginner, Intermediate"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- COVER IMAGE -->
-
-                    <div class="course-form-field">
-
-                        <label>
-                            Course cover
-                        </label>
-
-
-                        <div class="course-cover-tabs">
-
-                            <button
-                                type="button"
-                                class="cover-tab active"
-                                data-cover-tab="upload"
-                            >
-                                Upload from computer
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="cover-tab"
-                                data-cover-tab="url"
-                            >
-                                Use image URL
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            class="cover-tab-panel active"
-                            data-cover-panel="upload"
-                        >
-
-                            <label
-                                for="course-cover-file"
-                                class="course-upload-area"
-                                id="course-upload-area"
-                            >
-
-                                <div class="upload-icon">
-                                    ↑
-                                </div>
-
-                                <strong>
-                                    Choose an image
-                                </strong>
-
-                                <span>
-                                    JPG, JPEG, PNG or WebP
-                                </span>
-
-                            </label>
-
-
-                            <input
-                                id="course-cover-file"
-                                name="cover_file"
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp"
-                                hidden
-                            >
-
-                        </div>
-
-
-                        <div
-                            class="cover-tab-panel"
-                            data-cover-panel="url"
-                        >
-
-                            <input
-                                id="course-cover-url"
-                                name="cover_url"
-                                type="url"
-                                placeholder="https://example.com/course-cover.jpg"
-                            >
-
-                            <small>
-                                Enter a publicly accessible image URL.
-                            </small>
-
-                        </div>
-
-
-                        <div
-                            id="course-cover-preview"
-                            class="course-cover-preview"
-                            hidden
-                        >
-
-                            <img
-                                id="course-cover-preview-image"
-                                alt="Course cover preview"
-                            >
-
-
-                            <button
-                                type="button"
-                                id="course-remove-cover"
-                                class="course-remove-cover"
-                            >
-                                Remove image
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="course-form-field">
-
-                        <label for="course-sort-input">
-                            Display order
-                        </label>
-
-                        <input
-                            id="course-sort-input"
-                            name="sort_order"
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                        >
-
-                    </div>
-
-
-                    <div
-                        id="course-form-error"
-                        class="course-form-error"
-                        hidden
-                    ></div>
-
-
-                    <div class="course-form-actions">
-
-                        <button
-                            type="button"
-                            class="secondary-button"
-                            id="course-cancel-button"
-                        >
-                            Cancel
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            class="primary-button"
-                            id="course-save-button"
-                        >
-                            Save Course
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-        `;
-
-
-        document.body.appendChild(
-            courseModal
-        );
-
-
-        courseModal
-            .querySelector("#course-form")
-            .addEventListener(
-                "submit",
-                saveCourse
-            );
-
-
-        courseModal
-            .querySelector("#course-modal-close")
-            .addEventListener(
-                "click",
-                closeCourseModal
-            );
-
-
-        courseModal
-            .querySelector("#course-cancel-button")
-            .addEventListener(
-                "click",
-                closeCourseModal
-            );
-
-
-        courseModal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target.dataset
-                        .closeModal === "true"
-                ) {
-
-                    closeCourseModal();
-                }
-            }
-        );
-
-
-        courseModal
-            .querySelectorAll(".cover-tab")
-            .forEach(tab => {
-
-                tab.addEventListener(
-                    "click",
-                    () => {
-
-                        switchCoverTab(
-                            tab.dataset.coverTab
-                        );
-                    }
-                );
-
-            });
-
-
-        courseModal
-            .querySelector("#course-cover-file")
-            .addEventListener(
-                "change",
-                handleCoverFile
-            );
-
-
-        courseModal
-            .querySelector("#course-cover-url")
-            .addEventListener(
-                "input",
-                handleCoverUrl
-            );
-
-
-        courseModal
-            .querySelector("#course-remove-cover")
-            .addEventListener(
-                "click",
-                removeCover
-            );
-
-
-        return courseModal;
-    }
-
-
-    /* =====================================================
-       OPEN COURSE MODAL
-    ===================================================== */
-
-    function openCourseModal(course = null) {
-
-        editingCourseId =
-            course?.id || null;
-
-
-        const modal =
-            getCourseModal();
-
-
-        const form =
-            modal.querySelector("#course-form");
-
-
-        const title =
-            modal.querySelector(
-                "#course-modal-title"
-            );
-
-
-        form.reset();
-
-        clearFormError();
-
-        clearCoverPreview();
-
-
-        title.textContent =
-            course
-                ? "Edit Course"
-                : "Create Course";
-
-
-        form.elements.title.value =
-            course?.title || "";
-
-
-        form.elements.description.value =
-            course?.description || "";
-
-
-        form.elements.category.value =
-            course?.category || "";
-
-
-        form.elements.level.value =
-            course?.level || "";
-
-
-        form.elements.sort_order.value =
-            course?.sort_order ?? "";
-
-
-        if (course?.cover_image) {
-
-            switchCoverTab("url");
-
-            form.elements.cover_url.value =
-                course.cover_image;
-
-            showCoverPreview(
-                course.cover_image
-            );
-
-        } else {
-
-            switchCoverTab("upload");
-        }
-
-
-        modal.classList.add("open");
-
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-
-        setTimeout(() => {
-
-            form.elements.title.focus();
-
-        }, 50);
-    }
-
-
-    /* =====================================================
-       CLOSE COURSE MODAL
-    ===================================================== */
-
-    function closeCourseModal() {
-
-        if (!courseModal) return;
-
-
-        courseModal.classList.remove(
-            "open"
-        );
-
-
-        document.body.classList.remove(
-            "modal-open"
-        );
-
-
-        editingCourseId =
-            null;
-
-
-        clearFormError();
-    }
-
-
-    /* =====================================================
-       ESCAPE KEY
-    ===================================================== */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape" &&
-                courseModal &&
-                courseModal.classList.contains("open")
-            ) {
-
-                closeCourseModal();
-
-                return;
-            }
-
-
-            if (
-                event.key === "Escape" &&
-                carouselModal
-            ) {
-
-                closeCarouselModal();
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       COVER TABS
-    ===================================================== */
-
-    function switchCoverTab(tabName) {
-
-        if (!courseModal) return;
-
-
-        courseModal
-            .querySelectorAll(".cover-tab")
-            .forEach(tab => {
-
-                tab.classList.toggle(
-                    "active",
-                    tab.dataset.coverTab ===
-                    tabName
-                );
-            });
-
-
-        courseModal
-            .querySelectorAll(".cover-tab-panel")
-            .forEach(panel => {
-
-                panel.classList.toggle(
-                    "active",
-                    panel.dataset.coverPanel ===
-                    tabName
-                );
-            });
-    }
-
-
-    /* =====================================================
-       COVER FILE
-    ===================================================== */
-
-    function handleCoverFile(event) {
-
-        const file =
-            event.target.files?.[0];
-
-
-        if (!file) return;
-
-
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
-
-
-        if (!allowedTypes.includes(file.type)) {
-
-            showFormError(
-                "Please select a JPG, PNG or WebP image."
-            );
-
-            event.target.value = "";
-
-            return;
-        }
-
-
-        if (file.size > 5 * 1024 * 1024) {
-
-            showFormError(
-                "The cover image must be smaller than 5 MB."
-            );
-
-            event.target.value = "";
-
-            return;
-        }
-
-
-        clearFormError();
-
-
-        const reader =
-            new FileReader();
-
-
-        reader.onload = () => {
-
-            showCoverPreview(
-                reader.result
-            );
-        };
-
-
-        reader.readAsDataURL(file);
-    }
-
-
-    /* =====================================================
-       COVER URL
-    ===================================================== */
-
-    function handleCoverUrl(event) {
-
-        const url =
-            event.target.value.trim();
-
-
-        if (!url) {
-
-            clearCoverPreview();
-
-            return;
-        }
-
-
-        showCoverPreview(url);
-    }
-
-
-    /* =====================================================
-       COVER PREVIEW
-    ===================================================== */
-
-    function showCoverPreview(src) {
-
-        if (!courseModal) return;
-
-
-        const preview =
-            courseModal.querySelector(
-                "#course-cover-preview"
-            );
-
-
-        const image =
-            courseModal.querySelector(
-                "#course-cover-preview-image"
-            );
-
-
-        if (!src) {
-
-            clearCoverPreview();
-
-            return;
-        }
-
-
-        image.src =
-            src;
-
-
-        preview.hidden =
-            false;
-    }
-
-
-    function clearCoverPreview() {
-
-        if (!courseModal) return;
-
-
-        const preview =
-            courseModal.querySelector(
-                "#course-cover-preview"
-            );
-
-
-        const image =
-            courseModal.querySelector(
-                "#course-cover-preview-image"
-            );
-
-
-        preview.hidden =
-            true;
-
-
-        image.removeAttribute(
-            "src"
-        );
-    }
-
-
-    function removeCover() {
-
-        if (!courseModal) return;
-
-
-        const fileInput =
-            courseModal.querySelector(
-                "#course-cover-file"
-            );
-
-
-        const urlInput =
-            courseModal.querySelector(
-                "#course-cover-url"
-            );
-
-
-        fileInput.value = "";
-
-        urlInput.value = "";
-
-
-        clearCoverPreview();
-    }
-
-
-    /* =====================================================
-       SAVE COURSE
-    ===================================================== */
-
-    async function saveCourse(event) {
-
-        event.preventDefault();
-
-
-        const form =
-            event.currentTarget;
-
-
-        const saveButton =
-            $("#course-save-button");
-
-
-        clearFormError();
-
-
-        const formData =
-            new FormData(form);
-
-
-        const title =
-            String(
-                formData.get("title") || ""
-            ).trim();
-
-
-        const description =
-            String(
-                formData.get("description") || ""
-            ).trim();
-
-
-        const category =
-            String(
-                formData.get("category") || ""
-            ).trim();
-
-
-        const level =
-            String(
-                formData.get("level") || ""
-            ).trim();
-
-
-        const coverUrl =
-            String(
-                formData.get("cover_url") || ""
-            ).trim();
-
-
-        const coverFile =
-            formData.get("cover_file");
-
-
-        const sortOrderRaw =
-            String(
-                formData.get("sort_order") || ""
-            ).trim();
-
-
-        const sortOrder =
-            sortOrderRaw === ""
-                ? 0
-                : Number(sortOrderRaw);
-
-
-        if (!title) {
-
-            showFormError(
-                "Course title is required."
-            );
-
-            return;
-        }
-
-
-        if (
-            Number.isNaN(sortOrder) ||
-            sortOrder < 0
-        ) {
-
-            showFormError(
-                "Display order must be a valid number."
-            );
-
-            return;
-        }
-
-
-        if (saveButton) {
-
-            saveButton.disabled =
-                true;
-
-            saveButton.textContent =
-                editingCourseId
-                    ? "Saving..."
-                    : "Creating...";
-        }
-
-
-        try {
-
-            let finalCoverUrl =
-                coverUrl || null;
-
-
-            if (
-                coverFile &&
-                coverFile instanceof File &&
-                coverFile.size > 0
-            ) {
-
-                finalCoverUrl =
-                    await uploadCourseCover(
-                        coverFile
-                    );
-            }
-
-
-            const courseData = {
-
-                title,
-
-                description:
-                    description || null,
-
-                category:
-                    category || null,
-
-                level:
-                    level || null,
-
-                cover_image:
-                    finalCoverUrl,
-
-                sort_order:
-                    sortOrder
-            };
-
-
-            if (editingCourseId) {
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("courses")
-                        .update(courseData)
-                        .eq(
-                            "id",
-                            editingCourseId
-                        );
-
-
-                if (error) throw error;
-
-            } else {
-
-                courseData.status =
-                    "draft";
-
-
-                courseData.slug =
-                    await createUniqueSlug(
-                        title
-                    );
-
-
-                const {
-                    error
-                } =
-                    await client
-                        .from("courses")
-                        .insert(
-                            courseData
-                        );
-
-
-                if (error) throw error;
-            }
-
-
-            closeCourseModal();
-
-
-            await refreshCoursesAndDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not save course:",
-                error
-            );
-
-
-            showFormError(
-                error.message ||
-                "Could not save the course."
-            );
-
-        } finally {
-
-            if (saveButton) {
-
-                saveButton.disabled =
-                    false;
-
-                saveButton.textContent =
-                    "Save Course";
-            }
-        }
-    }
-
-
-    /* =====================================================
-       UPLOAD COURSE COVER
-    ===================================================== */
-
-    async function uploadCourseCover(file) {
-
-        const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
-
-
-        const randomName =
-            `${crypto.randomUUID()}.${extension}`;
-
-
-        const filePath =
-            `course-covers/${randomName}`;
-
-
-        const {
-            error: uploadError
-        } =
-            await client.storage
-                .from("course-covers")
-                .upload(
-                    filePath,
-                    file,
-                    {
-                        cacheControl: "3600",
-                        upsert: false,
-                        contentType: file.type
-                    }
-                );
-
-
-        if (uploadError) {
-
-            throw new Error(
-                `Cover upload failed: ${uploadError.message}`
-            );
-        }
-
-
-        const {
-            data
-        } =
-            client.storage
-                .from("course-covers")
-                .getPublicUrl(
-                    filePath
-                );
-
-
-        if (!data?.publicUrl) {
-
-            throw new Error(
-                "The cover was uploaded but its public URL could not be generated."
-            );
-        }
-
-
-        return data.publicUrl;
-    }
-
-
-    /* =====================================================
-       PUBLISH
-    ===================================================== */
-
-    async function publishCourse(course) {
-
-        if (
-            !confirm(
-                `Publish "${course.title}"?`
-            )
-        ) return;
-
-
-        await updateCourseStatus(
-            course,
-            "published"
-        );
-    }
-
-
-    /* =====================================================
-       UNPUBLISH
-    ===================================================== */
-
-    async function unpublishCourse(course) {
-
-        if (
-            !confirm(
-                `Unpublish "${course.title}" and return it to Draft?`
-            )
-        ) return;
-
-
-        await updateCourseStatus(
-            course,
-            "draft"
-        );
-    }
-
-
-    /* =====================================================
-       ARCHIVE
-    ===================================================== */
-
-    async function archiveCourse(course) {
-
-        if (
-            !confirm(
-                `Archive "${course.title}"?\n\nThe course will not be permanently deleted.`
-            )
-        ) return;
-
-
-        try {
-
-            const {
-                error
-            } =
-                await client
-                    .from("courses")
-                    .update({
-                        status: "archived",
-                        archived_at:
-                            new Date().toISOString()
-                    })
-                    .eq(
-                        "id",
-                        course.id
-                    );
-
-
-            if (error) throw error;
-
-
-            await refreshCoursesAndDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not archive course:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Could not archive the course."
-            );
-        }
-    }
-
-
-    /* =====================================================
-       RESTORE
-    ===================================================== */
-
-    async function restoreCourse(course) {
-
-        if (
-            !confirm(
-                `Restore "${course.title}" to Draft?`
-            )
-        ) return;
-
-
-        try {
-
-            const {
-                error
-            } =
-                await client
-                    .from("courses")
-                    .update({
-                        status: "draft",
-                        archived_at: null
-                    })
-                    .eq(
-                        "id",
-                        course.id
-                    );
-
-
-            if (error) throw error;
-
-
-            await refreshCoursesAndDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not restore course:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Could not restore the course."
-            );
-        }
-    }
-
-
-    /* =====================================================
-       STATUS
-    ===================================================== */
-
-    async function updateCourseStatus(
-        course,
-        status
-    ) {
-
-        try {
-
-            const {
-                error
-            } =
-                await client
-                    .from("courses")
-                    .update({
-                        status,
-                        archived_at:
-                            status === "archived"
-                                ? new Date().toISOString()
-                                : null
-                    })
-                    .eq(
-                        "id",
-                        course.id
-                    );
-
-
-            if (error) throw error;
-
-
-            await refreshCoursesAndDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not update course status:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Could not update the course."
-            );
-        }
-    }
-
-
-    /* =====================================================
-       DUPLICATE
-    ===================================================== */
-
-    async function duplicateCourse(course) {
-
-        if (
-            !confirm(
-                `Duplicate "${course.title}"?\n\nThe duplicate will be created as a Draft.`
-            )
-        ) return;
-
-
-        try {
-
-            const duplicateTitle =
-                `${course.title} Copy`;
-
-
-            const duplicate = {
-
-                title:
-                    duplicateTitle,
-
-                description:
-                    course.description || null,
-
-                category:
-                    course.category || null,
-
-                level:
-                    course.level || null,
-
-                cover_image:
-                    course.cover_image || null,
-
-                status:
-                    "draft",
-
-                sort_order:
-                    course.sort_order ?? 0,
-
-                slug:
-                    await createUniqueSlug(
-                        duplicateTitle
-                    ),
-
-                archived_at:
-                    null
-            };
-
-
-            const {
-                error
-            } =
-                await client
-                    .from("courses")
-                    .insert(
-                        duplicate
-                    );
-
-
-            if (error) throw error;
-
-
-            await refreshCoursesAndDashboard();
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not duplicate course:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Could not duplicate the course."
-            );
-        }
-    }
-
-
-    /* =====================================================
-       SLUG
-    ===================================================== */
-
-    async function createUniqueSlug(title) {
-
-        const base =
-            slugify(title) ||
-            "course";
-
-
-        let slug =
-            base;
-
-
-        let counter =
-            1;
-
-
-        while (true) {
-
-            const {
-                data,
-                error
-            } =
-                await client
-                    .from("courses")
-                    .select("id")
-                    .eq(
-                        "slug",
-                        slug
-                    )
-                    .limit(1);
-
-
-            if (error) throw error;
-
-
-            if (
-                !data ||
-                data.length === 0
-            ) {
-
-                return slug;
-            }
-
-
-            counter++;
-
-
-            slug =
-                `${base}-${counter}`;
-        }
-    }
-
-
-    function slugify(value) {
-
-        return String(value)
-
-            .normalize("NFD")
-
-            .replace(
-                /[\u0300-\u036f]/g,
-                ""
-            )
-
-            .toLowerCase()
-
-            .trim()
-
-            .replace(
-                /[^a-z0-9]+/g,
-                "-"
-            )
-
-            .replace(
-                /^-+|-+$/g,
-                ""
-            );
-    }
-
-
-    /* =====================================================
-       REFRESH
-    ===================================================== */
-
-    async function refreshCoursesAndDashboard() {
-
-        await Promise.all([
-            loadCourses(),
-            loadDashboard()
-        ]);
-    }
-
-
-    /* =====================================================
-       FORM ERROR
-    ===================================================== */
-
-    function showFormError(message) {
-
-        const element =
-            $("#course-form-error");
-
-
-        if (!element) return;
-
-
-        element.textContent =
-            message;
-
-
-        element.hidden =
-            false;
-    }
-
-
-    function clearFormError() {
-
-        const element =
-            $("#course-form-error");
-
-
-        if (!element) return;
-
-
-        element.textContent =
-            "";
-
-
-        element.hidden =
-            true;
-    }
-
-
-    /* =====================================================
-       UTILITIES
-    ===================================================== */
-
-    function normalizeStatus(status) {
-
-        if (
-            status === "published" ||
-            status === "archived"
-        ) {
-
-            return status;
-        }
-
-
-        return "draft";
-    }
-
-
-    function formatDate(value) {
-
-        if (!value)
-            return "—";
-
-
-        const date =
-            new Date(value);
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "—";
-        }
-
-
-        return date.toLocaleDateString(
-            undefined,
-            {
-                year: "numeric",
-                month: "short",
-                day: "numeric"
-            }
-        );
-    }
-
-
-    function escapeHTML(value) {
-
-        return String(value ?? "")
-
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-
-            .replace(
-                /</g,
-                "&lt;"
-            )
-
-            .replace(
-                />/g,
-                "&gt;"
-            )
-
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-    }
-
-
-    function escapeAttribute(value) {
-
-        return escapeHTML(value);
-    }
-
-});
+}
