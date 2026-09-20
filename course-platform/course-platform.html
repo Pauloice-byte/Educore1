@@ -1,4 +1,3 @@
- 
 <!DOCTYPE html>
 <html lang="en">
  
@@ -11,20 +10,30 @@
         content="width=device-width, initial-scale=1.0"
 	>
  
-    <title>EduCore | Learning</title>
+    <title>EduCore | Course</title>
  
 	<meta
         name="description"
         content="EduCore autonomous learning platform."
 	>
  
-	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+	>
+ 
+	<link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+    	crossorigin
+	>
  
 	<link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
 	>
  
+	<!-- CORRECT PATH -->
 	<link
         rel="stylesheet"
         href="css/course-platform.css"
@@ -38,9 +47,9 @@
 <div class="app-shell">
  
  
-	<!-- =================================================
+	<!-- =====================================================
      	DESKTOP / TABLET RAIL
-    ================================================== -->
+    ====================================================== -->
  
 	<aside class="app-rail">
  
@@ -48,14 +57,12 @@
  
         	<button
                 class="rail-brand"
-                id="brand-button"
+                id="rail-brand"
                 type="button"
-                aria-label="EduCore home"
+                aria-label="EduCore"
         	>
  
-                <span class="brand-logo">
-                	E
-                </span>
+                <span class="brand-logo">E</span>
  
                 <span class="brand-name">
                     EduCore
@@ -73,18 +80,15 @@
             	>
  
                     <span class="rail-icon">
- 
                         <svg viewBox="0 0 24 24">
-                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" rx="1"/>
-                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                            <path d="M3 11.5 12 4l9 7.5"></path>
+                            <path d="M5.5 10.5V20h13v-9.5"></path>
+                            <path d="M9.5 20v-5h5v5"></path>
                         </svg>
- 
                     </span>
  
                     <span class="rail-label">
-                        Overview
+                        Home
                     </span>
  
                 </button>
@@ -97,14 +101,12 @@
             	>
  
                     <span class="rail-icon">
- 
                         <svg viewBox="0 0 24 24">
-                            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/>
-                            <path d="M4 5.5v15"/>
-                            <path d="M8 7h8"/>
-                            <path d="M8 10h7"/>
+                            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"></path>
+                            <path d="M4 5.5v16"></path>
+                            <path d="M8 7h8"></path>
+                            <path d="M8 11h8"></path>
                         </svg>
- 
                     </span>
  
                     <span class="rail-label">
@@ -121,42 +123,15 @@
             	>
  
                     <span class="rail-icon">
- 
                         <svg viewBox="0 0 24 24">
-                            <path d="M4 19V5"/>
-                            <path d="M4 19h17"/>
-                            <path d="m7 15 4-4 3 2 6-7"/>
+                            <path d="M4 19V5"></path>
+                            <path d="M4 18h16"></path>
+                            <path d="M7 15l4-5 3 3 5-7"></path>
                         </svg>
- 
                     </span>
  
                     <span class="rail-label">
                         Progress
-                    </span>
- 
-                </button>
- 
- 
-                <button
-                    class="rail-button"
-                    id="more-button"
-                    type="button"
-                    aria-label="More"
-                    aria-expanded="false"
-            	>
- 
-                    <span class="rail-icon">
- 
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="5" cy="12" r="1.5"/>
-                            <circle cx="12" cy="12" r="1.5"/>
-                            <circle cx="19" cy="12" r="1.5"/>
-                        </svg>
- 
-                    </span>
- 
-                    <span class="rail-label">
-                        More
                     </span>
  
                 </button>
@@ -190,9 +165,9 @@
  
  
  
-	<!-- =================================================
-     	MAIN
-    ================================================== -->
+	<!-- =====================================================
+     	MAIN APPLICATION
+    ====================================================== -->
  
 	<main class="main">
  
@@ -205,13 +180,7 @@
  
         	<div class="topbar-left">
  
- 
-                <button
-                    class="mobile-brand"
-                    id="mobile-brand-button"
-                    type="button"
-                    aria-label="EduCore home"
-            	>
+                <div class="mobile-brand">
  
                     <span class="brand-logo">
                         E
@@ -221,7 +190,7 @@
                         EduCore
                     </span>
  
-                </button>
+                </div>
  
  
                 <div class="course-breadcrumb">
@@ -284,79 +253,15 @@
  
  
     	<!-- =================================================
-         	MORE MENU
-        ================================================== -->
- 
-    	<div
-            class="more-menu"
-            id="more-menu"
-            aria-hidden="true"
-    	>
- 
-        	<button
-                type="button"
-                data-screen="contents"
-        	>
-                <span>Contents</span>
-            </button>
- 
-        	<button
-                type="button"
-                data-screen="notes"
-        	>
-                <span>Notes</span>
-            </button>
- 
-        	<button
-                type="button"
-                data-screen="saved"
-        	>
-                <span>Saved</span>
-            </button>
- 
-        	<button
-                type="button"
-                data-screen="achievements"
-        	>
-                <span>Achievements</span>
-            </button>
- 
-        	<button
-                type="button"
-                data-screen="profile"
-        	>
-                <span>Profile</span>
-            </button>
- 
-        	<button
-                type="button"
-                data-screen="settings"
-        	>
-                <span>Settings</span>
-            </button>
- 
-        	<button
-                class="danger"
-                id="exit-course"
-                type="button"
-        	>
-                <span>Exit course</span>
-            </button>
- 
-    	</div>
- 
- 
- 
-    	<!-- =================================================
          	PAGE
         ================================================== -->
  
     	<div class="page">
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  OVERVIEW
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen active"
@@ -364,7 +269,6 @@
         	>
  
                 <div class="course-hero">
- 
  
                     <div class="hero-copy">
  
@@ -375,11 +279,9 @@
                             COURSE
                         </span>
  
- 
                         <h1 id="course-title">
                             Loading course...
                         </h1>
- 
  
                         <p id="course-description">
                             Your course is being prepared.
@@ -405,7 +307,7 @@
                             </span>
  
                             <span id="course-duration">
-                            	0 hours
+                            	0h
                             </span>
  
                         </div>
@@ -417,9 +319,7 @@
                             type="button"
                         >
  
-                            <span id="continue-button-text">
-                            	Start learning
-                            </span>
+                            Continue learning
  
                             <span>
                             	→
@@ -430,22 +330,20 @@
                     </div>
  
  
- 
                     <div class="hero-visual">
  
                         <div class="hero-orbit orbit-one"></div>
  
                         <div class="hero-orbit orbit-two"></div>
  
- 
                         <div
                             class="hero-progress-ring"
-                            id="hero-progress-ring"
+                            id="hero-progress"
                         >
  
                             <div class="ring-inner">
  
-                            	<strong id="hero-progress">
+                            	<strong id="hero-progress-value">
                                 	0%
                             	</strong>
  
@@ -466,7 +364,6 @@
                 <!-- STATS -->
  
                 <div class="stats-grid">
- 
  
                     <div class="stat-card">
  
@@ -513,7 +410,7 @@
                     <div class="stat-card">
  
                         <span class="stat-icon">
-                            ◈
+                            ↗
                         </span>
  
                         <div>
@@ -566,7 +463,7 @@
                         </span>
  
                         <h2>
-                            Continue learning
+                            Continue your learning
                         </h2>
  
                     </div>
@@ -593,15 +490,15 @@
                             class="lesson-module"
                             id="continue-module"
                         >
-                            MODULE
+                            Module
                         </span>
  
                         <h3 id="continue-lesson">
-                            Your first lesson
+                            Your next lesson
                         </h3>
  
                         <p id="continue-description">
-                            Begin your learning journey.
+                            Continue where you left off.
                         </p>
  
                     </div>
@@ -611,6 +508,7 @@
                         class="round-arrow"
                         id="continue-card-button"
                         type="button"
+                        aria-label="Continue"
                     >
                         →
                     </button>
@@ -619,14 +517,14 @@
  
  
  
-                <!-- LEARNING PATH -->
+                <!-- PATH -->
  
                 <div class="section-heading path-heading">
  
                     <div>
  
                         <span class="eyebrow">
-                            YOUR JOURNEY
+                            YOUR COURSE
                         </span>
  
                         <h2>
@@ -647,9 +545,9 @@
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
              	LEARN
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -659,15 +557,15 @@
                 <div class="screen-header">
  
                     <span class="eyebrow">
-                        LEARNING
+                        LEARN
                     </span>
  
                     <h1>
-                        Continue learning.
+                        Your lessons
                     </h1>
  
                     <p>
-                        Pick up where you left off or explore your lessons.
+                        Learn at your own pace and build your skills step by step.
                     </p>
  
                 </div>
@@ -682,9 +580,9 @@
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  CONTENTS
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -698,11 +596,11 @@
                     </span>
  
                     <h1>
-                        Course contents.
+                        Contents
                     </h1>
  
                     <p>
-                        Explore the complete learning path.
+                        Explore everything included in this course.
                     </p>
  
                 </div>
@@ -717,9 +615,9 @@
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  PROGRESS
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -733,254 +631,183 @@
                     </span>
  
                     <h1>
-                        Keep moving forward.
+                        Keep moving forward
                     </h1>
  
                     <p>
-                        See how your learning is progressing.
+                        Track your learning journey and achievements.
                     </p>
  
                 </div>
  
  
-                <div class="stats-grid">
+                <div class="progress-summary">
  
+                    <div class="progress-summary-card">
  
-                    <div class="stat-card">
- 
-                        <span class="stat-icon">
-                            %
+                        <span>
+                            Course completion
                         </span>
  
-                        <div>
- 
-                            <strong id="progress-dashboard-value">
-                            	0%
-                            </strong>
- 
-                            <span>
-                            	Course progress
-                            </span>
- 
-                        </div>
+                        <strong id="progress-dashboard-value">
+                            0%
+                        </strong>
  
                     </div>
  
  
-                    <div class="stat-card">
+                    <div class="progress-summary-card">
  
-                        <span class="stat-icon">
-                            ◈
+                        <span>
+                            Current streak
                         </span>
  
-                        <div>
- 
-                            <strong id="progress-streak">
-                            	0
-                            </strong>
- 
-                            <span>
-                            	Day streak
-                            </span>
- 
-                        </div>
+                        <strong id="progress-streak">
+                            0
+                        </strong>
  
                     </div>
  
  
-                    <div class="stat-card">
+                    <div class="progress-summary-card">
  
-                        <span class="stat-icon">
-                            ✓
+                        <span>
+                            Lessons
                         </span>
  
-                        <div>
- 
-                            <strong id="progress-lessons">
-                            	0
-                            </strong>
- 
-                            <span>
-                            	Lessons
-                            </span>
- 
-                        </div>
+                        <strong id="progress-lessons">
+                            0
+                        </strong>
  
                     </div>
  
  
-                    <div class="stat-card">
+                    <div class="progress-summary-card">
  
-                        <span class="stat-icon">
-                            ★
+                        <span>
+                            XP
                         </span>
  
-                        <div>
- 
-                            <strong id="progress-xp">
-                            	0
-                            </strong>
- 
-                            <span>
-                            	XP
-                            </span>
- 
-                        </div>
+                        <strong id="progress-xp">
+                            0
+                        </strong>
  
                     </div>
  
                 </div>
- 
- 
-                <div class="section-heading">
- 
-                    <div>
- 
-                        <span class="eyebrow">
-                            MODULES
-                        </span>
- 
-                        <h2>
-                            Your progress
-                        </h2>
- 
-                    </div>
- 
-                </div>
- 
- 
-                <div
-                    class="path-list"
-                    id="progress-module-list"
-                ></div>
  
             </section>
  
  
  
-        	<!-- =================================================
-                 LESSON
-            ================================================== -->
+        	<!-- =============================================
+                 LESSON PLAYER
+            ============================================== -->
  
             <section
-                class="screen"
+                class="screen lesson-screen"
                 id="lesson-screen"
         	>
  
-                <div class="lesson-screen-container">
+                <div class="lesson-top">
+ 
+                    <button
+                        class="secondary-button"
+                        id="lesson-back"
+                        type="button"
+                    >
+                        ← Back
+                    </button>
  
  
-                    <div class="lesson-top">
+                    <div class="lesson-position">
  
-                        <div class="lesson-top-left">
+                        <span id="lesson-module-name">
+                            Module
+                        </span>
  
-                            <button
-                                class="lesson-back-button"
-                                id="lesson-back"
-                                type="button"
-                                aria-label="Back"
-                            >
-                            	←
-                            </button>
+                        <span>
+                            •
+                        </span>
  
- 
-                            <div>
- 
-                            	<span
-                                    class="eyebrow"
-                                    id="lesson-module-name"
-                            	>
-                                	MODULE
-                            	</span>
- 
-                            </div>
- 
-                        </div>
- 
- 
-                        <div class="lesson-position">
- 
-                            <span>
-                            	Lesson
-                            </span>
- 
+                        <span>
+                            Lesson
                             <strong id="lesson-position-number">
                             	1
                             </strong>
- 
-                        </div>
- 
-                    </div>
- 
- 
-                    <div class="lesson-progress">
- 
-                        <div
-                            class="lesson-progress-fill"
-                            id="lesson-progress-fill"
-                        ></div>
- 
-                    </div>
- 
- 
-                    <div class="lesson-body">
- 
-                        <div id="lesson-body-content">
- 
-                            <div class="lesson-placeholder">
- 
-                            	<span class="eyebrow">
-                                	GET READY
-                            	</span>
- 
-                            	<h1>
-                                	Your lesson is loading...
-                            	</h1>
- 
-                            </div>
- 
-                        </div>
- 
-                    </div>
- 
- 
-                    <div class="lesson-footer">
- 
-                        <button
-                            class="secondary-button"
-                            id="lesson-save"
-                            type="button"
-                        >
-                            Save
-                        </button>
- 
- 
-                        <span
-                            id="lesson-footer-status"
-                            class="lesson-large-status"
-                        >
-                            Ready
                         </span>
  
+                    </div>
+ 
+ 
+                    <div class="lesson-actions">
  
                         <button
-                            class="secondary-button"
-                            id="previous-lesson"
+                            class="icon-button"
+                            id="lesson-save"
                             type="button"
+                            aria-label="Save lesson"
                         >
-                            ← Previous
+                            ♡
                         </button>
  
- 
                         <button
-                            class="primary-button"
-                            id="next-lesson"
+                            class="icon-button"
+                            id="lesson-more"
                             type="button"
+                            aria-label="More"
                         >
-                            Next →
+                            •••
                         </button>
  
                     </div>
+ 
+                </div>
+ 
+ 
+                <div class="lesson-progress">
+ 
+                    <div
+                        class="lesson-progress-fill"
+                        id="lesson-progress-fill"
+                    ></div>
+ 
+                </div>
+ 
+ 
+                <article class="lesson-content-shell">
+ 
+                    <div
+                        class="lesson-body"
+                        id="lesson-body"
+                    ></div>
+ 
+                </article>
+ 
+ 
+                <div class="lesson-footer">
+ 
+                    <button
+                        class="secondary-button"
+                        id="previous-lesson"
+                        type="button"
+                    >
+                        ← Previous
+                    </button>
+ 
+ 
+                    <span id="lesson-footer-status">
+                        In progress
+                    </span>
+ 
+ 
+                    <button
+                        class="primary-button"
+                        id="next-lesson"
+                        type="button"
+                    >
+                        Next →
+                    </button>
  
                 </div>
  
@@ -988,9 +815,9 @@
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
              	NOTES
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -1004,29 +831,29 @@
                     </span>
  
                     <h1>
-                        Your notes.
+                        Your notes
                     </h1>
  
                     <p>
-                        Keep important ideas close while you learn.
+                        Notes from your learning journey will appear here.
                     </p>
  
                 </div>
  
- 
                 <div class="empty-state">
- 
-                    Notes from your lessons will appear here.
- 
+                    <strong>No notes yet</strong>
+                    <span>
+                        Notes will become available as you study.
+                    </span>
                 </div>
  
             </section>
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
              	SAVED
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -1040,29 +867,29 @@
                     </span>
  
                     <h1>
-                        Saved lessons.
+                        Saved lessons
                     </h1>
  
                     <p>
-                        Quickly return to lessons you saved.
+                        Quickly return to lessons you want to revisit.
                     </p>
  
                 </div>
  
- 
                 <div class="empty-state">
- 
-                    Your saved lessons will appear here.
- 
+                    <strong>Nothing saved yet</strong>
+                    <span>
+                        Save lessons while learning to find them here.
+                    </span>
                 </div>
  
             </section>
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  ACHIEVEMENTS
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -1076,29 +903,29 @@
                     </span>
  
                     <h1>
-                        Keep building.
+                        Your achievements
                     </h1>
  
                     <p>
-                        Your learning milestones will appear here.
+                        Your milestones will appear here.
                     </p>
  
                 </div>
  
- 
                 <div class="empty-state">
- 
-                    Complete lessons and activities to unlock achievements.
- 
+                    <strong>Your journey is beginning</strong>
+                    <span>
+                        Complete lessons to unlock achievements.
+                    </span>
                 </div>
  
             </section>
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  PROFILE
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -1112,12 +939,8 @@
                     </span>
  
                     <h1>
-                        Your profile.
+                        Your profile
                     </h1>
- 
-                    <p>
-                        Your EduCore learning identity.
-                    </p>
  
                 </div>
  
@@ -1130,7 +953,6 @@
                     >
                         U
                     </span>
- 
  
                     <div>
  
@@ -1150,9 +972,9 @@
  
  
  
-        	<!-- =================================================
+        	<!-- =============================================
                  SETTINGS
-            ================================================== -->
+            ============================================== -->
  
             <section
                 class="screen"
@@ -1166,7 +988,7 @@
                     </span>
  
                     <h1>
-                        Settings.
+                        Settings
                     </h1>
  
                     <p>
@@ -1176,15 +998,44 @@
                 </div>
  
  
-                <div class="settings-card">
+                <div class="settings-list">
  
-                    <strong>
-                        EduCore learning experience
-                    </strong>
+                    <div class="setting-item">
  
-                    <p>
-                        More preferences will become available as the platform develops.
-                    </p>
+                        <div>
+                            <strong>
+                            	Learning preferences
+                            </strong>
+ 
+                            <span>
+                            	Personalise your experience.
+                            </span>
+                        </div>
+ 
+                        <span>
+                            →
+                        </span>
+ 
+                    </div>
+ 
+ 
+                    <div class="setting-item">
+ 
+                        <div>
+                            <strong>
+                            	Notifications
+                            </strong>
+ 
+                            <span>
+                            	Manage learning reminders.
+                            </span>
+                        </div>
+ 
+                        <span>
+                            →
+                        </span>
+ 
+                    </div>
  
                 </div>
  
@@ -1192,160 +1043,214 @@
  
     	</div>
  
- 
- 
-    	<!-- =================================================
-         	MOBILE NAVIGATION
-        ================================================== -->
- 
-    	<nav class="bottom-navigation">
- 
- 
-        	<button
-                class="bottom-nav-button active"
-                data-screen="overview"
-                type="button"
-        	>
- 
-                <span class="nav-icon">
- 
-                    <svg viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="7" height="7" rx="1"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1"/>
-                        <rect x="14" y="14" width="7" height="7" rx="1"/>
-                    </svg>
- 
-                </span>
- 
-                <span>
-                    Home
-                </span>
- 
-            </button>
- 
- 
-        	<button
-                class="bottom-nav-button"
-                data-screen="learn"
-                type="button"
-        	>
- 
-                <span class="nav-icon">
- 
-                    <svg viewBox="0 0 24 24">
-                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/>
-                        <path d="M4 5.5v15"/>
-                        <path d="M8 7h8"/>
-                    </svg>
- 
-                </span>
- 
-                <span>
-                    Learn
-                </span>
- 
-            </button>
- 
- 
-        	<button
-                class="bottom-nav-button"
-                data-screen="contents"
-                type="button"
-        	>
- 
-                <span class="nav-icon">
- 
-                    <svg viewBox="0 0 24 24">
-                        <path d="M4 5h16"/>
-                        <path d="M4 12h16"/>
-                        <path d="M4 19h16"/>
-                    </svg>
- 
-                </span>
- 
-                <span>
-                    Contents
-                </span>
- 
-            </button>
- 
- 
-        	<button
-                class="bottom-nav-button"
-                data-screen="progress"
-                type="button"
-        	>
- 
-                <span class="nav-icon">
- 
-                    <svg viewBox="0 0 24 24">
-                        <path d="M4 19V5"/>
-                        <path d="M4 19h17"/>
-                        <path d="m7 15 4-4 3 2 6-7"/>
-                    </svg>
- 
-                </span>
- 
-                <span>
-                    Progress
-                </span>
- 
-            </button>
- 
- 
-        	<button
-                class="bottom-nav-button more-nav-button"
-                id="mobile-more-button"
-                type="button"
-        	>
- 
-                <span class="nav-icon">
- 
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="5" cy="12" r="1.5"/>
-                        <circle cx="12" cy="12" r="1.5"/>
-                        <circle cx="19" cy="12" r="1.5"/>
-                    </svg>
- 
-                </span>
- 
-                <span>
-                    More
-                </span>
- 
-            </button>
- 
-    	</nav>
- 
 	</main>
  
 </div>
  
  
  
-<!-- =================================================
+<!-- =====================================================
+ 	MOBILE BOTTOM NAVIGATION
+====================================================== -->
+ 
+<nav class="bottom-navigation">
+ 
+	<button
+        class="bottom-button active"
+        data-screen="overview"
+        type="button"
+	>
+ 
+    	<span class="bottom-icon">
+        	⌂
+    	</span>
+ 
+    	<span>
+        	Home
+    	</span>
+ 
+	</button>
+ 
+ 
+	<button
+        class="bottom-button"
+        data-screen="learn"
+        type="button"
+	>
+ 
+    	<span class="bottom-icon">
+        	▣
+    	</span>
+ 
+    	<span>
+        	Learn
+    	</span>
+ 
+	</button>
+ 
+ 
+	<button
+        class="bottom-button"
+        data-screen="contents"
+        type="button"
+	>
+ 
+    	<span class="bottom-icon">
+        	☰
+    	</span>
+ 
+    	<span>
+        	Contents
+    	</span>
+ 
+	</button>
+ 
+ 
+	<button
+        class="bottom-button"
+        data-screen="progress"
+        type="button"
+	>
+ 
+    	<span class="bottom-icon">
+        	↗
+    	</span>
+ 
+    	<span>
+        	Progress
+    	</span>
+ 
+	</button>
+ 
+ 
+	<button
+        class="bottom-button"
+        id="more-button"
+        type="button"
+	>
+ 
+    	<span class="bottom-icon">
+        	•••
+    	</span>
+ 
+    	<span>
+        	More
+    	</span>
+ 
+	</button>
+ 
+</nav>
+ 
+ 
+ 
+<!-- =====================================================
+ 	MORE MENU
+====================================================== -->
+ 
+<div
+    class="more-menu"
+    id="more-menu"
+> 
+ 
+	<button
+        data-more-screen="contents"
+        type="button"
+	>
+    	Course contents
+	</button>
+ 
+	<button
+        data-more-screen="notes"
+        type="button"
+	>
+    	Notes
+	</button>
+ 
+	<button
+        data-more-screen="saved"
+        type="button"
+	>
+    	Saved lessons
+	</button>
+ 
+	<button
+        data-more-screen="achievements"
+        type="button"
+	>
+    	Achievements
+	</button>
+ 
+	<button
+        data-more-screen="profile"
+        type="button"
+	>
+    	Profile
+	</button>
+ 
+	<button
+        data-more-screen="settings"
+        type="button"
+	>
+    	Settings
+	</button>
+ 
+	<div class="menu-divider"></div>
+ 
+	<button
+        class="danger-menu-button"
+        id="exit-course"
+        type="button"
+	>
+    	Exit course
+	</button>
+ 
+</div>
+ 
+ 
+ 
+<!-- =====================================================
  	LOADING
-================================================== -->
+====================================================== -->
  
 <div
     class="app-loading"
     id="app-loading"
 > 
  
-	<div class="loading-spinner"></div>
+	<div class="loading-card">
  
-	<span>
-    	Preparing your learning space...
-	</span>
+    	<div class="loading-logo">
+        	E
+    	</div>
+ 
+    	<div class="loading-spinner"></div>
+ 
+    	<strong>
+        	Preparing your course
+        </strong>
+ 
+    	<span>
+        	Loading your learning experience...
+    	</span>
+ 
+	</div>
  
 </div>
  
  
  
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SUPABASE -->
  
-<script src="js/course-platform.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+ 
+ 
+<!-- CORRECT PATH -->
+ 
+<script
+    src="js/course-platform.js"
+></script>
  
 </body>
  
