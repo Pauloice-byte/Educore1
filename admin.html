@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -11,180 +10,131 @@
     >
 
     <meta
-        name="description"
-        content="EduCore Administration"
+        name="theme-color"
+        content="#11141b"
     >
 
-    <title>EduCore | Administration</title>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <title>EduCore Admin</title>
 
     <link
         rel="stylesheet"
         href="css/admin.css"
     >
-
 </head>
-
 
 <body>
 
+<div id="admin-app">
 
-<div
-    id="admin-app"
-    class="admin-app"
->
-
-
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
-
+    <!-- SIDEBAR -->
     <aside
-        id="admin-sidebar"
         class="admin-sidebar"
+        id="admin-sidebar"
     >
 
         <div class="sidebar-brand">
 
-            <div class="brand-mark">
-                E
-            </div>
+            <img
+                src="images/logo.jpg"
+                alt="EduCore"
+                class="brand-mark"
+            >
 
-            <div class="brand-copy">
-
-                <strong>
-                    EduCore
-                </strong>
-
-                <span>
-                    Administration
-                </span>
-
+            <div class="brand-information">
+                <div class="brand-name">EduCore</div>
+                <div class="brand-subtitle">ADMINISTRATION</div>
             </div>
 
             <button
-                id="mobile-sidebar-close"
-                class="mobile-sidebar-close"
                 type="button"
-                aria-label="Close menu"
+                class="mobile-sidebar-close"
+                id="mobile-sidebar-close"
+                aria-label="Close sidebar"
             >
                 ×
             </button>
 
         </div>
 
-
-        <nav class="admin-navigation">
-
-            <div class="navigation-label">
-                WORKSPACE
-            </div>
-
+        <nav
+            class="admin-navigation"
+            aria-label="Admin navigation"
+        >
 
             <button
-                class="nav-item active"
-                data-section="dashboard"
                 type="button"
+                class="nav-item active"
+                data-section="overview"
             >
                 <span class="nav-icon">⌂</span>
-                <span>Dashboard</span>
+                <span class="nav-label">Overview</span>
             </button>
 
-
             <button
+                type="button"
                 class="nav-item"
                 data-section="courses"
-                type="button"
             >
                 <span class="nav-icon">▣</span>
-                <span>Courses</span>
+                <span class="nav-label">Courses</span>
             </button>
 
+            <button
+    type="button"
+    class="nav-item"
+    data-section="carousel"
+>
+    <span class="nav-icon">▤</span>
+    <span class="nav-label">Carousel</span>
+</button>
 
             <button
-                class="nav-item"
-                data-section="personalise"
                 type="button"
-            >
-                <span class="nav-icon">✦</span>
-                <span>Personalise Course</span>
-            </button>
-
-
-            <button
-                class="nav-item"
-                data-section="carousel"
-                type="button"
-            >
-                <span class="nav-icon">▤</span>
-                <span>Carousel</span>
-            </button>
-
-
-            <div class="navigation-label navigation-label-spaced">
-                MANAGEMENT
-            </div>
-
-
-            <button
                 class="nav-item"
                 data-section="students"
-                type="button"
             >
                 <span class="nav-icon">♙</span>
-                <span>Students</span>
+                <span class="nav-label">Students</span>
             </button>
 
+            <button
+                type="button"
+                class="nav-item"
+                data-section="progress"
+            >
+                <span class="nav-icon">↗</span>
+                <span class="nav-label">Progress</span>
+            </button>
 
             <button
+                type="button"
+                class="nav-item"
+                data-section="media"
+            >
+                <span class="nav-icon">▶</span>
+                <span class="nav-label">Media</span>
+            </button>
+
+            <button
+                type="button"
                 class="nav-item"
                 data-section="settings"
-                type="button"
             >
                 <span class="nav-icon">⚙</span>
-                <span>Settings</span>
+                <span class="nav-label">Settings</span>
             </button>
 
         </nav>
 
-
         <div class="sidebar-footer">
 
-            <div class="admin-mini-profile">
-
-                <div
-                    id="admin-avatar"
-                    class="admin-avatar"
-                >
-                    A
-                </div>
-
-                <div class="admin-mini-copy">
-
-                    <strong id="admin-name">
-                        Administrator
-                    </strong>
-
-                    <span id="admin-role">
-                        Admin
-                    </span>
-
-                </div>
-
-            </div>
-
-
             <button
-                id="logout-button"
-                class="logout-button"
                 type="button"
+                class="logout-button"
+                id="logout-button"
             >
-                <span>↪</span>
-                Logout
+                <span class="nav-icon">↪</span>
+                <span>Logout</span>
             </button>
 
         </div>
@@ -193,61 +143,67 @@
 
 
     <div
-        id="sidebar-overlay"
         class="sidebar-overlay"
+        id="sidebar-overlay"
     ></div>
 
 
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
+    <!-- MAIN -->
     <main class="admin-main">
 
+        <header class="admin-header">
 
-        <!-- TOPBAR -->
-
-        <header class="admin-topbar">
-
-            <div class="topbar-left">
+            <div class="header-left">
 
                 <button
-                    id="sidebar-toggle"
-                    class="sidebar-toggle"
                     type="button"
-                    aria-label="Open navigation"
+                    class="sidebar-toggle"
+                    id="sidebar-toggle"
+                    aria-label="Toggle sidebar"
+                    aria-expanded="true"
                 >
-                    ☰
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </button>
 
-                <div>
+                <div class="header-title">
 
-                    <div class="topbar-eyebrow">
+                    <div class="header-eyebrow">
                         EDUCORE ADMIN
                     </div>
 
                     <h1 id="page-title">
-                        Dashboard
+                        Overview
                     </h1>
 
                 </div>
 
             </div>
 
+            <div class="admin-user">
 
-            <div class="topbar-right">
-
-                <div class="topbar-brand">
-                    EduCore
+                <div
+                    class="admin-avatar"
+                    id="admin-avatar"
+                >
+                    A
                 </div>
 
-                <div class="topbar-admin">
+                <div class="admin-user-details">
 
                     <div
-                        id="topbar-admin-avatar"
-                        class="topbar-avatar"
+                        class="admin-name"
+                        id="admin-name"
                     >
-                        A
+                        Administrator
+                    </div>
+
+                    <div
+                        class="admin-role"
+                        id="admin-role"
+                    >
+                        Admin
                     </div>
 
                 </div>
@@ -259,285 +215,277 @@
 
         <div class="admin-content">
 
+            <!-- DASHBOARD ERROR -->
+            <div
+                id="dashboard-error"
+                class="dashboard-error admin-hidden"
+                role="alert"
+            >
+                <span>
+                    Some dashboard information could not be loaded.
+                </span>
 
-            <!-- =================================================
-                 DASHBOARD
-            ================================================== -->
+                <button
+                    type="button"
+                    id="dashboard-retry"
+                >
+                    Retry
+                </button>
+            </div>
 
+
+            <!-- OVERVIEW -->
             <section
-                id="dashboard-section"
+                id="overview-section"
                 class="admin-section active"
             >
 
-                <div class="page-introduction">
+                <div class="section-introduction">
 
-                    <span class="section-kicker">
-                        OVERVIEW
-                    </span>
+                    <div class="section-kicker">
+                        DASHBOARD
+                    </div>
 
-                    <h2>
-                        Administration Dashboard
-                    </h2>
+                    <h2>Overview</h2>
 
                     <p>
-                        Manage courses, learning content and
-                        the EduCore learning environment.
+                        Manage and monitor your EduCore platform.
                     </p>
 
                 </div>
 
 
-                <div class="stats-grid">
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-card-icon">
-                            ▣
-                        </div>
-
-                        <span>
-                            Courses
-                        </span>
-
-                        <strong id="total-courses">
-                            0
-                        </strong>
-
-                    </div>
-
+                <div class="statistics-grid">
 
                     <div class="stat-card">
 
-                        <div class="stat-card-icon">
-                            ◫
+                        <div class="stat-card-top">
+                            <span class="stat-label">Courses</span>
+                            <span class="stat-icon">▣</span>
                         </div>
 
-                        <span>
-                            Modules
-                        </span>
-
-                        <strong id="total-units">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-card-icon">
-                            ≡
-                        </div>
-
-                        <span>
-                            Lessons
-                        </span>
-
-                        <strong id="total-lessons">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-card-icon">
-                            ♙
-                        </div>
-
-                        <span>
-                            Students
-                        </span>
-
-                        <strong id="total-students">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="dashboard-grid">
-
-
-                    <section class="dashboard-panel">
-
-                        <div class="panel-heading">
-
-                            <div>
-
-                                <span class="section-kicker">
-                                    CONTENT
-                                </span>
-
-                                <h3>
-                                    Course Publishing
-                                </h3>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="publishing-summary">
-
-                            <div>
-
-                                <span>
-                                    Published
-                                </span>
-
-                                <strong id="published-content">
-                                    0
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    Draft
-                                </span>
-
-                                <strong id="draft-content">
-                                    0
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-                    </section>
-
-
-                    <section class="dashboard-panel">
-
-                        <div class="panel-heading">
-
-                            <div>
-
-                                <span class="section-kicker">
-                                    ACTIVITY
-                                </span>
-
-                                <h3>
-                                    Recent Activity
-                                </h3>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="activity-list"
-                            class="activity-list"
+                        <strong
+                            class="stat-value"
+                            id="total-courses"
                         >
+                            —
+                        </strong>
 
-                            <div class="activity-empty">
-                                Loading activity...
-                            </div>
+                        <span class="stat-description">
+                            Courses in the platform
+                        </span>
 
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+                            <span class="stat-label">Units</span>
+                            <span class="stat-icon">▤</span>
                         </div>
 
-                    </section>
+                        <strong
+                            class="stat-value"
+                            id="total-units"
+                        >
+                            —
+                        </strong>
+
+                        <span class="stat-description">
+                            Units across all courses
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+                            <span class="stat-label">Lessons</span>
+                            <span class="stat-icon">◫</span>
+                        </div>
+
+                        <strong
+                            class="stat-value"
+                            id="total-lessons"
+                        >
+                            —
+                        </strong>
+
+                        <span class="stat-description">
+                            Lessons in the platform
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+                            <span class="stat-label">Students</span>
+                            <span class="stat-icon">♙</span>
+                        </div>
+
+                        <strong
+                            class="stat-value"
+                            id="total-students"
+                        >
+                            —
+                        </strong>
+
+                        <span class="stat-description">
+                            Registered students
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+                            <span class="stat-label">
+                                Published Content
+                            </span>
+
+                            <span class="stat-icon">✓</span>
+                        </div>
+
+                        <strong
+                            class="stat-value"
+                            id="published-content"
+                        >
+                            —
+                        </strong>
+
+                        <span class="stat-description">
+                            Published courses
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-top">
+                            <span class="stat-label">
+                                Draft Content
+                            </span>
+
+                            <span class="stat-icon">○</span>
+                        </div>
+
+                        <strong
+                            class="stat-value"
+                            id="draft-content"
+                        >
+                            —
+                        </strong>
+
+                        <span class="stat-description">
+                            Courses in draft
+                        </span>
+
+                    </div>
 
                 </div>
 
 
-                <div
-                    id="dashboard-error"
-                    class="dashboard-error admin-hidden"
-                >
+                <div class="dashboard-panel">
 
-                    <span>
-                        Unable to load some dashboard information.
-                    </span>
+                    <div class="panel-header">
 
-                    <button
-                        id="dashboard-retry"
-                        type="button"
+                        <div class="panel-kicker">
+                            RECENT ACTIVITY
+                        </div>
+
+                        <h3>Activity</h3>
+
+                    </div>
+
+                    <div
+                        class="activity-list"
+                        id="activity-list"
                     >
-                        Retry
-                    </button>
+                        <div class="activity-loading">
+                            Loading recent activity...
+                        </div>
+                    </div>
 
                 </div>
 
             </section>
 
 
-            <!-- =================================================
-                 COURSES
-            ================================================== -->
-
+            <!-- COURSES -->
             <section
                 id="courses-section"
                 class="admin-section"
             >
 
-                <div class="page-heading-row">
+                <div class="courses-header">
 
-                    <div>
+                    <div class="section-introduction">
 
-                        <span class="section-kicker">
-                            COURSE MANAGEMENT
-                        </span>
+                        <div class="section-kicker">
+                            CATALOGUE
+                        </div>
 
-                        <h2>
-                            Courses
-                        </h2>
+                        <h2>Courses</h2>
 
                         <p>
-                            Create, edit, publish and manage your
-                            EduCore courses.
+                            Create, edit and manage every type of
+                            course available on the EduCore platform.
                         </p>
 
                     </div>
 
-
                     <button
-                        id="create-course-button"
-                        class="primary-button"
                         type="button"
+                        class="primary-button"
+                        id="create-course-button"
                     >
-                        + Create Course
+                        <span>+</span>
+                        Create Course
                     </button>
 
                 </div>
 
 
-                <div class="toolbar">
+                <div class="course-toolbar">
 
-                    <div class="search-box">
+                    <div class="course-search">
 
-                        <span>
+                        <span class="search-icon">
                             ⌕
                         </span>
 
                         <input
-                            id="course-search"
                             type="search"
+                            id="course-search"
                             placeholder="Search courses..."
+                            aria-label="Search courses"
                         >
 
                     </div>
 
 
-                    <select id="course-filter">
+                    <select
+                        id="course-filter"
+                        class="course-filter"
+                        aria-label="Filter courses"
+                    >
 
                         <option value="all">
                             All courses
                         </option>
 
-                        <option value="draft">
-                            Draft
-                        </option>
-
                         <option value="published">
                             Published
+                        </option>
+
+                        <option value="draft">
+                            Draft
                         </option>
 
                         <option value="archived">
@@ -549,316 +497,44 @@
                 </div>
 
 
-                <div
-                    id="courses-list"
-                    class="courses-list"
-                >
+                <div class="courses-panel">
 
-                    <div class="courses-loading">
-                        Loading courses...
-                    </div>
+                    <div class="courses-panel-top">
 
-                </div>
+                        <div>
 
-            </section>
+                            <strong>
+                                Course List
+                            </strong>
 
+                            <span id="course-count">
+                                Loading...
+                            </span>
 
-            <!-- =================================================
-                 PERSONALISE COURSE
-            ================================================== -->
-
-            <section
-                id="personalise-section"
-                class="admin-section"
-            >
-
-                <div class="page-heading-row">
-
-                    <div>
-
-                        <span class="section-kicker">
-                            COURSE BUILDER
-                        </span>
-
-                        <h2>
-                            Personalise Course
-                        </h2>
-
-                        <p>
-                            Build modules, lessons and learning
-                            content for your students.
-                        </p>
+                        </div>
 
                     </div>
 
-                </div>
 
+                    <div class="courses-table-header">
 
-                <div class="builder-course-selector">
-
-                    <div>
-
-                        <label for="builder-course-select">
-                            Course
-                        </label>
-
-                        <select
-                            id="builder-course-select"
-                        >
-
-                            <option value="">
-                                Select a course...
-                            </option>
-
-                        </select>
+                        <span>Course</span>
+                        <span>Category</span>
+                        <span>Level</span>
+                        <span>Status</span>
+                        <span>Updated</span>
+                        <span>Actions</span>
 
                     </div>
 
 
                     <div
-                        id="builder-course-summary"
-                        class="builder-course-summary"
+                        class="courses-list"
+                        id="courses-list"
                     >
 
-                        <span>
-                            Select a course to begin.
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="course-builder"
-                    class="course-builder disabled"
-                >
-
-                    <aside class="builder-sidebar">
-
-                        <div class="builder-sidebar-heading">
-
-                            <div>
-
-                                <span>
-                                    COURSE STRUCTURE
-                                </span>
-
-                                <strong id="builder-course-title">
-                                    Select a course
-                                </strong>
-
-                            </div>
-
-                            <button
-                                id="add-module-button"
-                                class="small-primary-button"
-                                type="button"
-                                disabled
-                            >
-                                + Module
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            id="builder-tree"
-                            class="builder-tree"
-                        >
-
-                            <div class="builder-empty">
-                                Select a course to view its structure.
-                            </div>
-
-                        </div>
-
-                    </aside>
-
-
-                    <div class="builder-workspace">
-
-
-                        <div
-                            id="builder-welcome"
-                            class="builder-welcome"
-                        >
-
-                            <div class="builder-welcome-icon">
-                                ✦
-                            </div>
-
-                            <span class="section-kicker">
-                                COURSE BUILDER
-                            </span>
-
-                            <h3>
-                                Build the learning experience
-                            </h3>
-
-                            <p>
-                                Start by creating a module. Then
-                                create lessons and personalise each
-                                lesson with text, media, exercises
-                                and AI activities.
-                            </p>
-
-                        </div>
-
-
-                        <div
-                            id="module-editor"
-                            class="builder-editor admin-hidden"
-                        >
-
-                            <div class="editor-header">
-
-                                <div>
-
-                                    <span class="section-kicker">
-                                        MODULE
-                                    </span>
-
-                                    <h3 id="module-editor-title">
-                                        Module
-                                    </h3>
-
-                                </div>
-
-                                <div class="editor-actions">
-
-                                    <button
-                                        id="edit-module-button"
-                                        class="secondary-button"
-                                        type="button"
-                                    >
-                                        Edit Module
-                                    </button>
-
-                                    <button
-                                        id="delete-module-button"
-                                        class="danger-button"
-                                        type="button"
-                                    >
-                                        Delete
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="lesson-heading">
-
-                                <div>
-
-                                    <span class="section-kicker">
-                                        LESSONS
-                                    </span>
-
-                                    <h4>
-                                        Module lessons
-                                    </h4>
-
-                                </div>
-
-                                <button
-                                    id="add-lesson-button"
-                                    class="small-primary-button"
-                                    type="button"
-                                >
-                                    + Lesson
-                                </button>
-
-                            </div>
-
-
-                            <div
-                                id="lesson-list"
-                                class="lesson-list"
-                            ></div>
-
-                        </div>
-
-
-                        <div
-                            id="lesson-editor"
-                            class="builder-editor admin-hidden"
-                        >
-
-                            <div class="editor-header">
-
-                                <div>
-
-                                    <span class="section-kicker">
-                                        LESSON
-                                    </span>
-
-                                    <h3 id="lesson-editor-title">
-                                        Lesson
-                                    </h3>
-
-                                    <p
-                                        id="lesson-editor-description"
-                                        class="editor-subtitle"
-                                    ></p>
-
-                                </div>
-
-                                <div class="editor-actions">
-
-                                    <button
-                                        id="edit-lesson-button"
-                                        class="secondary-button"
-                                        type="button"
-                                    >
-                                        Edit Lesson
-                                    </button>
-
-                                    <button
-                                        id="delete-lesson-button"
-                                        class="danger-button"
-                                        type="button"
-                                    >
-                                        Delete
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="content-builder-toolbar">
-
-                                <div>
-
-                                    <span class="section-kicker">
-                                        LESSON CONTENT
-                                    </span>
-
-                                    <h4>
-                                        Learning blocks
-                                    </h4>
-
-                                </div>
-
-
-                                <button
-                                    id="add-content-button"
-                                    class="primary-button"
-                                    type="button"
-                                >
-                                    + Add Content
-                                </button>
-
-                            </div>
-
-
-                            <div
-                                id="content-list"
-                                class="content-list"
-                            ></div>
-
+                        <div class="courses-loading">
+                            Loading courses...
                         </div>
 
                     </div>
@@ -868,75 +544,77 @@
             </section>
 
 
-            <!-- =================================================
-                 CAROUSEL
-            ================================================== -->
 
+                        <!-- CAROUSEL -->
             <section
                 id="carousel-section"
                 class="admin-section"
             >
 
-                <div class="page-heading-row">
+                <div class="courses-header">
 
-                    <div>
+                    <div class="section-introduction">
 
-                        <span class="section-kicker">
-                            HOMEPAGE
-                        </span>
+                        <div class="section-kicker">
+                            FEATURED CONTENT
+                        </div>
 
-                        <h2>
-                            Carousel
-                        </h2>
+                        <h2>Carousel</h2>
 
                         <p>
-                            Manage featured promotions shown on
-                            the EduCore homepage.
+                            Create and manage promotional messages
+                            and advertisements displayed in the
+                            EduCore homepage carousel.
                         </p>
 
                     </div>
 
-
                     <button
-                        id="create-carousel-button"
-                        class="primary-button"
                         type="button"
+                        class="primary-button"
+                        id="create-carousel-button"
                     >
-                        + Create Promotion
+                        <span>+</span>
+                        Create Promotion
                     </button>
 
                 </div>
 
 
-                <div class="toolbar">
+                <div class="course-toolbar">
 
-                    <div class="search-box">
+                    <div class="course-search">
 
-                        <span>
+                        <span class="search-icon">
                             ⌕
                         </span>
 
                         <input
-                            id="carousel-search"
                             type="search"
+                            id="carousel-search"
                             placeholder="Search promotions..."
+                            aria-label="Search promotions"
                         >
 
                     </div>
 
 
-                    <select id="carousel-filter">
+                    <select
+                        id="carousel-filter"
+                        class="course-filter"
+                        aria-label="Filter carousel promotions"
+                    >
 
                         <option value="all">
-                            All
-                        </option>
-
-                        <option value="draft">
-                            Draft
+                            All promotions
                         </option>
 
                         <option value="published">
                             Published
+                        </option>
+
+                        <option value="draft">
+                            Draft
                         </option>
 
                     </select>
@@ -944,42 +622,70 @@
                 </div>
 
 
-                <div
-                    id="carousel-list"
-                    class="courses-list"
-                >
+                <div class="courses-panel">
 
-                    <div class="courses-loading">
-                        Loading promotions...
+                    <div class="courses-panel-top">
+
+                        <div>
+
+                            <strong>
+                                Promotion List
+                            </strong>
+
+                            <span id="carousel-count">
+                                Loading...
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="courses-table-header">
+
+                        <span>Promotion</span>
+                        <span>Area</span>
+                        <span>Status</span>
+                        <span>Start</span>
+                        <span>End</span>
+                        <span>Actions</span>
+
+                    </div>
+
+
+                    <div
+                        class="courses-list"
+                        id="carousel-list"
+                    >
+
+                        <div class="courses-loading">
+                            Loading promotions...
+                        </div>
+
                     </div>
 
                 </div>
 
             </section>
 
-
-            <!-- =================================================
-                 STUDENTS
-            ================================================== -->
-
+            
+            <!-- STUDENTS -->
             <section
                 id="students-section"
                 class="admin-section"
             >
 
-                <div class="page-introduction">
+                <div class="section-introduction">
 
-                    <span class="section-kicker">
-                        MANAGEMENT
-                    </span>
+                    <div class="section-kicker">
+                        STUDENTS
+                    </div>
 
-                    <h2>
-                        Students
-                    </h2>
+                    <h2>Students</h2>
 
                     <p>
-                        Student management will be connected to
-                        the learning and enrollment system.
+                        Student management will be introduced
+                        in its dedicated project phase.
                     </p>
 
                 </div>
@@ -990,38 +696,121 @@
                         ♙
                     </div>
 
-                    <h3>
-                        Student Management
-                    </h3>
+                    <h2>Student Management</h2>
 
                     <p>
-                        Enrollment, progress and student analytics
-                        will be added in a later phase.
+                        The admin shell is ready.
+                        Detailed student management belongs
+                        to a later roadmap phase.
                     </p>
+
+                    <span class="phase-badge">
+                        FUTURE PHASE
+                    </span>
 
                 </div>
 
             </section>
 
 
-            <!-- =================================================
-                 SETTINGS
-            ================================================== -->
+            <!-- PROGRESS -->
+            <section
+                id="progress-section"
+                class="admin-section"
+            >
 
+                <div class="section-introduction">
+
+                    <div class="section-kicker">
+                        ANALYTICS
+                    </div>
+
+                    <h2>Progress</h2>
+
+                    <p>
+                        Monitor student learning progress and performance.
+                    </p>
+
+                </div>
+
+                <div class="empty-section">
+
+                    <div class="empty-section-icon">
+                        ↗
+                    </div>
+
+                    <h2>Progress Analytics</h2>
+
+                    <p>
+                        Detailed analytics will be implemented
+                        in its dedicated roadmap phase.
+                    </p>
+
+                    <span class="phase-badge">
+                        FUTURE PHASE
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- MEDIA -->
+            <section
+                id="media-section"
+                class="admin-section"
+            >
+
+                <div class="section-introduction">
+
+                    <div class="section-kicker">
+                        CONTENT
+                    </div>
+
+                    <h2>Media</h2>
+
+                    <p>
+                        Manage learning media from the EduCore
+                        administration area.
+                    </p>
+
+                </div>
+
+                <div class="empty-section">
+
+                    <div class="empty-section-icon">
+                        ▶
+                    </div>
+
+                    <h2>Media Library</h2>
+
+                    <p>
+                        The Media administration area will be
+                        implemented in its dedicated phase.
+                    </p>
+
+                    <span class="phase-badge">
+                        FUTURE PHASE
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- SETTINGS -->
             <section
                 id="settings-section"
                 class="admin-section"
             >
 
-                <div class="page-introduction">
+                <div class="section-introduction">
 
-                    <span class="section-kicker">
-                        SYSTEM
-                    </span>
+                    <div class="section-kicker">
+                        CONFIGURATION
+                    </div>
 
-                    <h2>
-                        Settings
-                    </h2>
+                    <h2>Settings</h2>
 
                     <p>
                         Configure EduCore administration settings.
@@ -1029,16 +818,13 @@
 
                 </div>
 
-
                 <div class="empty-section">
 
                     <div class="empty-section-icon">
                         ⚙
                     </div>
 
-                    <h3>
-                        Administration Settings
-                    </h3>
+                    <h2>Settings</h2>
 
                     <p>
                         Administration settings will be implemented
@@ -1053,7 +839,6 @@
 
             </section>
 
-
         </div>
 
     </main>
@@ -1061,10 +846,7 @@
 </div>
 
 
-<!-- =========================================================
-     SUPABASE
-========================================================= -->
-
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
@@ -1072,7 +854,6 @@
 <script src="js/auth.js"></script>
 
 <script src="js/admin.js"></script>
-
 
 </body>
 </html>
