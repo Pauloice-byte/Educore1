@@ -597,22 +597,140 @@ async function loadUser() {
 
 
 /* =====================================================
-   COURSE
+   COURSE + COURSE CONTENT LOADING
+=====================================================
+
+   EduCore structure:
+
+   courses
+      ↓
+   modules
+      ↓
+   lessons
+      ↓
+   lesson_sections
+      ↓
+   activities
+      ↓
+   questions
+
+   Supporting:
+
+   media
+
+   IMPORTANT:
+
+   The course ID comes from:
+
+   course-platform.html?course_id=123
+
+   Every level is loaded using the actual
+   foreign-key relationship created by the
+   Admin Builder.
+===================================================== */
+
+
+/* =====================================================
+   COURSE ID
+===================================================== */
+
+function getCourseId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const candidates = [
+
+        params.get("course_id"),
+
+        params.get("course"),
+
+        params.get("id"),
+
+        sessionStorage.getItem(
+            "educore_course_id"
+        ),
+
+        localStorage.getItem(
+            "educore_course_id"
+        )
+
+    ];
+
+
+    const rawId =
+        candidates.find(
+            value =>
+                value !== null &&
+                value !== undefined &&
+                String(value).trim() !== ""
+        );
+
+
+    if (!rawId) {
+
+        return null;
+
+    }
+
+
+    const cleanId =
+        String(rawId)
+            .trim();
+
+
+    /*
+     * Supabase course IDs are numeric in the
+     * current EduCore database.
+     *
+     * Keep the value as a string for URL/state
+     * purposes, but validate that it is numeric
+     * before querying the database.
+     */
+
+    if (!/^\d+$/.test(cleanId)) {
+
+        console.error(
+            "EduCore: Invalid course ID:",
+            cleanId
+        );
+
+        return null;
+
+    }
+
+
+    return cleanId;
+
+}
+
+
+/* =====================================================
+   LOAD COURSE
 ===================================================== */
 
 async function loadCourse() {
 
     if (!state.courseId) {
 
-        console.warn(
-            "No course ID was supplied."
+        console.error(
+            "EduCore: No course ID was supplied."
         );
 
         renderNoCourse();
 
-        return;
+        return false;
 
     }
+
+
+    console.log(
+        "EduCore: Loading course:",
+        state.courseId
+    );
 
 
     const {
@@ -622,20 +740,37 @@ async function loadCourse() {
         await supabaseClient
             .from("courses")
             .select("*")
-            .eq("id", state.courseId)
+            .eq(
+                "id",
+                state.courseId
+            )
             .maybeSingle();
 
 
     if (error) {
 
         console.error(
-            "Course loading error:",
+            "EduCore: Course loading error:",
             error
         );
 
         renderCourseError();
 
-        return;
+        return false;
+
+    }
+
+
+    if (!data) {
+
+        console.error(
+            "EduCore: No course found for ID:",
+            state.courseId
+        );
+
+        renderNoCourse();
+
+        return false;
 
     }
 
@@ -644,16 +779,16 @@ async function loadCourse() {
         data;
 
 
-    if (!state.course) {
-
-        renderNoCourse();
-
-        return;
-
-    }
+    console.log(
+        "EduCore: Course loaded:",
+        state.course
+    );
 
 
     renderCourse();
+
+
+    return true;
 
 }
 
@@ -666,6 +801,7 @@ function renderCourse() {
 
     const course =
         state.course;
+
 
     if (!course) {
         return;
@@ -684,6 +820,7 @@ function renderCourse() {
 
     const category =
         course.category ||
+        course.language ||
         "COURSE";
 
 
@@ -693,8 +830,14 @@ function renderCourse() {
 
 
     const duration =
-        course.duration_minutes ||
-        course.duration ||
+        Number(
+            course.duration_minutes
+        ) ||
+
+        Number(
+            course.duration
+        ) ||
+
         calculateCourseDuration();
 
 
@@ -702,8 +845,10 @@ function renderCourse() {
         $("#course-category");
 
     if (categoryElement) {
+
         categoryElement.textContent =
             category;
+
     }
 
 
@@ -711,8 +856,10 @@ function renderCourse() {
         $("#course-title");
 
     if (titleElement) {
+
         titleElement.textContent =
             title;
+
     }
 
 
@@ -720,8 +867,10 @@ function renderCourse() {
         $("#course-description");
 
     if (descriptionElement) {
+
         descriptionElement.textContent =
             description;
+
     }
 
 
@@ -729,8 +878,10 @@ function renderCourse() {
         $("#course-level");
 
     if (levelElement) {
+
         levelElement.textContent =
             level;
+
     }
 
 
@@ -738,8 +889,10 @@ function renderCourse() {
         $("#course-duration");
 
     if (durationElement) {
+
         durationElement.textContent =
             formatDuration(duration);
+
     }
 
 
@@ -747,8 +900,10 @@ function renderCourse() {
         $("#top-course-name");
 
     if (topCourseName) {
+
         topCourseName.textContent =
             title;
+
     }
 
 
@@ -758,14 +913,29 @@ function renderCourse() {
 
 
 /* =====================================================
-   MODULES
+   LOAD MODULES
 ===================================================== */
 
 async function loadModules() {
 
+    state.modules = [];
+
+
     if (!state.courseId) {
-        return;
+
+        console.error(
+            "EduCore: Cannot load modules without a course ID."
+        );
+
+        return false;
+
     }
+
+
+    console.log(
+        "EduCore: Loading modules for course:",
+        state.courseId
+    );
 
 
     const {
@@ -775,24 +945,26 @@ async function loadModules() {
         await supabaseClient
             .from("modules")
             .select("*")
-            .eq("course_id", state.courseId)
-            .order("sort_order", {
-                ascending: true
-            });
+            .eq(
+                "course_id",
+                state.courseId
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
 
         console.error(
-            "Module loading error:",
+            "EduCore: Module loading error:",
             error
         );
 
-        state.modules = [];
-
-        renderEverything();
-
-        return;
+        return false;
 
     }
 
@@ -801,32 +973,53 @@ async function loadModules() {
         data || [];
 
 
+    console.log(
+        `EduCore: ${state.modules.length} module(s) loaded.`,
+        state.modules
+    );
+
+
     await loadLessons();
+
+
+    return true;
 
 }
 
 
 /* =====================================================
-   LESSONS
+   LOAD LESSONS
 ===================================================== */
 
 async function loadLessons() {
 
+    state.lessons = [];
+
+
     const moduleIds =
         state.modules.map(
-            module => module.id
+            module =>
+                module.id
         );
 
 
     if (!moduleIds.length) {
 
-        state.lessons = [];
+        console.log(
+            "EduCore: No modules found for this course."
+        );
 
-        renderEverything();
+        await loadLessonSections();
 
-        return;
+        return true;
 
     }
+
+
+    console.log(
+        "EduCore: Loading lessons for modules:",
+        moduleIds
+    );
 
 
     const {
@@ -836,24 +1029,26 @@ async function loadLessons() {
         await supabaseClient
             .from("lessons")
             .select("*")
-            .in("module_id", moduleIds)
-            .order("sort_order", {
-                ascending: true
-            });
+            .in(
+                "module_id",
+                moduleIds
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
 
         console.error(
-            "Lesson loading error:",
+            "EduCore: Lesson loading error:",
             error
         );
 
-        state.lessons = [];
-
-        renderEverything();
-
-        return;
+        return false;
 
     }
 
@@ -862,35 +1057,53 @@ async function loadLessons() {
         data || [];
 
 
+    console.log(
+        `EduCore: ${state.lessons.length} lesson(s) loaded.`,
+        state.lessons
+    );
+
+
     await loadLessonSections();
+
+
+    return true;
 
 }
 
 
 /* =====================================================
-   LESSON SECTIONS
+   LOAD LESSON SECTIONS
 ===================================================== */
 
 async function loadLessonSections() {
 
+    state.sections = [];
+
+
     const lessonIds =
         state.lessons.map(
-            lesson => lesson.id
+            lesson =>
+                lesson.id
         );
-
-
-    state.sections = [];
 
 
     if (!lessonIds.length) {
 
-        await loadProgress();
+        console.log(
+            "EduCore: No lessons found. No sections to load."
+        );
 
-        renderEverything();
+        await loadActivities();
 
-        return;
+        return true;
 
     }
+
+
+    console.log(
+        "EduCore: Loading sections for lessons:",
+        lessonIds
+    );
 
 
     const {
@@ -900,24 +1113,26 @@ async function loadLessonSections() {
         await supabaseClient
             .from("lesson_sections")
             .select("*")
-            .in("lesson_id", lessonIds)
-            .order("sort_order", {
-                ascending: true
-            });
+            .in(
+                "lesson_id",
+                lessonIds
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
 
         console.error(
-            "Lesson section loading error:",
+            "EduCore: Lesson section loading error:",
             error
         );
 
-        await loadProgress();
-
-        renderEverything();
-
-        return;
+        return false;
 
     }
 
@@ -926,35 +1141,53 @@ async function loadLessonSections() {
         data || [];
 
 
+    console.log(
+        `EduCore: ${state.sections.length} section(s) loaded.`,
+        state.sections
+    );
+
+
     await loadActivities();
+
+
+    return true;
 
 }
 
 
 /* =====================================================
-   ACTIVITIES
+   LOAD ACTIVITIES
 ===================================================== */
 
 async function loadActivities() {
 
+    state.activities = [];
+
+
     const sectionIds =
         state.sections.map(
-            section => section.id
+            section =>
+                section.id
         );
-
-
-    state.activities = [];
 
 
     if (!sectionIds.length) {
 
-        await loadProgress();
+        console.log(
+            "EduCore: No sections found. No activities to load."
+        );
 
-        renderEverything();
+        await loadQuestions();
 
-        return;
+        return true;
 
     }
+
+
+    console.log(
+        "EduCore: Loading activities for sections:",
+        sectionIds
+    );
 
 
     const {
@@ -964,24 +1197,26 @@ async function loadActivities() {
         await supabaseClient
             .from("activities")
             .select("*")
-            .in("section_id", sectionIds)
-            .order("sort_order", {
-                ascending: true
-            });
+            .in(
+                "section_id",
+                sectionIds
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
 
         console.error(
-            "Activity loading error:",
+            "EduCore: Activity loading error:",
             error
         );
 
-        await loadProgress();
-
-        renderEverything();
-
-        return;
+        return false;
 
     }
 
@@ -990,33 +1225,53 @@ async function loadActivities() {
         data || [];
 
 
+    console.log(
+        `EduCore: ${state.activities.length} activit(ies) loaded.`,
+        state.activities
+    );
+
+
     await loadQuestions();
+
+
+    return true;
 
 }
 
 
 /* =====================================================
-   QUESTIONS
+   LOAD QUESTIONS
 ===================================================== */
 
 async function loadQuestions() {
 
+    state.questions = [];
+
+
     const activityIds =
         state.activities.map(
-            activity => activity.id
+            activity =>
+                activity.id
         );
-
-
-    state.questions = [];
 
 
     if (!activityIds.length) {
 
+        console.log(
+            "EduCore: No activities found. No questions to load."
+        );
+
         await loadMedia();
 
-        return;
+        return true;
 
     }
+
+
+    console.log(
+        "EduCore: Loading questions for activities:",
+        activityIds
+    );
 
 
     const {
@@ -1026,37 +1281,55 @@ async function loadQuestions() {
         await supabaseClient
             .from("questions")
             .select("*")
-            .in("activity_id", activityIds)
-            .order("sort_order", {
-                ascending: true
-            });
+            .in(
+                "activity_id",
+                activityIds
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
 
 
     if (error) {
 
+        /*
+         * Questions are supporting content.
+         *
+         * A question-loading failure should not
+         * prevent the course itself from loading.
+         */
+
         console.warn(
-            "Question loading error:",
+            "EduCore: Question loading error:",
             error
         );
 
-        await loadMedia();
+    } else {
 
-        return;
+        state.questions =
+            data || [];
 
     }
 
 
-    state.questions =
-        data || [];
+    console.log(
+        `EduCore: ${state.questions.length} question(s) loaded.`
+    );
 
 
     await loadMedia();
+
+
+    return true;
 
 }
 
 
 /* =====================================================
-   MEDIA
+   LOAD MEDIA
 ===================================================== */
 
 async function loadMedia() {
@@ -1064,43 +1337,180 @@ async function loadMedia() {
     state.media = [];
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("media")
-            .select("*")
-            .or(
-                `course_id.eq.${state.courseId},lesson_id.in.(${state.lessons.map(l => l.id).join(",") || 0}),activity_id.in.(${state.activities.map(a => a.id).join(",") || 0})`
-            )
-            .order("created_at", {
-                ascending: true
-            });
+    /*
+     * Media can belong directly to:
+     *
+     * course
+     * lesson
+     * activity
+     *
+     * We therefore perform separate queries
+     * instead of constructing a complicated
+     * PostgREST OR expression.
+     *
+     * This is more reliable and much easier
+     * to debug.
+     */
+
+    const requests = [];
 
 
-    if (error) {
+    /* -------------------------------------------------
+       COURSE MEDIA
+    ------------------------------------------------- */
 
-        console.warn(
-            "Media loading error:",
-            error
+    if (state.courseId) {
+
+        requests.push(
+
+            supabaseClient
+                .from("media")
+                .select("*")
+                .eq(
+                    "course_id",
+                    state.courseId
+                )
+
         );
-
-        await loadProgress();
-
-        return;
 
     }
 
 
+    /* -------------------------------------------------
+       LESSON MEDIA
+    ------------------------------------------------- */
+
+    const lessonIds =
+        state.lessons.map(
+            lesson =>
+                lesson.id
+        );
+
+
+    if (lessonIds.length) {
+
+        requests.push(
+
+            supabaseClient
+                .from("media")
+                .select("*")
+                .in(
+                    "lesson_id",
+                    lessonIds
+                )
+
+        );
+
+    }
+
+
+    /* -------------------------------------------------
+       ACTIVITY MEDIA
+    ------------------------------------------------- */
+
+    const activityIds =
+        state.activities.map(
+            activity =>
+                activity.id
+        );
+
+
+    if (activityIds.length) {
+
+        requests.push(
+
+            supabaseClient
+                .from("media")
+                .select("*")
+                .in(
+                    "activity_id",
+                    activityIds
+                )
+
+        );
+
+    }
+
+
+    if (!requests.length) {
+
+        console.log(
+            "EduCore: No media queries required."
+        );
+
+        await loadProgress();
+
+        return true;
+
+    }
+
+
+    const results =
+        await Promise.all(
+            requests
+        );
+
+
+    const mediaMap =
+        new Map();
+
+
+    results.forEach(
+        result => {
+
+            if (result.error) {
+
+                console.warn(
+                    "EduCore: Media loading error:",
+                    result.error
+                );
+
+                return;
+
+            }
+
+
+            (result.data || [])
+                .forEach(
+                    media => {
+
+                        mediaMap.set(
+                            String(media.id),
+                            media
+                        );
+
+                    }
+                );
+
+        }
+    );
+
+
     state.media =
-        data || [];
+        [...mediaMap.values()]
+            .sort(
+                (a, b) =>
+                    new Date(
+                        a.created_at || 0
+                    ) -
+                    new Date(
+                        b.created_at || 0
+                    )
+            );
+
+
+    console.log(
+        `EduCore: ${state.media.length} media item(s) loaded.`,
+        state.media
+    );
 
 
     await loadProgress();
 
-}
 
+    return true;
+
+}
 
 /* =====================================================
    PROGRESS
