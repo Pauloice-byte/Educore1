@@ -231,28 +231,60 @@ function getCourseId() {
             window.location.search
         );
 
-    const candidates = [
+    const urlCourseId =
+        params.get("course_id") ||
+        params.get("course") ||
+        params.get("id");
 
-        params.get("course_id"),
-
-        params.get("course"),
-
-        params.get("id"),
-
+    const storageCourseId =
         sessionStorage.getItem(
             "educore_course_id"
-        ),
-
+        ) ||
         localStorage.getItem(
             "educore_course_id"
-        )
+        );
 
-    ];
+    const rawId =
+        urlCourseId ||
+        storageCourseId;
 
-    return candidates.find(Boolean) || null;
+    console.log(
+        "EduCore URL:",
+        window.location.href
+    );
+
+    console.log(
+        "EduCore course_id from URL:",
+        urlCourseId
+    );
+
+    console.log(
+        "EduCore course_id from storage:",
+        storageCourseId
+    );
+
+    console.log(
+        "EduCore selected course ID:",
+        rawId
+    );
+
+    if (
+        rawId === null ||
+        rawId === undefined ||
+        String(rawId).trim() === ""
+    ) {
+
+        console.error(
+            "EduCore: No course ID was found."
+        );
+
+        return null;
+
+    }
+
+    return String(rawId).trim();
 
 }
-
 
 /* =====================================================
    LOADING
@@ -630,168 +662,230 @@ async function loadUser() {
 ===================================================== */
 
 
-/* =====================================================
-   COURSE ID
-===================================================== */
-
-function getCourseId() {
-
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-
-    const candidates = [
-
-        params.get("course_id"),
-
-        params.get("course"),
-
-        params.get("id"),
-
-        sessionStorage.getItem(
-            "educore_course_id"
-        ),
-
-        localStorage.getItem(
-            "educore_course_id"
-        )
-
-    ];
-
-
-    const rawId =
-        candidates.find(
-            value =>
-                value !== null &&
-                value !== undefined &&
-                String(value).trim() !== ""
-        );
-
-
-    if (!rawId) {
-
-        return null;
-
-    }
-
-
-    const cleanId =
-        String(rawId)
-            .trim();
-
-
-    /*
-     * Supabase course IDs are numeric in the
-     * current EduCore database.
-     *
-     * Keep the value as a string for URL/state
-     * purposes, but validate that it is numeric
-     * before querying the database.
-     */
-
-    if (!/^\d+$/.test(cleanId)) {
-
-        console.error(
-            "EduCore: Invalid course ID:",
-            cleanId
-        );
-
-        return null;
-
-    }
-
-
-    return cleanId;
-
-}
-
 
 /* =====================================================
-   LOAD COURSE
+   INITIALIZATION
 ===================================================== */
 
-async function loadCourse() {
+async function init() {
 
-    if (!state.courseId) {
-
-        console.error(
-            "EduCore: No course ID was supplied."
-        );
-
-        renderNoCourse();
-
-        return false;
-
-    }
+    showLoading();
 
 
     console.log(
-        "EduCore: Loading course:",
+        "=============================================="
+    );
+
+    console.log(
+        "EDUCORE COURSE PLATFORM STARTING"
+    );
+
+    console.log(
+        "Page:",
+        window.location.href
+    );
+
+    console.log(
+        "=============================================="
+    );
+
+
+    /*
+     * Get selected course.
+     */
+
+    state.courseId =
+        getCourseId();
+
+
+    console.log(
+        "EduCore final course ID:",
         state.courseId
     );
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("courses")
-            .select("*")
-            .eq(
-                "id",
-                state.courseId
-            )
-            .maybeSingle();
+    /*
+     * Setup interface.
+     */
+
+    setupNavigation();
+
+    setupMoreMenu();
+
+    setupLessonNavigation();
+
+    setupContinueButtons();
+
+    setupExitCourse();
 
 
-    if (error) {
+    try {
+
+        /*
+         * Load user.
+         *
+         * This MUST NOT prevent the course itself
+         * from loading.
+         */
+
+        try {
+
+            await loadUser();
+
+        } catch (userError) {
+
+            console.warn(
+                "EduCore: User could not be loaded. Continuing with course:",
+                userError
+            );
+
+            state.user = null;
+
+        }
+
+
+        /*
+         * Load course.
+         */
+
+        const courseLoaded =
+            await loadCourse();
+
+
+        if (!courseLoaded) {
+
+            console.error(
+                "EduCore: COURSE LOAD FAILED."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Load course hierarchy.
+         */
+
+        const modulesLoaded =
+            await loadModules();
+
+
+        if (!modulesLoaded) {
+
+            console.error(
+                "EduCore: Modules could not be loaded."
+            );
+
+        }
+
+
+        /*
+         * loadModules() continues through:
+         *
+         * modules
+         * lessons
+         * sections
+         * activities
+         * questions
+         * media
+         * progress
+         */
+
+
+        renderEverything();
+
+
+        console.log(
+            "=============================================="
+        );
+
+        console.log(
+            "EDUCORE COURSE LOADING COMPLETE"
+        );
+
+        console.log(
+            "Course:",
+            state.course
+        );
+
+        console.log(
+            "Course ID:",
+            state.courseId
+        );
+
+        console.log(
+            "Modules:",
+            state.modules.length
+        );
+
+        console.log(
+            "Lessons:",
+            state.lessons.length
+        );
+
+        console.log(
+            "Sections:",
+            state.sections.length
+        );
+
+        console.log(
+            "Activities:",
+            state.activities.length
+        );
+
+        console.log(
+            "Questions:",
+            state.questions.length
+        );
+
+        console.log(
+            "Media:",
+            state.media.length
+        );
+
+        console.log(
+            "=============================================="
+        );
+
+
+    } catch (error) {
 
         console.error(
-            "EduCore: Course loading error:",
+            "=============================================="
+        );
+
+        console.error(
+            "EDUCORE INITIALIZATION ERROR"
+        );
+
+        console.error(
             error
+        );
+
+        console.error(
+            "=============================================="
         );
 
         renderCourseError();
 
-        return false;
+    } finally {
+
+        hideLoading();
 
     }
-
-
-    if (!data) {
-
-        console.error(
-            "EduCore: No course found for ID:",
-            state.courseId
-        );
-
-        renderNoCourse();
-
-        return false;
-
-    }
-
-
-    state.course =
-        data;
-
-
-    console.log(
-        "EduCore: Course loaded:",
-        state.course
-    );
-
-
-    renderCourse();
-
-
-    return true;
 
 }
 
+
+/* =====================================================
+   START
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
 
 /* =====================================================
    COURSE RENDER
