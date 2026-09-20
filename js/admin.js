@@ -1,3233 +1,6634 @@
 /* =========================================================
    EDUCORE ADMIN
+   COURSE MANAGEMENT + COURSE BUILDER
 ========================================================= */
 
-:root {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    --purple: #7c3aed;
-    --purple-dark: #6d28d9;
-    --purple-soft: #f3e8ff;
-    --purple-wash: #faf7ff;
+        "use strict";
 
-    --background: #f6f7fb;
-    --surface: #ffffff;
-    --surface-soft: #f9fafc;
 
-    --text: #171a21;
-    --text-secondary: #667085;
-    --text-muted: #98a2b3;
+        /* =====================================================
+           SUPABASE
+        ===================================================== */
 
-    --border: #e7e9ef;
+        const client =
+            window.supabaseClient ||
+            window.supabase ||
+            null;
 
-    --danger: #dc2626;
-    --danger-soft: #fef2f2;
 
-    --success: #16a34a;
-    --success-soft: #ecfdf3;
+        if (
+            !client ||
+            typeof client.from !== "function"
+        ) {
 
-    --sidebar: #11121a;
+            console.error(
+                "Supabase client is not available."
+            );
 
-    --shadow:
-        0 12px 40px rgba(16, 24, 40, 0.07);
+            return;
+        }
 
-    --shadow-small:
-        0 4px 18px rgba(16, 24, 40, 0.06);
 
-    --radius: 18px;
-    --radius-small: 12px;
+        /* =====================================================
+           STATE
+        ===================================================== */
 
-}
+        let allCourses = [];
 
+        let allCarouselItems = [];
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        let editingCourseId = null;
 
+        let courseModal = null;
 
-html {
-    scroll-behavior: smooth;
-}
+        let editingCarouselItemId = null;
 
+        let carouselModal = null;
 
-body {
 
-    min-height: 100vh;
+        let builderCourse = null;
 
-    background: var(--background);
+        let builderModules = [];
 
-    color: var(--text);
+        let selectedModule = null;
 
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+        let selectedLesson = null;
 
-}
+        let moduleModal = null;
 
+        let lessonModal = null;
 
-button,
-input,
-select,
-textarea {
+        let contentModal = null;
 
-    font: inherit;
 
-}
+        /* =====================================================
+           HELPERS
+        ===================================================== */
 
+        const $ =
+            selector =>
+                document.querySelector(selector);
 
-button {
 
-    cursor: pointer;
+        const $$ =
+            selector =>
+                document.querySelectorAll(selector);
 
-}
 
+        const escapeHTML =
+            value =>
+                String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
 
-button:disabled {
 
-    cursor: not-allowed;
+        const escapeAttribute =
+            value =>
+                escapeHTML(value);
 
-    opacity: .5;
 
-}
+        function formatDate(value) {
 
+            if (!value) return "—";
 
-.admin-hidden {
-    display: none !important;
-}
+            const date =
+                new Date(value);
 
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
 
-/* =========================================================
-   APP
-========================================================= */
+                return "—";
+            }
 
-.admin-app {
+            return date.toLocaleDateString(
+                undefined,
+                {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                }
+            );
+        }
 
-    min-height: 100vh;
 
-}
+        function showError(message) {
 
+            console.error(message);
 
-/* =========================================================
-   SIDEBAR
-========================================================= */
+            alert(message);
+        }
 
-.admin-sidebar {
 
-    position: fixed;
+        function closeModalElement(
+            modal
+        ) {
 
-    inset:
-        0 auto 0 0;
+            if (!modal) return;
 
-    width: 270px;
+            modal.classList.remove("open");
 
-    background:
-        linear-gradient(
-            180deg,
-            #151522 0%,
-            #0f1017 100%
-        );
+            setTimeout(
+                () => modal.remove(),
+                180
+            );
 
-    color: white;
+            document.body.classList.remove(
+                "modal-open"
+            );
+        }
 
-    display: flex;
 
-    flex-direction: column;
+        /* =====================================================
+           INITIALISE
+        ===================================================== */
 
-    z-index: 100;
+        init();
 
-    transition:
-        width .3s ease,
-        transform .3s ease;
 
-}
+        async function init() {
 
+            setupNavigation();
 
-.sidebar-brand {
+            setupSidebar();
 
-    min-height: 90px;
+            setupLogout();
 
-    padding:
-        22px 22px;
+            setupCourseControls();
 
-    display: flex;
+            setupCarouselControls();
 
-    align-items: center;
+            setupDashboardRetry();
 
-    gap: 12px;
+            setupBuilderControls();
 
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.07);
+            await loadAdminUser();
 
-}
+            await loadDashboard();
 
+            await loadCourses();
 
-.brand-mark {
+            await loadCarouselItems();
 
-    width: 38px;
-    height: 38px;
+            await loadBuilderCourses();
 
-    border-radius: 11px;
+        }
 
-    display: grid;
 
-    place-items: center;
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            #9b5cf6
-        );
+        function setupNavigation() {
 
-    font-size: 18px;
+            $$(".nav-item")
+                .forEach(button => {
 
-    font-weight: 800;
+                    button.addEventListener(
+                        "click",
+                        () => {
 
-    box-shadow:
-        0 8px 20px
-        rgba(124,58,237,.25);
+                            const section =
+                                button.dataset.section;
 
-}
+                            if (!section) return;
 
+                            showSection(section);
 
-.brand-copy {
+                            closeMobileSidebar();
 
-    display: flex;
+                        }
+                    );
 
-    flex-direction: column;
+                });
 
-    min-width: 0;
+        }
 
-}
 
+        function showSection(section) {
 
-.brand-copy strong {
+            $$(".nav-item")
+                .forEach(button => {
 
-    font-size: 17px;
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.section ===
+                        section
+                    );
 
-}
+                });
 
 
-.brand-copy span {
+            $$(".admin-section")
+                .forEach(element => {
 
-    margin-top: 2px;
+                    element.classList.toggle(
+                        "active",
+                        element.id ===
+                        `${section}-section`
+                    );
 
-    color:
-        rgba(255,255,255,.5);
+                });
 
-    font-size: 10px;
 
-}
+            const pageTitle =
+                $("#page-title");
 
 
-.mobile-sidebar-close {
+            const titles = {
 
-    display: none;
+                dashboard:
+                    "Dashboard",
 
-    margin-left: auto;
+                courses:
+                    "Courses",
 
-    border: 0;
+                personalise:
+                    "Personalise Course",
 
-    background: transparent;
+                carousel:
+                    "Carousel",
 
-    color: white;
+                students:
+                    "Students",
 
-    font-size: 28px;
+                settings:
+                    "Settings"
 
-}
+            };
 
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
+            if (pageTitle) {
 
-.admin-navigation {
+                pageTitle.textContent =
+                    titles[section] ||
+                    "Dashboard";
+            }
 
-    flex: 1;
 
-    padding: 22px 14px;
+            if (section === "courses") {
 
-    overflow-y: auto;
+                loadCourses();
 
-}
+            }
 
 
-.navigation-label {
+            if (section === "carousel") {
 
-    padding:
-        0 12px 10px;
+                loadCarouselItems();
 
-    color:
-        rgba(255,255,255,.35);
+            }
 
-    font-size: 9px;
 
-    font-weight: 700;
+            if (section === "personalise") {
 
-    letter-spacing: .12em;
+                loadBuilderCourses();
 
-}
+            }
 
+        }
 
-.navigation-label-spaced {
 
-    margin-top: 26px;
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
 
-}
+        function setupSidebar() {
 
+            const app =
+                $("#admin-app");
 
-.nav-item {
+            const toggle =
+                $("#sidebar-toggle");
 
-    width: 100%;
+            const close =
+                $("#mobile-sidebar-close");
 
-    min-height: 48px;
+            const overlay =
+                $("#sidebar-overlay");
 
-    margin-bottom: 4px;
 
-    border: 0;
+            toggle?.addEventListener(
+                "click",
+                () => {
 
-    border-radius: 12px;
+                    if (
+                        window.innerWidth <= 900
+                    ) {
 
-    background: transparent;
+                        app?.classList.toggle(
+                            "sidebar-open"
+                        );
 
-    color:
-        rgba(255,255,255,.62);
+                    }
 
-    display: flex;
+                }
+            );
 
-    align-items: center;
 
-    gap: 12px;
+            close?.addEventListener(
+                "click",
+                closeMobileSidebar
+            );
 
-    padding:
-        0 13px;
 
-    text-align: left;
+            overlay?.addEventListener(
+                "click",
+                closeMobileSidebar
+            );
 
-    transition:
-        background .2s ease,
-        color .2s ease,
-        transform .2s ease;
 
-}
+            window.addEventListener(
+                "resize",
+                () => {
 
+                    if (
+                        window.innerWidth > 900
+                    ) {
 
-.nav-item:hover {
+                        app?.classList.remove(
+                            "sidebar-open"
+                        );
 
-    background:
-        rgba(255,255,255,.06);
+                    }
 
-    color: white;
+                }
+            );
 
-}
+        }
 
 
-.nav-item.active {
+        function closeMobileSidebar() {
 
-    background:
-        linear-gradient(
-            90deg,
-            rgba(124,58,237,.28),
-            rgba(124,58,237,.1)
-        );
+            $("#admin-app")
+                ?.classList.remove(
+                    "sidebar-open"
+                );
 
-    color: white;
+        }
 
-}
 
+        /* =====================================================
+           LOGOUT
+        ===================================================== */
 
-.nav-icon {
+        function setupLogout() {
 
-    width: 25px;
+            $("#logout-button")
+                ?.addEventListener(
+                    "click",
+                    async () => {
 
-    display: grid;
+                        try {
 
-    place-items: center;
+                            if (
+                                typeof window.logout ===
+                                "function"
+                            ) {
 
-    color:
-        rgba(255,255,255,.55);
+                                await window.logout();
 
-    font-size: 17px;
+                                return;
+                            }
 
-}
 
+                            await client.auth.signOut();
 
-.nav-item.active .nav-icon {
+                            window.location.href =
+                                "index.html";
 
-    color:
-        #b99aff;
+                        } catch (error) {
 
-}
+                            console.error(
+                                "Logout error:",
+                                error
+                            );
 
+                        }
 
-/* =========================================================
-   SIDEBAR FOOTER
-========================================================= */
+                    }
+                );
 
-.sidebar-footer {
+        }
 
-    padding: 16px;
 
-    border-top:
-        1px solid
-        rgba(255,255,255,.07);
+        /* =====================================================
+           ADMIN USER
+        ===================================================== */
 
-}
+        async function loadAdminUser() {
 
+            try {
 
-.admin-mini-profile {
+                const {
+                    data,
+                    error
+                } =
+                    await client.auth.getUser();
 
-    display: flex;
 
-    align-items: center;
+                if (
+                    error ||
+                    !data?.user
+                ) {
 
-    gap: 10px;
+                    return;
+                }
 
-    margin-bottom: 14px;
 
-}
+                const user =
+                    data.user;
 
 
-.admin-avatar {
+                const metadata =
+                    user.user_metadata ||
+                    {};
 
-    width: 36px;
-    height: 36px;
 
-    border-radius: 50%;
+                const name =
+                    metadata.name ||
+                    metadata.full_name ||
+                    metadata.display_name ||
+                    user.email?.split("@")[0] ||
+                    "Administrator";
 
-    background:
-        var(--purple-soft);
 
-    color:
-        var(--purple);
+                const avatar =
+                    name
+                        .charAt(0)
+                        .toUpperCase();
 
-    display: grid;
 
-    place-items: center;
+                if ($("#admin-name")) {
 
-    font-weight: 700;
+                    $("#admin-name")
+                        .textContent =
+                        name;
 
-}
+                }
 
 
-.admin-mini-copy {
+                if ($("#admin-role")) {
 
-    display: flex;
+                    $("#admin-role")
+                        .textContent =
+                        "Admin";
 
-    flex-direction: column;
+                }
 
-    min-width: 0;
 
-}
+                if ($("#admin-avatar")) {
 
+                    $("#admin-avatar")
+                        .textContent =
+                        avatar;
 
-.admin-mini-copy strong {
+                }
 
-    max-width: 170px;
 
-    overflow: hidden;
+                if (
+                    $("#topbar-admin-avatar")
+                ) {
 
-    text-overflow: ellipsis;
+                    $("#topbar-admin-avatar")
+                        .textContent =
+                        avatar;
 
-    white-space: nowrap;
+                }
 
-    font-size: 12px;
+            } catch (error) {
 
-}
+                console.error(
+                    "Could not load admin:",
+                    error
+                );
 
+            }
 
-.admin-mini-copy span {
+        }
 
-    color:
-        rgba(255,255,255,.4);
 
-    font-size: 10px;
+        /* =====================================================
+           DASHBOARD
+        ===================================================== */
 
-    margin-top: 2px;
+        async function loadDashboard() {
 
-}
+            try {
 
+                await Promise.all([
 
-.logout-button {
+                    loadCourseCount(),
 
-    width: 100%;
+                    loadModuleCount(),
 
-    height: 42px;
+                    loadLessonCount(),
 
-    border:
-        1px solid
-        rgba(255,255,255,.08);
+                    loadStudentCount(),
 
-    border-radius: 10px;
+                    loadContentCounts(),
 
-    background:
-        rgba(255,255,255,.04);
+                    loadRecentActivity()
 
-    color:
-        rgba(255,255,255,.65);
+                ]);
 
-    display: flex;
+                hideDashboardError();
 
-    align-items: center;
+            } catch (error) {
 
-    gap: 10px;
+                console.error(
+                    "Dashboard error:",
+                    error
+                );
 
-    padding: 0 13px;
+                showDashboardError();
 
-}
+            }
 
+        }
 
-.logout-button:hover {
 
-    color: white;
+        async function loadCourseCount() {
 
-    background:
-        rgba(255,255,255,.08);
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("courses")
+                    .select(
+                        "id",
+                        {
+                            count: "exact",
+                            head: true
+                        }
+                    )
+                    .neq(
+                        "status",
+                        "archived"
+                    );
 
-}
 
+            if (error) throw error;
 
-/* =========================================================
-   SIDEBAR OVERLAY
-========================================================= */
 
-.sidebar-overlay {
+            if ($("#total-courses")) {
 
-    position: fixed;
+                $("#total-courses")
+                    .textContent =
+                    count ?? 0;
 
-    inset: 0;
+            }
 
-    background:
-        rgba(8,9,15,.55);
+        }
 
-    backdrop-filter:
-        blur(3px);
 
-    z-index: 90;
+        async function loadModuleCount() {
 
-    opacity: 0;
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("modules")
+                    .select(
+                        "id",
+                        {
+                            count: "exact",
+                            head: true
+                        }
+                    );
 
-    pointer-events: none;
 
-    transition: opacity .25s ease;
+            if (error) {
 
-}
+                console.warn(
+                    "Modules count:",
+                    error
+                );
 
+                if ($("#total-units")) {
 
-.sidebar-open .sidebar-overlay {
+                    $("#total-units")
+                        .textContent =
+                        "—";
 
-    opacity: 1;
+                }
 
-    pointer-events: auto;
+                return;
+            }
 
-}
 
+            if ($("#total-units")) {
 
-/* =========================================================
-   MAIN
-========================================================= */
+                $("#total-units")
+                    .textContent =
+                    count ?? 0;
 
-.admin-main {
+            }
 
-    min-height: 100vh;
+        }
 
-    margin-left: 270px;
 
-    transition:
-        margin-left .3s ease;
+        async function loadLessonCount() {
 
-}
+            const {
+                count,
+                error
+            } =
+                await client
+                    .from("lessons")
+                    .select(
+                        "id",
+                        {
+                            count: "exact",
+                            head: true
+                        }
+                    );
 
 
-.admin-topbar {
+            if (error) {
 
-    position: sticky;
+                console.warn(
+                    "Lessons count:",
+                    error
+                );
 
-    top: 0;
+                if ($("#total-lessons")) {
 
-    z-index: 50;
+                    $("#total-lessons")
+                        .textContent =
+                        "—";
 
-    min-height: 84px;
+                }
 
-    padding:
-        0 34px;
+                return;
+            }
 
-    background:
-        rgba(255,255,255,.92);
 
-    backdrop-filter:
-        blur(18px);
+            if ($("#total-lessons")) {
 
-    border-bottom:
-        1px solid
-        var(--border);
+                $("#total-lessons")
+                    .textContent =
+                    count ?? 0;
 
-    display: flex;
+            }
 
-    align-items: center;
+        }
 
-    justify-content: space-between;
 
-}
+        async function loadStudentCount() {
 
+            try {
 
-.topbar-left {
+                const {
+                    count,
+                    error
+                } =
+                    await client
+                        .from("profiles")
+                        .select(
+                            "id",
+                            {
+                                count: "exact",
+                                head: true
+                            }
+                        )
+                        .eq(
+                            "role",
+                            "student"
+                        );
 
-    display: flex;
 
-    align-items: center;
+                if (error) throw error;
 
-    gap: 14px;
 
-}
+                if ($("#total-students")) {
 
+                    $("#total-students")
+                        .textContent =
+                        count ?? 0;
 
-.sidebar-toggle {
+                }
 
-    width: 40px;
-    height: 40px;
+            } catch (error) {
 
-    border: 1px solid var(--border);
+                console.warn(
+                    "Students count:",
+                    error
+                );
 
-    border-radius: 10px;
+                if ($("#total-students")) {
 
-    background: white;
+                    $("#total-students")
+                        .textContent =
+                        "—";
 
-    color: var(--text);
+                }
 
-}
+            }
 
+        }
 
-.topbar-eyebrow {
 
-    color:
-        var(--purple);
+        async function loadContentCounts() {
 
-    font-size: 9px;
+            const published =
+                $("#published-content");
 
-    font-weight: 800;
+            const draft =
+                $("#draft-content");
 
-    letter-spacing: .14em;
 
-}
+            try {
 
+                const [
+                    publishedResult,
+                    draftResult
+                ] =
+                    await Promise.all([
 
-.topbar-left h1 {
+                        client
+                            .from("courses")
+                            .select(
+                                "id",
+                                {
+                                    count:
+                                        "exact",
+                                    head:
+                                        true
+                                }
+                            )
+                            .eq(
+                                "status",
+                                "published"
+                            ),
 
-    margin-top: 3px;
+                        client
+                            .from("courses")
+                            .select(
+                                "id",
+                                {
+                                    count:
+                                        "exact",
+                                    head:
+                                        true
+                                }
+                            )
+                            .eq(
+                                "status",
+                                "draft"
+                            )
 
-    font-size: 20px;
+                    ]);
 
-}
 
+                if (published) {
 
-.topbar-right {
+                    published.textContent =
+                        publishedResult.count ??
+                        0;
 
-    display: flex;
+                }
 
-    align-items: center;
 
-    gap: 18px;
+                if (draft) {
 
-}
+                    draft.textContent =
+                        draftResult.count ??
+                        0;
 
+                }
 
-.topbar-brand {
+            } catch (error) {
 
-    color:
-        var(--purple);
+                console.warn(
+                    "Content counts:",
+                    error
+                );
 
-    font-weight: 800;
+            }
 
-}
+        }
 
 
-.topbar-avatar {
+        async function loadRecentActivity() {
 
-    width: 38px;
-    height: 38px;
+            const list =
+                $("#activity-list");
 
-    border-radius: 50%;
+            if (!list) return;
 
-    background:
-        var(--purple-soft);
 
-    color:
-        var(--purple);
+            try {
 
-    display: grid;
+                const {
+                    data,
+                    error
+                } =
+                    await client
+                        .from("courses")
+                        .select(
+                            "id,title,status,created_at"
+                        )
+                        .order(
+                            "created_at",
+                            {
+                                ascending:
+                                    false
+                            }
+                        )
+                        .limit(6);
 
-    place-items: center;
 
-    font-weight: 700;
+                if (error) throw error;
 
-}
 
+                if (!data?.length) {
 
-/* =========================================================
-   CONTENT
-========================================================= */
+                    list.innerHTML =
+                        `<div class="activity-empty">
+                            No recent activity.
+                        </div>`;
 
-.admin-content {
+                    return;
+                }
 
-    max-width: 1600px;
 
-    margin: 0 auto;
+                list.innerHTML =
+                    data
+                        .map(course => {
 
-    padding:
-        38px 38px 70px;
+                            let action =
+                                "Course created";
 
-}
+                            if (
+                                course.status ===
+                                "published"
+                            ) {
 
+                                action =
+                                    "Course published";
 
-.admin-section {
+                            } else if (
+                                course.status ===
+                                "archived"
+                            ) {
 
-    display: none;
+                                action =
+                                    "Course archived";
 
-    animation:
-        sectionIn .28s ease;
+                            }
 
-}
 
+                            return `
+                                <div class="activity-item">
 
-.admin-section.active {
+                                    <div class="activity-icon">
+                                        ▣
+                                    </div>
 
-    display: block;
+                                    <div>
 
-}
+                                        <div class="activity-title">
+                                            ${escapeHTML(action)}
+                                        </div>
 
+                                        <div class="activity-meta">
+                                            ${escapeHTML(course.title)}
+                                            ·
+                                            ${formatDate(course.created_at)}
+                                        </div>
 
-@keyframes sectionIn {
+                                    </div>
 
-    from {
+                                </div>
+                            `;
 
-        opacity: 0;
+                        })
+                        .join("");
 
-        transform:
-            translateY(8px);
+            } catch (error) {
+
+                list.innerHTML =
+                    `<div class="activity-empty">
+                        Unable to load activity.
+                    </div>`;
+
+            }
+
+        }
+
+
+        function setupDashboardRetry() {
+
+            $("#dashboard-retry")
+                ?.addEventListener(
+                    "click",
+                    loadDashboard
+                );
+
+        }
+
+
+        function showDashboardError() {
+
+            $("#dashboard-error")
+                ?.classList.remove(
+                    "admin-hidden"
+                );
+
+        }
+
+
+        function hideDashboardError() {
+
+            $("#dashboard-error")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+        }
+
+
+        /* =====================================================
+           COURSE CONTROLS
+        ===================================================== */
+
+        function setupCourseControls() {
+
+            $("#course-search")
+                ?.addEventListener(
+                    "input",
+                    renderCourses
+                );
+
+
+            $("#course-filter")
+                ?.addEventListener(
+                    "change",
+                    renderCourses
+                );
+
+
+            $("#create-course-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openCourseModal()
+                );
+
+        }
+
+
+        /* =====================================================
+           LOAD COURSES
+        ===================================================== */
+
+        async function loadCourses() {
+
+            const list =
+                $("#courses-list");
+
+            if (!list) return;
+
+
+            list.innerHTML =
+                `<div class="courses-loading">
+                    Loading courses...
+                </div>`;
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await client
+                        .from("courses")
+                        .select(`
+                            id,
+                            title,
+                            description,
+                            category,
+                            level,
+                            language,
+                            cover_image,
+                            status,
+                            sort_order,
+                            created_at,
+                            slug,
+                            archived_at
+                        `)
+                        .order(
+                            "sort_order",
+                            {
+                                ascending: true,
+                                nullsFirst: false
+                            }
+                        )
+                        .order(
+                            "created_at",
+                            {
+                                ascending: false
+                            }
+                        );
+
+
+                if (error) throw error;
+
+
+                allCourses =
+                    data || [];
+
+
+                renderCourses();
+
+            } catch (error) {
+
+                console.error(
+                    "Could not load courses:",
+                    error
+                );
+
+
+                list.innerHTML = `
+                    <div class="courses-empty">
+
+                        <strong>
+                            Could not load courses
+                        </strong>
+
+                        <p style="margin-top:8px;">
+                            ${escapeHTML(
+                                error.message ||
+                                "Please try again."
+                            )}
+                        </p>
+
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           RENDER COURSES
+        ===================================================== */
+
+        function renderCourses() {
+
+            const list =
+                $("#courses-list");
+
+            if (!list) return;
+
+
+            const search =
+                (
+                    $("#course-search")
+                        ?.value ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            const filter =
+                $("#course-filter")
+                    ?.value ||
+                "all";
+
+
+            let courses =
+                [...allCourses];
+
+
+            if (filter !== "all") {
+
+                courses =
+                    courses.filter(
+                        course =>
+                            course.status ===
+                            filter
+                    );
+
+            }
+
+
+            if (search) {
+
+                courses =
+                    courses.filter(
+                        course =>
+                            (
+                                course.title ||
+                                ""
+                            )
+                                .toLowerCase()
+                                .includes(search) ||
+
+                            (
+                                course.description ||
+                                ""
+                            )
+                                .toLowerCase()
+                                .includes(search) ||
+
+                            (
+                                course.category ||
+                                ""
+                            )
+                                .toLowerCase()
+                                .includes(search)
+                    );
+
+            }
+
+
+            if (!courses.length) {
+
+                list.innerHTML =
+                    `<div class="courses-empty">
+                        No courses found.
+                    </div>`;
+
+                return;
+            }
+
+
+            list.innerHTML =
+                courses
+                    .map(
+                        renderCourseRow
+                    )
+                    .join("");
+
+
+            attachCourseActions();
+
+        }
+
+
+        function renderCourseRow(course) {
+
+            const image =
+                course.cover_image
+                    ? `
+                        <img
+                            src="${escapeAttribute(
+                                course.cover_image
+                            )}"
+                            alt=""
+                        >
+                    `
+                    : `
+                        <div class="course-cover-placeholder">
+                            E
+                        </div>
+                    `;
+
+
+            const status =
+                course.status ||
+                "draft";
+
+
+            return `
+                <article class="course-row">
+
+                    <div class="course-cover">
+                        ${image}
+                    </div>
+
+
+                    <div>
+
+                        <div class="course-row-title">
+                            ${escapeHTML(
+                                course.title ||
+                                "Untitled course"
+                            )}
+                        </div>
+
+                        <div class="course-row-description">
+                            ${escapeHTML(
+                                course.description ||
+                                "No description."
+                            )}
+                        </div>
+
+
+                        <div class="course-row-meta">
+
+                            ${
+                                course.category
+                                    ? `
+                                        <span class="course-badge">
+                                            ${escapeHTML(
+                                                course.category
+                                            )}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            ${
+                                course.level
+                                    ? `
+                                        <span class="course-badge">
+                                            ${escapeHTML(
+                                                course.level
+                                            )}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            <span
+                                class="course-badge ${escapeHTML(
+                                    status
+                                )}"
+                            >
+                                ${escapeHTML(
+                                    status
+                                )}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="course-actions">
+
+                        <button
+                            type="button"
+                            class="course-action-button primary"
+                            data-action="personalise"
+                            data-id="${escapeAttribute(
+                                course.id
+                            )}"
+                        >
+                            Personalise
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="course-action-button"
+                            data-action="edit"
+                            data-id="${escapeAttribute(
+                                course.id
+                            )}"
+                        >
+                            Edit
+                        </button>
+
+
+                        ${
+                            status === "published"
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="course-action-button"
+                                        data-action="unpublish"
+                                        data-id="${escapeAttribute(
+                                            course.id
+                                        )}"
+                                    >
+                                        Unpublish
+                                    </button>
+                                `
+                                : `
+                                    <button
+                                        type="button"
+                                        class="course-action-button"
+                                        data-action="publish"
+                                        data-id="${escapeAttribute(
+                                            course.id
+                                        )}"
+                                    >
+                                        Publish
+                                    </button>
+                                `
+                        }
+
+
+                        ${
+                            status !== "archived"
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="course-action-button danger"
+                                        data-action="archive"
+                                        data-id="${escapeAttribute(
+                                            course.id
+                                        )}"
+                                    >
+                                        Archive
+                                    </button>
+                                `
+                                : `
+                                    <button
+                                        type="button"
+                                        class="course-action-button"
+                                        data-action="restore"
+                                        data-id="${escapeAttribute(
+                                            course.id
+                                        )}"
+                                    >
+                                        Restore
+                                    </button>
+                                `
+                        }
+
+                    </div>
+
+                </article>
+            `;
+
+        }
+
+
+        function attachCourseActions() {
+
+            $$(".course-action-button")
+                .forEach(button => {
+
+                    button.addEventListener(
+                        "click",
+                        async () => {
+
+                            const action =
+                                button.dataset.action;
+
+                            const id =
+                                button.dataset.id;
+
+
+                            const course =
+                                allCourses.find(
+                                    item =>
+                                        String(item.id) ===
+                                        String(id)
+                                );
+
+
+                            if (!course) return;
+
+
+                            if (
+                                action ===
+                                "edit"
+                            ) {
+
+                                openCourseModal(
+                                    course
+                                );
+
+                                return;
+                            }
+
+
+                            if (
+                                action ===
+                                "personalise"
+                            ) {
+
+                                openCourseBuilder(
+                                    course.id
+                                );
+
+                                return;
+                            }
+
+
+                            if (
+                                action ===
+                                "publish"
+                            ) {
+
+                                await updateCourseStatus(
+                                    course,
+                                    "published"
+                                );
+
+                                return;
+                            }
+
+
+                            if (
+                                action ===
+                                "unpublish"
+                            ) {
+
+                                await updateCourseStatus(
+                                    course,
+                                    "draft"
+                                );
+
+                                return;
+                            }
+
+
+                            if (
+                                action ===
+                                "archive"
+                            ) {
+
+                                await updateCourseStatus(
+                                    course,
+                                    "archived"
+                                );
+
+                                return;
+                            }
+
+
+                            if (
+                                action ===
+                                "restore"
+                            ) {
+
+                                await updateCourseStatus(
+                                    course,
+                                    "draft"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                });
+
+        }
+
+
+        async function updateCourseStatus(
+            course,
+            status
+        ) {
+
+            try {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("courses")
+                        .update({
+                            status,
+                            updated_at:
+                                new Date()
+                                    .toISOString(),
+                            archived_at:
+                                status ===
+                                "archived"
+                                    ? new Date()
+                                        .toISOString()
+                                    : null
+                        })
+                        .eq(
+                            "id",
+                            course.id
+                        );
+
+
+                if (error) throw error;
+
+
+                await loadCourses();
+
+                await loadDashboard();
+
+            } catch (error) {
+
+                showError(
+                    error.message ||
+                    "Unable to update course."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           COURSE MODAL
+        ===================================================== */
+
+        function openCourseModal(
+            course = null
+        ) {
+
+            editingCourseId =
+                course?.id ||
+                null;
+
+
+            if (courseModal) {
+
+                courseModal.remove();
+
+            }
+
+
+            courseModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            courseModal.className =
+                "course-modal";
+
+
+            courseModal.innerHTML = `
+
+                <div
+                    class="course-modal-backdrop"
+                ></div>
+
+
+                <div
+                    class="course-modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                >
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                COURSE MANAGEMENT
+                            </div>
+
+                            <h2>
+                                ${
+                                    course
+                                        ? "Edit Course"
+                                        : "Create Course"
+                                }
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-course-modal"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="course-form"
+                        class="course-form"
+                        novalidate
+                    >
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Course Title *
+                            </label>
+
+                            <input
+                                id="course-title-input"
+                                type="text"
+                                maxlength="200"
+                                required
+                                value="${escapeAttribute(
+                                    course?.title ||
+                                    ""
+                                )}"
+                                placeholder="Example: English Beginner"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Description
+                            </label>
+
+                            <textarea
+                                id="course-description-input"
+                                maxlength="5000"
+                                placeholder="Describe this course."
+                            >${escapeHTML(
+                                course?.description ||
+                                ""
+                            )}</textarea>
+
+                        </div>
+
+
+                        <div class="course-form-grid">
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Category
+                                </label>
+
+                                <input
+                                    id="course-category-input"
+                                    type="text"
+                                    value="${escapeAttribute(
+                                        course?.category ||
+                                        ""
+                                    )}"
+                                    placeholder="Language"
+                                >
+
+                            </div>
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Level
+                                </label>
+
+                                <input
+                                    id="course-level-input"
+                                    type="text"
+                                    value="${escapeAttribute(
+                                        course?.level ||
+                                        ""
+                                    )}"
+                                    placeholder="A1"
+                                >
+
+                            </div>
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Language
+                                </label>
+
+                                <input
+                                    id="course-language-input"
+                                    type="text"
+                                    value="${escapeAttribute(
+                                        course?.language ||
+                                        ""
+                                    )}"
+                                    placeholder="English"
+                                >
+
+                            </div>
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Status
+                                </label>
+
+                                <select id="course-status-input">
+
+                                    <option
+                                        value="draft"
+                                        ${
+                                            (
+                                                course?.status ||
+                                                "draft"
+                                            ) === "draft"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Draft
+                                    </option>
+
+                                    <option
+                                        value="published"
+                                        ${
+                                            course?.status ===
+                                            "published"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Published
+                                    </option>
+
+                                    <option
+                                        value="archived"
+                                        ${
+                                            course?.status ===
+                                            "archived"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Archived
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Course Cover
+                            </label>
+
+                            <div class="file-drop">
+
+                                <input
+                                    id="course-cover-input"
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                >
+
+                                <strong>
+                                    Choose a course image
+                                </strong>
+
+                                <span>
+                                    PNG, JPG or WebP
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="course-form-error"
+                            class="course-form-error"
+                            hidden
+                        ></div>
+
+
+                        <div class="course-form-actions">
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="cancel-course-modal"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                                id="course-save-button"
+                            >
+                                ${
+                                    course
+                                        ? "Save Changes"
+                                        : "Create Course"
+                                }
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                courseModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    courseModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            document.body.classList.add(
+                "modal-open"
+            );
+
+
+            $("#close-course-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            courseModal
+                        )
+                );
+
+
+            $("#cancel-course-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            courseModal
+                        )
+                );
+
+
+            $(".course-modal-backdrop")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            courseModal
+                        )
+                );
+
+
+            $("#course-form")
+                ?.addEventListener(
+                    "submit",
+                    saveCourse
+                );
+
+        }
+
+
+        async function saveCourse(
+            event
+        ) {
+
+            event.preventDefault();
+
+
+            const title =
+                $("#course-title-input")
+                    ?.value
+                    .trim();
+
+
+            const description =
+                $("#course-description-input")
+                    ?.value
+                    .trim();
+
+
+            const category =
+                $("#course-category-input")
+                    ?.value
+                    .trim();
+
+
+            const level =
+                $("#course-level-input")
+                    ?.value
+                    .trim();
+
+
+            const language =
+                $("#course-language-input")
+                    ?.value
+                    .trim();
+
+
+            const status =
+                $("#course-status-input")
+                    ?.value ||
+                "draft";
+
+
+            const errorElement =
+                $("#course-form-error");
+
+
+            const saveButton =
+                $("#course-save-button");
+
+
+            if (!title) {
+
+                if (errorElement) {
+
+                    errorElement.textContent =
+                        "Course title is required.";
+
+                    errorElement.hidden =
+                        false;
+
+                }
+
+                return;
+            }
+
+
+            try {
+
+                saveButton.disabled =
+                    true;
+
+
+                let coverImage =
+                    null;
+
+
+                const file =
+                    $("#course-cover-input")
+                        ?.files?.[0];
+
+
+                if (
+                    editingCourseId
+                ) {
+
+                    const existing =
+                        allCourses.find(
+                            item =>
+                                String(item.id) ===
+                                String(
+                                    editingCourseId
+                                )
+                        );
+
+                    coverImage =
+                        existing?.cover_image ||
+                        null;
+
+                }
+
+
+                if (file) {
+
+                    coverImage =
+                        await uploadFile(
+                            file,
+                            "course-covers"
+                        );
+
+                }
+
+
+                const payload = {
+
+                    title,
+
+                    description,
+
+                    category,
+
+                    level,
+
+                    language,
+
+                    status,
+
+                    cover_image:
+                        coverImage,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                let result;
+
+
+                if (
+                    editingCourseId
+                ) {
+
+                    result =
+                        await client
+                            .from("courses")
+                            .update(payload)
+                            .eq(
+                                "id",
+                                editingCourseId
+                            )
+                            .select()
+                            .single();
+
+                } else {
+
+                    const {
+                        data: {
+                            user
+                        } =
+                            await client.auth
+                                .getUser();
+
+
+                    if (!user) {
+
+                        throw new Error(
+                            "Your session has expired."
+                        );
+
+                    }
+
+
+                    payload.teacher_id =
+                        user.id;
+
+
+                    result =
+                        await client
+                            .from("courses")
+                            .insert(
+                                payload
+                            )
+                            .select()
+                            .single();
+
+                }
+
+
+                if (result.error) {
+
+                    throw result.error;
+
+                }
+
+
+                closeModalElement(
+                    courseModal
+                );
+
+
+                await loadCourses();
+
+                await loadDashboard();
+
+            } catch (error) {
+
+                console.error(
+                    "Course save error:",
+                    error
+                );
+
+
+                if (errorElement) {
+
+                    errorElement.textContent =
+                        error.message ||
+                        "Could not save course.";
+
+                    errorElement.hidden =
+                        false;
+
+                }
+
+            } finally {
+
+                if (saveButton) {
+
+                    saveButton.disabled =
+                        false;
+
+                }
+
+            }
+
+        }
+
+
+        /* =====================================================
+           FILE UPLOAD
+        ===================================================== */
+
+        async function uploadFile(
+            file,
+            bucket,
+            folder = ""
+        ) {
+
+            const extension =
+                file.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+
+            const safeName =
+                file.name
+                    .replace(
+                        /[^a-zA-Z0-9._-]/g,
+                        "-"
+                    );
+
+
+            const path =
+                `${folder ? folder + "/" : ""}` +
+                `${Date.now()}-${crypto.randomUUID()}` +
+                `-${safeName}`;
+
+
+            const {
+                error
+            } =
+                await client.storage
+                    .from(bucket)
+                    .upload(
+                        path,
+                        file,
+                        {
+                            cacheControl:
+                                "3600",
+                            upsert:
+                                false,
+                            contentType:
+                                file.type ||
+                                `application/${extension}`
+                        }
+                    );
+
+
+            if (error) throw error;
+
+
+            const {
+                data
+            } =
+                client.storage
+                    .from(bucket)
+                    .getPublicUrl(path);
+
+
+            return data.publicUrl;
+
+        }
+
+
+        /* =====================================================
+           BUILDER
+        ===================================================== */
+
+        function setupBuilderControls() {
+
+            $("#builder-course-select")
+                ?.addEventListener(
+                    "change",
+                    async event => {
+
+                        const courseId =
+                            event.target.value;
+
+                        if (!courseId) {
+
+                            resetBuilder();
+
+                            return;
+                        }
+
+                        await openCourseBuilder(
+                            courseId
+                        );
+
+                    }
+                );
+
+
+            $("#add-module-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openModuleModal()
+                );
+
+
+            $("#edit-module-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openModuleModal(
+                            selectedModule
+                        )
+                );
+
+
+            $("#delete-module-button")
+                ?.addEventListener(
+                    "click",
+                    deleteSelectedModule
+                );
+
+
+            $("#add-lesson-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openLessonModal()
+                );
+
+
+            $("#edit-lesson-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openLessonModal(
+                            selectedLesson
+                        )
+                );
+
+
+            $("#delete-lesson-button")
+                ?.addEventListener(
+                    "click",
+                    deleteSelectedLesson
+                );
+
+
+            $("#add-content-button")
+                ?.addEventListener(
+                    "click",
+                    openContentTypeModal
+                );
+
+        }
+
+
+        async function loadBuilderCourses() {
+
+            const select =
+                $("#builder-course-select");
+
+            if (!select) return;
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await client
+                        .from("courses")
+                        .select(
+                            "id,title,status"
+                        )
+                        .neq(
+                            "status",
+                            "archived"
+                        )
+                        .order(
+                            "title",
+                            {
+                                ascending: true
+                            }
+                        );
+
+
+                if (error) throw error;
+
+
+                const current =
+                    select.value;
+
+
+                select.innerHTML =
+                    `<option value="">
+                        Select a course...
+                    </option>` +
+                    (data || [])
+                        .map(
+                            course =>
+                                `
+                                <option
+                                    value="${escapeAttribute(
+                                        course.id
+                                    )}"
+                                >
+                                    ${escapeHTML(
+                                        course.title
+                                    )}
+                                </option>
+                                `
+                        )
+                        .join("");
+
+
+                if (current) {
+
+                    select.value =
+                        current;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Builder courses:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        async function openCourseBuilder(
+            courseId
+        ) {
+
+            const course =
+                allCourses.find(
+                    item =>
+                        String(item.id) ===
+                        String(courseId)
+                );
+
+
+            if (!course) {
+
+                await loadCourses();
+
+                builderCourse =
+                    allCourses.find(
+                        item =>
+                            String(item.id) ===
+                            String(courseId)
+                    );
+
+            } else {
+
+                builderCourse =
+                    course;
+
+            }
+
+
+            if (!builderCourse) {
+
+                showError(
+                    "Course could not be loaded."
+                );
+
+                return;
+            }
+
+
+            const select =
+                $("#builder-course-select");
+
+
+            if (select) {
+
+                select.value =
+                    builderCourse.id;
+
+            }
+
+
+            await loadBuilderStructure();
+
+            showSection("personalise");
+
+        }
+
+
+        async function loadBuilderStructure() {
+
+            if (!builderCourse) return;
+
+
+            $("#course-builder")
+                ?.classList.remove(
+                    "disabled"
+                );
+
+
+            $("#add-module-button")
+                ?.removeAttribute(
+                    "disabled"
+                );
+
+
+            $("#builder-course-title")
+                &&
+                (
+                    $("#builder-course-title")
+                        .textContent =
+                        builderCourse.title
+                );
+
+
+            const summary =
+                $("#builder-course-summary");
+
+
+            if (summary) {
+
+                summary.innerHTML = `
+                    <span>
+                        ${escapeHTML(
+                            builderCourse.level ||
+                            "Course"
+                        )}
+                        ·
+                        ${escapeHTML(
+                            builderCourse.status ||
+                            "draft"
+                        )}
+                        ·
+                        Build modules, lessons and content
+                    </span>
+                `;
+
+            }
+
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("modules")
+                    .select("*")
+                    .eq(
+                        "course_id",
+                        builderCourse.id
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    "Could not load modules:",
+                    error
+                );
+
+
+                $("#builder-tree").innerHTML =
+                    `<div class="builder-empty">
+                        ${escapeHTML(
+                            error.message
+                        )}
+                    </div>`;
+
+                return;
+
+            }
+
+
+            builderModules =
+                data || [];
+
+
+            for (
+                const module
+                of builderModules
+            ) {
+
+                await loadModuleLessons(
+                    module
+                );
+
+            }
+
+
+            selectedModule =
+                null;
+
+            selectedLesson =
+                null;
+
+
+            renderBuilderTree();
+
+            showBuilderWelcome();
+
+        }
+
+
+        async function loadModuleLessons(
+            module
+        ) {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("lessons")
+                    .select("*")
+                    .eq(
+                        "module_id",
+                        module.id
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    "Lessons:",
+                    error
+                );
+
+                module.lessons = [];
+
+                return;
+
+            }
+
+
+            module.lessons =
+                data || [];
+
+
+            for (
+                const lesson
+                of module.lessons
+            ) {
+
+                await loadLessonContent(
+                    lesson
+                );
+
+            }
+
+        }
+
+
+        async function loadLessonContent(
+            lesson
+        ) {
+
+            const {
+                data,
+                error
+            } =
+                await client
+                    .from("content")
+                    .select("*")
+                    .eq(
+                        "lesson_id",
+                        lesson.id
+                    )
+                    .order(
+                        "sort_order",
+                        {
+                            ascending: true
+                        }
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    "Content:",
+                    error
+                );
+
+                lesson.content =
+                    [];
+
+                return;
+
+            }
+
+
+            lesson.content =
+                data || [];
+
+        }
+
+
+        function renderBuilderTree() {
+
+            const tree =
+                $("#builder-tree");
+
+            if (!tree) return;
+
+
+            if (!builderModules.length) {
+
+                tree.innerHTML =
+                    `<div class="builder-empty">
+                        No modules yet.<br>
+                        Create your first module.
+                    </div>`;
+
+                return;
+            }
+
+
+            tree.innerHTML =
+                builderModules
+                    .map(
+                        (module, moduleIndex) => {
+
+                            const active =
+                                selectedModule &&
+                                String(
+                                    selectedModule.id
+                                ) ===
+                                String(
+                                    module.id
+                                );
+
+
+                            return `
+                                <div class="tree-module">
+
+                                    <div
+                                        class="
+                                            tree-module-header
+                                            ${
+                                                active
+                                                    ? "active"
+                                                    : ""
+                                            }
+                                        "
+                                        data-module-id="${escapeAttribute(
+                                            module.id
+                                        )}"
+                                    >
+
+                                        <span class="tree-module-toggle">
+                                            ▾
+                                        </span>
+
+                                        <span class="tree-module-title">
+                                            ${escapeHTML(
+                                                module.title
+                                            )}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            class="tree-module-menu"
+                                            data-module-edit="${escapeAttribute(
+                                                module.id
+                                            )}"
+                                            aria-label="Edit module"
+                                        >
+                                            ⋯
+                                        </button>
+
+                                    </div>
+
+
+                                    <div class="tree-lessons">
+
+                                        ${
+                                            module.lessons?.length
+                                                ? module.lessons
+                                                    .map(
+                                                        (
+                                                            lesson,
+                                                            lessonIndex
+                                                        ) =>
+                                                            `
+                                                            <button
+                                                                type="button"
+                                                                class="
+                                                                    tree-lesson
+                                                                    ${
+                                                                        selectedLesson &&
+                                                                        String(
+                                                                            selectedLesson.id
+                                                                        ) ===
+                                                                        String(
+                                                                            lesson.id
+                                                                        )
+                                                                            ? "active"
+                                                                            : ""
+                                                                    }
+                                                                "
+                                                                data-lesson-id="${escapeAttribute(
+                                                                    lesson.id
+                                                                )}"
+                                                                data-module-id="${escapeAttribute(
+                                                                    module.id
+                                                                )}"
+                                                            >
+
+                                                                ${escapeHTML(
+                                                                    lesson.title
+                                                                )}
+
+                                                                <span class="tree-lesson-count">
+                                                                    ${
+                                                                        lesson.content?.length ||
+                                                                        0
+                                                                    }
+                                                                </span>
+
+                                                            </button>
+                                                            `
+                                                    )
+                                                    .join("")
+                                                : `
+                                                    <div
+                                                        style="
+                                                            padding:8px;
+                                                            color:#98a2b3;
+                                                            font-size:9px;
+                                                        "
+                                                    >
+                                                        No lessons
+                                                    </div>
+                                                `
+                                        }
+
+                                    </div>
+
+                                </div>
+                            `;
+
+                        }
+                    )
+                    .join("");
+
+
+            $$(".tree-module-header")
+                .forEach(
+                    element => {
+
+                        element.addEventListener(
+                            "click",
+                            event => {
+
+                                if (
+                                    event.target.closest(
+                                        "[data-module-edit]"
+                                    )
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                const module =
+                                    builderModules.find(
+                                        item =>
+                                            String(
+                                                item.id
+                                            ) ===
+                                            String(
+                                                element.dataset.moduleId
+                                            )
+                                    );
+
+
+                                if (!module) return;
+
+
+                                selectedModule =
+                                    module;
+
+                                selectedLesson =
+                                    null;
+
+                                renderBuilderTree();
+
+                                renderModuleEditor();
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            $$("[data-module-edit]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            event => {
+
+                                event.stopPropagation();
+
+                                const module =
+                                    builderModules.find(
+                                        item =>
+                                            String(
+                                                item.id
+                                            ) ===
+                                            String(
+                                                button.dataset.moduleEdit
+                                            )
+                                    );
+
+
+                                if (module) {
+
+                                    openModuleModal(
+                                        module
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            $$(".tree-lesson")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const module =
+                                    builderModules.find(
+                                        item =>
+                                            String(
+                                                item.id
+                                            ) ===
+                                            String(
+                                                button.dataset.moduleId
+                                            )
+                                    );
+
+
+                                const lesson =
+                                    module?.lessons?.find(
+                                        item =>
+                                            String(
+                                                item.id
+                                            ) ===
+                                            String(
+                                                button.dataset.lessonId
+                                            )
+                                    );
+
+
+                                if (
+                                    !module ||
+                                    !lesson
+                                ) return;
+
+
+                                selectedModule =
+                                    module;
+
+                                selectedLesson =
+                                    lesson;
+
+                                renderBuilderTree();
+
+                                renderLessonEditor();
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        function showBuilderWelcome() {
+
+            $("#builder-welcome")
+                ?.classList.remove(
+                    "admin-hidden"
+                );
+
+            $("#module-editor")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+            $("#lesson-editor")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+        }
+
+
+        function renderModuleEditor() {
+
+            if (!selectedModule) return;
+
+
+            $("#builder-welcome")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+
+            $("#lesson-editor")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+
+            $("#module-editor")
+                ?.classList.remove(
+                    "admin-hidden"
+                );
+
+
+            $("#module-editor-title")
+                &&
+                (
+                    $("#module-editor-title")
+                        .textContent =
+                        selectedModule.title
+                );
+
+
+            const list =
+                $("#lesson-list");
+
+
+            if (!list) return;
+
+
+            if (
+                !selectedModule.lessons?.length
+            ) {
+
+                list.innerHTML =
+                    `<div class="content-empty">
+                        This module has no lessons yet.
+                    </div>`;
+
+                return;
+
+            }
+
+
+            list.innerHTML =
+                selectedModule.lessons
+                    .map(
+                        (
+                            lesson,
+                            index
+                        ) =>
+                            `
+                            <article
+                                class="
+                                    lesson-card
+                                    ${
+                                        selectedLesson &&
+                                        String(
+                                            selectedLesson.id
+                                        ) ===
+                                        String(
+                                            lesson.id
+                                        )
+                                            ? "active"
+                                            : ""
+                                    }
+                                "
+                                data-editor-lesson="${escapeAttribute(
+                                    lesson.id
+                                )}"
+                            >
+
+                                <div class="lesson-number">
+                                    ${index + 1}
+                                </div>
+
+                                <div class="lesson-card-content">
+
+                                    <div class="lesson-card-title">
+                                        ${escapeHTML(
+                                            lesson.title
+                                        )}
+                                    </div>
+
+                                    <div class="lesson-card-description">
+                                        ${
+                                            escapeHTML(
+                                                lesson.description ||
+                                                "No description."
+                                            )
+                                        }
+                                        ·
+                                        ${
+                                            lesson.content?.length ||
+                                            0
+                                        }
+                                        content blocks
+                                    </div>
+
+                                </div>
+
+                                <div class="lesson-card-arrow">
+                                    →
+                                </div>
+
+                            </article>
+                            `
+                    )
+                    .join("");
+
+
+            $$("[data-editor-lesson]")
+                .forEach(
+                    element => {
+
+                        element.addEventListener(
+                            "click",
+                            () => {
+
+                                const lesson =
+                                    selectedModule
+                                        .lessons
+                                        .find(
+                                            item =>
+                                                String(
+                                                    item.id
+                                                ) ===
+                                                String(
+                                                    element.dataset
+                                                        .editorLesson
+                                                )
+                                        );
+
+
+                                if (!lesson) return;
+
+
+                                selectedLesson =
+                                    lesson;
+
+                                renderBuilderTree();
+
+                                renderLessonEditor();
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        function renderLessonEditor() {
+
+            if (!selectedLesson) return;
+
+
+            $("#builder-welcome")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+
+            $("#module-editor")
+                ?.classList.add(
+                    "admin-hidden"
+                );
+
+
+            $("#lesson-editor")
+                ?.classList.remove(
+                    "admin-hidden"
+                );
+
+
+            $("#lesson-editor-title")
+                &&
+                (
+                    $("#lesson-editor-title")
+                        .textContent =
+                        selectedLesson.title
+                );
+
+
+            $("#lesson-editor-description")
+                &&
+                (
+                    $("#lesson-editor-description")
+                        .textContent =
+                        selectedLesson.description ||
+                        "Build this lesson using learning content blocks."
+                );
+
+
+            renderContentList();
+
+        }
+
+
+        /* =====================================================
+           MODULE MODAL
+        ===================================================== */
+
+        function openModuleModal(
+            module = null
+        ) {
+
+            if (!builderCourse) {
+
+                showError(
+                    "Select a course first."
+                );
+
+                return;
+            }
+
+
+            if (moduleModal) {
+
+                moduleModal.remove();
+
+            }
+
+
+            moduleModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            moduleModal.className =
+                "course-modal";
+
+
+            moduleModal.innerHTML = `
+
+                <div class="course-modal-backdrop"></div>
+
+
+                <div class="course-modal-dialog">
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                COURSE STRUCTURE
+                            </div>
+
+                            <h2>
+                                ${
+                                    module
+                                        ? "Edit Module"
+                                        : "Create Module"
+                                }
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-module-modal"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="module-form"
+                        class="course-form"
+                    >
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Module Title *
+                            </label>
+
+                            <input
+                                id="module-title-input"
+                                type="text"
+                                required
+                                maxlength="200"
+                                value="${escapeAttribute(
+                                    module?.title ||
+                                    ""
+                                )}"
+                                placeholder="Example: Getting Started"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Module Description
+                            </label>
+
+                            <textarea
+                                id="module-description-input"
+                                maxlength="2000"
+                                placeholder="Describe what students will learn in this module."
+                            >${escapeHTML(
+                                module?.description ||
+                                ""
+                            )}</textarea>
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Order
+                            </label>
+
+                            <input
+                                id="module-order-input"
+                                type="number"
+                                min="0"
+                                value="${escapeAttribute(
+                                    module?.sort_order ??
+                                    builderModules.length
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div
+                            id="module-form-error"
+                            class="course-form-error"
+                            hidden
+                        ></div>
+
+
+                        <div class="course-form-actions">
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="cancel-module-modal"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+                                ${
+                                    module
+                                        ? "Save Module"
+                                        : "Create Module"
+                                }
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                moduleModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    moduleModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            $("#close-module-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            moduleModal
+                        )
+                );
+
+
+            $("#cancel-module-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            moduleModal
+                        )
+                );
+
+
+            moduleModal
+                .querySelector(
+                    ".course-modal-backdrop"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            moduleModal
+                        )
+                );
+
+
+            $("#module-form")
+                ?.addEventListener(
+                    "submit",
+                    event =>
+                        saveModule(
+                            event,
+                            module
+                        )
+                );
+
+        }
+
+
+        async function saveModule(
+            event,
+            module
+        ) {
+
+            event.preventDefault();
+
+
+            const title =
+                $("#module-title-input")
+                    ?.value
+                    .trim();
+
+
+            const description =
+                $("#module-description-input")
+                    ?.value
+                    .trim();
+
+
+            const sortOrder =
+                Number(
+                    $("#module-order-input")
+                        ?.value ||
+                    0
+                );
+
+
+            const errorElement =
+                $("#module-form-error");
+
+
+            if (!title) {
+
+                errorElement.textContent =
+                    "Module title is required.";
+
+                errorElement.hidden =
+                    false;
+
+                return;
+
+            }
+
+
+            try {
+
+                const payload = {
+
+                    title,
+
+                    description,
+
+                    sort_order:
+                        Number.isFinite(
+                            sortOrder
+                        )
+                            ? sortOrder
+                            : 0,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                let result;
+
+
+                if (module) {
+
+                    result =
+                        await client
+                            .from("modules")
+                            .update(
+                                payload
+                            )
+                            .eq(
+                                "id",
+                                module.id
+                            )
+                            .select()
+                            .single();
+
+                } else {
+
+                    result =
+                        await client
+                            .from("modules")
+                            .insert({
+
+                                ...payload,
+
+                                course_id:
+                                    builderCourse.id
+
+                            })
+                            .select()
+                            .single();
+
+                }
+
+
+                if (result.error) {
+
+                    throw result.error;
+
+                }
+
+
+                closeModalElement(
+                    moduleModal
+                );
+
+
+                await loadBuilderStructure();
+
+            } catch (error) {
+
+                console.error(
+                    "Module save:",
+                    error
+                );
+
+
+                errorElement.textContent =
+                    error.message ||
+                    "Could not save module.";
+
+                errorElement.hidden =
+                    false;
+
+            }
+
+        }
+
+
+        async function deleteSelectedModule() {
+
+            if (!selectedModule) return;
+
+
+            const confirmed =
+                confirm(
+                    `Delete "${selectedModule.title}" and all its lessons and content?`
+                );
+
+
+            if (!confirmed) return;
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("modules")
+                        .delete()
+                        .eq(
+                            "id",
+                            selectedModule.id
+                        );
+
+
+                if (error) throw error;
+
+
+                selectedModule =
+                    null;
+
+                selectedLesson =
+                    null;
+
+
+                await loadBuilderStructure();
+
+
+            } catch (error) {
+
+                showError(
+                    error.message ||
+                    "Could not delete module."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           LESSON MODAL
+        ===================================================== */
+
+        function openLessonModal(
+            lesson = null
+        ) {
+
+            if (!selectedModule) {
+
+                showError(
+                    "Select a module first."
+                );
+
+                return;
+            }
+
+
+            if (lessonModal) {
+
+                lessonModal.remove();
+
+            }
+
+
+            lessonModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            lessonModal.className =
+                "course-modal";
+
+
+            lessonModal.innerHTML = `
+
+                <div class="course-modal-backdrop"></div>
+
+
+                <div class="course-modal-dialog">
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                LESSON
+                            </div>
+
+                            <h2>
+                                ${
+                                    lesson
+                                        ? "Edit Lesson"
+                                        : "Create Lesson"
+                                }
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-lesson-modal"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="lesson-form"
+                        class="course-form"
+                    >
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Lesson Title *
+                            </label>
+
+                            <input
+                                id="lesson-title-input"
+                                type="text"
+                                maxlength="200"
+                                required
+                                value="${escapeAttribute(
+                                    lesson?.title ||
+                                    ""
+                                )}"
+                                placeholder="Example: Introducing Yourself"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Lesson Description
+                            </label>
+
+                            <textarea
+                                id="lesson-description-input"
+                                maxlength="3000"
+                                placeholder="Explain what this lesson covers."
+                            >${escapeHTML(
+                                lesson?.description ||
+                                ""
+                            )}</textarea>
+
+                        </div>
+
+
+                        <div class="course-form-grid">
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Order
+                                </label>
+
+                                <input
+                                    id="lesson-order-input"
+                                    type="number"
+                                    min="0"
+                                    value="${escapeAttribute(
+                                        lesson?.sort_order ??
+                                        (
+                                            selectedModule
+                                                .lessons
+                                                ?.length ||
+                                            0
+                                        )
+                                    )}"
+                                >
+
+                            </div>
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Status
+                                </label>
+
+                                <select id="lesson-status-input">
+
+                                    <option
+                                        value="draft"
+                                        ${
+                                            (
+                                                lesson?.status ||
+                                                "draft"
+                                            ) ===
+                                            "draft"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Draft
+                                    </option>
+
+                                    <option
+                                        value="published"
+                                        ${
+                                            lesson?.status ===
+                                            "published"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Published
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="lesson-form-error"
+                            class="course-form-error"
+                            hidden
+                        ></div>
+
+
+                        <div class="course-form-actions">
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="cancel-lesson-modal"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+                                ${
+                                    lesson
+                                        ? "Save Lesson"
+                                        : "Create Lesson"
+                                }
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                lessonModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    lessonModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            $("#close-lesson-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            lessonModal
+                        )
+                );
+
+
+            $("#cancel-lesson-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            lessonModal
+                        )
+                );
+
+
+            lessonModal
+                .querySelector(
+                    ".course-modal-backdrop"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            lessonModal
+                        )
+                );
+
+
+            $("#lesson-form")
+                ?.addEventListener(
+                    "submit",
+                    event =>
+                        saveLesson(
+                            event,
+                            lesson
+                        )
+                );
+
+        }
+
+
+        async function saveLesson(
+            event,
+            lesson
+        ) {
+
+            event.preventDefault();
+
+
+            const title =
+                $("#lesson-title-input")
+                    ?.value
+                    .trim();
+
+
+            const description =
+                $("#lesson-description-input")
+                    ?.value
+                    .trim();
+
+
+            const sortOrder =
+                Number(
+                    $("#lesson-order-input")
+                        ?.value ||
+                    0
+                );
+
+
+            const status =
+                $("#lesson-status-input")
+                    ?.value ||
+                "draft";
+
+
+            const errorElement =
+                $("#lesson-form-error");
+
+
+            if (!title) {
+
+                errorElement.textContent =
+                    "Lesson title is required.";
+
+                errorElement.hidden =
+                    false;
+
+                return;
+
+            }
+
+
+            try {
+
+                const payload = {
+
+                    title,
+
+                    description,
+
+                    sort_order:
+                        Number.isFinite(
+                            sortOrder
+                        )
+                            ? sortOrder
+                            : 0,
+
+                    status,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                let result;
+
+
+                if (lesson) {
+
+                    result =
+                        await client
+                            .from("lessons")
+                            .update(
+                                payload
+                            )
+                            .eq(
+                                "id",
+                                lesson.id
+                            )
+                            .select()
+                            .single();
+
+                } else {
+
+                    result =
+                        await client
+                            .from("lessons")
+                            .insert({
+
+                                ...payload,
+
+                                module_id:
+                                    selectedModule.id
+
+                            })
+                            .select()
+                            .single();
+
+                }
+
+
+                if (result.error) {
+
+                    throw result.error;
+
+                }
+
+
+                closeModalElement(
+                    lessonModal
+                );
+
+
+                await loadBuilderStructure();
+
+
+                selectedModule =
+                    builderModules.find(
+                        item =>
+                            String(item.id) ===
+                            String(
+                                selectedModule?.id
+                            )
+                    ) ||
+                    builderModules[0] ||
+                    null;
+
+
+            } catch (error) {
+
+                console.error(
+                    "Lesson save:",
+                    error
+                );
+
+
+                errorElement.textContent =
+                    error.message ||
+                    "Could not save lesson.";
+
+                errorElement.hidden =
+                    false;
+
+            }
+
+        }
+
+
+        async function deleteSelectedLesson() {
+
+            if (!selectedLesson) return;
+
+
+            const confirmed =
+                confirm(
+                    `Delete "${selectedLesson.title}" and all its content?`
+                );
+
+
+            if (!confirmed) return;
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("lessons")
+                        .delete()
+                        .eq(
+                            "id",
+                            selectedLesson.id
+                        );
+
+
+                if (error) throw error;
+
+
+                selectedLesson =
+                    null;
+
+
+                await loadBuilderStructure();
+
+            } catch (error) {
+
+                showError(
+                    error.message ||
+                    "Could not delete lesson."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CONTENT TYPE MODAL
+        ===================================================== */
+
+        function openContentTypeModal() {
+
+            if (!selectedLesson) {
+
+                showError(
+                    "Select a lesson first."
+                );
+
+                return;
+            }
+
+
+            if (contentModal) {
+
+                contentModal.remove();
+
+            }
+
+
+            contentModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            contentModal.className =
+                "course-modal";
+
+
+            const types = [
+
+                [
+                    "text",
+                    "T",
+                    "Text",
+                    "Reading, explanations and instructions."
+                ],
+
+                [
+                    "image",
+                    "▧",
+                    "Image",
+                    "Visual learning material."
+                ],
+
+                [
+                    "audio",
+                    "♫",
+                    "Audio",
+                    "Listening and pronunciation."
+                ],
+
+                [
+                    "video",
+                    "▶",
+                    "Video",
+                    "Video lessons and demonstrations."
+                ],
+
+                [
+                    "pdf",
+                    "▤",
+                    "PDF",
+                    "Documents and downloadable resources."
+                ],
+
+                [
+                    "exercise",
+                    "✓",
+                    "Exercise",
+                    "Practice activities."
+                ],
+
+                [
+                    "quiz",
+                    "?",
+                    "Quiz",
+                    "Questions and assessment."
+                ],
+
+                [
+                    "ai",
+                    "✦",
+                    "AI Interaction",
+                    "AI-powered learning activity."
+                ]
+
+            ];
+
+
+            contentModal.innerHTML = `
+
+                <div class="course-modal-backdrop"></div>
+
+
+                <div class="course-modal-dialog">
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                LESSON BUILDER
+                            </div>
+
+                            <h2>
+                                Add Content
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-content-type-modal"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <div class="course-form">
+
+                        <p
+                            style="
+                                color:#667085;
+                                font-size:11px;
+                                line-height:1.6;
+                                margin-bottom:18px;
+                            "
+                        >
+                            Choose the type of learning block
+                            you want to add to this lesson.
+                        </p>
+
+
+                        <div class="content-type-grid">
+
+                            ${
+                                types
+                                    .map(
+                                        type =>
+                                            `
+                                            <button
+                                                type="button"
+                                                class="content-type-option"
+                                                data-content-type="${type[0]}"
+                                            >
+
+                                                <div
+                                                    class="content-type-option-icon"
+                                                >
+                                                    ${type[1]}
+                                                </div>
+
+                                                <strong>
+                                                    ${type[2]}
+                                                </strong>
+
+                                                <span>
+                                                    ${type[3]}
+                                                </span>
+
+                                            </button>
+                                            `
+                                    )
+                                    .join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                contentModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    contentModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            $("#close-content-type-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            contentModal
+                        )
+                );
+
+
+            contentModal
+                .querySelector(
+                    ".course-modal-backdrop"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            contentModal
+                        )
+                );
+
+
+            $$("[data-content-type]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const type =
+                                    button.dataset
+                                        .contentType;
+
+                                closeModalElement(
+                                    contentModal
+                                );
+
+                                openContentEditor(
+                                    type
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           CONTENT EDITOR
+        ===================================================== */
+
+        function openContentEditor(
+            type,
+            content = null
+        ) {
+
+            const labels = {
+
+                text:
+                    [
+                        "Text",
+                        "Create written learning material."
+                    ],
+
+                image:
+                    [
+                        "Image",
+                        "Upload an image for the lesson."
+                    ],
+
+                audio:
+                    [
+                        "Audio",
+                        "Upload an audio recording."
+                    ],
+
+                video:
+                    [
+                        "Video",
+                        "Upload a video lesson."
+                    ],
+
+                pdf:
+                    [
+                        "PDF",
+                        "Upload a PDF resource."
+                    ],
+
+                exercise:
+                    [
+                        "Exercise",
+                        "Create a practice activity."
+                    ],
+
+                quiz:
+                    [
+                        "Quiz",
+                        "Create a structured quiz."
+                    ],
+
+                ai:
+                    [
+                        "AI Interaction",
+                        "Configure an AI-powered learning activity."
+                    ]
+
+            };
+
+
+            const label =
+                labels[type] ||
+                ["Content", "Learning content."];
+
+
+            const body =
+                content?.body ||
+                "";
+
+
+            const metadata =
+                content?.metadata ||
+                {};
+
+
+            if (contentModal) {
+
+                contentModal.remove();
+
+            }
+
+
+            contentModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            contentModal.className =
+                "course-modal";
+
+
+            contentModal.innerHTML = `
+
+                <div class="course-modal-backdrop"></div>
+
+
+                <div class="course-modal-dialog">
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                ${escapeHTML(
+                                    label[0]
+                                )}
+                            </div>
+
+                            <h2>
+                                ${
+                                    content
+                                        ? "Edit Content"
+                                        : "Add Content"
+                                }
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-content-editor"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="content-editor-form"
+                        class="course-form"
+                    >
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Title
+                            </label>
+
+                            <input
+                                id="content-title-input"
+                                type="text"
+                                maxlength="200"
+                                value="${escapeAttribute(
+                                    content?.title ||
+                                    ""
+                                )}"
+                                placeholder="${escapeAttribute(
+                                    label[0]
+                                )}"
+                            >
+
+                        </div>
+
+
+                        ${
+                            type === "text"
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Content *
+                                        </label>
+
+                                        <textarea
+                                            id="content-body-input"
+                                            required
+                                            style="min-height:220px;"
+                                            placeholder="Write the learning content here..."
+                                        >${escapeHTML(
+                                            body
+                                        )}</textarea>
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            type === "exercise"
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Instructions *
+                                        </label>
+
+                                        <textarea
+                                            id="content-body-input"
+                                            required
+                                            style="min-height:150px;"
+                                            placeholder="Describe the activity..."
+                                        >${escapeHTML(
+                                            body
+                                        )}</textarea>
+
+                                    </div>
+
+                                    <div class="course-form-grid">
+
+                                        <div class="course-form-field">
+
+                                            <label>
+                                                Expected Answer
+                                            </label>
+
+                                            <input
+                                                id="exercise-answer-input"
+                                                value="${escapeAttribute(
+                                                    metadata.answer ||
+                                                    ""
+                                                )}"
+                                                placeholder="Optional"
+                                            >
+
+                                        </div>
+
+                                        <div class="course-form-field">
+
+                                            <label>
+                                                Hint
+                                            </label>
+
+                                            <input
+                                                id="exercise-hint-input"
+                                                value="${escapeAttribute(
+                                                    metadata.hint ||
+                                                    ""
+                                                )}"
+                                                placeholder="Optional"
+                                            >
+
+                                        </div>
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            type === "quiz"
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Question *
+                                        </label>
+
+                                        <textarea
+                                            id="content-body-input"
+                                            required
+                                            style="min-height:130px;"
+                                            placeholder="Write the quiz question..."
+                                        >${escapeHTML(
+                                            body
+                                        )}</textarea>
+
+                                    </div>
+
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Options
+                                        </label>
+
+                                        <textarea
+                                            id="quiz-options-input"
+                                            style="min-height:100px;"
+                                            placeholder="One option per line"
+                                        >${escapeHTML(
+                                            Array.isArray(
+                                                metadata.options
+                                            )
+                                                ? metadata.options.join(
+                                                    "\n"
+                                                )
+                                                : ""
+                                        )}</textarea>
+
+                                    </div>
+
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Correct Answer
+                                        </label>
+
+                                        <input
+                                            id="quiz-answer-input"
+                                            value="${escapeAttribute(
+                                                metadata.answer ||
+                                                ""
+                                            )}"
+                                            placeholder="Enter the correct option"
+                                        >
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            type === "ai"
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            AI Instructions *
+                                        </label>
+
+                                        <textarea
+                                            id="content-body-input"
+                                            required
+                                            style="min-height:170px;"
+                                            placeholder="Tell the AI what the student should practise..."
+                                        >${escapeHTML(
+                                            body
+                                        )}</textarea>
+
+                                    </div>
+
+                                    <div class="course-form-grid">
+
+                                        <div class="course-form-field">
+
+                                            <label>
+                                                AI Mode
+                                            </label>
+
+                                            <select id="ai-mode-input">
+
+                                                <option
+                                                    value="conversation"
+                                                    ${
+                                                        (
+                                                            metadata.mode ||
+                                                            "conversation"
+                                                        ) ===
+                                                        "conversation"
+                                                            ? "selected"
+                                                            : ""
+                                                    }
+                                                >
+                                                    Conversation
+                                                </option>
+
+                                                <option
+                                                    value="speaking"
+                                                    ${
+                                                        metadata.mode ===
+                                                        "speaking"
+                                                            ? "selected"
+                                                            : ""
+                                                    }
+                                                >
+                                                    Speaking
+                                                </option>
+
+                                                <option
+                                                    value="roleplay"
+                                                    ${
+                                                        metadata.mode ===
+                                                        "roleplay"
+                                                            ? "selected"
+                                                            : ""
+                                                    }
+                                                >
+                                                    Role Play
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                        <div class="course-form-field">
+
+                                            <label>
+                                                Objective
+                                            </label>
+
+                                            <input
+                                                id="ai-objective-input"
+                                                value="${escapeAttribute(
+                                                    metadata.objective ||
+                                                    ""
+                                                )}"
+                                                placeholder="What should the student achieve?"
+                                            >
+
+                                        </div>
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            (
+                                type === "image" ||
+                                type === "audio" ||
+                                type === "video" ||
+                                type === "pdf"
+                            )
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            File *
+                                        </label>
+
+                                        <div class="file-drop">
+
+                                            <input
+                                                id="content-file-input"
+                                                type="file"
+                                                accept="${
+                                                    type ===
+                                                    "image"
+                                                        ? "image/*"
+                                                        :
+                                                    type ===
+                                                    "audio"
+                                                        ? "audio/*"
+                                                        :
+                                                    type ===
+                                                    "video"
+                                                        ? "video/*"
+                                                        :
+                                                        "application/pdf"
+                                                }"
+                                            >
+
+                                            <strong>
+                                                ${
+                                                    content
+                                                        ? "Choose a replacement file"
+                                                        : "Choose file"
+                                                }
+                                            </strong>
+
+                                            <span>
+                                                ${escapeHTML(
+                                                    label[1]
+                                                )}
+                                            </span>
+
+                                        </div>
+
+                                        ${
+                                            content?.media_url
+                                                ? `
+                                                    <div
+                                                        style="
+                                                            margin-top:9px;
+                                                            color:#667085;
+                                                            font-size:9px;
+                                                            word-break:break-all;
+                                                        "
+                                                    >
+                                                        Existing:
+                                                        ${escapeHTML(
+                                                            content.media_url
+                                                        )}
+                                                    </div>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            (
+                                type === "image" ||
+                                type === "audio" ||
+                                type === "video" ||
+                                type === "pdf"
+                            )
+                                ? `
+                                    <div class="course-form-field">
+
+                                        <label>
+                                            Description
+                                        </label>
+
+                                        <textarea
+                                            id="content-body-input"
+                                            placeholder="Optional description..."
+                                        >${escapeHTML(
+                                            body
+                                        )}</textarea>
+
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            type === "text" ||
+                            type === "exercise" ||
+                            type === "quiz" ||
+                            type === "ai"
+                                ? ""
+                                : ""
+                        }
+
+
+                        <div
+                            id="content-form-error"
+                            class="course-form-error"
+                            hidden
+                        ></div>
+
+
+                        <div class="course-form-actions">
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="cancel-content-editor"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                                id="content-save-button"
+                            >
+                                ${
+                                    content
+                                        ? "Save Changes"
+                                        : "Add Content"
+                                }
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                contentModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    contentModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            $("#close-content-editor")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            contentModal
+                        )
+                );
+
+
+            $("#cancel-content-editor")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            contentModal
+                        )
+                );
+
+
+            contentModal
+                .querySelector(
+                    ".course-modal-backdrop"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            contentModal
+                        )
+                );
+
+
+            $("#content-editor-form")
+                ?.addEventListener(
+                    "submit",
+                    event =>
+                        saveContent(
+                            event,
+                            type,
+                            content
+                        )
+                );
+
+        }
+
+
+        /* =====================================================
+           SAVE CONTENT
+        ===================================================== */
+
+        async function saveContent(
+            event,
+            type,
+            existingContent
+        ) {
+
+            event.preventDefault();
+
+
+            const errorElement =
+                $("#content-form-error");
+
+
+            const saveButton =
+                $("#content-save-button");
+
+
+            try {
+
+                saveButton.disabled =
+                    true;
+
+
+                const title =
+                    $("#content-title-input")
+                        ?.value
+                        .trim() ||
+                    "";
+
+
+                const body =
+                    $("#content-body-input")
+                        ?.value ||
+                    "";
+
+
+                let mediaUrl =
+                    existingContent?.media_url ||
+                    null;
+
+
+                let metadata =
+                    {
+                        ...(existingContent?.metadata ||
+                            {})
+                    };
+
+
+                if (
+                    type === "exercise"
+                ) {
+
+                    metadata.answer =
+                        $("#exercise-answer-input")
+                            ?.value
+                            .trim() ||
+                        "";
+
+                    metadata.hint =
+                        $("#exercise-hint-input")
+                            ?.value
+                            .trim() ||
+                        "";
+
+                }
+
+
+                if (
+                    type === "quiz"
+                ) {
+
+                    metadata.options =
+                        (
+                            $("#quiz-options-input")
+                                ?.value ||
+                            ""
+                        )
+                            .split("\n")
+                            .map(
+                                value =>
+                                    value.trim()
+                            )
+                            .filter(Boolean);
+
+
+                    metadata.answer =
+                        $("#quiz-answer-input")
+                            ?.value
+                            .trim() ||
+                        "";
+
+                }
+
+
+                if (
+                    type === "ai"
+                ) {
+
+                    metadata.mode =
+                        $("#ai-mode-input")
+                            ?.value ||
+                        "conversation";
+
+
+                    metadata.objective =
+                        $("#ai-objective-input")
+                            ?.value
+                            .trim() ||
+                        "";
+
+                }
+
+
+                const file =
+                    $("#content-file-input")
+                        ?.files?.[0];
+
+
+                if (
+                    (
+                        type === "image" ||
+                        type === "audio" ||
+                        type === "video" ||
+                        type === "pdf"
+                    ) &&
+                    !file &&
+                    !mediaUrl
+                ) {
+
+                    throw new Error(
+                        "Please select a file."
+                    );
+
+                }
+
+
+                if (file) {
+
+                    mediaUrl =
+                        await uploadFile(
+                            file,
+                            "course-content",
+                            builderCourse.id
+                        );
+
+                }
+
+
+                if (
+                    type === "text" &&
+                    !body.trim()
+                ) {
+
+                    throw new Error(
+                        "Please enter the text content."
+                    );
+
+                }
+
+
+                if (
+                    type === "exercise" &&
+                    !body.trim()
+                ) {
+
+                    throw new Error(
+                        "Please enter the exercise instructions."
+                    );
+
+                }
+
+
+                if (
+                    type === "quiz" &&
+                    !body.trim()
+                ) {
+
+                    throw new Error(
+                        "Please enter the quiz question."
+                    );
+
+                }
+
+
+                if (
+                    type === "ai" &&
+                    !body.trim()
+                ) {
+
+                    throw new Error(
+                        "Please enter the AI instructions."
+                    );
+
+                }
+
+
+                const payload = {
+
+                    title:
+                        title ||
+                        typeLabel(type),
+
+                    type,
+
+                    body,
+
+                    media_url:
+                        mediaUrl,
+
+                    metadata,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                };
+
+
+                let result;
+
+
+                if (existingContent) {
+
+                    result =
+                        await client
+                            .from("content")
+                            .update(
+                                payload
+                            )
+                            .eq(
+                                "id",
+                                existingContent.id
+                            )
+                            .select()
+                            .single();
+
+                } else {
+
+                    const nextOrder =
+                        selectedLesson
+                            .content
+                            ?.length ||
+                        0;
+
+
+                    result =
+                        await client
+                            .from("content")
+                            .insert({
+
+                                ...payload,
+
+                                lesson_id:
+                                    selectedLesson.id,
+
+                                sort_order:
+                                    nextOrder
+
+                            })
+                            .select()
+                            .single();
+
+                }
+
+
+                if (result.error) {
+
+                    throw result.error;
+
+                }
+
+
+                closeModalElement(
+                    contentModal
+                );
+
+
+                await loadBuilderStructure();
+
+
+                const refreshedModule =
+                    builderModules.find(
+                        module =>
+                            String(
+                                module.id
+                            ) ===
+                            String(
+                                selectedModule?.id
+                            )
+                    );
+
+
+                selectedModule =
+                    refreshedModule ||
+                    builderModules[0] ||
+                    null;
+
+
+                if (selectedModule) {
+
+                    selectedLesson =
+                        selectedModule.lessons.find(
+                            lesson =>
+                                String(
+                                    lesson.id
+                                ) ===
+                                String(
+                                    selectedLesson?.id
+                                )
+                        ) ||
+                        selectedModule.lessons[0] ||
+                        null;
+
+                }
+
+
+                renderBuilderTree();
+
+
+                if (selectedLesson) {
+
+                    renderLessonEditor();
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Content save:",
+                    error
+                );
+
+
+                if (errorElement) {
+
+                    errorElement.textContent =
+                        error.message ||
+                        "Could not save content.";
+
+                    errorElement.hidden =
+                        false;
+
+                }
+
+            } finally {
+
+                if (saveButton) {
+
+                    saveButton.disabled =
+                        false;
+
+                }
+
+            }
+
+        }
+
+
+        function typeLabel(type) {
+
+            const labels = {
+
+                text: "Text",
+
+                image: "Image",
+
+                audio: "Audio",
+
+                video: "Video",
+
+                pdf: "PDF",
+
+                exercise: "Exercise",
+
+                quiz: "Quiz",
+
+                ai: "AI Interaction"
+
+            };
+
+
+            return (
+                labels[type] ||
+                "Content"
+            );
+
+        }
+
+
+        /* =====================================================
+           CONTENT LIST
+        ===================================================== */
+
+        function renderContentList() {
+
+            const list =
+                $("#content-list");
+
+            if (!list) return;
+
+
+            const content =
+                selectedLesson?.content ||
+                [];
+
+
+            if (!content.length) {
+
+                list.innerHTML =
+                    `<div class="content-empty">
+                        This lesson has no content yet.
+                        Click <strong>+ Add Content</strong>
+                        to start building it.
+                    </div>`;
+
+                return;
+
+            }
+
+
+            list.innerHTML =
+                content
+                    .map(
+                        item =>
+                            renderContentCard(
+                                item
+                            )
+                    )
+                    .join("");
+
+
+            $$("[data-edit-content]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const item =
+                                    content.find(
+                                        contentItem =>
+                                            String(
+                                                contentItem.id
+                                            ) ===
+                                            String(
+                                                button.dataset
+                                                    .editContent
+                                            )
+                                    );
+
+
+                                if (item) {
+
+                                    openContentEditor(
+                                        item.type,
+                                        item
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            $$("[data-delete-content]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            async () => {
+
+                                const item =
+                                    content.find(
+                                        contentItem =>
+                                            String(
+                                                contentItem.id
+                                            ) ===
+                                            String(
+                                                button.dataset
+                                                    .deleteContent
+                                            )
+                                    );
+
+
+                                if (item) {
+
+                                    await deleteContent(
+                                        item
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        function renderContentCard(
+            item
+        ) {
+
+            const icon = {
+
+                text: "T",
+
+                image: "▧",
+
+                audio: "♫",
+
+                video: "▶",
+
+                pdf: "▤",
+
+                exercise: "✓",
+
+                quiz: "?",
+
+                ai: "✦"
+
+            }[item.type] || "•";
+
+
+            let preview = "";
+
+
+            if (
+                item.type ===
+                "image" &&
+                item.media_url
+            ) {
+
+                preview =
+                    `
+                    <img
+                        class="content-media-preview"
+                        src="${escapeAttribute(
+                            item.media_url
+                        )}"
+                        alt=""
+                    >
+                    `;
+
+            } else if (
+                item.type ===
+                "audio" &&
+                item.media_url
+            ) {
+
+                preview =
+                    `
+                    <audio
+                        controls
+                        style="width:100%;"
+                    >
+                        <source
+                            src="${escapeAttribute(
+                                item.media_url
+                            )}"
+                        >
+                    </audio>
+                    `;
+
+            } else if (
+                item.type ===
+                "video" &&
+                item.media_url
+            ) {
+
+                preview =
+                    `
+                    <video
+                        class="content-media-preview"
+                        controls
+                        style="width:100%;"
+                    >
+                        <source
+                            src="${escapeAttribute(
+                                item.media_url
+                            )}"
+                        >
+                    </video>
+                    `;
+
+            } else if (
+                item.type ===
+                "pdf" &&
+                item.media_url
+            ) {
+
+                preview =
+                    `
+                    <div class="content-file">
+                        ▤
+                        <span>
+                            PDF resource attached
+                        </span>
+                    </div>
+                    `;
+
+            } else {
+
+                preview =
+                    `
+                    <div class="content-preview">
+                        ${escapeHTML(
+                            item.body ||
+                            "No preview available."
+                        )}
+                    </div>
+                    `;
+
+            }
+
+
+            return `
+                <article class="content-card">
+
+                    <div class="content-card-header">
+
+                        <div class="content-type-icon">
+                            ${icon}
+                        </div>
+
+                        <strong>
+                            ${escapeHTML(
+                                item.title ||
+                                typeLabel(
+                                    item.type
+                                )
+                            )}
+                        </strong>
+
+                        <div class="content-card-actions">
+
+                            <button
+                                type="button"
+                                class="content-mini-button"
+                                data-edit-content="${escapeAttribute(
+                                    item.id
+                                )}"
+                            >
+                                ✎
+                            </button>
+
+                            <button
+                                type="button"
+                                class="content-mini-button danger"
+                                data-delete-content="${escapeAttribute(
+                                    item.id
+                                )}"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="content-card-body">
+
+                        <div
+                            style="
+                                margin-bottom:8px;
+                                color:#7c3aed;
+                                font-size:8px;
+                                font-weight:800;
+                                text-transform:uppercase;
+                                letter-spacing:.1em;
+                            "
+                        >
+                            ${escapeHTML(
+                                typeLabel(
+                                    item.type
+                                )
+                            )}
+                        </div>
+
+                        ${preview}
+
+                    </div>
+
+                </article>
+            `;
+
+        }
+
+
+        async function deleteContent(
+            item
+        ) {
+
+            const confirmed =
+                confirm(
+                    `Delete "${item.title || typeLabel(item.type)}"?`
+                );
+
+
+            if (!confirmed) return;
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await client
+                        .from("content")
+                        .delete()
+                        .eq(
+                            "id",
+                            item.id
+                        );
+
+
+                if (error) throw error;
+
+
+                await loadBuilderStructure();
+
+
+                const module =
+                    builderModules.find(
+                        itemModule =>
+                            String(
+                                itemModule.id
+                            ) ===
+                            String(
+                                selectedModule?.id
+                            )
+                    );
+
+
+                selectedModule =
+                    module ||
+                    builderModules[0] ||
+                    null;
+
+
+                if (selectedModule) {
+
+                    selectedLesson =
+                        selectedModule.lessons.find(
+                            lesson =>
+                                String(
+                                    lesson.id
+                                ) ===
+                                String(
+                                    selectedLesson?.id
+                                )
+                        ) ||
+                        selectedModule.lessons[0] ||
+                        null;
+
+                }
+
+
+                renderBuilderTree();
+
+
+                if (selectedLesson) {
+
+                    renderLessonEditor();
+
+                }
+
+            } catch (error) {
+
+                showError(
+                    error.message ||
+                    "Could not delete content."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           RESET BUILDER
+        ===================================================== */
+
+        function resetBuilder() {
+
+            builderCourse =
+                null;
+
+            builderModules =
+                [];
+
+            selectedModule =
+                null;
+
+            selectedLesson =
+                null;
+
+
+            $("#course-builder")
+                ?.classList.add(
+                    "disabled"
+                );
+
+
+            $("#add-module-button")
+                ?.setAttribute(
+                    "disabled",
+                    "disabled"
+                );
+
+
+            $("#builder-course-title")
+                &&
+                (
+                    $("#builder-course-title")
+                        .textContent =
+                        "Select a course"
+                );
+
+
+            $("#builder-course-summary")
+                &&
+                (
+                    $("#builder-course-summary")
+                        .innerHTML =
+                        "<span>Select a course to begin.</span>"
+                );
+
+
+            $("#builder-tree")
+                &&
+                (
+                    $("#builder-tree")
+                        .innerHTML =
+                        `
+                        <div class="builder-empty">
+                            Select a course to view its structure.
+                        </div>
+                        `
+                );
+
+
+            showBuilderWelcome();
+
+        }
+
+
+        /* =====================================================
+           OPEN BUILDER FROM COURSE LIST
+        ===================================================== */
+
+        function openCourseBuilderFromCourse(
+            courseId
+        ) {
+
+            showSection(
+                "personalise"
+            );
+
+            setTimeout(
+                async () => {
+
+                    await loadBuilderCourses();
+
+                    await openCourseBuilder(
+                        courseId
+                    );
+
+                },
+                50
+            );
+
+        }
+
+
+        /* =====================================================
+           CAROUSEL
+        ===================================================== */
+
+        function setupCarouselControls() {
+
+            $("#create-carousel-button")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        openCarouselModal()
+                );
+
+
+            $("#carousel-search")
+                ?.addEventListener(
+                    "input",
+                    renderCarouselItems
+                );
+
+
+            $("#carousel-filter")
+                ?.addEventListener(
+                    "change",
+                    renderCarouselItems
+                );
+
+        }
+
+
+        async function loadCarouselItems() {
+
+            const list =
+                $("#carousel-list");
+
+            if (!list) return;
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await client
+                        .from(
+                            "carousel_items"
+                        )
+                        .select("*")
+                        .order(
+                            "sort_order",
+                            {
+                                ascending:
+                                    true
+                            }
+                        )
+                        .order(
+                            "created_at",
+                            {
+                                ascending:
+                                    false
+                            }
+                        );
+
+
+                if (error) throw error;
+
+
+                allCarouselItems =
+                    data || [];
+
+
+                renderCarouselItems();
+
+            } catch (error) {
+
+                console.error(
+                    "Carousel:",
+                    error
+                );
+
+
+                list.innerHTML =
+                    `
+                    <div class="courses-empty">
+                        Unable to load promotions.
+                    </div>
+                    `;
+
+            }
+
+        }
+
+
+        function renderCarouselItems() {
+
+            const list =
+                $("#carousel-list");
+
+            if (!list) return;
+
+
+            const search =
+                (
+                    $("#carousel-search")
+                        ?.value ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            const filter =
+                $("#carousel-filter")
+                    ?.value ||
+                "all";
+
+
+            let items =
+                [...allCarouselItems];
+
+
+            if (filter !== "all") {
+
+                items =
+                    items.filter(
+                        item =>
+                            item.status ===
+                            filter
+                    );
+
+            }
+
+
+            if (search) {
+
+                items =
+                    items.filter(
+                        item =>
+                            (
+                                item.title ||
+                                ""
+                            )
+                                .toLowerCase()
+                                .includes(search) ||
+
+                            (
+                                item.description ||
+                                ""
+                            )
+                                .toLowerCase()
+                                .includes(search)
+                    );
+
+            }
+
+
+            if (!items.length) {
+
+                list.innerHTML =
+                    `
+                    <div class="courses-empty">
+                        No promotions found.
+                    </div>
+                    `;
+
+                return;
+
+            }
+
+
+            list.innerHTML =
+                items
+                    .map(
+                        item =>
+                            `
+                            <article class="course-row">
+
+                                <div class="course-cover">
+
+                                    ${
+                                        item.image_url
+                                            ? `
+                                                <img
+                                                    src="${escapeAttribute(
+                                                        item.image_url
+                                                    )}"
+                                                    alt=""
+                                                >
+                                            `
+                                            :
+                                            `
+                                                <div class="course-cover-placeholder">
+                                                    E
+                                                </div>
+                                            `
+                                    }
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="course-row-title">
+                                        ${escapeHTML(
+                                            item.title
+                                        )}
+                                    </div>
+
+                                    <div class="course-row-description">
+                                        ${escapeHTML(
+                                            item.description ||
+                                            ""
+                                        )}
+                                    </div>
+
+                                    <div class="course-row-meta">
+
+                                        <span class="course-badge">
+                                            ${escapeHTML(
+                                                item.area ||
+                                                "all"
+                                            )}
+                                        </span>
+
+                                        <span
+                                            class="
+                                                course-badge
+                                                ${
+                                                    item.status ===
+                                                    "published"
+                                                        ? "published"
+                                                        : "draft"
+                                                }
+                                            "
+                                        >
+                                            ${escapeHTML(
+                                                item.status ||
+                                                "draft"
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="course-actions">
+
+                                    <button
+                                        type="button"
+                                        class="course-action-button"
+                                        data-carousel-edit="${escapeAttribute(
+                                            item.id
+                                        )}"
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="course-action-button danger"
+                                        data-carousel-delete="${escapeAttribute(
+                                            item.id
+                                        )}"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </div>
+
+                            </article>
+                            `
+                    )
+                    .join("");
+
+
+            $$("[data-carousel-edit]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const item =
+                                    allCarouselItems.find(
+                                        carouselItem =>
+                                            String(
+                                                carouselItem.id
+                                            ) ===
+                                            String(
+                                                button.dataset
+                                                    .carouselEdit
+                                            )
+                                    );
+
+
+                                if (item) {
+
+                                    openCarouselModal(
+                                        item
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            $$("[data-carousel-delete]")
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            async () => {
+
+                                const item =
+                                    allCarouselItems.find(
+                                        carouselItem =>
+                                            String(
+                                                carouselItem.id
+                                            ) ===
+                                            String(
+                                                button.dataset
+                                                    .carouselDelete
+                                            )
+                                    );
+
+
+                                if (!item) return;
+
+
+                                if (
+                                    !confirm(
+                                        `Delete "${item.title}"?`
+                                    )
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                const {
+                                    error
+                                } =
+                                    await client
+                                        .from(
+                                            "carousel_items"
+                                        )
+                                        .delete()
+                                        .eq(
+                                            "id",
+                                            item.id
+                                        );
+
+
+                                if (error) {
+
+                                    showError(
+                                        error.message
+                                    );
+
+                                    return;
+
+                                }
+
+
+                                await loadCarouselItems();
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        function openCarouselModal(
+            item = null
+        ) {
+
+            editingCarouselItemId =
+                item?.id ||
+                null;
+
+
+            if (carouselModal) {
+
+                carouselModal.remove();
+
+            }
+
+
+            carouselModal =
+                document.createElement(
+                    "div"
+                );
+
+
+            carouselModal.className =
+                "course-modal";
+
+
+            carouselModal.innerHTML = `
+
+                <div class="course-modal-backdrop"></div>
+
+
+                <div class="course-modal-dialog">
+
+                    <div class="course-modal-header">
+
+                        <div>
+
+                            <div class="course-modal-kicker">
+                                HOMEPAGE
+                            </div>
+
+                            <h2>
+                                ${
+                                    item
+                                        ? "Edit Promotion"
+                                        : "Create Promotion"
+                                }
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="course-modal-close"
+                            id="close-carousel-modal"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="carousel-form"
+                        class="course-form"
+                    >
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Title *
+                            </label>
+
+                            <input
+                                id="carousel-title"
+                                required
+                                maxlength="200"
+                                value="${escapeAttribute(
+                                    item?.title ||
+                                    ""
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Description
+                            </label>
+
+                            <textarea
+                                id="carousel-description"
+                            >${escapeHTML(
+                                item?.description ||
+                                ""
+                            )}</textarea>
+
+                        </div>
+
+
+                        <div class="course-form-field">
+
+                            <label>
+                                Image URL
+                            </label>
+
+                            <input
+                                id="carousel-image"
+                                type="url"
+                                value="${escapeAttribute(
+                                    item?.image_url ||
+                                    ""
+                                )}"
+                            >
+
+                        </div>
+
+
+                        <div class="course-form-grid">
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Area
+                                </label>
+
+                                <select id="carousel-area">
+
+                                    <option value="all">
+                                        All Areas
+                                    </option>
+
+                                    <option value="language">
+                                        Language
+                                    </option>
+
+                                    <option value="business">
+                                        Business
+                                    </option>
+
+                                    <option value="technology">
+                                        Technology
+                                    </option>
+
+                                    <option value="finance">
+                                        Finance
+                                    </option>
+
+                                    <option value="personal-development">
+                                        Personal Development
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="course-form-field">
+
+                                <label>
+                                    Status
+                                </label>
+
+                                <select id="carousel-status">
+
+                                    <option value="draft">
+                                        Draft
+                                    </option>
+
+                                    <option value="published">
+                                        Published
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="carousel-form-error"
+                            class="course-form-error"
+                            hidden
+                        ></div>
+
+
+                        <div class="course-form-actions">
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                id="cancel-carousel-modal"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+                                ${
+                                    item
+                                        ? "Save Changes"
+                                        : "Create Promotion"
+                                }
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            `;
+
+
+            document.body.appendChild(
+                carouselModal
+            );
+
+
+            requestAnimationFrame(
+                () =>
+                    carouselModal.classList.add(
+                        "open"
+                    )
+            );
+
+
+            if (item?.area) {
+
+                $("#carousel-area")
+                    .value =
+                    item.area;
+
+            }
+
+
+            if (item?.status) {
+
+                $("#carousel-status")
+                    .value =
+                    item.status;
+
+            }
+
+
+            $("#close-carousel-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            carouselModal
+                        )
+                );
+
+
+            $("#cancel-carousel-modal")
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            carouselModal
+                        )
+                );
+
+
+            carouselModal
+                .querySelector(
+                    ".course-modal-backdrop"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModalElement(
+                            carouselModal
+                        )
+                );
+
+
+            $("#carousel-form")
+                ?.addEventListener(
+                    "submit",
+                    saveCarouselItem
+                );
+
+        }
+
+
+        async function saveCarouselItem(
+            event
+        ) {
+
+            event.preventDefault();
+
+
+            const title =
+                $("#carousel-title")
+                    ?.value
+                    .trim();
+
+
+            if (!title) {
+
+                $("#carousel-form-error")
+                    .textContent =
+                    "Promotion title is required.";
+
+                $("#carousel-form-error")
+                    .hidden =
+                    false;
+
+                return;
+
+            }
+
+
+            try {
+
+                const payload = {
+
+                    title,
+
+                    description:
+                        $("#carousel-description")
+                            ?.value
+                            .trim() ||
+                        "",
+
+                    image_url:
+                        $("#carousel-image")
+                            ?.value
+                            .trim() ||
+                        null,
+
+                    area:
+                        $("#carousel-area")
+                            ?.value ||
+                        "all",
+
+                    status:
+                        $("#carousel-status")
+                            ?.value ||
+                        "draft"
+
+                };
+
+
+                let result;
+
+
+                if (
+                    editingCarouselItemId
+                ) {
+
+                    result =
+                        await client
+                            .from(
+                                "carousel_items"
+                            )
+                            .update(
+                                payload
+                            )
+                            .eq(
+                                "id",
+                                editingCarouselItemId
+                            );
+
+                } else {
+
+                    result =
+                        await client
+                            .from(
+                                "carousel_items"
+                            )
+                            .insert(
+                                payload
+                            );
+
+                }
+
+
+                if (result.error) {
+
+                    throw result.error;
+
+                }
+
+
+                closeModalElement(
+                    carouselModal
+                );
+
+
+                await loadCarouselItems();
+
+            } catch (error) {
+
+                $("#carousel-form-error")
+                    .textContent =
+                    error.message ||
+                    "Could not save promotion.";
+
+                $("#carousel-form-error")
+                    .hidden =
+                    false;
+
+            }
+
+        }
 
     }
-
-    to {
-
-        opacity: 1;
-
-        transform:
-            translateY(0);
-
-    }
-
-}
-
-
-/* =========================================================
-   HEADINGS
-========================================================= */
-
-.page-introduction {
-
-    margin-bottom: 30px;
-
-}
-
-
-.page-introduction h2,
-.page-heading-row h2 {
-
-    margin-top: 5px;
-
-    font-size: 28px;
-
-    letter-spacing: -.03em;
-
-}
-
-
-.page-introduction p,
-.page-heading-row p {
-
-    margin-top: 7px;
-
-    color:
-        var(--text-secondary);
-
-    max-width: 650px;
-
-    line-height: 1.6;
-
-}
-
-
-.section-kicker {
-
-    display: block;
-
-    color:
-        var(--purple);
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: .14em;
-
-}
-
-
-.page-heading-row {
-
-    display: flex;
-
-    align-items: flex-end;
-
-    justify-content: space-between;
-
-    gap: 24px;
-
-    margin-bottom: 28px;
-
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.primary-button,
-.small-primary-button,
-.secondary-button,
-.danger-button {
-
-    border: 0;
-
-    border-radius: 10px;
-
-    transition:
-        transform .18s ease,
-        background .18s ease,
-        box-shadow .18s ease;
-
-}
-
-
-.primary-button {
-
-    min-height: 44px;
-
-    padding:
-        0 18px;
-
-    background:
-        var(--purple);
-
-    color: white;
-
-    font-weight: 700;
-
-    box-shadow:
-        0 7px 18px
-        rgba(124,58,237,.18);
-
-}
-
-
-.primary-button:hover {
-
-    background:
-        var(--purple-dark);
-
-    transform:
-        translateY(-1px);
-
-}
-
-
-.small-primary-button {
-
-    min-height: 36px;
-
-    padding:
-        0 13px;
-
-    background:
-        var(--purple);
-
-    color: white;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-}
-
-
-.secondary-button {
-
-    min-height: 38px;
-
-    padding:
-        0 13px;
-
-    border:
-        1px solid
-        var(--border);
-
-    background: white;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-}
-
-
-.secondary-button:hover {
-
-    background:
-        var(--surface-soft);
-
-}
-
-
-.danger-button {
-
-    min-height: 38px;
-
-    padding:
-        0 13px;
-
-    background:
-        var(--danger-soft);
-
-    color:
-        var(--danger);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-}
-
-
-/* =========================================================
-   STATS
-========================================================= */
-
-.stats-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 18px;
-
-    margin-bottom: 24px;
-
-}
-
-
-.stat-card {
-
-    min-height: 145px;
-
-    padding: 22px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    box-shadow:
-        var(--shadow-small);
-
-}
-
-
-.stat-card-icon {
-
-    width: 38px;
-    height: 38px;
-
-    border-radius: 11px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-    margin-bottom: 15px;
-
-}
-
-
-.stat-card span {
-
-    display: block;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 12px;
-
-}
-
-
-.stat-card strong {
-
-    display: block;
-
-    margin-top: 5px;
-
-    font-size: 27px;
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-.dashboard-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 20px;
-
-}
-
-
-.dashboard-panel {
-
-    min-height: 230px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    padding: 24px;
-
-    box-shadow:
-        var(--shadow-small);
-
-}
-
-
-.panel-heading {
-
-    display: flex;
-
-    justify-content: space-between;
-
-}
-
-
-.panel-heading h3 {
-
-    margin-top: 5px;
-
-    font-size: 17px;
-
-}
-
-
-.publishing-summary {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 12px;
-
-    margin-top: 25px;
-
-}
-
-
-.publishing-summary > div {
-
-    padding: 18px;
-
-    border-radius: 14px;
-
-    background:
-        var(--surface-soft);
-
-}
-
-
-.publishing-summary span {
-
-    display: block;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-}
-
-
-.publishing-summary strong {
-
-    display: block;
-
-    margin-top: 5px;
-
-    font-size: 24px;
-
-}
-
-
-.activity-list {
-
-    margin-top: 20px;
-
-}
-
-
-.activity-item {
-
-    display: flex;
-
-    gap: 12px;
-
-    padding:
-        11px 0;
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-}
-
-
-.activity-icon {
-
-    width: 32px;
-    height: 32px;
-
-    flex: 0 0 32px;
-
-    border-radius: 9px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-}
-
-
-.activity-title {
-
-    font-size: 12px;
-
-    font-weight: 600;
-
-}
-
-
-.activity-meta {
-
-    margin-top: 3px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 10px;
-
-}
-
-
-.activity-empty {
-
-    color:
-        var(--text-muted);
-
-    font-size: 12px;
-
-}
-
-
-.dashboard-error {
-
-    margin-top: 20px;
-
-    padding: 15px 18px;
-
-    background:
-        var(--danger-soft);
-
-    color:
-        var(--danger);
-
-    border-radius: 12px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-}
-
-
-/* =========================================================
-   TOOLBAR
-========================================================= */
-
-.toolbar {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    margin-bottom: 20px;
-
-}
-
-
-.search-box {
-
-    flex: 1;
-
-    height: 44px;
-
-    max-width: 500px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    padding:
-        0 13px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 10px;
-
-}
-
-
-.search-box span {
-
-    color:
-        var(--text-muted);
-
-}
-
-
-.search-box input {
-
-    width: 100%;
-
-    border: 0;
-
-    outline: 0;
-
-    color: var(--text);
-
-    background: transparent;
-
-}
-
-
-.toolbar select,
-.builder-course-selector select {
-
-    min-height: 44px;
-
-    padding:
-        0 12px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 10px;
-
-    background: white;
-
-    color:
-        var(--text);
-
-    outline: 0;
-
-}
-
-
-/* =========================================================
-   COURSES
-========================================================= */
-
-.courses-list {
-
-    display: grid;
-
-    gap: 12px;
-
-}
-
-
-.course-row {
-
-    display: grid;
-
-    grid-template-columns:
-        72px 1fr auto;
-
-    align-items: center;
-
-    gap: 16px;
-
-    padding: 14px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 15px;
-
-    box-shadow:
-        var(--shadow-small);
-
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease;
-
-}
-
-
-.course-row:hover {
-
-    transform:
-        translateY(-1px);
-
-    box-shadow:
-        var(--shadow);
-
-}
-
-
-.course-cover {
-
-    width: 72px;
-    height: 54px;
-
-    border-radius: 9px;
-
-    overflow: hidden;
-
-    background:
-        var(--purple-soft);
-
-}
-
-
-.course-cover img {
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-}
-
-
-.course-cover-placeholder {
-
-    width: 100%;
-    height: 100%;
-
-    display: grid;
-
-    place-items: center;
-
-    color:
-        var(--purple);
-
-    font-weight: 800;
-
-}
-
-
-.course-row-title {
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-}
-
-
-.course-row-description {
-
-    margin-top: 4px;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-    display: -webkit-box;
-
-    -webkit-line-clamp: 1;
-
-    -webkit-box-orient: vertical;
-
-    overflow: hidden;
-
-}
-
-
-.course-row-meta {
-
-    display: flex;
-
-    gap: 7px;
-
-    margin-top: 7px;
-
-    flex-wrap: wrap;
-
-}
-
-
-.course-badge {
-
-    padding:
-        4px 7px;
-
-    border-radius: 20px;
-
-    background:
-        var(--surface-soft);
-
-    color:
-        var(--text-secondary);
-
-    font-size: 9px;
-
-}
-
-
-.course-badge.published {
-
-    background:
-        var(--success-soft);
-
-    color:
-        var(--success);
-
-}
-
-
-.course-badge.draft {
-
-    background:
-        #f2f4f7;
-
-    color:
-        #667085;
-
-}
-
-
-.course-badge.archived {
-
-    background:
-        var(--danger-soft);
-
-    color:
-        var(--danger);
-
-}
-
-
-.course-actions {
-
-    display: flex;
-
-    gap: 7px;
-
-    flex-wrap: wrap;
-
-    justify-content: flex-end;
-
-}
-
-
-.course-action-button {
-
-    min-height: 34px;
-
-    padding:
-        0 10px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 8px;
-
-    background: white;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-}
-
-
-.course-action-button:hover {
-
-    border-color:
-        #d6c7f8;
-
-    color:
-        var(--purple);
-
-}
-
-
-.course-action-button.primary {
-
-    border-color:
-        var(--purple);
-
-    background:
-        var(--purple);
-
-    color: white;
-
-}
-
-
-.course-action-button.danger {
-
-    color:
-        var(--danger);
-
-    background:
-        var(--danger-soft);
-
-    border-color:
-        #fecaca;
-
-}
-
-
-.courses-loading,
-.courses-empty {
-
-    padding: 45px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    color:
-        var(--text-secondary);
-
-    text-align: center;
-
-}
-
-
-/* =========================================================
-   COURSE BUILDER
-========================================================= */
-
-.builder-course-selector {
-
-    display: grid;
-
-    grid-template-columns:
-        minmax(260px, 380px) 1fr;
-
-    gap: 18px;
-
-    padding: 18px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    margin-bottom: 20px;
-
-    box-shadow:
-        var(--shadow-small);
-
-}
-
-
-.builder-course-selector label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-}
-
-
-.builder-course-selector select {
-
-    width: 100%;
-
-}
-
-
-.builder-course-summary {
-
-    min-height: 44px;
-
-    display: flex;
-
-    align-items: center;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-}
-
-
-.course-builder {
-
-    min-height: 650px;
-
-    display: grid;
-
-    grid-template-columns:
-        320px 1fr;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    overflow: hidden;
-
-    box-shadow:
-        var(--shadow-small);
-
-}
-
-
-.course-builder.disabled {
-
-    opacity: .65;
-
-}
-
-
-/* =========================================================
-   BUILDER SIDEBAR
-========================================================= */
-
-.builder-sidebar {
-
-    background:
-        #fbfbfd;
-
-    border-right:
-        1px solid
-        var(--border);
-
-    display: flex;
-
-    flex-direction: column;
-
-}
-
-
-.builder-sidebar-heading {
-
-    padding: 19px;
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-}
-
-
-.builder-sidebar-heading span {
-
-    display: block;
-
-    color:
-        var(--text-muted);
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: .12em;
-
-}
-
-
-.builder-sidebar-heading strong {
-
-    display: block;
-
-    margin-top: 5px;
-
-    font-size: 12px;
-
-}
-
-
-.builder-tree {
-
-    padding: 12px;
-
-    overflow-y: auto;
-
-}
-
-
-.builder-empty {
-
-    padding: 25px 12px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 11px;
-
-    line-height: 1.6;
-
-    text-align: center;
-
-}
-
-
-.tree-module {
-
-    margin-bottom: 8px;
-
-}
-
-
-.tree-module-header {
-
-    min-height: 43px;
-
-    padding:
-        0 9px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    border-radius: 9px;
-
-    cursor: pointer;
-
-    transition:
-        background .18s ease;
-
-}
-
-
-.tree-module-header:hover {
-
-    background:
-        var(--purple-soft);
-
-}
-
-
-.tree-module-header.active {
-
-    background:
-        var(--purple-soft);
-
-}
-
-
-.tree-module-toggle {
-
-    width: 20px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 10px;
-
-}
-
-
-.tree-module-title {
-
-    flex: 1;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-}
-
-
-.tree-module-menu {
-
-    width: 25px;
-
-    height: 25px;
-
-    border: 0;
-
-    border-radius: 6px;
-
-    background: transparent;
-
-    color:
-        var(--text-muted);
-
-}
-
-
-.tree-lessons {
-
-    margin-left: 20px;
-
-    padding:
-        3px 0 5px 8px;
-
-    border-left:
-        1px solid
-        #e5e7eb;
-
-}
-
-
-.tree-lesson {
-
-    width: 100%;
-
-    min-height: 37px;
-
-    padding:
-        0 8px;
-
-    border: 0;
-
-    border-radius: 8px;
-
-    background: transparent;
-
-    color:
-        var(--text-secondary);
-
-    text-align: left;
-
-    font-size: 10px;
-
-}
-
-
-.tree-lesson:hover {
-
-    background:
-        #f0ecfa;
-
-}
-
-
-.tree-lesson.active {
-
-    background:
-        #eee7fc;
-
-    color:
-        var(--purple);
-
-    font-weight: 700;
-
-}
-
-
-.tree-lesson-count {
-
-    float: right;
-
-    color:
-        var(--text-muted);
-
-    font-size: 8px;
-
-}
-
-
-/* =========================================================
-   BUILDER WORKSPACE
-========================================================= */
-
-.builder-workspace {
-
-    min-width: 0;
-
-    padding: 28px;
-
-    overflow-y: auto;
-
-}
-
-
-.builder-welcome {
-
-    max-width: 600px;
-
-    margin:
-        80px auto;
-
-    text-align: center;
-
-}
-
-
-.builder-welcome-icon {
-
-    width: 62px;
-    height: 62px;
-
-    margin:
-        0 auto 20px;
-
-    border-radius: 18px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-    font-size: 26px;
-
-}
-
-
-.builder-welcome h3 {
-
-    margin-top: 7px;
-
-    font-size: 23px;
-
-}
-
-
-.builder-welcome p {
-
-    margin-top: 10px;
-
-    color:
-        var(--text-secondary);
-
-    line-height: 1.7;
-
-    font-size: 12px;
-
-}
-
-
-/* =========================================================
-   EDITORS
-========================================================= */
-
-.editor-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: flex-start;
-
-    gap: 20px;
-
-    padding-bottom: 20px;
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-}
-
-
-.editor-header h3 {
-
-    margin-top: 5px;
-
-    font-size: 22px;
-
-}
-
-
-.editor-subtitle {
-
-    margin-top: 5px;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-}
-
-
-.editor-actions {
-
-    display: flex;
-
-    gap: 7px;
-
-    flex-wrap: wrap;
-
-}
-
-
-.lesson-heading,
-.content-builder-toolbar {
-
-    margin-top: 24px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 15px;
-
-}
-
-
-.lesson-heading h4,
-.content-builder-toolbar h4 {
-
-    margin-top: 5px;
-
-    font-size: 15px;
-
-}
-
-
-.lesson-list {
-
-    display: grid;
-
-    gap: 10px;
-
-    margin-top: 13px;
-
-}
-
-
-.lesson-card {
-
-    padding: 14px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 12px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    cursor: pointer;
-
-    transition:
-        border-color .18s ease,
-        background .18s ease;
-
-}
-
-
-.lesson-card:hover,
-.lesson-card.active {
-
-    border-color:
-        #d7c7f7;
-
-    background:
-        var(--purple-wash);
-
-}
-
-
-.lesson-number {
-
-    width: 34px;
-    height: 34px;
-
-    flex: 0 0 34px;
-
-    border-radius: 10px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-}
-
-
-.lesson-card-content {
-
-    min-width: 0;
-
-    flex: 1;
-
-}
-
-
-.lesson-card-title {
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-}
-
-
-.lesson-card-description {
-
-    margin-top: 3px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 10px;
-
-}
-
-
-.lesson-card-arrow {
-
-    color:
-        var(--text-muted);
-
-}
-
-
-/* =========================================================
-   CONTENT BLOCKS
-========================================================= */
-
-.content-list {
-
-    display: grid;
-
-    gap: 12px;
-
-    margin-top: 14px;
-
-}
-
-
-.content-card {
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 14px;
-
-    overflow: hidden;
-
-    background: white;
-
-}
-
-
-.content-card-header {
-
-    min-height: 48px;
-
-    padding:
-        0 14px;
-
-    background:
-        #fafafa;
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-}
-
-
-.content-type-icon {
-
-    width: 30px;
-    height: 30px;
-
-    border-radius: 8px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-    font-size: 11px;
-
-}
-
-
-.content-card-header strong {
-
-    flex: 1;
-
-    font-size: 11px;
-
-}
-
-
-.content-card-actions {
-
-    display: flex;
-
-    gap: 5px;
-
-}
-
-
-.content-mini-button {
-
-    width: 28px;
-    height: 28px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 7px;
-
-    background: white;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 10px;
-
-}
-
-
-.content-mini-button.danger {
-
-    color:
-        var(--danger);
-
-}
-
-
-.content-card-body {
-
-    padding: 15px;
-
-}
-
-
-.content-preview {
-
-    color:
-        var(--text-secondary);
-
-    font-size: 11px;
-
-    line-height: 1.65;
-
-}
-
-
-.content-media-preview {
-
-    max-width: 100%;
-
-    border-radius: 10px;
-
-    background: #111;
-
-}
-
-
-.content-file {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 12px;
-
-    background:
-        var(--surface-soft);
-
-    border-radius: 9px;
-
-    font-size: 11px;
-
-}
-
-
-.content-empty {
-
-    padding: 30px;
-
-    border:
-        1px dashed
-        var(--border);
-
-    border-radius: 12px;
-
-    color:
-        var(--text-muted);
-
-    text-align: center;
-
-    font-size: 11px;
-
-}
-
-
-/* =========================================================
-   EMPTY SECTION
-========================================================= */
-
-.empty-section {
-
-    min-height: 360px;
-
-    background: white;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        var(--radius);
-
-    box-shadow:
-        var(--shadow-small);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    flex-direction: column;
-
-    text-align: center;
-
-    padding: 35px;
-
-}
-
-
-.empty-section-icon {
-
-    width: 60px;
-    height: 60px;
-
-    margin-bottom: 18px;
-
-    border-radius: 18px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-    font-size: 25px;
-
-}
-
-
-.empty-section h3 {
-
-    font-size: 19px;
-
-}
-
-
-.empty-section p {
-
-    max-width: 500px;
-
-    margin-top: 8px;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 12px;
-
-    line-height: 1.6;
-
-}
-
-
-.phase-badge {
-
-    margin-top: 18px;
-
-    padding:
-        6px 9px;
-
-    border-radius: 20px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-}
-
-
-/* =========================================================
-   MODALS
-========================================================= */
-
-.course-modal {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 500;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 20px;
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    transition:
-        opacity .2s ease;
-
-}
-
-
-.course-modal.open {
-
-    opacity: 1;
-
-    pointer-events: auto;
-
-}
-
-
-.course-modal-backdrop {
-
-    position: absolute;
-
-    inset: 0;
-
-    background:
-        rgba(12,13,20,.58);
-
-    backdrop-filter:
-        blur(5px);
-
-}
-
-
-.course-modal-dialog {
-
-    position: relative;
-
-    z-index: 1;
-
-    width: min(720px, 100%);
-
-    max-height:
-        calc(100vh - 40px);
-
-    overflow-y: auto;
-
-    background: white;
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 30px 80px
-        rgba(0,0,0,.22);
-
-}
-
-
-.course-modal-header {
-
-    padding:
-        22px 24px;
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-}
-
-
-.course-modal-kicker {
-
-    color:
-        var(--purple);
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: .13em;
-
-}
-
-
-.course-modal-header h2 {
-
-    margin-top: 4px;
-
-    font-size: 20px;
-
-}
-
-
-.course-modal-close {
-
-    width: 34px;
-    height: 34px;
-
-    border: 0;
-
-    border-radius: 9px;
-
-    background:
-        #f2f4f7;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 21px;
-
-}
-
-
-.course-form {
-
-    padding: 24px;
-
-}
-
-
-.course-form-field {
-
-    margin-bottom: 17px;
-
-}
-
-
-.course-form-field label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    color:
-        var(--text-secondary);
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-}
-
-
-.course-form-field input,
-.course-form-field textarea,
-.course-form-field select {
-
-    width: 100%;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 9px;
-
-    background: white;
-
-    color:
-        var(--text);
-
-    outline: none;
-
-    padding:
-        11px 12px;
-
-    font-size: 12px;
-
-}
-
-
-.course-form-field textarea {
-
-    min-height: 105px;
-
-    resize: vertical;
-
-}
-
-
-.course-form-field input:focus,
-.course-form-field textarea:focus,
-.course-form-field select:focus {
-
-    border-color:
-        #c7aef4;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(124,58,237,.08);
-
-}
-
-
-.course-form-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 15px;
-
-}
-
-
-.course-form-error {
-
-    padding: 11px 12px;
-
-    margin-bottom: 15px;
-
-    border-radius: 9px;
-
-    background:
-        var(--danger-soft);
-
-    color:
-        var(--danger);
-
-    font-size: 10px;
-
-}
-
-
-.course-form-actions {
-
-    padding-top: 5px;
-
-    display: flex;
-
-    justify-content: flex-end;
-
-    gap: 8px;
-
-}
-
-
-/* =========================================================
-   CONTENT TYPE SELECTOR
-========================================================= */
-
-.content-type-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 9px;
-
-}
-
-
-.content-type-option {
-
-    min-height: 82px;
-
-    padding: 10px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius: 11px;
-
-    background: white;
-
-    text-align: left;
-
-    transition:
-        border-color .18s ease,
-        background .18s ease,
-        transform .18s ease;
-
-}
-
-
-.content-type-option:hover {
-
-    border-color:
-        #cbb7ef;
-
-    transform:
-        translateY(-1px);
-
-}
-
-
-.content-type-option strong {
-
-    display: block;
-
-    margin-top: 7px;
-
-    font-size: 10px;
-
-}
-
-
-.content-type-option span {
-
-    display: block;
-
-    margin-top: 3px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 8px;
-
-    line-height: 1.35;
-
-}
-
-
-.content-type-option-icon {
-
-    width: 28px;
-    height: 28px;
-
-    border-radius: 8px;
-
-    background:
-        var(--purple-soft);
-
-    color:
-        var(--purple);
-
-    display: grid;
-
-    place-items: center;
-
-}
-
-
-/* =========================================================
-   MEDIA UPLOAD
-========================================================= */
-
-.file-drop {
-
-    position: relative;
-
-    border:
-        1px dashed
-        #cfd3dc;
-
-    border-radius: 11px;
-
-    padding: 22px;
-
-    text-align: center;
-
-    background:
-        #fbfbfd;
-
-}
-
-
-.file-drop input {
-
-    position: absolute;
-
-    inset: 0;
-
-    opacity: 0;
-
-    cursor: pointer;
-
-}
-
-
-.file-drop strong {
-
-    display: block;
-
-    font-size: 11px;
-
-}
-
-
-.file-drop span {
-
-    display: block;
-
-    margin-top: 5px;
-
-    color:
-        var(--text-muted);
-
-    font-size: 9px;
-
-}
-
-
-.upload-progress {
-
-    height: 5px;
-
-    margin-top: 12px;
-
-    overflow: hidden;
-
-    border-radius: 10px;
-
-    background:
-        #e9e9ee;
-
-}
-
-
-.upload-progress-fill {
-
-    width: 0;
-
-    height: 100%;
-
-    background:
-        var(--purple);
-
-    transition:
-        width .2s ease;
-
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1100px) {
-
-    .stats-grid {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-    .course-builder {
-
-        grid-template-columns:
-            280px 1fr;
-
-    }
-
-}
-
-
-@media (max-width: 900px) {
-
-    .admin-sidebar {
-
-        width: 270px;
-
-        transform:
-            translateX(-100%);
-
-    }
-
-
-    .sidebar-open .admin-sidebar {
-
-        transform:
-            translateX(0);
-
-    }
-
-
-    .mobile-sidebar-close {
-
-        display: block;
-
-    }
-
-
-    .admin-main {
-
-        margin-left: 0;
-
-    }
-
-
-    .sidebar-toggle {
-
-        display: grid;
-
-        place-items: center;
-
-    }
-
-
-    .dashboard-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .course-builder {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .builder-sidebar {
-
-        max-height: 350px;
-
-        border-right: 0;
-
-        border-bottom:
-            1px solid
-            var(--border);
-
-    }
-
-}
-
-
-@media (min-width: 901px) {
-
-    .sidebar-overlay {
-
-        display: none;
-
-    }
-
-}
-
-
-@media (max-width: 700px) {
-
-    .admin-content {
-
-        padding:
-            25px 16px 50px;
-
-    }
-
-
-    .admin-topbar {
-
-        padding:
-            0 16px;
-
-    }
-
-
-    .topbar-brand {
-
-        display: none;
-
-    }
-
-
-    .page-heading-row {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-    }
-
-
-    .stats-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .toolbar {
-
-        flex-direction: column;
-
-        align-items: stretch;
-
-    }
-
-
-    .search-box {
-
-        max-width: none;
-
-    }
-
-
-    .course-row {
-
-        grid-template-columns:
-            56px 1fr;
-
-    }
-
-
-    .course-cover {
-
-        width: 56px;
-        height: 48px;
-
-    }
-
-
-    .course-actions {
-
-        grid-column: 1 / -1;
-
-        justify-content: flex-start;
-
-    }
-
-
-    .builder-course-selector {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .builder-workspace {
-
-        padding: 18px;
-
-    }
-
-
-    .editor-header {
-
-        flex-direction: column;
-
-    }
-
-
-    .content-type-grid {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-
-    .course-form-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-}
-
-
-@media (max-width: 500px) {
-
-    .admin-topbar {
-
-        min-height: 72px;
-
-    }
-
-
-    .topbar-left h1 {
-
-        font-size: 17px;
-
-    }
-
-
-    .content-type-grid {
-
-        grid-template-columns: 1fr 1fr;
-
-    }
-
-
-    .course-modal {
-
-        padding: 10px;
-
-    }
-
-
-    .course-modal-dialog {
-
-        max-height:
-            calc(100vh - 20px);
-
-        border-radius: 14px;
-
-    }
-
-
-    .course-form {
-
-        padding: 18px;
-
-    }
-
-
-    .course-modal-header {
-
-        padding:
-            18px;
-
-    }
-
-}
+);
