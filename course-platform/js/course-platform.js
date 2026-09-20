@@ -16,9 +16,7 @@
 
    Supporting:
    media
-   enrollments
-   lesson_progress
-   activity_progress
+   student_progress
    activity_attempts
 ===================================================== */
 
@@ -129,9 +127,11 @@ function getInitials(name) {
     }
 
     if (parts.length === 1) {
+
         return parts[0]
             .slice(0, 2)
             .toUpperCase();
+
     }
 
     return (
@@ -286,23 +286,10 @@ function getCourseId() {
 
 }
 
+
 /* =====================================================
-   LOADING
+   LOADING SCREEN
 ===================================================== */
-
-function hideLoading() {
-
-    const loading =
-        $("#app-loading");
-
-    if (!loading) {
-        return;
-    }
-
-    loading.classList.add("hidden");
-
-}
-
 
 function showLoading() {
 
@@ -314,6 +301,20 @@ function showLoading() {
     }
 
     loading.classList.remove("hidden");
+
+}
+
+
+function hideLoading() {
+
+    const loading =
+        $("#app-loading");
+
+    if (!loading) {
+        return;
+    }
+
+    loading.classList.add("hidden");
 
 }
 
@@ -451,9 +452,12 @@ function setupMoreMenu() {
                 return;
             }
 
+            const moreButton =
+                $("#more-button");
+
             if (
                 !menu.contains(event.target) &&
-                event.target !== $("#more-button")
+                event.target !== moreButton
             ) {
 
                 toggleMoreMenu(false);
@@ -525,353 +529,292 @@ function setupNavigation() {
 
 async function loadUser() {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.auth.getUser();
-
-
-    if (error) {
-
-        console.warn(
-            "Could not load user:",
-            error
-        );
-
-        return null;
-
-    }
-
-
-    state.user =
-        data?.user || null;
-
-
-    if (!state.user) {
-        return null;
-    }
-
-
-    const metadata =
-        state.user.user_metadata || {};
-
-
-    const name =
-        metadata.full_name ||
-        metadata.name ||
-        metadata.display_name ||
-        state.user.email?.split("@")[0] ||
-        "Student";
-
-
-    const initials =
-        getInitials(name);
-
-
-    const topStudentName =
-        $("#top-student-name");
-
-    if (topStudentName) {
-        topStudentName.textContent =
-            name;
-    }
-
-
-    const railAvatar =
-        $("#rail-avatar");
-
-    if (railAvatar) {
-        railAvatar.textContent =
-            initials;
-    }
-
-
-    const topAvatar =
-        $("#top-avatar");
-
-    if (topAvatar) {
-        topAvatar.textContent =
-            initials;
-    }
-
-
-    const profileLargeAvatar =
-        $("#profile-large-avatar");
-
-    if (profileLargeAvatar) {
-        profileLargeAvatar.textContent =
-            initials;
-    }
-
-
-    const profileName =
-        $("#profile-name");
-
-    if (profileName) {
-        profileName.textContent =
-            name;
-    }
-
-
-    const profileEmail =
-        $("#profile-email");
-
-    if (profileEmail) {
-        profileEmail.textContent =
-            state.user.email || "—";
-    }
-
-
-    return state.user;
-
-}
-
-
-/* =====================================================
-   COURSE + COURSE CONTENT LOADING
-=====================================================
-
-   EduCore structure:
-
-   courses
-      ↓
-   modules
-      ↓
-   lessons
-      ↓
-   lesson_sections
-      ↓
-   activities
-      ↓
-   questions
-
-   Supporting:
-
-   media
-
-   IMPORTANT:
-
-   The course ID comes from:
-
-   course-platform.html?course_id=123
-
-   Every level is loaded using the actual
-   foreign-key relationship created by the
-   Admin Builder.
-===================================================== */
-
-
-
-/* =====================================================
-   INITIALIZATION
-===================================================== */
-
-async function init() {
-
-    showLoading();
-
-
-    console.log(
-        "=============================================="
-    );
-
-    console.log(
-        "EDUCORE COURSE PLATFORM STARTING"
-    );
-
-    console.log(
-        "Page:",
-        window.location.href
-    );
-
-    console.log(
-        "=============================================="
-    );
-
-
-    /*
-     * Get selected course.
-     */
-
-    state.courseId =
-        getCourseId();
-
-
-    console.log(
-        "EduCore final course ID:",
-        state.courseId
-    );
-
-
-    /*
-     * Setup interface.
-     */
-
-    setupNavigation();
-
-    setupMoreMenu();
-
-    setupLessonNavigation();
-
-    setupContinueButtons();
-
-    setupExitCourse();
-
-
     try {
 
-        /*
-         * Load user.
-         *
-         * This MUST NOT prevent the course itself
-         * from loading.
-         */
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getUser();
 
-        try {
 
-            await loadUser();
-
-        } catch (userError) {
+        if (error) {
 
             console.warn(
-                "EduCore: User could not be loaded. Continuing with course:",
-                userError
+                "EduCore: Could not load user:",
+                error
             );
 
             state.user = null;
 
+            return null;
+
         }
 
 
-        /*
-         * Load course.
-         */
-
-        const courseLoaded =
-            await loadCourse();
+        state.user =
+            data?.user || null;
 
 
-        if (!courseLoaded) {
+        if (!state.user) {
 
-            console.error(
-                "EduCore: COURSE LOAD FAILED."
+            console.log(
+                "EduCore: No authenticated user."
             );
 
-            return;
+            return null;
 
         }
 
 
-        /*
-         * Load course hierarchy.
-         */
-
-        const modulesLoaded =
-            await loadModules();
+        const metadata =
+            state.user.user_metadata || {};
 
 
-        if (!modulesLoaded) {
+        const name =
+            metadata.full_name ||
+            metadata.name ||
+            metadata.display_name ||
+            state.user.email?.split("@")[0] ||
+            "Student";
+
+
+        const initials =
+            getInitials(name);
+
+
+        const topStudentName =
+            $("#top-student-name");
+
+        if (topStudentName) {
+
+            topStudentName.textContent =
+                name;
+
+        }
+
+
+        const railAvatar =
+            $("#rail-avatar");
+
+        if (railAvatar) {
+
+            railAvatar.textContent =
+                initials;
+
+        }
+
+
+        const topAvatar =
+            $("#top-avatar");
+
+        if (topAvatar) {
+
+            topAvatar.textContent =
+                initials;
+
+        }
+
+
+        const profileLargeAvatar =
+            $("#profile-large-avatar");
+
+        if (profileLargeAvatar) {
+
+            profileLargeAvatar.textContent =
+                initials;
+
+        }
+
+
+        const profileName =
+            $("#profile-name");
+
+        if (profileName) {
+
+            profileName.textContent =
+                name;
+
+        }
+
+
+        const profileEmail =
+            $("#profile-email");
+
+        if (profileEmail) {
+
+            profileEmail.textContent =
+                state.user.email || "—";
+
+        }
+
+
+        console.log(
+            "EduCore: Authenticated user:",
+            state.user.id
+        );
+
+
+        return state.user;
+
+    } catch (error) {
+
+        console.warn(
+            "EduCore: User loading failed:",
+            error
+        );
+
+        state.user = null;
+
+        return null;
+
+    }
+
+}
+
+
+/* =====================================================
+   COURSE
+===================================================== */
+
+async function loadCourse() {
+
+    state.course = null;
+
+
+    if (!state.courseId) {
+
+        console.error(
+            "EduCore: Cannot load course without a course ID."
+        );
+
+        renderNoCourse();
+
+        return false;
+
+    }
+
+
+    console.log(
+        "EduCore: Loading course with ID:",
+        state.courseId
+    );
+
+
+    try {
+
+        const result =
+            await supabaseClient
+                .from("courses")
+                .select("*")
+                .eq(
+                    "id",
+                    state.courseId
+                )
+                .limit(1);
+
+
+        console.log(
+            "EduCore: Course query result:",
+            result
+        );
+
+
+        if (result.error) {
 
             console.error(
-                "EduCore: Modules could not be loaded."
+                "EduCore: Course query error:",
+                result.error
             );
+
+            console.error(
+                "Code:",
+                result.error.code
+            );
+
+            console.error(
+                "Message:",
+                result.error.message
+            );
+
+            console.error(
+                "Details:",
+                result.error.details
+            );
+
+            console.error(
+                "Hint:",
+                result.error.hint
+            );
+
+            renderCourseError();
+
+            return false;
 
         }
 
 
-        /*
-         * loadModules() continues through:
-         *
-         * modules
-         * lessons
-         * sections
-         * activities
-         * questions
-         * media
-         * progress
-         */
-
-
-        renderEverything();
+        const rows =
+            result.data || [];
 
 
         console.log(
-            "=============================================="
+            "EduCore: Matching course rows:",
+            rows
         );
 
-        console.log(
-            "EDUCORE COURSE LOADING COMPLETE"
-        );
+
+        if (!rows.length) {
+
+            console.error(
+                "EduCore: No course was found for ID:",
+                state.courseId
+            );
+
+            renderNoCourse();
+
+            return false;
+
+        }
+
+
+        state.course =
+            rows[0];
+
 
         console.log(
-            "Course:",
+            "EduCore: COURSE LOADED:",
             state.course
         );
 
-        console.log(
-            "Course ID:",
-            state.courseId
-        );
 
         console.log(
-            "Modules:",
-            state.modules.length
+            "EduCore: Course title:",
+            state.course.title
         );
+
 
         console.log(
-            "Lessons:",
-            state.lessons.length
+            "EduCore: Course status:",
+            state.course.status
         );
 
-        console.log(
-            "Sections:",
-            state.sections.length
-        );
 
-        console.log(
-            "Activities:",
-            state.activities.length
-        );
+        renderCourse();
 
-        console.log(
-            "Questions:",
-            state.questions.length
-        );
 
-        console.log(
-            "Media:",
-            state.media.length
-        );
-
-        console.log(
-            "=============================================="
-        );
-
+        return true;
 
     } catch (error) {
 
         console.error(
-            "=============================================="
-        );
-
-        console.error(
-            "EDUCORE INITIALIZATION ERROR"
-        );
-
-        console.error(
+            "EduCore: Unexpected course loading error:",
             error
-        );
-
-        console.error(
-            "=============================================="
         );
 
         renderCourseError();
 
-    } finally {
-
-        hideLoading();
+        return false;
 
     }
 
@@ -879,135 +822,7 @@ async function init() {
 
 
 /* =====================================================
-   START
-===================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
-
-/* =====================================================
-   COURSE RENDER
-===================================================== */
-
-function renderCourse() {
-
-    const course =
-        state.course;
-
-
-    if (!course) {
-        return;
-    }
-
-
-    const title =
-        course.title ||
-        "Untitled course";
-
-
-    const description =
-        course.description ||
-        "Continue your learning journey with EduCore.";
-
-
-    const category =
-        course.category ||
-        course.language ||
-        "COURSE";
-
-
-    const level =
-        course.level ||
-        "All levels";
-
-
-    const duration =
-        Number(
-            course.duration_minutes
-        ) ||
-
-        Number(
-            course.duration
-        ) ||
-
-        calculateCourseDuration();
-
-
-    const categoryElement =
-        $("#course-category");
-
-    if (categoryElement) {
-
-        categoryElement.textContent =
-            category;
-
-    }
-
-
-    const titleElement =
-        $("#course-title");
-
-    if (titleElement) {
-
-        titleElement.textContent =
-            title;
-
-    }
-
-
-    const descriptionElement =
-        $("#course-description");
-
-    if (descriptionElement) {
-
-        descriptionElement.textContent =
-            description;
-
-    }
-
-
-    const levelElement =
-        $("#course-level");
-
-    if (levelElement) {
-
-        levelElement.textContent =
-            level;
-
-    }
-
-
-    const durationElement =
-        $("#course-duration");
-
-    if (durationElement) {
-
-        durationElement.textContent =
-            formatDuration(duration);
-
-    }
-
-
-    const topCourseName =
-        $("#top-course-name");
-
-    if (topCourseName) {
-
-        topCourseName.textContent =
-            title;
-
-    }
-
-
-    updateLessonCount();
-
-}
-
-
-/* =====================================================
-   LOAD MODULES
+   MODULES
 ===================================================== */
 
 async function loadModules() {
@@ -1018,7 +833,7 @@ async function loadModules() {
     if (!state.courseId) {
 
         console.error(
-            "EduCore: Cannot load modules without a course ID."
+            "EduCore: Cannot load modules without course ID."
         );
 
         return false;
@@ -1082,7 +897,7 @@ async function loadModules() {
 
 
 /* =====================================================
-   LOAD LESSONS
+   LESSONS
 ===================================================== */
 
 async function loadLessons() {
@@ -1100,7 +915,7 @@ async function loadLessons() {
     if (!moduleIds.length) {
 
         console.log(
-            "EduCore: No modules found for this course."
+            "EduCore: No modules found."
         );
 
         await loadLessonSections();
@@ -1111,7 +926,7 @@ async function loadLessons() {
 
 
     console.log(
-        "EduCore: Loading lessons for modules:",
+        "EduCore: Loading lessons:",
         moduleIds
     );
 
@@ -1166,7 +981,7 @@ async function loadLessons() {
 
 
 /* =====================================================
-   LOAD LESSON SECTIONS
+   LESSON SECTIONS
 ===================================================== */
 
 async function loadLessonSections() {
@@ -1184,7 +999,7 @@ async function loadLessonSections() {
     if (!lessonIds.length) {
 
         console.log(
-            "EduCore: No lessons found. No sections to load."
+            "EduCore: No lessons found."
         );
 
         await loadActivities();
@@ -1195,7 +1010,7 @@ async function loadLessonSections() {
 
 
     console.log(
-        "EduCore: Loading sections for lessons:",
+        "EduCore: Loading lesson sections:",
         lessonIds
     );
 
@@ -1222,7 +1037,7 @@ async function loadLessonSections() {
     if (error) {
 
         console.error(
-            "EduCore: Lesson section loading error:",
+            "EduCore: Section loading error:",
             error
         );
 
@@ -1250,7 +1065,7 @@ async function loadLessonSections() {
 
 
 /* =====================================================
-   LOAD ACTIVITIES
+   ACTIVITIES
 ===================================================== */
 
 async function loadActivities() {
@@ -1268,7 +1083,7 @@ async function loadActivities() {
     if (!sectionIds.length) {
 
         console.log(
-            "EduCore: No sections found. No activities to load."
+            "EduCore: No sections found."
         );
 
         await loadQuestions();
@@ -1279,7 +1094,7 @@ async function loadActivities() {
 
 
     console.log(
-        "EduCore: Loading activities for sections:",
+        "EduCore: Loading activities:",
         sectionIds
     );
 
@@ -1334,7 +1149,7 @@ async function loadActivities() {
 
 
 /* =====================================================
-   LOAD QUESTIONS
+   QUESTIONS
 ===================================================== */
 
 async function loadQuestions() {
@@ -1352,7 +1167,7 @@ async function loadQuestions() {
     if (!activityIds.length) {
 
         console.log(
-            "EduCore: No activities found. No questions to load."
+            "EduCore: No activities found."
         );
 
         await loadMedia();
@@ -1363,7 +1178,7 @@ async function loadQuestions() {
 
 
     console.log(
-        "EduCore: Loading questions for activities:",
+        "EduCore: Loading questions:",
         activityIds
     );
 
@@ -1388,13 +1203,6 @@ async function loadQuestions() {
 
 
     if (error) {
-
-        /*
-         * Questions are supporting content.
-         *
-         * A question-loading failure should not
-         * prevent the course itself from loading.
-         */
 
         console.warn(
             "EduCore: Question loading error:",
@@ -1423,7 +1231,7 @@ async function loadQuestions() {
 
 
 /* =====================================================
-   LOAD MEDIA
+   MEDIA
 ===================================================== */
 
 async function loadMedia() {
@@ -1431,27 +1239,10 @@ async function loadMedia() {
     state.media = [];
 
 
-    /*
-     * Media can belong directly to:
-     *
-     * course
-     * lesson
-     * activity
-     *
-     * We therefore perform separate queries
-     * instead of constructing a complicated
-     * PostgREST OR expression.
-     *
-     * This is more reliable and much easier
-     * to debug.
-     */
-
     const requests = [];
 
 
-    /* -------------------------------------------------
-       COURSE MEDIA
-    ------------------------------------------------- */
+    /* COURSE MEDIA */
 
     if (state.courseId) {
 
@@ -1470,9 +1261,7 @@ async function loadMedia() {
     }
 
 
-    /* -------------------------------------------------
-       LESSON MEDIA
-    ------------------------------------------------- */
+    /* LESSON MEDIA */
 
     const lessonIds =
         state.lessons.map(
@@ -1498,9 +1287,7 @@ async function loadMedia() {
     }
 
 
-    /* -------------------------------------------------
-       ACTIVITY MEDIA
-    ------------------------------------------------- */
+    /* ACTIVITY MEDIA */
 
     const activityIds =
         state.activities.map(
@@ -1527,10 +1314,6 @@ async function loadMedia() {
 
 
     if (!requests.length) {
-
-        console.log(
-            "EduCore: No media queries required."
-        );
 
         await loadProgress();
 
@@ -1606,563 +1389,6 @@ async function loadMedia() {
 
 }
 
-/* =====================================================
-   PROGRESS
-===================================================== */
-
-async function loadProgress() {
-
-    state.progress = {};
-
-    state.activityProgress = {};
-
-
-    if (!state.user) {
-
-        renderEverything();
-
-        return;
-
-    }
-
-
-    /* -------------------------------------------------
-       LESSON PROGRESS
-    ------------------------------------------------- */
-
-    if (state.lessons.length) {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("lesson_progress")
-                .select("*")
-                .eq("student_id", state.user.id)
-                .in(
-                    "lesson_id",
-                    state.lessons.map(
-                        lesson => lesson.id
-                    )
-                );
-
-
-        if (!error && data) {
-
-            data.forEach(row => {
-
-                state.progress[row.lesson_id] =
-                    row;
-
-            });
-
-        } else if (error) {
-
-            console.warn(
-                "Lesson progress loading error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /* -------------------------------------------------
-       ACTIVITY PROGRESS
-    ------------------------------------------------- */
-
-    if (state.activities.length) {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("activity_progress")
-                .select("*")
-                .eq("student_id", state.user.id)
-                .in(
-                    "activity_id",
-                    state.activities.map(
-                        activity => activity.id
-                    )
-                );
-
-
-        if (!error && data) {
-
-            data.forEach(row => {
-
-                state.activityProgress[
-                    row.activity_id
-                ] = row;
-
-            });
-
-        } else if (error) {
-
-            console.warn(
-                "Activity progress loading error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    renderEverything();
-
-}
-
-
-/* =====================================================
-   COURSE DURATION
-===================================================== */
-
-function calculateCourseDuration() {
-
-    return state.lessons.reduce(
-        (total, lesson) =>
-            total +
-            (Number(
-                lesson.duration_minutes
-            ) || 0),
-        0
-    );
-
-}
-
-
-/* =====================================================
-   LESSON COUNT
-===================================================== */
-
-function updateLessonCount() {
-
-    const count =
-        state.lessons.length;
-
-
-    const element =
-        $("#course-lesson-count");
-
-    if (element) {
-
-        element.textContent =
-            `${count} ${
-                count === 1
-                    ? "lesson"
-                    : "lessons"
-            }`;
-
-    }
-
-
-    const completed =
-        countCompleted();
-
-
-    const statCompleted =
-        $("#stat-completed");
-
-    if (statCompleted) {
-        statCompleted.textContent =
-            completed;
-    }
-
-
-    const progressLessons =
-        $("#progress-lessons");
-
-    if (progressLessons) {
-        progressLessons.textContent =
-            completed;
-    }
-
-}
-
-
-/* =====================================================
-   LESSON STATUS
-===================================================== */
-
-function lessonCompleted(lesson) {
-
-    if (!lesson) {
-        return false;
-    }
-
-
-    const value =
-        state.progress[lesson.id];
-
-
-    if (!value) {
-        return false;
-    }
-
-
-    return (
-        value.completed === true ||
-        value.status === "completed" ||
-        Number(value.progress_percent) >= 100
-    );
-
-}
-
-
-/* =====================================================
-   COUNT COMPLETED
-===================================================== */
-
-function countCompleted() {
-
-    return state.lessons.filter(
-        lesson =>
-            lessonCompleted(lesson)
-    ).length;
-
-}
-
-
-/* =====================================================
-   COURSE PROGRESS
-===================================================== */
-
-function calculateProgress() {
-
-    const total =
-        state.lessons.length;
-
-
-    if (!total) {
-        return 0;
-    }
-
-
-    return Math.round(
-        (
-            countCompleted() /
-            total
-        ) * 100
-    );
-
-}
-
-
-/* =====================================================
-   PROGRESS RENDER
-===================================================== */
-
-function renderProgress() {
-
-    const progress =
-        calculateProgress();
-
-
-    const top =
-        $("#top-progress-value");
-
-    if (top) {
-        top.textContent =
-            `${progress}%`;
-    }
-
-
-    const hero =
-        $("#hero-progress-value");
-
-    if (hero) {
-        hero.textContent =
-            `${progress}%`;
-    }
-
-
-    const dashboard =
-        $("#progress-dashboard-value");
-
-    if (dashboard) {
-        dashboard.textContent =
-            `${progress}%`;
-    }
-
-
-    const ring =
-        $("#hero-progress");
-
-
-    if (ring) {
-
-        const degrees =
-            progress * 3.6;
-
-        ring.style.background =
-            `conic-gradient(
-                var(--purple)
-                ${degrees}deg,
-                #eeecf3
-                ${degrees}deg
-            )`;
-
-    }
-
-
-    const completed =
-        countCompleted();
-
-
-    const streak =
-        $("#progress-streak");
-
-    if (streak) {
-        streak.textContent =
-            "0";
-    }
-
-
-    const statStreak =
-        $("#stat-streak");
-
-    if (statStreak) {
-        statStreak.textContent =
-            "0";
-    }
-
-
-    const xp =
-        completed * 10;
-
-
-    const statXP =
-        $("#stat-xp");
-
-    if (statXP) {
-        statXP.textContent =
-            String(xp);
-    }
-
-
-    const progressXP =
-        $("#progress-xp");
-
-    if (progressXP) {
-        progressXP.textContent =
-            String(xp);
-    }
-
-
-    const statCompleted =
-        $("#stat-completed");
-
-    if (statCompleted) {
-        statCompleted.textContent =
-            completed;
-    }
-
-
-    const progressLessons =
-        $("#progress-lessons");
-
-    if (progressLessons) {
-        progressLessons.textContent =
-            completed;
-    }
-
-
-    calculateLearningTime();
-
-}
-
-
-/* =====================================================
-   LEARNING TIME
-===================================================== */
-
-function calculateLearningTime() {
-
-    const minutes =
-        state.lessons.reduce(
-            (total, lesson) => {
-
-                if (
-                    lessonCompleted(lesson)
-                ) {
-
-                    return total +
-                        (
-                            Number(
-                                lesson.duration_minutes
-                            ) || 0
-                        );
-
-                }
-
-                return total;
-
-            },
-            0
-        );
-
-
-    const element =
-        $("#stat-time");
-
-    if (element) {
-
-        element.textContent =
-            formatDuration(minutes);
-
-    }
-
-}
-
-
-/* =====================================================
-   CONTINUE LESSON
-===================================================== */
-
-function getContinueLesson() {
-
-    if (!state.lessons.length) {
-        return null;
-    }
-
-
-    const incomplete =
-        state.lessons.find(
-            lesson =>
-                !lessonCompleted(lesson)
-        );
-
-
-    return (
-        incomplete ||
-        state.lessons[
-            state.lessons.length - 1
-        ]
-    );
-
-}
-
-
-/* =====================================================
-   MODULE LOOKUP
-===================================================== */
-
-function getModuleForLesson(lesson) {
-
-    if (!lesson) {
-        return null;
-    }
-
-
-    return (
-        state.modules.find(
-            module =>
-                String(module.id) ===
-                String(lesson.module_id)
-        ) ||
-        null
-    );
-
-}
-
-
-/* =====================================================
-   SECTIONS FOR LESSON
-===================================================== */
-
-function getSectionsForLesson(lessonId) {
-
-    return state.sections
-        .filter(
-            section =>
-                String(section.lesson_id) ===
-                String(lessonId)
-        )
-        .sort(
-            (a, b) =>
-                Number(a.sort_order || 0) -
-                Number(b.sort_order || 0)
-        );
-
-}
-
-
-/* =====================================================
-   ACTIVITIES FOR SECTION
-===================================================== */
-
-function getActivitiesForSection(sectionId) {
-
-    return state.activities
-        .filter(
-            activity =>
-                String(activity.section_id) ===
-                String(sectionId)
-        )
-        .sort(
-            (a, b) =>
-                Number(a.sort_order || 0) -
-                Number(b.sort_order || 0)
-        );
-
-}
-
-
-/* =====================================================
-   QUESTIONS FOR ACTIVITY
-===================================================== */
-
-function getQuestionsForActivity(activityId) {
-
-    return state.questions
-        .filter(
-            question =>
-                String(question.activity_id) ===
-                String(activityId)
-        )
-        .sort(
-            (a, b) =>
-                Number(a.sort_order || 0) -
-                Number(b.sort_order || 0)
-        );
-
-}
-
-
-/* =====================================================
-   MEDIA FOR LESSON
-===================================================== */
-
-function getMediaForLesson(lessonId) {
-
-    return state.media.filter(
-        item =>
-            String(item.lesson_id) ===
-            String(lessonId)
-    );
-
-}
-
-
-/* =====================================================
-   MEDIA FOR ACTIVITY
-===================================================== */
-
-function getMediaForActivity(activityId) {
-
-    return state.media.filter(
-        item =>
-            String(item.activity_id) ===
-            String(activityId)
-    );
-
-}
-
 
 /* =====================================================
    MEDIA URL
@@ -2209,15 +1435,856 @@ function resolveMediaURL(media) {
     }
 
 
-    /*
-       Storage bucket will be connected here.
+    if (media.storage_path) {
 
-       We deliberately don't guess the bucket
-       name until the actual Storage configuration
-       is confirmed.
-    */
+        try {
+
+            const {
+                data
+            } =
+                supabaseClient
+                    .storage
+                    .from("course-media")
+                    .getPublicUrl(
+                        media.storage_path
+                    );
+
+
+            if (
+                data &&
+                data.publicUrl
+            ) {
+
+                return data.publicUrl;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "EduCore: Could not resolve media URL:",
+                error
+            );
+
+        }
+
+    }
+
 
     return "";
+
+}
+
+
+/* =====================================================
+   PROGRESS
+=====================================================
+
+   Uses the actual EduCore table:
+
+   student_progress
+
+   A row can represent:
+
+   lesson:
+      lesson_id = value
+      activity_id = null
+
+   activity:
+      activity_id = value
+
+===================================================== */
+
+async function loadProgress() {
+
+    state.progress = {};
+
+    state.activityProgress = {};
+
+
+    if (!state.user) {
+
+        console.log(
+            "EduCore: No user. Progress will remain local."
+        );
+
+        return true;
+
+    }
+
+
+    /* -------------------------------------------------
+       LESSON PROGRESS
+    ------------------------------------------------- */
+
+    const lessonIds =
+        state.lessons.map(
+            lesson =>
+                lesson.id
+        );
+
+
+    if (lessonIds.length) {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("student_progress")
+                .select("*")
+                .eq(
+                    "student_id",
+                    state.user.id
+                )
+                .in(
+                    "lesson_id",
+                    lessonIds
+                );
+
+
+        if (error) {
+
+            console.warn(
+                "EduCore: Lesson progress loading error:",
+                error
+            );
+
+        } else {
+
+            (data || []).forEach(row => {
+
+                if (
+                    row.lesson_id !== null &&
+                    row.lesson_id !== undefined &&
+                    (
+                        row.activity_id === null ||
+                        row.activity_id === undefined
+                    )
+                ) {
+
+                    state.progress[
+                        row.lesson_id
+                    ] = row;
+
+                }
+
+            });
+
+        }
+
+    }
+
+
+    /* -------------------------------------------------
+       ACTIVITY PROGRESS
+    ------------------------------------------------- */
+
+    const activityIds =
+        state.activities.map(
+            activity =>
+                activity.id
+        );
+
+
+    if (activityIds.length) {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("student_progress")
+                .select("*")
+                .eq(
+                    "student_id",
+                    state.user.id
+                )
+                .in(
+                    "activity_id",
+                    activityIds
+                );
+
+
+        if (error) {
+
+            console.warn(
+                "EduCore: Activity progress loading error:",
+                error
+            );
+
+        } else {
+
+            (data || []).forEach(row => {
+
+                if (
+                    row.activity_id !== null &&
+                    row.activity_id !== undefined
+                ) {
+
+                    state.activityProgress[
+                        row.activity_id
+                    ] = row;
+
+                }
+
+            });
+
+        }
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =====================================================
+   COURSE DURATION
+===================================================== */
+
+function calculateCourseDuration() {
+
+    return state.lessons.reduce(
+        (total, lesson) =>
+            total +
+            (
+                Number(
+                    lesson.duration_minutes
+                ) || 0
+            ),
+        0
+    );
+
+}
+
+
+/* =====================================================
+   LESSON COUNT
+===================================================== */
+
+function updateLessonCount() {
+
+    const count =
+        state.lessons.length;
+
+
+    const element =
+        $("#course-lesson-count");
+
+    if (element) {
+
+        element.textContent =
+            `${count} ${
+                count === 1
+                    ? "lesson"
+                    : "lessons"
+            }`;
+
+    }
+
+
+    const completed =
+        countCompleted();
+
+
+    const statCompleted =
+        $("#stat-completed");
+
+    if (statCompleted) {
+
+        statCompleted.textContent =
+            completed;
+
+    }
+
+
+    const progressLessons =
+        $("#progress-lessons");
+
+    if (progressLessons) {
+
+        progressLessons.textContent =
+            completed;
+
+    }
+
+}
+
+
+/* =====================================================
+   LESSON STATUS
+===================================================== */
+
+function lessonCompleted(lesson) {
+
+    if (!lesson) {
+        return false;
+    }
+
+
+    const value =
+        state.progress[
+            lesson.id
+        ];
+
+
+    if (!value) {
+        return false;
+    }
+
+
+    return (
+        value.completed === true ||
+        value.status === "completed" ||
+        Number(
+            value.progress_percent
+        ) >= 100
+    );
+
+}
+
+
+/* =====================================================
+   COUNT COMPLETED
+===================================================== */
+
+function countCompleted() {
+
+    return state.lessons.filter(
+        lesson =>
+            lessonCompleted(
+                lesson
+            )
+    ).length;
+
+}
+
+
+/* =====================================================
+   COURSE PROGRESS
+===================================================== */
+
+function calculateProgress() {
+
+    const total =
+        state.lessons.length;
+
+
+    if (!total) {
+        return 0;
+    }
+
+
+    return Math.round(
+        (
+            countCompleted() /
+            total
+        ) * 100
+    );
+
+}
+
+
+/* =====================================================
+   PROGRESS RENDER
+===================================================== */
+
+function renderProgress() {
+
+    const progress =
+        calculateProgress();
+
+
+    const top =
+        $("#top-progress-value");
+
+    if (top) {
+
+        top.textContent =
+            `${progress}%`;
+
+    }
+
+
+    const hero =
+        $("#hero-progress-value");
+
+    if (hero) {
+
+        hero.textContent =
+            `${progress}%`;
+
+    }
+
+
+    const dashboard =
+        $("#progress-dashboard-value");
+
+    if (dashboard) {
+
+        dashboard.textContent =
+            `${progress}%`;
+
+    }
+
+
+    const ring =
+        $("#hero-progress");
+
+
+    if (ring) {
+
+        const degrees =
+            progress * 3.6;
+
+        ring.style.background =
+            `conic-gradient(
+                var(--purple)
+                ${degrees}deg,
+                #eeecf3
+                ${degrees}deg
+            )`;
+
+    }
+
+
+    const completed =
+        countCompleted();
+
+
+    const streak =
+        $("#progress-streak");
+
+    if (streak) {
+
+        streak.textContent =
+            "0";
+
+    }
+
+
+    const statStreak =
+        $("#stat-streak");
+
+    if (statStreak) {
+
+        statStreak.textContent =
+            "0";
+
+    }
+
+
+    const xp =
+        completed * 10;
+
+
+    const statXP =
+        $("#stat-xp");
+
+    if (statXP) {
+
+        statXP.textContent =
+            String(xp);
+
+    }
+
+
+    const progressXP =
+        $("#progress-xp");
+
+    if (progressXP) {
+
+        progressXP.textContent =
+            String(xp);
+
+    }
+
+
+    const statCompleted =
+        $("#stat-completed");
+
+    if (statCompleted) {
+
+        statCompleted.textContent =
+            completed;
+
+    }
+
+
+    const progressLessons =
+        $("#progress-lessons");
+
+    if (progressLessons) {
+
+        progressLessons.textContent =
+            completed;
+
+    }
+
+
+    calculateLearningTime();
+
+}
+
+
+/* =====================================================
+   LEARNING TIME
+===================================================== */
+
+function calculateLearningTime() {
+
+    const minutes =
+        state.lessons.reduce(
+            (total, lesson) => {
+
+                if (
+                    lessonCompleted(
+                        lesson
+                    )
+                ) {
+
+                    return (
+                        total +
+                        (
+                            Number(
+                                lesson.duration_minutes
+                            ) || 0
+                        )
+                    );
+
+                }
+
+                return total;
+
+            },
+            0
+        );
+
+
+    const element =
+        $("#stat-time");
+
+    if (element) {
+
+        element.textContent =
+            formatDuration(
+                minutes
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   CONTINUE LESSON
+===================================================== */
+
+function getContinueLesson() {
+
+    if (!state.lessons.length) {
+        return null;
+    }
+
+
+    const incomplete =
+        state.lessons.find(
+            lesson =>
+                !lessonCompleted(
+                    lesson
+                )
+        );
+
+
+    return (
+        incomplete ||
+        state.lessons[
+            state.lessons.length - 1
+        ]
+    );
+
+}
+
+
+/* =====================================================
+   MODULE LOOKUP
+===================================================== */
+
+function getModuleForLesson(lesson) {
+
+    if (!lesson) {
+        return null;
+    }
+
+
+    return (
+        state.modules.find(
+            module =>
+                String(
+                    module.id
+                ) ===
+                String(
+                    lesson.module_id
+                )
+        ) ||
+        null
+    );
+
+}
+
+
+/* =====================================================
+   SECTIONS FOR LESSON
+===================================================== */
+
+function getSectionsForLesson(
+    lessonId
+) {
+
+    return state.sections
+        .filter(
+            section =>
+                String(
+                    section.lesson_id
+                ) ===
+                String(
+                    lessonId
+                )
+        )
+        .sort(
+            (a, b) =>
+                Number(
+                    a.sort_order || 0
+                ) -
+                Number(
+                    b.sort_order || 0
+                )
+        );
+
+}
+
+
+/* =====================================================
+   ACTIVITIES FOR SECTION
+===================================================== */
+
+function getActivitiesForSection(
+    sectionId
+) {
+
+    return state.activities
+        .filter(
+            activity =>
+                String(
+                    activity.section_id
+                ) ===
+                String(
+                    sectionId
+                )
+        )
+        .sort(
+            (a, b) =>
+                Number(
+                    a.sort_order || 0
+                ) -
+                Number(
+                    b.sort_order || 0
+                )
+        );
+
+}
+
+
+/* =====================================================
+   QUESTIONS FOR ACTIVITY
+===================================================== */
+
+function getQuestionsForActivity(
+    activityId
+) {
+
+    return state.questions
+        .filter(
+            question =>
+                String(
+                    question.activity_id
+                ) ===
+                String(
+                    activityId
+                )
+        )
+        .sort(
+            (a, b) =>
+                Number(
+                    a.sort_order || 0
+                ) -
+                Number(
+                    b.sort_order || 0
+                )
+        );
+
+}
+
+
+/* =====================================================
+   MEDIA FOR LESSON
+===================================================== */
+
+function getMediaForLesson(
+    lessonId
+) {
+
+    return state.media.filter(
+        item =>
+            String(
+                item.lesson_id
+            ) ===
+            String(
+                lessonId
+            )
+    );
+
+}
+
+
+/* =====================================================
+   MEDIA FOR ACTIVITY
+===================================================== */
+
+function getMediaForActivity(
+    activityId
+) {
+
+    return state.media.filter(
+        item =>
+            String(
+                item.activity_id
+            ) ===
+            String(
+                activityId
+            )
+    );
+
+}
+
+
+/* =====================================================
+   COURSE RENDER
+===================================================== */
+
+function renderCourse() {
+
+    const course =
+        state.course;
+
+
+    if (!course) {
+        return;
+    }
+
+
+    const title =
+        course.title ||
+        "Untitled course";
+
+
+    const description =
+        course.description ||
+        "Continue your learning journey with EduCore.";
+
+
+    const category =
+        course.category ||
+        course.language ||
+        "COURSE";
+
+
+    const level =
+        course.level ||
+        "All levels";
+
+
+    const duration =
+        Number(
+            course.duration_minutes
+        ) ||
+        Number(
+            course.duration
+        ) ||
+        calculateCourseDuration();
+
+
+    const categoryElement =
+        $("#course-category");
+
+    if (categoryElement) {
+
+        categoryElement.textContent =
+            category;
+
+    }
+
+
+    const titleElement =
+        $("#course-title");
+
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+
+    }
+
+
+    const descriptionElement =
+        $("#course-description");
+
+    if (descriptionElement) {
+
+        descriptionElement.textContent =
+            description;
+
+    }
+
+
+    const levelElement =
+        $("#course-level");
+
+    if (levelElement) {
+
+        levelElement.textContent =
+            level;
+
+    }
+
+
+    const durationElement =
+        $("#course-duration");
+
+    if (durationElement) {
+
+        durationElement.textContent =
+            formatDuration(
+                duration
+            );
+
+    }
+
+
+    const topCourseName =
+        $("#top-course-name");
+
+    if (topCourseName) {
+
+        topCourseName.textContent =
+            title;
+
+    }
+
+
+    updateLessonCount();
 
 }
 
@@ -2238,8 +2305,10 @@ function renderContinue() {
             $("#continue-lesson");
 
         if (title) {
+
             title.textContent =
                 "Your course is ready";
+
         }
 
 
@@ -2247,8 +2316,10 @@ function renderContinue() {
             $("#continue-description");
 
         if (description) {
+
             description.textContent =
                 "Your first lesson will appear here.";
+
         }
 
         return;
@@ -2257,20 +2328,30 @@ function renderContinue() {
 
 
     const module =
-        getModuleForLesson(lesson);
+        getModuleForLesson(
+            lesson
+        );
 
 
     const index =
-        state.lessons.indexOf(lesson);
+        state.lessons.indexOf(
+            lesson
+        );
 
 
     const number =
         $("#continue-number");
 
     if (number) {
+
         number.textContent =
-            String(index + 1)
-                .padStart(2, "0");
+            String(
+                index + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
     }
 
 
@@ -2278,9 +2359,11 @@ function renderContinue() {
         $("#continue-module");
 
     if (moduleElement) {
+
         moduleElement.textContent =
             module?.title ||
             "Course lesson";
+
     }
 
 
@@ -2288,9 +2371,11 @@ function renderContinue() {
         $("#continue-lesson");
 
     if (lessonElement) {
+
         lessonElement.textContent =
             lesson.title ||
             "Lesson";
+
     }
 
 
@@ -2298,9 +2383,11 @@ function renderContinue() {
         $("#continue-description");
 
     if (description) {
+
         description.textContent =
             lesson.description ||
             "Continue your learning journey.";
+
     }
 
 }
@@ -2341,7 +2428,9 @@ function renderPath() {
                             String(
                                 lesson.module_id
                             ) ===
-                            String(module.id)
+                            String(
+                                module.id
+                            )
                     );
 
 
@@ -2376,8 +2465,12 @@ function renderPath() {
 
                         <div class="path-number">
 
-                            ${String(index + 1)
-                                .padStart(2, "0")}
+                            ${String(
+                                index + 1
+                            ).padStart(
+                                2,
+                                "0"
+                            )}
 
                         </div>
 
@@ -2460,16 +2553,21 @@ function renderLearnList() {
             (lesson, index) => {
 
                 const module =
-                    getModuleForLesson(lesson);
+                    getModuleForLesson(
+                        lesson
+                    );
 
 
                 const completed =
-                    lessonCompleted(lesson);
+                    lessonCompleted(
+                        lesson
+                    );
 
 
                 const progress =
-                    state.progress[lesson.id]
-                        ?.progress_percent || 0;
+                    state.progress[
+                        lesson.id
+                    ]?.progress_percent || 0;
 
 
                 return `
@@ -2487,8 +2585,12 @@ function renderLearnList() {
 
                         <div class="lesson-large-number">
 
-                            ${String(index + 1)
-                                .padStart(2, "0")}
+                            ${String(
+                                index + 1
+                            ).padStart(
+                                2,
+                                "0"
+                            )}
 
                         </div>
 
@@ -2591,7 +2693,9 @@ function renderContents() {
                             String(
                                 lesson.module_id
                             ) ===
-                            String(module.id)
+                            String(
+                                module.id
+                            )
                     );
 
 
@@ -2608,7 +2712,10 @@ function renderContents() {
 
                                 ${String(
                                     moduleIndex + 1
-                                ).padStart(2, "0")}
+                                ).padStart(
+                                    2,
+                                    "0"
+                                )}
 
                             </div>
 
@@ -2623,7 +2730,6 @@ function renderContents() {
                                     )}
 
                                 </strong>
-
 
                                 <span>
 
@@ -2663,7 +2769,10 @@ function renderContents() {
 
                                             ${String(
                                                 lessonIndex + 1
-                                            ).padStart(2, "0")}
+                                            ).padStart(
+                                                2,
+                                                "0"
+                                            )}
 
                                         </span>
 
@@ -2717,8 +2826,12 @@ function renderContents() {
                 () => {
 
                     button
-                        .closest(".content-module")
-                        .classList.toggle("open");
+                        .closest(
+                            ".content-module"
+                        )
+                        .classList.toggle(
+                            "open"
+                        );
 
                 }
             );
@@ -2749,13 +2862,19 @@ function renderContents() {
    LESSON PLAYER
 ===================================================== */
 
-async function openLesson(lessonId) {
+async function openLesson(
+    lessonId
+) {
 
     const lesson =
         state.lessons.find(
             item =>
-                String(item.id) ===
-                String(lessonId)
+                String(
+                    item.id
+                ) ===
+                String(
+                    lessonId
+                )
         );
 
 
@@ -2769,7 +2888,9 @@ async function openLesson(lessonId) {
 
 
     state.currentLessonIndex =
-        state.lessons.indexOf(lesson);
+        state.lessons.indexOf(
+            lesson
+        );
 
 
     renderLessonPlayer();
@@ -2778,7 +2899,9 @@ async function openLesson(lessonId) {
     showScreen("lesson");
 
 
-    await loadLessonContent(lesson);
+    await loadLessonContent(
+        lesson
+    );
 
 
     if (state.user) {
@@ -2808,7 +2931,9 @@ function renderLessonPlayer() {
 
 
     const module =
-        getModuleForLesson(lesson);
+        getModuleForLesson(
+            lesson
+        );
 
 
     const moduleName =
@@ -2840,7 +2965,9 @@ function renderLessonPlayer() {
     if (status) {
 
         status.textContent =
-            lessonCompleted(lesson)
+            lessonCompleted(
+                lesson
+            )
                 ? "Completed"
                 : "In progress";
 
@@ -2916,7 +3043,9 @@ function renderLessonPlayer() {
    LESSON CONTENT
 ===================================================== */
 
-async function loadLessonContent(lesson) {
+async function loadLessonContent(
+    lesson
+) {
 
     const container =
         $("#lesson-body");
@@ -2967,10 +3096,6 @@ async function loadLessonContent(lesson) {
     let html = "";
 
 
-    /* -------------------------------------------------
-       LESSON INTRODUCTION
-    ------------------------------------------------- */
-
     html += `
 
         <span class="eyebrow">
@@ -3002,10 +3127,6 @@ async function loadLessonContent(lesson) {
     }
 
 
-    /* -------------------------------------------------
-       LESSON-LEVEL MEDIA
-    ------------------------------------------------- */
-
     if (lessonMedia.length) {
 
         html += lessonMedia
@@ -3019,10 +3140,6 @@ async function loadLessonContent(lesson) {
 
     }
 
-
-    /* -------------------------------------------------
-       SECTIONS
-    ------------------------------------------------- */
 
     sections.forEach(
         (section, sectionIndex) => {
@@ -3038,12 +3155,19 @@ async function loadLessonContent(lesson) {
 
     container.innerHTML =
         html ||
-        `<div class="empty-state">
-            <strong>Lesson ready</strong>
-            <span>
-                Content will appear here.
-            </span>
-        </div>`;
+        `
+            <div class="empty-state">
+
+                <strong>
+                    Lesson ready
+                </strong>
+
+                <span>
+                    Content will appear here.
+                </span>
+
+            </div>
+        `;
 
 }
 
@@ -3075,7 +3199,10 @@ function renderSection(
                             <span class="eyebrow">
                                 SECTION ${String(
                                     sectionIndex + 1
-                                ).padStart(2, "0")}
+                                ).padStart(
+                                    2,
+                                    "0"
+                                )}
                             </span>
 
                             <h2>
@@ -3104,13 +3231,12 @@ function renderSection(
     `;
 
 
-    /* -------------------------------------------------
-       SECTION JSON CONTENT
-    ------------------------------------------------- */
-
     if (
         section.content &&
-        typeof section.content === "object"
+        (
+            typeof section.content === "object" ||
+            typeof section.content === "string"
+        )
     ) {
 
         html += renderSectionJSON(
@@ -3119,10 +3245,6 @@ function renderSection(
 
     }
 
-
-    /* -------------------------------------------------
-       ACTIVITIES
-    ------------------------------------------------- */
 
     if (activities.length) {
 
@@ -3179,7 +3301,9 @@ function renderSection(
    SECTION JSON CONTENT
 ===================================================== */
 
-function renderSectionJSON(content) {
+function renderSectionJSON(
+    content
+) {
 
     if (!content) {
         return "";
@@ -3192,7 +3316,9 @@ function renderSectionJSON(content) {
 
             <div class="content-block text-block">
 
-                ${escapeHTML(content)}
+                ${escapeHTML(
+                    content
+                )}
 
             </div>
 
@@ -3305,7 +3431,8 @@ function renderContentObject(
                             ""
                         )}"
                         alt="${escapeHTML(
-                            block.alt || ""
+                            block.alt ||
+                            ""
                         )}"
                     >
 
@@ -3576,7 +3703,9 @@ function renderQuestions(
                     activity.id
                 )}"
             >
+
                 Complete activity
+
             </button>
 
         `;
@@ -3599,10 +3728,12 @@ function renderQuestions(
                     >
 
                         <strong>
+
                             ${index + 1}.
                             ${escapeHTML(
                                 question.question_text
                             )}
+
                         </strong>
 
                         <input
@@ -3630,7 +3761,9 @@ function renderQuestions(
                 activity.id
             )}"
         >
+
             Check answers
+
         </button>
 
     `;
@@ -3667,8 +3800,8 @@ function renderMedia(
 
                 <p>
                     This media file is available
-                    but its storage URL has not
-                    been connected yet.
+                    but its storage URL could not
+                    be resolved.
                 </p>
 
             </div>
@@ -3687,7 +3820,9 @@ function renderMedia(
 
     if (
         type === "image" ||
-        media.mime_type?.startsWith("image/")
+        media.mime_type?.startsWith(
+            "image/"
+        )
     ) {
 
         return `
@@ -3695,9 +3830,12 @@ function renderMedia(
             <figure class="content-block">
 
                 <img
-                    src="${escapeHTML(url)}"
+                    src="${escapeHTML(
+                        url
+                    )}"
                     alt="${escapeHTML(
-                        media.file_name || ""
+                        media.file_name ||
+                        ""
                     )}"
                 >
 
@@ -3710,7 +3848,9 @@ function renderMedia(
 
     if (
         type === "audio" ||
-        media.mime_type?.startsWith("audio/")
+        media.mime_type?.startsWith(
+            "audio/"
+        )
     ) {
 
         return `
@@ -3727,7 +3867,9 @@ function renderMedia(
                 >
 
                     <source
-                        src="${escapeHTML(url)}"
+                        src="${escapeHTML(
+                            url
+                        )}"
                     >
 
                 </audio>
@@ -3741,7 +3883,9 @@ function renderMedia(
 
     if (
         type === "video" ||
-        media.mime_type?.startsWith("video/")
+        media.mime_type?.startsWith(
+            "video/"
+        )
     ) {
 
         return `
@@ -3755,7 +3899,9 @@ function renderMedia(
                 >
 
                     <source
-                        src="${escapeHTML(url)}"
+                        src="${escapeHTML(
+                            url
+                        )}"
                     >
 
                 </video>
@@ -3847,13 +3993,25 @@ async function completeCurrentLesson() {
     }
 
 
-    state.progress[lesson.id] = {
+    const now =
+        new Date().toISOString();
 
-        id:
-            state.progress[lesson.id]?.id,
+
+    state.progress[
+        lesson.id
+    ] = {
+
+        ...(
+            state.progress[
+                lesson.id
+            ] || {}
+        ),
 
         student_id:
             state.user?.id,
+
+        course_id:
+            state.courseId,
 
         lesson_id:
             lesson.id,
@@ -3868,7 +4026,7 @@ async function completeCurrentLesson() {
             true,
 
         completed_at:
-            new Date().toISOString()
+            now
 
     };
 
@@ -3900,20 +4058,37 @@ async function completeCurrentLesson() {
         student_id:
             state.user.id,
 
+        course_id:
+            state.courseId,
+
         lesson_id:
             lesson.id,
 
-        status:
-            "completed",
+        activity_id:
+            null,
 
-        progress_percent:
+        completed:
+            true,
+
+        score:
             100,
 
+        best_score:
+            100,
+
+        attempts:
+            Number(
+                existing?.attempts || 0
+            ) + 1,
+
+        last_attempt_at:
+            now,
+
         completed_at:
-            new Date().toISOString(),
+            now,
 
         updated_at:
-            new Date().toISOString()
+            now
 
     };
 
@@ -3925,8 +4100,10 @@ async function completeCurrentLesson() {
 
         result =
             await supabaseClient
-                .from("lesson_progress")
-                .update(payload)
+                .from("student_progress")
+                .update(
+                    payload
+                )
                 .eq(
                     "id",
                     existing.id
@@ -3936,8 +4113,12 @@ async function completeCurrentLesson() {
 
         result =
             await supabaseClient
-                .from("lesson_progress")
-                .insert(payload);
+                .from("student_progress")
+                .insert(
+                    payload
+                )
+                .select()
+                .single();
 
     }
 
@@ -3945,9 +4126,21 @@ async function completeCurrentLesson() {
     if (result.error) {
 
         console.warn(
-            "Lesson progress could not be saved:",
+            "EduCore: Lesson progress could not be saved:",
             result.error
         );
+
+        return;
+
+    }
+
+
+    if (result.data) {
+
+        state.progress[
+            lesson.id
+        ] =
+            result.data;
 
     }
 
@@ -3962,7 +4155,10 @@ async function markLessonStarted(
     lesson
 ) {
 
-    if (!state.user || !lesson) {
+    if (
+        !state.user ||
+        !lesson
+    ) {
         return;
     }
 
@@ -3973,87 +4169,91 @@ async function markLessonStarted(
         ];
 
 
-    if (existing?.id) {
-
-        if (
-            existing.status === "completed"
-        ) {
-            return;
-        }
-
-
-        const result =
-            await supabaseClient
-                .from("lesson_progress")
-                .update({
-
-                    status:
-                        "in_progress",
-
-                    progress_percent:
-                        Math.max(
-                            Number(
-                                existing.progress_percent
-                            ) || 0,
-                            1
-                        ),
-
-                    started_at:
-                        existing.started_at ||
-                        new Date().toISOString(),
-
-                    updated_at:
-                        new Date().toISOString()
-
-                })
-                .eq(
-                    "id",
-                    existing.id
-                );
-
-
-        if (result.error) {
-
-            console.warn(
-                "Could not update lesson start:",
-                result.error
-            );
-
-        }
-
+    if (
+        existing?.status ===
+        "completed"
+    ) {
 
         return;
 
     }
 
 
-    const result =
-        await supabaseClient
-            .from("lesson_progress")
-            .insert({
+    const now =
+        new Date().toISOString();
 
-                student_id:
-                    state.user.id,
 
-                lesson_id:
-                    lesson.id,
+    const payload = {
 
-                status:
-                    "in_progress",
+        student_id:
+            state.user.id,
 
-                progress_percent:
-                    1,
+        course_id:
+            state.courseId,
 
-                started_at:
-                    new Date().toISOString()
+        lesson_id:
+            lesson.id,
 
-            });
+        activity_id:
+            null,
+
+        completed:
+            false,
+
+        status:
+            "in_progress",
+
+        progress_percent:
+            Math.max(
+                Number(
+                    existing?.progress_percent
+                ) || 0,
+                1
+            ),
+
+        last_attempt_at:
+            now,
+
+        updated_at:
+            now
+
+    };
+
+
+    let result;
+
+
+    if (existing?.id) {
+
+        result =
+            await supabaseClient
+                .from("student_progress")
+                .update(
+                    payload
+                )
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+    } else {
+
+        result =
+            await supabaseClient
+                .from("student_progress")
+                .insert(
+                    payload
+                )
+                .select()
+                .single();
+
+    }
 
 
     if (result.error) {
 
         console.warn(
-            "Could not create lesson progress:",
+            "EduCore: Could not save lesson start:",
             result.error
         );
 
@@ -4062,21 +4262,14 @@ async function markLessonStarted(
     }
 
 
-    state.progress[lesson.id] = {
+    if (result.data) {
 
-        student_id:
-            state.user.id,
+        state.progress[
+            lesson.id
+        ] =
+            result.data;
 
-        lesson_id:
-            lesson.id,
-
-        status:
-            "in_progress",
-
-        progress_percent:
-            1
-
-    };
+    }
 
 }
 
@@ -4089,10 +4282,54 @@ async function completeActivity(
     activityId
 ) {
 
+    if (!activityId) {
+        return;
+    }
+
+
+    const activity =
+        state.activities.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    activityId
+                )
+        );
+
+
+    if (!activity) {
+        return;
+    }
+
+
+    const now =
+        new Date().toISOString();
+
+
+    const existing =
+        state.activityProgress[
+            activity.id
+        ];
+
+
+    const attempts =
+        Number(
+            existing?.attempts || 0
+        ) + 1;
+
+
     if (!state.user) {
 
         markActivityLocal(
-            activityId
+            activity.id
+        );
+
+        await refreshCurrentLessonProgress();
+
+        await loadLessonContent(
+            state.currentLesson
         );
 
         return;
@@ -4100,30 +4337,45 @@ async function completeActivity(
     }
 
 
-    const existing =
-        state.activityProgress[
-            activityId
-        ];
-
-
     const payload = {
 
         student_id:
             state.user.id,
 
+        course_id:
+            state.courseId,
+
+        lesson_id:
+            state.currentLesson?.id ||
+            null,
+
         activity_id:
-            activityId,
+            activity.id,
 
         completed:
             true,
 
-        attempts:
-            Number(
-                existing?.attempts || 0
-            ) + 1,
+        score:
+            100,
+
+        best_score:
+            Math.max(
+                Number(
+                    existing?.best_score
+                ) || 0,
+                100
+            ),
+
+        attempts,
+
+        last_attempt_at:
+            now,
+
+        completed_at:
+            now,
 
         updated_at:
-            new Date().toISOString()
+            now
 
     };
 
@@ -4135,8 +4387,10 @@ async function completeActivity(
 
         result =
             await supabaseClient
-                .from("activity_progress")
-                .update(payload)
+                .from("student_progress")
+                .update(
+                    payload
+                )
                 .eq(
                     "id",
                     existing.id
@@ -4146,16 +4400,20 @@ async function completeActivity(
 
         result =
             await supabaseClient
-                .from("activity_progress")
-                .insert(payload);
+                .from("student_progress")
+                .insert(
+                    payload
+                )
+                .select()
+                .single();
 
     }
 
 
     if (result.error) {
 
-        console.warn(
-            "Activity progress could not be saved:",
+        console.error(
+            "EduCore: Activity progress save error:",
             result.error
         );
 
@@ -4165,22 +4423,57 @@ async function completeActivity(
 
 
     state.activityProgress[
-        activityId
-    ] = {
+        activity.id
+    ] =
+        result.data || {
+            ...existing,
+            ...payload
+        };
 
-        ...existing,
 
-        ...payload,
+    await supabaseClient
+        .from("activity_attempts")
+        .insert({
 
-        completed:
-            true
+            student_id:
+                state.user.id,
 
-    };
+            course_id:
+                state.courseId,
+
+            lesson_id:
+                state.currentLesson?.id ||
+                null,
+
+            activity_id:
+                activity.id,
+
+            attempt_number:
+                attempts,
+
+            score:
+                100,
+
+            answer_data:
+                {},
+
+            completed_at:
+                now
+
+        });
 
 
     await refreshCurrentLessonProgress();
 
-    await loadProgress();
+
+    renderProgress();
+
+    renderLearnList();
+
+    renderContents();
+
+    renderLessonPlayer();
+
 
     await loadLessonContent(
         state.currentLesson
@@ -4202,7 +4495,17 @@ function markActivityLocal(
     ] = {
 
         completed:
-            true
+            true,
+
+        score:
+            100,
+
+        attempts:
+            Number(
+                state.activityProgress[
+                    activityId
+                ]?.attempts || 0
+            ) + 1
 
     };
 
@@ -4220,8 +4523,12 @@ async function submitActivity(
     const activity =
         state.activities.find(
             item =>
-                String(item.id) ===
-                String(activityId)
+                String(
+                    item.id
+                ) ===
+                String(
+                    activityId
+                )
         );
 
 
@@ -4262,16 +4569,19 @@ async function submitActivity(
 
 
             const answer =
-                input?.value?.trim() || "";
+                input?.value?.trim() ||
+                "";
 
 
             answers[
                 question.id
-            ] = answer;
+            ] =
+                answer;
 
 
             if (
-                question.correct_answer &&
+                question.correct_answer !== null &&
+                question.correct_answer !== undefined &&
                 answer.toLowerCase() ===
                 String(
                     question.correct_answer
@@ -4299,8 +4609,29 @@ async function submitActivity(
 
     if (!state.user) {
 
-        markActivityLocal(
+        state.activityProgress[
             activity.id
+        ] = {
+
+            completed:
+                score >= 100,
+
+            score,
+
+            attempts:
+                Number(
+                    state.activityProgress[
+                        activity.id
+                    ]?.attempts || 0
+                ) + 1
+
+        };
+
+
+        await refreshCurrentLessonProgress();
+
+        await loadLessonContent(
+            state.currentLesson
         );
 
         return;
@@ -4320,28 +4651,57 @@ async function submitActivity(
         ) + 1;
 
 
+    const now =
+        new Date().toISOString();
+
+
+    const completed =
+        score >= 100;
+
+
+    const bestScore =
+        Math.max(
+            Number(
+                existing?.best_score
+            ) || 0,
+            score
+        );
+
+
     const progressPayload = {
 
         student_id:
             state.user.id,
 
+        course_id:
+            state.courseId,
+
+        lesson_id:
+            state.currentLesson?.id ||
+            null,
+
         activity_id:
             activity.id,
 
-        completed:
-            score >= 100,
+        completed,
 
         score,
 
+        best_score:
+            bestScore,
+
         attempts,
 
-        last_answer:
-            JSON.stringify(
-                answers
-            ),
+        last_attempt_at:
+            now,
+
+        completed_at:
+            completed
+                ? now
+                : null,
 
         updated_at:
-            new Date().toISOString()
+            now
 
     };
 
@@ -4353,7 +4713,7 @@ async function submitActivity(
 
         progressResult =
             await supabaseClient
-                .from("activity_progress")
+                .from("student_progress")
                 .update(
                     progressPayload
                 )
@@ -4366,10 +4726,12 @@ async function submitActivity(
 
         progressResult =
             await supabaseClient
-                .from("activity_progress")
+                .from("student_progress")
                 .insert(
                     progressPayload
-                );
+                )
+                .select()
+                .single();
 
     }
 
@@ -4377,7 +4739,7 @@ async function submitActivity(
     if (progressResult.error) {
 
         console.error(
-            "Activity progress save error:",
+            "EduCore: Activity progress save error:",
             progressResult.error
         );
 
@@ -4388,13 +4750,11 @@ async function submitActivity(
 
     state.activityProgress[
         activity.id
-    ] = {
-
-        ...existing,
-
-        ...progressPayload
-
-    };
+    ] =
+        progressResult.data || {
+            ...existing,
+            ...progressPayload
+        };
 
 
     /* -------------------------------------------------
@@ -4428,7 +4788,9 @@ async function submitActivity(
                     answers,
 
                 completed_at:
-                    new Date().toISOString()
+                    completed
+                        ? now
+                        : null
 
             });
 
@@ -4436,7 +4798,7 @@ async function submitActivity(
     if (attemptResult.error) {
 
         console.warn(
-            "Activity attempt history could not be saved:",
+            "EduCore: Activity attempt history could not be saved:",
             attemptResult.error
         );
 
@@ -4445,7 +4807,15 @@ async function submitActivity(
 
     await refreshCurrentLessonProgress();
 
-    await loadProgress();
+
+    renderProgress();
+
+    renderLearnList();
+
+    renderContents();
+
+    renderLessonPlayer();
+
 
     await loadLessonContent(
         state.currentLesson
@@ -4464,7 +4834,10 @@ async function refreshCurrentLessonProgress() {
         state.currentLesson;
 
 
-    if (!lesson || !state.user) {
+    if (
+        !lesson ||
+        !state.user
+    ) {
         return;
     }
 
@@ -4485,7 +4858,9 @@ async function refreshCurrentLessonProgress() {
 
 
     if (!activities.length) {
+
         return;
+
     }
 
 
@@ -4513,10 +4888,12 @@ async function refreshCurrentLessonProgress() {
         ];
 
 
-    const newStatus =
-        percentage >= 100
-            ? "completed"
-            : "in_progress";
+    const now =
+        new Date().toISOString();
+
+
+    const isCompleted =
+        percentage >= 100;
 
 
     const payload = {
@@ -4524,26 +4901,39 @@ async function refreshCurrentLessonProgress() {
         student_id:
             state.user.id,
 
+        course_id:
+            state.courseId,
+
         lesson_id:
             lesson.id,
 
-        status:
-            newStatus,
+        activity_id:
+            null,
 
-        progress_percent:
+        completed:
+            isCompleted,
+
+        score:
             percentage,
 
-        started_at:
-            existing?.started_at ||
-            new Date().toISOString(),
+        best_score:
+            percentage,
+
+        attempts:
+            Number(
+                existing?.attempts || 0
+            ) + 1,
+
+        last_attempt_at:
+            now,
 
         completed_at:
-            percentage >= 100
-                ? new Date().toISOString()
+            isCompleted
+                ? now
                 : null,
 
         updated_at:
-            new Date().toISOString()
+            now
 
     };
 
@@ -4555,8 +4945,10 @@ async function refreshCurrentLessonProgress() {
 
         result =
             await supabaseClient
-                .from("lesson_progress")
-                .update(payload)
+                .from("student_progress")
+                .update(
+                    payload
+                )
                 .eq(
                     "id",
                     existing.id
@@ -4566,8 +4958,12 @@ async function refreshCurrentLessonProgress() {
 
         result =
             await supabaseClient
-                .from("lesson_progress")
-                .insert(payload);
+                .from("student_progress")
+                .insert(
+                    payload
+                )
+                .select()
+                .single();
 
     }
 
@@ -4575,7 +4971,7 @@ async function refreshCurrentLessonProgress() {
     if (result.error) {
 
         console.warn(
-            "Lesson progress update failed:",
+            "EduCore: Lesson progress update failed:",
             result.error
         );
 
@@ -4586,16 +4982,14 @@ async function refreshCurrentLessonProgress() {
 
     state.progress[
         lesson.id
-    ] = {
+    ] =
+        result.data || {
+            ...existing,
+            ...payload
+        };
 
-        ...existing,
 
-        ...payload,
-
-        completed:
-            percentage >= 100
-
-    };
+    renderProgress();
 
 }
 
@@ -4611,7 +5005,9 @@ function setupLessonNavigation() {
             "click",
             () => {
 
-                showScreen("learn");
+                showScreen(
+                    "learn"
+                );
 
             }
         );
@@ -4655,7 +5051,9 @@ function setupLessonNavigation() {
 
                     await completeCurrentLesson();
 
-                    showScreen("overview");
+                    showScreen(
+                        "overview"
+                    );
 
                     return;
 
@@ -4663,6 +5061,7 @@ function setupLessonNavigation() {
 
 
                 await completeCurrentLesson();
+
 
                 await openLesson(
                     next.id
@@ -4807,7 +5206,9 @@ function renderSavedLessons() {
 
 
     if (existing) {
+
         existing.remove();
+
     }
 
 
@@ -4880,7 +5281,9 @@ function renderSavedLessons() {
     }
 
 
-    screen.appendChild(list);
+    screen.appendChild(
+        list
+    );
 
 
     list.querySelectorAll(
@@ -4954,7 +5357,9 @@ function setupExitCourse() {
             "click",
             () => {
 
-                toggleMoreMenu(false);
+                toggleMoreMenu(
+                    false
+                );
 
                 window.location.href =
                     "../student.html";
@@ -5048,8 +5453,10 @@ function renderNoCourse() {
         $("#course-title");
 
     if (title) {
+
         title.textContent =
             "Course not selected";
+
     }
 
 
@@ -5118,31 +5525,52 @@ async function init() {
     showLoading();
 
 
-    /*
-     * 1. Get the course ID from the URL.
-     */
+    console.log(
+        "================================================"
+    );
+
+    console.log(
+        "EDUCORE COURSE PLATFORM STARTING"
+    );
+
+    console.log(
+        "Page:",
+        window.location.href
+    );
+
+    console.log(
+        "================================================"
+    );
+
+
+    /* -------------------------------------------------
+       1. GET COURSE ID
+    ------------------------------------------------- */
 
     state.courseId =
         getCourseId();
 
 
     console.log(
-        "================================================"
-    );
-
-    console.log(
-        "EDUCORE COURSE PLATFORM"
-    );
-
-    console.log(
-        "Course ID:",
+        "EduCore final course ID:",
         state.courseId
     );
 
-    console.log(
-        "================================================"
-    );
 
+    if (!state.courseId) {
+
+        renderNoCourse();
+
+        hideLoading();
+
+        return;
+
+    }
+
+
+    /* -------------------------------------------------
+       2. SETUP INTERFACE
+    ------------------------------------------------- */
 
     setupNavigation();
 
@@ -5157,16 +5585,16 @@ async function init() {
 
     try {
 
-        /*
-         * 2. Load authenticated student.
-         */
+        /* -------------------------------------------------
+           3. LOAD USER
+        ------------------------------------------------- */
 
         await loadUser();
 
 
-        /*
-         * 3. Load the selected course.
-         */
+        /* -------------------------------------------------
+           4. LOAD COURSE
+        ------------------------------------------------- */
 
         const courseLoaded =
             await loadCourse();
@@ -5183,30 +5611,26 @@ async function init() {
         }
 
 
-        /*
-         * 4. Load the complete course tree.
-         *
-         * courses
-         *    ↓
-         * modules
-         *    ↓
-         * lessons
-         *    ↓
-         * sections
-         *    ↓
-         * activities
-         *    ↓
-         * questions
-         *    +
-         * media
-         */
+        /* -------------------------------------------------
+           5. LOAD COURSE TREE
+        ------------------------------------------------- */
 
-        await loadModules();
+        const modulesLoaded =
+            await loadModules();
 
 
-        /*
-         * 5. Render the complete platform.
-         */
+        if (!modulesLoaded) {
+
+            console.warn(
+                "EduCore: Course loaded, but course structure could not be completely loaded."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           6. RENDER
+        ------------------------------------------------- */
 
         renderEverything();
 
@@ -5222,6 +5646,11 @@ async function init() {
         console.log(
             "Course:",
             state.course
+        );
+
+        console.log(
+            "Course ID:",
+            state.courseId
         );
 
         console.log(
@@ -5262,8 +5691,19 @@ async function init() {
     } catch (error) {
 
         console.error(
-            "EduCore initialization error:",
+            "================================================"
+        );
+
+        console.error(
+            "EDUCORE INITIALIZATION ERROR"
+        );
+
+        console.error(
             error
+        );
+
+        console.error(
+            "================================================"
         );
 
         renderCourseError();
