@@ -2151,37 +2151,77 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     // ========================================================
-    // EXPLORE COURSE
-    // ========================================================
+// EXPLORE COURSE
+// ========================================================
 
-    if (courseStartButton) {
+if (courseStartButton) {
 
-        courseStartButton.addEventListener(
-            "click",
-            () => {
+    courseStartButton.addEventListener(
+        "click",
+        () => {
 
-                if (!activeCourse) {
+            if (!activeCourse) {
+                return;
+            }
 
-                    return;
+            /*
+               Every course comes directly from the
+               Supabase courses table, so the ID is the
+               permanent identifier we use throughout
+               EduCore.
 
-                }
+               Example:
 
+               course-platform/course-platform.html?course_id=12
+            */
 
-                if (activeCourse.slug) {
+            if (!activeCourse.id) {
 
-                    window.location.href =
-                        `course.html?slug=${encodeURIComponent(
-                            activeCourse.slug
-                        )}`;
+                console.error(
+                    "EduCore: Selected course has no Supabase course ID.",
+                    activeCourse
+                );
 
-                }
+                return;
+            }
+
+            /*
+               Store the selected course as a convenience
+               for the student platform and future dashboard.
+            */
+
+            try {
+
+                localStorage.setItem(
+                    "educore_course_id",
+                    String(activeCourse.id)
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "EduCore: Could not save selected course.",
+                    error
+                );
 
             }
-        );
 
-    }
+            /*
+               Open the single course platform.
 
+               The same platform will load whichever
+               course ID was selected.
+            */
 
+            window.location.href =
+                `course-platform/course-platform.html?course_id=${encodeURIComponent(
+                    activeCourse.id
+                )}`;
+
+        }
+    );
+
+}
     // ========================================================
     // SIDEBAR TOGGLE
     // ========================================================
