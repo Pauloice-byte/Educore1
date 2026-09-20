@@ -1,4 +1,3 @@
-```yaml
 name: Build EduCore Android App
 
 on:
@@ -24,7 +23,7 @@ jobs:
         run: npm install
 
       - name: Prepare EduCore
-        run: mkdir -p www && cp index.html login.html register.html student.html admin.html www/ && cp -r css js images course-platform www/
+        run: mkdir -p www && cp index.html www/ && cp login.html www/ && cp register.html www/ && cp student.html www/ && cp admin.html www/ && cp -r css www/ && cp -r js www/ && cp -r images www/ && cp -r course-platform www/
 
       - name: Create Android project
         run: npx cap add android
@@ -49,4 +48,4 @@ jobs:
         with:
           name: EduCore-Android
           path: android/app/build/outputs/apk/debug/app-debug.apk
-```
+
