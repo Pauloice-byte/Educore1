@@ -1,1048 +1,1856 @@
 /* =====================================================
    EDUCORE COURSE PLATFORM
+   DATABASE ARCHITECTURE
+
+   courses
+      ↓
+   modules
+      ↓
+   lessons
+      ↓
+   lesson_sections
+      ↓
+   activities
+      ↓
+   questions
+
+   Supporting:
+   media
+   enrollments
+   lesson_progress
+   activity_progress
+   activity_attempts
 ===================================================== */
- 
+
 "use strict";
- 
- 
+
+
 /* =====================================================
    SUPABASE
 ===================================================== */
- 
-/*
-	IMPORTANT:
- 
-	Use the SAME Supabase URL and ANON KEY
-	already used by the rest of EduCore.
- 
-	Replace these two values with your existing
-	project credentials.
-*/
- 
+
 const SUPABASE_URL =
     "https://kioqhgkpfqdhjqidrlwf.supabase.co";
- 
+
 const SUPABASE_ANON_KEY =
     "Ysb_publishable_ZDAJmFtSl9WNGVlZPyvngA_ZWiv_Q4g";
- 
- 
+
 const supabaseClient =
     window.supabase.createClient(
-    	SUPABASE_URL,
+        SUPABASE_URL,
         SUPABASE_ANON_KEY
-	);
- 
- 
+    );
+
+
 /* =====================================================
    APPLICATION STATE
 ===================================================== */
- 
+
 const state = {
- 
-	user: null,
- 
-	course: null,
- 
-	modules: [],
- 
-	lessons: [],
- 
-	currentLesson: null,
- 
+
+    user: null,
+
+    course: null,
+
+    modules: [],
+
+    lessons: [],
+
+    sections: [],
+
+    activities: [],
+
+    questions: [],
+
+    media: [],
+
+    currentLesson: null,
+
     currentLessonIndex: 0,
- 
-	progress: {},
- 
-	savedLessons: new Set(),
- 
-	activeScreen: "overview",
- 
-	courseId: null
- 
+
+    progress: {},
+
+    activityProgress: {},
+
+    savedLessons: new Set(),
+
+    activeScreen: "overview",
+
+    courseId: null
+
 };
- 
- 
+
+
 /* =====================================================
    HELPERS
 ===================================================== */
- 
+
 const $ = selector =>
     document.querySelector(selector);
- 
- 
+
+
 const $$ = selector =>
     [...document.querySelectorAll(selector)];
- 
- 
+
+
 function escapeHTML(value) {
- 
-	if (value === null || value === undefined) {
-    	return "";
-	}
- 
-	return String(value)
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-    	.replace(/'/g, "&#039;");
- 
+        .replace(/'/g, "&#039;");
+
 }
- 
- 
+
+
 function getInitials(name) {
- 
-	if (!name) {
-    	return "U";
-	}
- 
-	const parts =
-    	String(name)
-        	.trim()
+
+    if (!name) {
+        return "U";
+    }
+
+    const parts =
+        String(name)
+            .trim()
             .split(/\s+/)
             .filter(Boolean);
- 
-	if (!parts.length) {
-    	return "U";
-	}
- 
-	if (parts.length === 1) {
-    	return parts[0].slice(0, 2).toUpperCase();
-	}
- 
-	return (
-    	parts[0][0] +
+
+    if (!parts.length) {
+        return "U";
+    }
+
+    if (parts.length === 1) {
+        return parts[0]
+            .slice(0, 2)
+            .toUpperCase();
+    }
+
+    return (
+        parts[0][0] +
         parts[parts.length - 1][0]
-	).toUpperCase();
- 
+    ).toUpperCase();
+
 }
- 
- 
+
+
 function formatDuration(minutes) {
- 
-	const value =
+
+    const value =
         Number(minutes) || 0;
- 
-	if (value <= 0) {
-    	return "0h";
-	}
- 
-	if (value < 60) {
-    	return `${value}m`;
-	}
- 
-	const hours =
+
+    if (value <= 0) {
+        return "0h";
+    }
+
+    if (value < 60) {
+        return `${value}m`;
+    }
+
+    const hours =
         Math.floor(value / 60);
- 
-	const remaining =
-    	value % 60;
- 
-	if (!remaining) {
-    	return `${hours}h`;
-	}
- 
-	return `${hours}h ${remaining}m`;
- 
+
+    const remaining =
+        value % 60;
+
+    if (!remaining) {
+        return `${hours}h`;
+    }
+
+    return `${hours}h ${remaining}m`;
+
 }
- 
- 
+
+
+function formatActivityType(type) {
+
+    const value =
+        String(type || "")
+            .trim()
+            .toLowerCase();
+
+    const labels = {
+
+        reading: "Reading",
+
+        text: "Reading",
+
+        vocabulary: "Vocabulary",
+
+        listening: "Listening",
+
+        audio: "Listening",
+
+        video: "Video",
+
+        exercise: "Practice",
+
+        practice: "Practice",
+
+        quiz: "Quiz",
+
+        test: "Test",
+
+        speaking: "Speaking",
+
+        speaking_activity: "Speaking",
+
+        ai: "AI Activity",
+
+        ai_interaction: "AI Activity",
+
+        writing: "Writing",
+
+        review: "Review",
+
+        recall: "Recall"
+
+    };
+
+    return labels[value] || "Activity";
+
+}
+
+
 /* =====================================================
    COURSE ID
 ===================================================== */
- 
+
 function getCourseId() {
- 
-	const params =
-    	new URLSearchParams(
+
+    const params =
+        new URLSearchParams(
             window.location.search
-    	);
- 
-	const candidates = [
- 
+        );
+
+    const candidates = [
+
         params.get("course_id"),
- 
+
         params.get("course"),
- 
+
         params.get("id"),
- 
+
         sessionStorage.getItem(
             "educore_course_id"
-    	),
- 
+        ),
+
         localStorage.getItem(
             "educore_course_id"
-    	)
- 
-	];
- 
-	return candidates.find(Boolean) || null;
- 
+        )
+
+    ];
+
+    return candidates.find(Boolean) || null;
+
 }
- 
- 
+
+
 /* =====================================================
    LOADING
 ===================================================== */
- 
+
 function hideLoading() {
- 
-	const loading =
+
+    const loading =
         $("#app-loading");
- 
-	if (!loading) {
-    	return;
-	}
- 
+
+    if (!loading) {
+        return;
+    }
+
     loading.classList.add("hidden");
- 
+
 }
- 
- 
+
+
 function showLoading() {
- 
-	const loading =
+
+    const loading =
         $("#app-loading");
- 
-	if (!loading) {
-    	return;
-	}
- 
+
+    if (!loading) {
+        return;
+    }
+
     loading.classList.remove("hidden");
- 
+
 }
- 
- 
+
+
 /* =====================================================
    NAVIGATION
 ===================================================== */
- 
+
 function showScreen(screenName) {
- 
-	const screen =
+
+    const screen =
         document.getElementById(
             `${screenName}-screen`
-    	);
- 
-	if (!screen) {
-    	return;
-	}
- 
+        );
+
+    if (!screen) {
+        return;
+    }
+
     $$(".screen").forEach(item => {
- 
+
         item.classList.remove("active");
- 
-	});
- 
+
+    });
+
     screen.classList.add("active");
- 
-	state.activeScreen =
-    	screenName;
- 
+
+    state.activeScreen =
+        screenName;
+
     updateNavigation(screenName);
- 
-	window.scrollTo({
-    	top: 0,
-    	behavior: "smooth"
-	});
- 
+
+    toggleMoreMenu(false);
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
 }
- 
- 
+
+
 function updateNavigation(screenName) {
- 
+
     $$("[data-screen]").forEach(button => {
- 
+
         button.classList.toggle(
             "active",
             button.dataset.screen === screenName
-    	);
- 
-	});
- 
+        );
+
+    });
+
 }
- 
- 
+
+
 /* =====================================================
    MORE MENU
 ===================================================== */
- 
+
 function toggleMoreMenu(force) {
- 
-	const menu =
+
+    const menu =
         $("#more-menu");
- 
-	if (!menu) {
-    	return;
-	}
- 
-	if (typeof force === "boolean") {
- 
+
+    if (!menu) {
+        return;
+    }
+
+    if (typeof force === "boolean") {
+
         menu.classList.toggle(
             "open",
-        	force
-    	);
- 
-    	return;
- 
-	}
- 
+            force
+        );
+
+        return;
+
+    }
+
     menu.classList.toggle("open");
- 
+
 }
- 
- 
+
+
 function setupMoreMenu() {
- 
-	const button =
+
+    const button =
         $("#more-button");
- 
-	if (button) {
- 
+
+    if (button) {
+
         button.addEventListener(
             "click",
-        	event => {
- 
+            event => {
+
                 event.stopPropagation();
- 
+
                 toggleMoreMenu();
- 
-        	}
-    	);
- 
-	}
- 
- 
+
+            }
+        );
+
+    }
+
+
     $$("[data-more-screen]")
         .forEach(button => {
- 
+
             button.addEventListener(
                 "click",
-            	() => {
- 
+                () => {
+
                     const screen =
                         button.dataset.moreScreen;
- 
+
                     toggleMoreMenu(false);
- 
+
                     showScreen(screen);
- 
-            	}
-        	);
- 
-    	});
- 
- 
+
+                }
+            );
+
+        });
+
+
     document.addEventListener(
         "click",
-    	event => {
- 
-        	const menu =
+        event => {
+
+            const menu =
                 $("#more-menu");
- 
-        	if (!menu) {
+
+            if (!menu) {
                 return;
-        	}
- 
-        	if (
+            }
+
+            if (
                 !menu.contains(event.target) &&
                 event.target !== $("#more-button")
-        	) {
- 
+            ) {
+
                 toggleMoreMenu(false);
- 
-        	}
- 
-    	}
-	);
- 
+
+            }
+
+        }
+    );
+
 }
- 
- 
+
+
 /* =====================================================
    NAV BUTTONS
 ===================================================== */
- 
+
 function setupNavigation() {
- 
+
     $$("[data-screen]")
         .forEach(button => {
- 
+
             button.addEventListener(
                 "click",
-            	() => {
- 
+                () => {
+
                     const screen =
                         button.dataset.screen;
- 
+
                     showScreen(screen);
- 
-            	}
-        	);
- 
-    	});
- 
- 
-	const profileButtons = [
- 
+
+                }
+            );
+
+        });
+
+
+    const profileButtons = [
+
         $("#profile-button"),
- 
+
         $("#top-profile-button")
- 
-	];
- 
- 
+
+    ];
+
+
     profileButtons.forEach(button => {
- 
-    	if (!button) {
-        	return;
-    	}
- 
+
+        if (!button) {
+            return;
+        }
+
         button.addEventListener(
             "click",
-        	() => {
- 
+            () => {
+
                 showScreen("profile");
- 
-        	}
-    	);
- 
-	});
- 
+
+            }
+        );
+
+    });
+
 }
- 
- 
+
+
 /* =====================================================
    USER
 ===================================================== */
- 
+
 async function loadUser() {
- 
-	const {
-    	data,
-    	error
-	} =
-    	await supabaseClient.auth.getUser();
- 
- 
-	if (error) {
- 
-    	console.warn(
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (error) {
+
+        console.warn(
             "Could not load user:",
-        	error
-    	);
- 
-    	return null;
- 
-	}
- 
- 
-	state.user =
-    	data?.user || null;
- 
- 
-	if (!state.user) {
-    	return null;
-	}
- 
- 
-	const metadata =
+            error
+        );
+
+        return null;
+
+    }
+
+
+    state.user =
+        data?.user || null;
+
+
+    if (!state.user) {
+        return null;
+    }
+
+
+    const metadata =
         state.user.user_metadata || {};
- 
- 
-	const name =
+
+
+    const name =
         metadata.full_name ||
-    	metadata.name ||
+        metadata.name ||
         metadata.display_name ||
         state.user.email?.split("@")[0] ||
         "Student";
- 
- 
-	const initials =
+
+
+    const initials =
         getInitials(name);
- 
- 
-    $("#top-student-name").textContent =
-    	name;
- 
- 
-    $("#rail-avatar").textContent =
-    	initials;
- 
- 
-    $("#top-avatar").textContent =
-    	initials;
- 
- 
-    $("#profile-large-avatar").textContent =
-    	initials;
- 
- 
-    $("#profile-name").textContent =
-    	name;
- 
- 
-    $("#profile-email").textContent =
-        state.user.email || "—";
- 
- 
-	return state.user;
- 
+
+
+    const topStudentName =
+        $("#top-student-name");
+
+    if (topStudentName) {
+        topStudentName.textContent =
+            name;
+    }
+
+
+    const railAvatar =
+        $("#rail-avatar");
+
+    if (railAvatar) {
+        railAvatar.textContent =
+            initials;
+    }
+
+
+    const topAvatar =
+        $("#top-avatar");
+
+    if (topAvatar) {
+        topAvatar.textContent =
+            initials;
+    }
+
+
+    const profileLargeAvatar =
+        $("#profile-large-avatar");
+
+    if (profileLargeAvatar) {
+        profileLargeAvatar.textContent =
+            initials;
+    }
+
+
+    const profileName =
+        $("#profile-name");
+
+    if (profileName) {
+        profileName.textContent =
+            name;
+    }
+
+
+    const profileEmail =
+        $("#profile-email");
+
+    if (profileEmail) {
+        profileEmail.textContent =
+            state.user.email || "—";
+    }
+
+
+    return state.user;
+
 }
- 
- 
+
+
 /* =====================================================
    COURSE
 ===================================================== */
- 
+
 async function loadCourse() {
- 
-	if (!state.courseId) {
- 
-    	console.warn(
-        	"No course ID was supplied."
-    	);
- 
+
+    if (!state.courseId) {
+
+        console.warn(
+            "No course ID was supplied."
+        );
+
         renderNoCourse();
- 
-    	return;
- 
-	}
- 
- 
-	const {
-    	data,
-    	error
-	} =
-    	await supabaseClient
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("courses")
             .select("*")
             .eq("id", state.courseId)
             .maybeSingle();
- 
- 
-	if (error) {
- 
-    	console.error(
+
+
+    if (error) {
+
+        console.error(
             "Course loading error:",
-        	error
-    	);
- 
+            error
+        );
+
         renderCourseError();
- 
-    	return;
- 
-	}
- 
- 
-	state.course =
-    	data;
- 
- 
-	if (!state.course) {
- 
+
+        return;
+
+    }
+
+
+    state.course =
+        data;
+
+
+    if (!state.course) {
+
         renderNoCourse();
- 
-    	return;
- 
-	}
- 
- 
-	renderCourse();
- 
+
+        return;
+
+    }
+
+
+    renderCourse();
+
 }
- 
- 
+
+
 /* =====================================================
    COURSE RENDER
 ===================================================== */
- 
+
 function renderCourse() {
- 
-	const course =
-    	state.course;
- 
- 
-	const title =
-    	course.title ||
-    	course.name ||
-    	"Untitled course";
- 
- 
-	const description =
+
+    const course =
+        state.course;
+
+    if (!course) {
+        return;
+    }
+
+
+    const title =
+        course.title ||
+        "Untitled course";
+
+
+    const description =
         course.description ||
-        course.short_description ||
-    	"Continue your learning journey with EduCore.";
- 
- 
-	const category =
+        "Continue your learning journey with EduCore.";
+
+
+    const category =
         course.category ||
-        course.course_category ||
         "COURSE";
- 
- 
-	const level =
-    	course.level ||
-        course.course_level ||
-    	"All levels";
- 
- 
-	const duration =
+
+
+    const level =
+        course.level ||
+        "All levels";
+
+
+    const duration =
         course.duration_minutes ||
         course.duration ||
-    	0;
- 
- 
-    $("#course-category").textContent =
-    	category;
- 
- 
-    $("#course-title").textContent =
-    	title;
- 
- 
-    $("#course-description").textContent =
-    	description;
- 
- 
-    $("#course-level").textContent =
-    	level;
- 
- 
-    $("#course-duration").textContent =
-        formatDuration(duration);
- 
- 
-    $("#top-course-name").textContent =
-    	title;
- 
- 
+        calculateCourseDuration();
+
+
+    const categoryElement =
+        $("#course-category");
+
+    if (categoryElement) {
+        categoryElement.textContent =
+            category;
+    }
+
+
+    const titleElement =
+        $("#course-title");
+
+    if (titleElement) {
+        titleElement.textContent =
+            title;
+    }
+
+
+    const descriptionElement =
+        $("#course-description");
+
+    if (descriptionElement) {
+        descriptionElement.textContent =
+            description;
+    }
+
+
+    const levelElement =
+        $("#course-level");
+
+    if (levelElement) {
+        levelElement.textContent =
+            level;
+    }
+
+
+    const durationElement =
+        $("#course-duration");
+
+    if (durationElement) {
+        durationElement.textContent =
+            formatDuration(duration);
+    }
+
+
+    const topCourseName =
+        $("#top-course-name");
+
+    if (topCourseName) {
+        topCourseName.textContent =
+            title;
+    }
+
+
     updateLessonCount();
- 
+
 }
- 
- 
+
+
 /* =====================================================
    MODULES
 ===================================================== */
- 
+
 async function loadModules() {
- 
-	if (!state.courseId) {
-    	return;
-	}
- 
- 
-	const {
-    	data,
-    	error
-	} =
-    	await supabaseClient
+
+    if (!state.courseId) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("modules")
             .select("*")
             .eq("course_id", state.courseId)
             .order("sort_order", {
                 ascending: true
-        	});
- 
- 
-	if (error) {
- 
-    	console.error(
+            });
+
+
+    if (error) {
+
+        console.error(
             "Module loading error:",
-        	error
-    	);
- 
-    	return;
- 
-	}
- 
- 
-	state.modules =
-    	data || [];
- 
- 
-	await loadLessons();
- 
+            error
+        );
+
+        state.modules = [];
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    state.modules =
+        data || [];
+
+
+    await loadLessons();
+
 }
- 
- 
+
+
 /* =====================================================
    LESSONS
 ===================================================== */
- 
+
 async function loadLessons() {
- 
-	if (!state.courseId) {
-    	return;
-	}
- 
- 
-	const moduleIds =
+
+    const moduleIds =
         state.modules.map(
-        	module => module.id
-    	);
- 
- 
-	if (!moduleIds.length) {
- 
-    	state.lessons = [];
- 
+            module => module.id
+        );
+
+
+    if (!moduleIds.length) {
+
+        state.lessons = [];
+
         renderEverything();
- 
-    	return;
- 
-	}
- 
- 
-	const {
-    	data,
-    	error
-	} =
-    	await supabaseClient
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("lessons")
             .select("*")
             .in("module_id", moduleIds)
             .order("sort_order", {
                 ascending: true
-        	});
- 
- 
-	if (error) {
- 
-    	console.warn(
-            "Lessons table could not be loaded:",
-        	error
-    	);
- 
-    	/*
-        	The current project may still use the
-        	older content structure.
- 
-        	We leave the lesson list empty rather
-        	than inventing course content.
-    	*/
- 
-    	state.lessons = [];
- 
+            });
+
+
+    if (error) {
+
+        console.error(
+            "Lesson loading error:",
+            error
+        );
+
+        state.lessons = [];
+
         renderEverything();
- 
-    	return;
- 
-	}
- 
- 
-	state.lessons =
-    	data || [];
- 
- 
-    renderEverything();
- 
+
+        return;
+
+    }
+
+
+    state.lessons =
+        data || [];
+
+
+    await loadLessonSections();
+
 }
- 
- 
+
+
 /* =====================================================
-   LESSON COUNT
+   LESSON SECTIONS
 ===================================================== */
- 
-function updateLessonCount() {
- 
-	const count =
-        state.lessons.length;
- 
- 
-    $("#course-lesson-count").textContent =
-    	`${count} ${count === 1 ? "lesson" : "lessons"}`;
- 
- 
-    $("#stat-completed").textContent =
-        countCompleted();
- 
- 
-    $("#progress-lessons").textContent =
-        countCompleted();
- 
+
+async function loadLessonSections() {
+
+    const lessonIds =
+        state.lessons.map(
+            lesson => lesson.id
+        );
+
+
+    state.sections = [];
+
+
+    if (!lessonIds.length) {
+
+        await loadProgress();
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("lesson_sections")
+            .select("*")
+            .in("lesson_id", lessonIds)
+            .order("sort_order", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.error(
+            "Lesson section loading error:",
+            error
+        );
+
+        await loadProgress();
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    state.sections =
+        data || [];
+
+
+    await loadActivities();
+
 }
- 
- 
+
+
+/* =====================================================
+   ACTIVITIES
+===================================================== */
+
+async function loadActivities() {
+
+    const sectionIds =
+        state.sections.map(
+            section => section.id
+        );
+
+
+    state.activities = [];
+
+
+    if (!sectionIds.length) {
+
+        await loadProgress();
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("activities")
+            .select("*")
+            .in("section_id", sectionIds)
+            .order("sort_order", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.error(
+            "Activity loading error:",
+            error
+        );
+
+        await loadProgress();
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    state.activities =
+        data || [];
+
+
+    await loadQuestions();
+
+}
+
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
+
+async function loadQuestions() {
+
+    const activityIds =
+        state.activities.map(
+            activity => activity.id
+        );
+
+
+    state.questions = [];
+
+
+    if (!activityIds.length) {
+
+        await loadMedia();
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("questions")
+            .select("*")
+            .in("activity_id", activityIds)
+            .order("sort_order", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.warn(
+            "Question loading error:",
+            error
+        );
+
+        await loadMedia();
+
+        return;
+
+    }
+
+
+    state.questions =
+        data || [];
+
+
+    await loadMedia();
+
+}
+
+
+/* =====================================================
+   MEDIA
+===================================================== */
+
+async function loadMedia() {
+
+    state.media = [];
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("media")
+            .select("*")
+            .or(
+                `course_id.eq.${state.courseId},lesson_id.in.(${state.lessons.map(l => l.id).join(",") || 0}),activity_id.in.(${state.activities.map(a => a.id).join(",") || 0})`
+            )
+            .order("created_at", {
+                ascending: true
+            });
+
+
+    if (error) {
+
+        console.warn(
+            "Media loading error:",
+            error
+        );
+
+        await loadProgress();
+
+        return;
+
+    }
+
+
+    state.media =
+        data || [];
+
+
+    await loadProgress();
+
+}
+
+
 /* =====================================================
    PROGRESS
 ===================================================== */
- 
-function countCompleted() {
- 
-	return state.lessons.filter(
-    	lesson => {
- 
-        	const value =
-                state.progress[lesson.id];
- 
-        	return (
-                value?.completed === true ||
-            	value === 100
-        	);
- 
-    	}
-	).length;
- 
+
+async function loadProgress() {
+
+    state.progress = {};
+
+    state.activityProgress = {};
+
+
+    if (!state.user) {
+
+        renderEverything();
+
+        return;
+
+    }
+
+
+    /* -------------------------------------------------
+       LESSON PROGRESS
+    ------------------------------------------------- */
+
+    if (state.lessons.length) {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("lesson_progress")
+                .select("*")
+                .eq("student_id", state.user.id)
+                .in(
+                    "lesson_id",
+                    state.lessons.map(
+                        lesson => lesson.id
+                    )
+                );
+
+
+        if (!error && data) {
+
+            data.forEach(row => {
+
+                state.progress[row.lesson_id] =
+                    row;
+
+            });
+
+        } else if (error) {
+
+            console.warn(
+                "Lesson progress loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* -------------------------------------------------
+       ACTIVITY PROGRESS
+    ------------------------------------------------- */
+
+    if (state.activities.length) {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("activity_progress")
+                .select("*")
+                .eq("student_id", state.user.id)
+                .in(
+                    "activity_id",
+                    state.activities.map(
+                        activity => activity.id
+                    )
+                );
+
+
+        if (!error && data) {
+
+            data.forEach(row => {
+
+                state.activityProgress[
+                    row.activity_id
+                ] = row;
+
+            });
+
+        } else if (error) {
+
+            console.warn(
+                "Activity progress loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    renderEverything();
+
 }
- 
- 
-function calculateProgress() {
- 
-	const total =
+
+
+/* =====================================================
+   COURSE DURATION
+===================================================== */
+
+function calculateCourseDuration() {
+
+    return state.lessons.reduce(
+        (total, lesson) =>
+            total +
+            (Number(
+                lesson.duration_minutes
+            ) || 0),
+        0
+    );
+
+}
+
+
+/* =====================================================
+   LESSON COUNT
+===================================================== */
+
+function updateLessonCount() {
+
+    const count =
         state.lessons.length;
- 
- 
-	if (!total) {
-    	return 0;
-	}
- 
- 
-	const completed =
+
+
+    const element =
+        $("#course-lesson-count");
+
+    if (element) {
+
+        element.textContent =
+            `${count} ${
+                count === 1
+                    ? "lesson"
+                    : "lessons"
+            }`;
+
+    }
+
+
+    const completed =
         countCompleted();
- 
- 
-	return Math.round(
-    	(completed / total) * 100
-	);
- 
+
+
+    const statCompleted =
+        $("#stat-completed");
+
+    if (statCompleted) {
+        statCompleted.textContent =
+            completed;
+    }
+
+
+    const progressLessons =
+        $("#progress-lessons");
+
+    if (progressLessons) {
+        progressLessons.textContent =
+            completed;
+    }
+
 }
- 
- 
-function renderProgress() {
- 
-	const progress =
-        calculateProgress();
- 
- 
-    $("#top-progress-value").textContent =
-        `${progress}%`;
- 
- 
-    $("#hero-progress-value").textContent =
-        `${progress}%`;
- 
- 
-    $("#progress-dashboard-value").textContent =
-        `${progress}%`;
- 
- 
-	const ring =
-        $("#hero-progress");
- 
- 
-	if (ring) {
- 
-    	const degrees =
-        	progress * 3.6;
- 
-        ring.style.background =
-            `conic-gradient(
-                var(--purple) ${degrees}deg,
-                #eeecf3 ${degrees}deg
-        	)`;
- 
-	}
- 
- 
-    $("#progress-streak").textContent =
-    	"0";
- 
- 
-    $("#stat-streak").textContent =
-    	"0";
- 
- 
-    $("#stat-xp").textContent =
-    	String(
-            countCompleted() * 10
-    	);
- 
- 
-    $("#progress-xp").textContent =
-    	String(
-            countCompleted() * 10
-    	);
- 
- 
-    $("#stat-completed").textContent =
-        countCompleted();
- 
- 
-    $("#progress-lessons").textContent =
-        countCompleted();
- 
-}
- 
- 
+
+
 /* =====================================================
    LESSON STATUS
 ===================================================== */
- 
+
 function lessonCompleted(lesson) {
- 
-	if (!lesson) {
-    	return false;
-	}
- 
- 
-	const value =
+
+    if (!lesson) {
+        return false;
+    }
+
+
+    const value =
         state.progress[lesson.id];
- 
- 
-	return (
-        value?.completed === true ||
-    	value === 100
-	);
- 
+
+
+    if (!value) {
+        return false;
+    }
+
+
+    return (
+        value.completed === true ||
+        value.status === "completed" ||
+        Number(value.progress_percent) >= 100
+    );
+
 }
- 
- 
+
+
+/* =====================================================
+   COUNT COMPLETED
+===================================================== */
+
+function countCompleted() {
+
+    return state.lessons.filter(
+        lesson =>
+            lessonCompleted(lesson)
+    ).length;
+
+}
+
+
+/* =====================================================
+   COURSE PROGRESS
+===================================================== */
+
+function calculateProgress() {
+
+    const total =
+        state.lessons.length;
+
+
+    if (!total) {
+        return 0;
+    }
+
+
+    return Math.round(
+        (
+            countCompleted() /
+            total
+        ) * 100
+    );
+
+}
+
+
+/* =====================================================
+   PROGRESS RENDER
+===================================================== */
+
+function renderProgress() {
+
+    const progress =
+        calculateProgress();
+
+
+    const top =
+        $("#top-progress-value");
+
+    if (top) {
+        top.textContent =
+            `${progress}%`;
+    }
+
+
+    const hero =
+        $("#hero-progress-value");
+
+    if (hero) {
+        hero.textContent =
+            `${progress}%`;
+    }
+
+
+    const dashboard =
+        $("#progress-dashboard-value");
+
+    if (dashboard) {
+        dashboard.textContent =
+            `${progress}%`;
+    }
+
+
+    const ring =
+        $("#hero-progress");
+
+
+    if (ring) {
+
+        const degrees =
+            progress * 3.6;
+
+        ring.style.background =
+            `conic-gradient(
+                var(--purple)
+                ${degrees}deg,
+                #eeecf3
+                ${degrees}deg
+            )`;
+
+    }
+
+
+    const completed =
+        countCompleted();
+
+
+    const streak =
+        $("#progress-streak");
+
+    if (streak) {
+        streak.textContent =
+            "0";
+    }
+
+
+    const statStreak =
+        $("#stat-streak");
+
+    if (statStreak) {
+        statStreak.textContent =
+            "0";
+    }
+
+
+    const xp =
+        completed * 10;
+
+
+    const statXP =
+        $("#stat-xp");
+
+    if (statXP) {
+        statXP.textContent =
+            String(xp);
+    }
+
+
+    const progressXP =
+        $("#progress-xp");
+
+    if (progressXP) {
+        progressXP.textContent =
+            String(xp);
+    }
+
+
+    const statCompleted =
+        $("#stat-completed");
+
+    if (statCompleted) {
+        statCompleted.textContent =
+            completed;
+    }
+
+
+    const progressLessons =
+        $("#progress-lessons");
+
+    if (progressLessons) {
+        progressLessons.textContent =
+            completed;
+    }
+
+
+    calculateLearningTime();
+
+}
+
+
+/* =====================================================
+   LEARNING TIME
+===================================================== */
+
+function calculateLearningTime() {
+
+    const minutes =
+        state.lessons.reduce(
+            (total, lesson) => {
+
+                if (
+                    lessonCompleted(lesson)
+                ) {
+
+                    return total +
+                        (
+                            Number(
+                                lesson.duration_minutes
+                            ) || 0
+                        );
+
+                }
+
+                return total;
+
+            },
+            0
+        );
+
+
+    const element =
+        $("#stat-time");
+
+    if (element) {
+
+        element.textContent =
+            formatDuration(minutes);
+
+    }
+
+}
+
+
 /* =====================================================
    CONTINUE LESSON
 ===================================================== */
- 
+
 function getContinueLesson() {
- 
-	if (!state.lessons.length) {
-    	return null;
-	}
- 
- 
-	const incomplete =
+
+    if (!state.lessons.length) {
+        return null;
+    }
+
+
+    const incomplete =
         state.lessons.find(
-        	lesson =>
+            lesson =>
                 !lessonCompleted(lesson)
-    	);
- 
- 
-	return incomplete ||
-    	state.lessons[
+        );
+
+
+    return (
+        incomplete ||
+        state.lessons[
             state.lessons.length - 1
-    	];
- 
+        ]
+    );
+
 }
- 
- 
+
+
 /* =====================================================
    MODULE LOOKUP
 ===================================================== */
- 
+
 function getModuleForLesson(lesson) {
- 
-	if (!lesson) {
-    	return null;
-	}
- 
- 
-	return state.modules.find(
-    	module =>
-        	module.id === lesson.module_id
-	) || null;
- 
+
+    if (!lesson) {
+        return null;
+    }
+
+
+    return (
+        state.modules.find(
+            module =>
+                String(module.id) ===
+                String(lesson.module_id)
+        ) ||
+        null
+    );
+
 }
- 
- 
+
+
+/* =====================================================
+   SECTIONS FOR LESSON
+===================================================== */
+
+function getSectionsForLesson(lessonId) {
+
+    return state.sections
+        .filter(
+            section =>
+                String(section.lesson_id) ===
+                String(lessonId)
+        )
+        .sort(
+            (a, b) =>
+                Number(a.sort_order || 0) -
+                Number(b.sort_order || 0)
+        );
+
+}
+
+
+/* =====================================================
+   ACTIVITIES FOR SECTION
+===================================================== */
+
+function getActivitiesForSection(sectionId) {
+
+    return state.activities
+        .filter(
+            activity =>
+                String(activity.section_id) ===
+                String(sectionId)
+        )
+        .sort(
+            (a, b) =>
+                Number(a.sort_order || 0) -
+                Number(b.sort_order || 0)
+        );
+
+}
+
+
+/* =====================================================
+   QUESTIONS FOR ACTIVITY
+===================================================== */
+
+function getQuestionsForActivity(activityId) {
+
+    return state.questions
+        .filter(
+            question =>
+                String(question.activity_id) ===
+                String(activityId)
+        )
+        .sort(
+            (a, b) =>
+                Number(a.sort_order || 0) -
+                Number(b.sort_order || 0)
+        );
+
+}
+
+
+/* =====================================================
+   MEDIA FOR LESSON
+===================================================== */
+
+function getMediaForLesson(lessonId) {
+
+    return state.media.filter(
+        item =>
+            String(item.lesson_id) ===
+            String(lessonId)
+    );
+
+}
+
+
+/* =====================================================
+   MEDIA FOR ACTIVITY
+===================================================== */
+
+function getMediaForActivity(activityId) {
+
+    return state.media.filter(
+        item =>
+            String(item.activity_id) ===
+            String(activityId)
+    );
+
+}
+
+
+/* =====================================================
+   MEDIA URL
+===================================================== */
+
+function resolveMediaURL(media) {
+
+    if (!media) {
+        return "";
+    }
+
+
+    if (
+        media.url &&
+        /^https?:\/\//i.test(media.url)
+    ) {
+
+        return media.url;
+
+    }
+
+
+    if (
+        media.storage_url &&
+        /^https?:\/\//i.test(
+            media.storage_url
+        )
+    ) {
+
+        return media.storage_url;
+
+    }
+
+
+    if (
+        media.public_url &&
+        /^https?:\/\//i.test(
+            media.public_url
+        )
+    ) {
+
+        return media.public_url;
+
+    }
+
+
+    /*
+       Storage bucket will be connected here.
+
+       We deliberately don't guess the bucket
+       name until the actual Storage configuration
+       is confirmed.
+    */
+
+    return "";
+
+}
+
+
 /* =====================================================
    CONTINUE CARD
 ===================================================== */
- 
+
 function renderContinue() {
- 
-	const lesson =
+
+    const lesson =
         getContinueLesson();
- 
- 
-	if (!lesson) {
- 
-        $("#continue-lesson").textContent =
-        	"Your course is ready";
- 
- 
-        $("#continue-description").textContent =
-        	"Your first lesson will appear here.";
- 
- 
-    	return;
- 
-	}
- 
- 
-	const module =
+
+
+    if (!lesson) {
+
+        const title =
+            $("#continue-lesson");
+
+        if (title) {
+            title.textContent =
+                "Your course is ready";
+        }
+
+
+        const description =
+            $("#continue-description");
+
+        if (description) {
+            description.textContent =
+                "Your first lesson will appear here.";
+        }
+
+        return;
+
+    }
+
+
+    const module =
         getModuleForLesson(lesson);
- 
- 
-	const index =
+
+
+    const index =
         state.lessons.indexOf(lesson);
- 
- 
-    $("#continue-number").textContent =
-    	String(index + 1)
-            .padStart(2, "0");
- 
- 
-    $("#continue-module").textContent =
-    	module?.title ||
-    	"Course lesson";
- 
- 
-    $("#continue-lesson").textContent =
-    	lesson.title ||
-    	lesson.name ||
-        "Lesson";
- 
- 
-    $("#continue-description").textContent =
-        lesson.description ||
-    	"Continue your learning journey.";
- 
+
+
+    const number =
+        $("#continue-number");
+
+    if (number) {
+        number.textContent =
+            String(index + 1)
+                .padStart(2, "0");
+    }
+
+
+    const moduleElement =
+        $("#continue-module");
+
+    if (moduleElement) {
+        moduleElement.textContent =
+            module?.title ||
+            "Course lesson";
+    }
+
+
+    const lessonElement =
+        $("#continue-lesson");
+
+    if (lessonElement) {
+        lessonElement.textContent =
+            lesson.title ||
+            "Lesson";
+    }
+
+
+    const description =
+        $("#continue-description");
+
+    if (description) {
+        description.textContent =
+            lesson.description ||
+            "Continue your learning journey.";
+    }
+
 }
- 
- 
+
+
 /* =====================================================
    OVERVIEW PATH
 ===================================================== */
- 
+
 function renderPath() {
- 
-	const container =
+
+    const container =
         $("#overview-path");
- 
- 
-	if (!container) {
-    	return;
-	}
- 
- 
-	if (!state.modules.length) {
- 
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!state.modules.length) {
+
         container.innerHTML =
             emptyPathHTML();
- 
-    	return;
- 
-	}
- 
- 
+
+        return;
+
+    }
+
+
     container.innerHTML =
         state.modules.map(
-        	(module, index) => {
- 
-            	const moduleLessons =
+            (module, index) => {
+
+                const moduleLessons =
                     state.lessons.filter(
                         lesson =>
-                            lesson.module_id === module.id
-                	);
- 
- 
-            	const completed =
+                            String(
+                                lesson.module_id
+                            ) ===
+                            String(module.id)
+                    );
+
+
+                const completed =
                     moduleLessons.filter(
                         lesson =>
-                            lessonCompleted(lesson)
+                            lessonCompleted(
+                                lesson
+                            )
                     ).length;
- 
- 
-            	const percentage =
+
+
+                const percentage =
                     moduleLessons.length
                         ? Math.round(
                             completed /
@@ -1050,1362 +1858,2808 @@ function renderPath() {
                             100
                         )
                         : 0;
- 
- 
-            	return `
- 
+
+
+                return `
+
                     <div
-                        class="path-item ${percentage === 100 ? "completed" : ""}"
+                        class="path-item ${
+                            percentage === 100
+                                ? "completed"
+                                : ""
+                        }"
                     >
- 
+
                         <div class="path-number">
- 
-                            ${String(index + 1).padStart(2, "0")}
- 
+
+                            ${String(index + 1)
+                                .padStart(2, "0")}
+
                         </div>
- 
- 
+
+
                         <div class="path-info">
- 
+
                             <strong>
-                            	${escapeHTML(
+
+                                ${escapeHTML(
                                     module.title ||
-                                	module.name ||
-                                	`Module ${index + 1}`
-                            	)}
+                                    `Module ${index + 1}`
+                                )}
+
                             </strong>
- 
+
                             <span>
+
                                 ${moduleLessons.length}
-                                ${moduleLessons.length === 1 ? "lesson" : "lessons"}
+                                ${
+                                    moduleLessons.length === 1
+                                        ? "lesson"
+                                        : "lessons"
+                                }
+
                             </span>
- 
+
                         </div>
- 
- 
+
+
                         <div class="path-progress">
- 
+
                             <div class="path-progress-track">
- 
-                            	<div
+
+                                <div
                                     class="path-progress-fill"
                                     style="width:${percentage}%"
                                 ></div>
- 
+
                             </div>
- 
+
                         </div>
- 
+
                     </div>
- 
-            	`;
- 
-        	}
+
+                `;
+
+            }
         ).join("");
- 
+
 }
- 
- 
+
+
 /* =====================================================
    LEARN LIST
 ===================================================== */
- 
+
 function renderLearnList() {
- 
-	const container =
+
+    const container =
         $("#learn-list");
- 
- 
-	if (!container) {
-    	return;
-	}
- 
- 
-	if (!state.lessons.length) {
- 
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!state.lessons.length) {
+
         container.innerHTML =
             emptyLessonHTML();
- 
-    	return;
- 
-	}
- 
- 
+
+        return;
+
+    }
+
+
     container.innerHTML =
         state.lessons.map(
-        	(lesson, index) => {
- 
-            	const module =
+            (lesson, index) => {
+
+                const module =
                     getModuleForLesson(lesson);
- 
- 
-            	const completed =
+
+
+                const completed =
                     lessonCompleted(lesson);
- 
- 
-            	return `
- 
+
+
+                const progress =
+                    state.progress[lesson.id]
+                        ?.progress_percent || 0;
+
+
+                return `
+
                     <article
-                        class="lesson-large ${completed ? "completed" : ""}"
-                        data-lesson-id="${escapeHTML(lesson.id)}"
+                        class="lesson-large ${
+                            completed
+                                ? "completed"
+                                : ""
+                        }"
+                        data-lesson-id="${escapeHTML(
+                            lesson.id
+                        )}"
                     >
- 
+
                         <div class="lesson-large-number">
- 
-                            ${String(index + 1).padStart(2, "0")}
- 
+
+                            ${String(index + 1)
+                                .padStart(2, "0")}
+
                         </div>
- 
- 
+
+
                         <div class="lesson-large-info">
- 
+
                             <strong>
- 
-                            	${escapeHTML(
+
+                                ${escapeHTML(
                                     lesson.title ||
-                                	lesson.name ||
-                                	`Lesson ${index + 1}`
-                            	)}
- 
+                                    `Lesson ${index + 1}`
+                                )}
+
                             </strong>
- 
- 
+
+
                             <span>
- 
-                            	${escapeHTML(
+
+                                ${escapeHTML(
                                     module?.title ||
                                     "Course lesson"
-                            	)}
- 
+                                )}
+
                             </span>
- 
+
                         </div>
- 
- 
+
+
                         <div class="lesson-large-status">
- 
+
                             ${
-                            	completed
-                                	? "Completed"
-                                	: "Start →"
+                                completed
+                                    ? "Completed"
+                                    : progress > 0
+                                        ? `${progress}%`
+                                        : "Start →"
                             }
- 
+
                         </div>
- 
+
                     </article>
- 
-            	`;
- 
-        	}
+
+                `;
+
+            }
         ).join("");
- 
- 
+
+
     $$("#learn-list .lesson-large")
-    	.forEach(item => {
- 
+        .forEach(item => {
+
             item.addEventListener(
                 "click",
-            	() => {
- 
+                () => {
+
                     openLesson(
                         item.dataset.lessonId
-                	);
- 
-            	}
-        	);
- 
-    	});
- 
+                    );
+
+                }
+            );
+
+        });
+
 }
- 
- 
+
+
 /* =====================================================
    CONTENTS
 ===================================================== */
- 
+
 function renderContents() {
- 
-	const container =
+
+    const container =
         $("#contents-list");
- 
- 
-	if (!container) {
-    	return;
-	}
- 
- 
-	if (!state.modules.length) {
- 
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!state.modules.length) {
+
         container.innerHTML =
             emptyPathHTML();
- 
-    	return;
- 
-	}
- 
- 
+
+        return;
+
+    }
+
+
     container.innerHTML =
         state.modules.map(
-        	(module, moduleIndex) => {
- 
-            	const moduleLessons =
+            (module, moduleIndex) => {
+
+                const moduleLessons =
                     state.lessons.filter(
                         lesson =>
-                            lesson.module_id === module.id
-                	);
- 
- 
-            	return `
- 
+                            String(
+                                lesson.module_id
+                            ) ===
+                            String(module.id)
+                    );
+
+
+                return `
+
                     <div class="content-module">
- 
+
                         <button
                             class="content-module-header"
                             type="button"
                         >
- 
+
                             <div class="content-module-number">
- 
-                            	${String(
-                                	moduleIndex + 1
-                            	).padStart(2, "0")}
- 
+
+                                ${String(
+                                    moduleIndex + 1
+                                ).padStart(2, "0")}
+
                             </div>
- 
- 
+
+
                             <div class="content-module-title">
- 
-                            	<strong>
- 
+
+                                <strong>
+
                                     ${escapeHTML(
                                         module.title ||
-                                        module.name ||
-                                    	`Module ${moduleIndex + 1}`
-                                	)}
- 
-                            	</strong>
- 
- 
-                            	<span>
- 
+                                        `Module ${moduleIndex + 1}`
+                                    )}
+
+                                </strong>
+
+
+                                <span>
+
                                     ${moduleLessons.length}
-                                    ${moduleLessons.length === 1 ? "lesson" : "lessons"}
- 
-                            	</span>
- 
+                                    ${
+                                        moduleLessons.length === 1
+                                            ? "lesson"
+                                            : "lessons"
+                                    }
+
+                                </span>
+
                             </div>
- 
- 
+
+
                             <span class="content-module-arrow">
-                            	↓
+                                ↓
                             </span>
- 
+
                         </button>
- 
- 
+
+
                         <div class="module-lessons">
- 
+
                             ${moduleLessons.map(
-                            	(lesson, lessonIndex) => `
- 
-                                	<button
+                                (lesson, lessonIndex) => `
+
+                                    <button
                                         class="content-lesson"
-                                        data-lesson-id="${escapeHTML(lesson.id)}"
+                                        data-lesson-id="${escapeHTML(
+                                            lesson.id
+                                        )}"
                                         type="button"
-                                	>
- 
+                                    >
+
                                         <span class="content-lesson-icon">
+
                                             ${String(
                                                 lessonIndex + 1
                                             ).padStart(2, "0")}
+
                                         </span>
- 
- 
+
+
                                         <span class="content-lesson-info">
- 
+
                                             <strong>
- 
+
                                                 ${escapeHTML(
                                                     lesson.title ||
-                                                    lesson.name ||
                                                     `Lesson ${lessonIndex + 1}`
                                                 )}
- 
+
                                             </strong>
- 
+
+
                                             <span>
-                                                ${lessonCompleted(lesson) ? "Completed" : "Not started"}
+
+                                                ${
+                                                    lessonCompleted(
+                                                        lesson
+                                                    )
+                                                        ? "Completed"
+                                                        : "Not started"
+                                                }
+
                                             </span>
- 
+
                                         </span>
- 
+
                                     </button>
- 
-                            	`
+
+                                `
                             ).join("")}
- 
+
                         </div>
- 
+
                     </div>
- 
-            	`;
- 
-        	}
+
+                `;
+
+            }
         ).join("");
- 
- 
+
+
     $$(".content-module-header")
         .forEach(button => {
- 
+
             button.addEventListener(
                 "click",
-            	() => {
- 
+                () => {
+
                     button
                         .closest(".content-module")
                         .classList.toggle("open");
- 
-            	}
-        	);
- 
-    	});
- 
- 
+
+                }
+            );
+
+        });
+
+
     $$(".content-lesson")
         .forEach(button => {
- 
+
             button.addEventListener(
                 "click",
-            	() => {
- 
+                () => {
+
                     openLesson(
                         button.dataset.lessonId
-                	);
- 
-            	}
-        	);
- 
-    	});
- 
+                    );
+
+                }
+            );
+
+        });
+
 }
- 
- 
+
+
 /* =====================================================
    LESSON PLAYER
 ===================================================== */
- 
+
 async function openLesson(lessonId) {
- 
-	const lesson =
+
+    const lesson =
         state.lessons.find(
-        	item =>
+            item =>
                 String(item.id) ===
                 String(lessonId)
-    	);
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
+        );
+
+
+    if (!lesson) {
+        return;
+    }
+
+
     state.currentLesson =
-    	lesson;
- 
- 
+        lesson;
+
+
     state.currentLessonIndex =
         state.lessons.indexOf(lesson);
- 
- 
+
+
     renderLessonPlayer();
- 
- 
+
+
     showScreen("lesson");
- 
- 
-	await loadLessonContent(lesson);
- 
+
+
+    await loadLessonContent(lesson);
+
+
+    if (state.user) {
+
+        await markLessonStarted(
+            lesson
+        );
+
+    }
+
 }
- 
- 
+
+
+/* =====================================================
+   LESSON PLAYER HEADER
+===================================================== */
+
 function renderLessonPlayer() {
- 
-	const lesson =
+
+    const lesson =
         state.currentLesson;
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
-	const module =
+
+
+    if (!lesson) {
+        return;
+    }
+
+
+    const module =
         getModuleForLesson(lesson);
- 
- 
-    $("#lesson-module-name").textContent =
-    	module?.title ||
-        "Course";
- 
- 
-    $("#lesson-position-number").textContent =
-        state.currentLessonIndex + 1;
- 
- 
-    $("#lesson-footer-status").textContent =
-        lessonCompleted(lesson)
-        	? "Completed"
-        	: "In progress";
- 
- 
-	const progress =
+
+
+    const moduleName =
+        $("#lesson-module-name");
+
+    if (moduleName) {
+
+        moduleName.textContent =
+            module?.title ||
+            "Course";
+
+    }
+
+
+    const position =
+        $("#lesson-position-number");
+
+    if (position) {
+
+        position.textContent =
+            state.currentLessonIndex + 1;
+
+    }
+
+
+    const status =
+        $("#lesson-footer-status");
+
+    if (status) {
+
+        status.textContent =
+            lessonCompleted(lesson)
+                ? "Completed"
+                : "In progress";
+
+    }
+
+
+    const progress =
         state.lessons.length
-        	? (
+            ? (
                 state.currentLessonIndex /
                 Math.max(
                     state.lessons.length - 1,
-                	1
-            	)
-        	) * 100
-        	: 0;
- 
- 
-    $("#lesson-progress-fill").style.width =
-        `${progress}%`;
- 
- 
-	const previous =
+                    1
+                )
+            ) * 100
+            : 0;
+
+
+    const progressFill =
+        $("#lesson-progress-fill");
+
+    if (progressFill) {
+
+        progressFill.style.width =
+            `${progress}%`;
+
+    }
+
+
+    const previous =
         $("#previous-lesson");
- 
- 
-	const next =
+
+    if (previous) {
+
+        previous.disabled =
+            state.currentLessonIndex <= 0;
+
+    }
+
+
+    const next =
         $("#next-lesson");
- 
- 
-	previous.disabled =
-        state.currentLessonIndex <= 0;
- 
- 
-	next.textContent =
-        state.currentLessonIndex >=
-        state.lessons.length - 1
-        	? "Complete ✓"
-        	: "Next →";
- 
+
+    if (next) {
+
+        next.textContent =
+            state.currentLessonIndex >=
+            state.lessons.length - 1
+                ? "Complete ✓"
+                : "Next →";
+
+    }
+
+
+    const save =
+        $("#lesson-save");
+
+    if (save) {
+
+        save.textContent =
+            state.savedLessons.has(
+                lesson.id
+            )
+                ? "♥"
+                : "♡";
+
+    }
+
 }
- 
- 
+
+
 /* =====================================================
    LESSON CONTENT
 ===================================================== */
- 
-/*
-	This is the future-proof part of EduCore.
- 
-	Supabase can provide different content blocks.
- 
-	Supported renderer types:
- 
-    	text
-    	rich_text
-    	image
-    	audio
-    	video
-    	exercise
-    	quiz
-    	ai
-    	speaking
-    	html
- 
-	A lesson can contain multiple blocks.
-*/
- 
+
 async function loadLessonContent(lesson) {
- 
-	const container =
+
+    const container =
         $("#lesson-body");
- 
- 
+
+
+    if (!container) {
+        return;
+    }
+
+
     container.innerHTML = `
- 
-    	<div class="lesson-loading">
- 
+
+        <div class="lesson-loading">
+
             <span>
                 Loading lesson...
             </span>
- 
-    	</div>
- 
-	`;
- 
- 
-	/*
-    	We intentionally check several possible
-    	content structures so the platform can
-    	evolve without redesigning the player.
-	*/
- 
- 
-	let content =
-    	lesson.content ||
-        lesson.sections ||
-    	lesson.blocks ||
-    	null;
- 
- 
-	if (typeof content === "string") {
- 
-    	try {
- 
-        	content =
-                JSON.parse(content);
- 
-    	} catch {
- 
-        	content = [
-            	{
-                    type: "text",
-                    content
-            	}
-        	];
- 
-    	}
- 
-	}
- 
- 
-	if (Array.isArray(content) &&
-        content.length) {
- 
-        renderContentBlocks(content);
- 
-    	return;
- 
-	}
- 
- 
-	/*
-    	Future Supabase content table.
- 
-    	Expected relationship:
- 
-        lesson_content.lesson_id
-        lesson_content.sort_order
-        lesson_content.type
-        lesson_content.content
-        lesson_content.media_url
-        lesson_content.settings
- 
-	*/
- 
-	try {
- 
-    	const {
-        	data,
-        	error
-    	} =
-        	await supabaseClient
-                .from("lesson_content")
-                .select("*")
-                .eq("lesson_id", lesson.id)
-                .order("sort_order", {
-                    ascending: true
-            	});
- 
- 
-    	if (!error && data?.length) {
- 
-            renderContentBlocks(data);
- 
-        	return;
- 
-    	}
- 
-	} catch (error) {
- 
-    	console.warn(
-            "Lesson content table not available yet:",
-        	error
-    	);
- 
-	}
- 
- 
-	/*
-    	Until content is connected, show the
-    	lesson's basic information rather than
-    	fake course material.
-	*/
- 
-    renderFallbackLesson(lesson);
- 
-}
- 
- 
-/* =====================================================
-   CONTENT BLOCK RENDERER
-===================================================== */
- 
-function renderContentBlocks(blocks) {
- 
-	const container =
-        $("#lesson-body");
- 
- 
+
+        </div>
+
+    `;
+
+
+    const sections =
+        getSectionsForLesson(
+            lesson.id
+        );
+
+
+    if (!sections.length) {
+
+        renderFallbackLesson(
+            lesson,
+            "This lesson does not have any sections yet."
+        );
+
+        return;
+
+    }
+
+
+    const lessonMedia =
+        getMediaForLesson(
+            lesson.id
+        );
+
+
+    let html = "";
+
+
+    /* -------------------------------------------------
+       LESSON INTRODUCTION
+    ------------------------------------------------- */
+
+    html += `
+
+        <span class="eyebrow">
+            LESSON
+        </span>
+
+        <h1>
+            ${escapeHTML(
+                lesson.title ||
+                "Lesson"
+            )}
+        </h1>
+
+    `;
+
+
+    if (lesson.description) {
+
+        html += `
+
+            <p class="lesson-introduction">
+                ${escapeHTML(
+                    lesson.description
+                )}
+            </p>
+
+        `;
+
+    }
+
+
+    /* -------------------------------------------------
+       LESSON-LEVEL MEDIA
+    ------------------------------------------------- */
+
+    if (lessonMedia.length) {
+
+        html += lessonMedia
+            .map(
+                media =>
+                    renderMedia(
+                        media
+                    )
+            )
+            .join("");
+
+    }
+
+
+    /* -------------------------------------------------
+       SECTIONS
+    ------------------------------------------------- */
+
+    sections.forEach(
+        (section, sectionIndex) => {
+
+            html += renderSection(
+                section,
+                sectionIndex
+            );
+
+        }
+    );
+
+
     container.innerHTML =
-    	blocks.map(
-        	block =>
-                renderContentBlock(block)
-        ).join("");
- 
+        html ||
+        `<div class="empty-state">
+            <strong>Lesson ready</strong>
+            <span>
+                Content will appear here.
+            </span>
+        </div>`;
+
 }
- 
- 
+
+
 /* =====================================================
-   INDIVIDUAL CONTENT TYPES
+   SECTION RENDERER
 ===================================================== */
- 
-function renderContentBlock(block) {
- 
-	const type =
-    	String(
-        	block.type ||
+
+function renderSection(
+    section,
+    sectionIndex
+) {
+
+    const activities =
+        getActivitiesForSection(
+            section.id
+        );
+
+
+    let html = `
+
+        <section class="lesson-section">
+
+            ${
+                section.title
+                    ? `
+                        <div class="lesson-section-heading">
+
+                            <span class="eyebrow">
+                                SECTION ${String(
+                                    sectionIndex + 1
+                                ).padStart(2, "0")}
+                            </span>
+
+                            <h2>
+                                ${escapeHTML(
+                                    section.title
+                                )}
+                            </h2>
+
+                            ${
+                                section.description
+                                    ? `
+                                        <p>
+                                            ${escapeHTML(
+                                                section.description
+                                            )}
+                                        </p>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+                    `
+                    : ""
+            }
+
+    `;
+
+
+    /* -------------------------------------------------
+       SECTION JSON CONTENT
+    ------------------------------------------------- */
+
+    if (
+        section.content &&
+        typeof section.content === "object"
+    ) {
+
+        html += renderSectionJSON(
+            section.content
+        );
+
+    }
+
+
+    /* -------------------------------------------------
+       ACTIVITIES
+    ------------------------------------------------- */
+
+    if (activities.length) {
+
+        html += activities
+            .map(
+                activity =>
+                    renderActivity(
+                        activity
+                    )
+            )
+            .join("");
+
+    }
+
+
+    if (
+        !activities.length &&
+        !section.content
+    ) {
+
+        html += `
+
+            <div class="lesson-activity">
+
+                <strong>
+                    Section ready
+                </strong>
+
+                <p>
+                    Content for this section has
+                    not been added yet.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    html += `
+
+        </section>
+
+    `;
+
+
+    return html;
+
+}
+
+
+/* =====================================================
+   SECTION JSON CONTENT
+===================================================== */
+
+function renderSectionJSON(content) {
+
+    if (!content) {
+        return "";
+    }
+
+
+    if (typeof content === "string") {
+
+        return `
+
+            <div class="content-block text-block">
+
+                ${escapeHTML(content)}
+
+            </div>
+
+        `;
+
+    }
+
+
+    if (Array.isArray(content)) {
+
+        return content
+            .map(
+                item =>
+                    renderContentObject(
+                        item
+                    )
+            )
+            .join("");
+
+    }
+
+
+    if (typeof content === "object") {
+
+        if (content.blocks) {
+
+            return Array.isArray(
+                content.blocks
+            )
+                ? content.blocks
+                    .map(
+                        item =>
+                            renderContentObject(
+                                item
+                            )
+                    )
+                    .join("")
+                : "";
+
+        }
+
+
+        return renderContentObject(
+            content
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =====================================================
+   CONTENT OBJECT
+===================================================== */
+
+function renderContentObject(
+    block
+) {
+
+    if (!block) {
+        return "";
+    }
+
+
+    const type =
+        String(
+            block.type ||
             block.content_type ||
             "text"
         ).toLowerCase();
- 
- 
-	const content =
-    	block.content ||
-    	block.body ||
-    	block.text ||
-    	"";
- 
- 
-	const media =
-        block.media_url ||
-    	block.url ||
-    	block.file_url ||
-    	"";
- 
- 
-	switch (type) {
- 
- 
-    	case "text":
- 
-    	case "rich_text":
- 
-        	return `
- 
+
+
+    const content =
+        block.content ||
+        block.body ||
+        block.text ||
+        "";
+
+
+    switch (type) {
+
+        case "text":
+
+        case "rich_text":
+
+            return `
+
                 <div class="content-block text-block">
- 
+
                     ${content}
- 
+
                 </div>
- 
-        	`;
- 
- 
-    	case "image":
- 
-        	return `
- 
+
+            `;
+
+
+        case "image":
+
+            return `
+
                 <figure class="content-block">
- 
+
                     <img
-                        src="${escapeHTML(media || content)}"
-                        alt="${escapeHTML(block.alt || "")}"
+                        src="${escapeHTML(
+                            block.url ||
+                            block.src ||
+                            ""
+                        )}"
+                        alt="${escapeHTML(
+                            block.alt || ""
+                        )}"
                     >
- 
+
                 </figure>
- 
-        	`;
- 
- 
-    	case "audio":
- 
-        	return `
- 
+
+            `;
+
+
+        case "audio":
+
+            return `
+
                 <div class="lesson-audio content-block">
- 
+
                     <strong>
                         Listen
                     </strong>
- 
+
                     <audio
                         controls
                         preload="metadata"
                     >
- 
+
                         <source
-                            src="${escapeHTML(media)}"
+                            src="${escapeHTML(
+                                block.url ||
+                                ""
+                            )}"
                         >
- 
+
                     </audio>
- 
+
                 </div>
- 
-        	`;
- 
- 
-    	case "video":
- 
-        	return `
- 
+
+            `;
+
+
+        case "video":
+
+            return `
+
                 <div class="lesson-media content-block">
- 
+
                     <video
                         controls
                         playsinline
                         preload="metadata"
                     >
- 
+
                         <source
-                            src="${escapeHTML(media)}"
+                            src="${escapeHTML(
+                                block.url ||
+                                ""
+                            )}"
                         >
- 
+
                     </video>
- 
+
                 </div>
- 
-        	`;
- 
- 
-    	case "exercise":
- 
-        	return `
- 
-                <div class="lesson-activity content-block">
- 
-                    <strong>
-                        Practice
-                    </strong>
- 
-                    <p>
-                        ${content}
-                    </p>
- 
-                    <button
-                        class="primary-button"
-                        type="button"
-                        data-action="exercise"
-                    >
-                        Start exercise
-                    </button>
- 
+
+            `;
+
+
+        default:
+
+            return `
+
+                <div class="content-block text-block">
+
+                    ${escapeHTML(
+                        content
+                    )}
+
                 </div>
- 
-        	`;
- 
- 
-    	case "quiz":
- 
-        	return `
- 
-                <div class="lesson-activity content-block">
- 
-                    <strong>
-                        Check your understanding
-                    </strong>
- 
-                    <p>
-                        ${content}
-                    </p>
- 
-                    <button
-                        class="primary-button"
-                        type="button"
-                        data-action="quiz"
-                    >
-                        Start quiz
-                    </button>
- 
-                </div>
- 
-        	`;
- 
- 
-    	case "ai":
- 
-    	case "ai_interaction":
- 
-        	return `
- 
-                <div class="lesson-activity content-block">
- 
-                    <strong>
-                        AI Learning Activity
-                    </strong>
- 
-                    <p>
-                        ${content}
-                    </p>
- 
-                    <button
-                        class="primary-button"
-                        type="button"
-                        data-action="ai"
-                    >
-                        Start AI activity
-                    </button>
- 
-                </div>
- 
-        	`;
- 
- 
-    	case "speaking":
- 
-    	case "speaking_activity":
- 
-        	return `
- 
-                <div class="lesson-activity content-block">
- 
-                    <strong>
-                        Speaking practice
-                    </strong>
- 
-                    <p>
-                        ${content}
-                    </p>
- 
-                    <button
-                        class="primary-button"
-                        type="button"
-                        data-action="speaking"
-                    >
-                        Start speaking
-                    </button>
- 
-                </div>
- 
-        	`;
- 
- 
-    	case "html":
- 
-        	return `
- 
-                <div class="content-block">
- 
-                    ${content}
- 
-                </div>
- 
-        	`;
- 
- 
-    	default:
- 
-        	return `
- 
-                <div class="content-block">
- 
-                    ${content}
- 
-                </div>
- 
-        	`;
- 
-	}
- 
+
+            `;
+
+    }
+
 }
- 
- 
+
+
+/* =====================================================
+   ACTIVITY RENDERER
+===================================================== */
+
+function renderActivity(
+    activity
+) {
+
+    const type =
+        String(
+            activity.activity_type ||
+            ""
+        ).toLowerCase();
+
+
+    const activityProgress =
+        state.activityProgress[
+            activity.id
+        ];
+
+
+    const completed =
+        activityProgress?.completed === true;
+
+
+    const questions =
+        getQuestionsForActivity(
+            activity.id
+        );
+
+
+    const media =
+        getMediaForActivity(
+            activity.id
+        );
+
+
+    let html = `
+
+        <div
+            class="lesson-activity content-block ${
+                completed
+                    ? "completed"
+                    : ""
+            }"
+            data-activity-id="${escapeHTML(
+                activity.id
+            )}"
+        >
+
+            <div class="activity-header">
+
+                <span class="eyebrow">
+                    ${escapeHTML(
+                        formatActivityType(
+                            type
+                        )
+                    )}
+                </span>
+
+                <strong>
+                    ${escapeHTML(
+                        activity.title ||
+                        "Learning activity"
+                    )}
+                </strong>
+
+            </div>
+
+    `;
+
+
+    if (activity.instructions) {
+
+        html += `
+
+            <p>
+                ${escapeHTML(
+                    activity.instructions
+                )}
+            </p>
+
+        `;
+
+    }
+
+
+    if (activity.content) {
+
+        html += `
+
+            <div class="activity-content">
+
+                ${escapeHTML(
+                    activity.content
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    if (media.length) {
+
+        html += media
+            .map(
+                item =>
+                    renderMedia(
+                        item
+                    )
+            )
+            .join("");
+
+    }
+
+
+    if (
+        type === "quiz" ||
+        type === "test" ||
+        questions.length
+    ) {
+
+        html += renderQuestions(
+            activity,
+            questions
+        );
+
+    } else {
+
+        html += `
+
+            <button
+                class="primary-button"
+                type="button"
+                data-action="complete-activity"
+                data-activity-id="${escapeHTML(
+                    activity.id
+                )}"
+            >
+
+                ${
+                    completed
+                        ? "Completed ✓"
+                        : "Complete activity"
+                }
+
+            </button>
+
+        `;
+
+    }
+
+
+    html += `
+
+        </div>
+
+    `;
+
+
+    return html;
+
+}
+
+
+/* =====================================================
+   QUESTIONS
+===================================================== */
+
+function renderQuestions(
+    activity,
+    questions
+) {
+
+    if (!questions.length) {
+
+        return `
+
+            <button
+                class="primary-button"
+                type="button"
+                data-action="complete-activity"
+                data-activity-id="${escapeHTML(
+                    activity.id
+                )}"
+            >
+                Complete activity
+            </button>
+
+        `;
+
+    }
+
+
+    return `
+
+        <div class="activity-questions">
+
+            ${questions.map(
+                (question, index) => `
+
+                    <div
+                        class="activity-question"
+                        data-question-id="${escapeHTML(
+                            question.id
+                        )}"
+                    >
+
+                        <strong>
+                            ${index + 1}.
+                            ${escapeHTML(
+                                question.question_text
+                            )}
+                        </strong>
+
+                        <input
+                            type="text"
+                            class="activity-answer"
+                            data-question-id="${escapeHTML(
+                                question.id
+                            )}"
+                            placeholder="Type your answer..."
+                        >
+
+                    </div>
+
+                `
+            ).join("")}
+
+        </div>
+
+
+        <button
+            class="primary-button"
+            type="button"
+            data-action="submit-activity"
+            data-activity-id="${escapeHTML(
+                activity.id
+            )}"
+        >
+            Check answers
+        </button>
+
+    `;
+
+}
+
+
+/* =====================================================
+   MEDIA RENDERER
+===================================================== */
+
+function renderMedia(
+    media
+) {
+
+    const url =
+        resolveMediaURL(
+            media
+        );
+
+
+    if (!url) {
+
+        return `
+
+            <div class="content-block lesson-activity">
+
+                <strong>
+                    ${escapeHTML(
+                        media.file_name ||
+                        "Media"
+                    )}
+                </strong>
+
+                <p>
+                    This media file is available
+                    but its storage URL has not
+                    been connected yet.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    const type =
+        String(
+            media.media_type ||
+            ""
+        ).toLowerCase();
+
+
+    if (
+        type === "image" ||
+        media.mime_type?.startsWith("image/")
+    ) {
+
+        return `
+
+            <figure class="content-block">
+
+                <img
+                    src="${escapeHTML(url)}"
+                    alt="${escapeHTML(
+                        media.file_name || ""
+                    )}"
+                >
+
+            </figure>
+
+        `;
+
+    }
+
+
+    if (
+        type === "audio" ||
+        media.mime_type?.startsWith("audio/")
+    ) {
+
+        return `
+
+            <div class="lesson-audio content-block">
+
+                <strong>
+                    Listen
+                </strong>
+
+                <audio
+                    controls
+                    preload="metadata"
+                >
+
+                    <source
+                        src="${escapeHTML(url)}"
+                    >
+
+                </audio>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if (
+        type === "video" ||
+        media.mime_type?.startsWith("video/")
+    ) {
+
+        return `
+
+            <div class="lesson-media content-block">
+
+                <video
+                    controls
+                    playsinline
+                    preload="metadata"
+                >
+
+                    <source
+                        src="${escapeHTML(url)}"
+                    >
+
+                </video>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return "";
+
+}
+
+
 /* =====================================================
    FALLBACK LESSON
 ===================================================== */
- 
-function renderFallbackLesson(lesson) {
- 
-	const container =
+
+function renderFallbackLesson(
+    lesson,
+    message
+) {
+
+    const container =
         $("#lesson-body");
- 
- 
+
+
+    if (!container) {
+        return;
+    }
+
+
     container.innerHTML = `
- 
-    	<span class="eyebrow">
-        	LESSON
-    	</span>
- 
-    	<h1>
+
+        <span class="eyebrow">
+            LESSON
+        </span>
+
+        <h1>
             ${escapeHTML(
                 lesson.title ||
-                lesson.name ||
                 "Lesson"
-        	)}
-    	</h1>
- 
-    	<p>
-        	${
-                escapeHTML(
-                    lesson.description ||
-                    "This lesson is ready for content."
-            	)
-        	}
-    	</p>
- 
-    	<div class="lesson-activity">
- 
+            )}
+        </h1>
+
+        <p>
+            ${escapeHTML(
+                lesson.description ||
+                "Continue your learning journey."
+            )}
+        </p>
+
+        <div class="lesson-activity">
+
             <strong>
-            	Your learning content will appear here
+                ${escapeHTML(
+                    message ||
+                    "This lesson is ready."
+                )}
             </strong>
- 
-        	<p>
-            	This lesson player is connected to the
-            	course structure. Text, audio, video,
-                exercises, quizzes and AI activities
-            	can be loaded from Supabase.
-        	</p>
- 
-    	</div>
- 
-	`;
- 
+
+            <p>
+                Learning content will appear here
+                when it has been added by the course
+                administrator.
+            </p>
+
+        </div>
+
+    `;
+
 }
- 
- 
-/* =====================================================
-   COURSE ERRORS
-===================================================== */
- 
-function renderNoCourse() {
- 
-    $("#course-title").textContent =
-    	"Course not selected";
- 
- 
-    $("#course-description").textContent =
-    	"No course was selected for this learning session.";
- 
- 
-    $("#continue-lesson").textContent =
-    	"Select a course to begin";
- 
- 
-	hideLoading();
- 
-}
- 
- 
-function renderCourseError() {
- 
-    $("#course-title").textContent =
-    	"Unable to load course";
- 
- 
-    $("#course-description").textContent =
-    	"There was a problem loading this course from Supabase.";
- 
- 
-	hideLoading();
- 
-}
- 
- 
-/* =====================================================
-   EMPTY STATES
-===================================================== */
- 
-function emptyPathHTML() {
- 
-	return `
- 
-    	<div class="empty-state">
- 
-            <strong>
-            	Course structure coming soon
-            </strong>
- 
-            <span>
-                Modules will appear here when they are added.
-            </span>
- 
-    	</div>
- 
-	`;
- 
-}
- 
- 
-function emptyLessonHTML() {
- 
-	return `
- 
-    	<div class="empty-state">
- 
-            <strong>
-            	No lessons yet
-            </strong>
- 
-            <span>
-                Lessons will appear here when the course is published.
-            </span>
- 
-    	</div>
- 
-	`;
- 
-}
- 
- 
-/* =====================================================
-   RENDER EVERYTHING
-===================================================== */
- 
-function renderEverything() {
- 
-	renderCourse();
- 
-	renderContinue();
- 
-	renderPath();
- 
-	renderLearnList();
- 
-	renderContents();
- 
-	renderProgress();
- 
-    updateLessonCount();
- 
-}
- 
- 
-/* =====================================================
-   LESSON NAVIGATION
-===================================================== */
- 
-function setupLessonNavigation() {
- 
-    $("#lesson-back")
-        ?.addEventListener(
-            "click",
-        	() => {
- 
-                showScreen("learn");
- 
-        	}
-    	);
- 
- 
-    $("#previous-lesson")
-        ?.addEventListener(
-            "click",
-        	() => {
- 
-            	const previous =
-                    state.lessons[
-                        state.currentLessonIndex - 1
-                	];
- 
- 
-            	if (previous) {
- 
-                    openLesson(previous.id);
- 
-            	}
- 
-        	}
-    	);
- 
- 
-    $("#next-lesson")
-        ?.addEventListener(
-            "click",
-        	async () => {
- 
-            	const next =
-                    state.lessons[
-                        state.currentLessonIndex + 1
-                	];
- 
- 
-            	if (!next) {
- 
-                    await completeCurrentLesson();
- 
-                    showScreen("overview");
- 
-                    return;
- 
-            	}
- 
- 
-            	await completeCurrentLesson();
- 
-                openLesson(next.id);
- 
-        	}
-    	);
- 
- 
-    $("#lesson-save")
-        ?.addEventListener(
-            "click",
-        	() => {
- 
-                toggleSaveCurrentLesson();
- 
-        	}
-    	);
- 
-}
- 
- 
+
+
 /* =====================================================
    COMPLETE LESSON
 ===================================================== */
- 
+
 async function completeCurrentLesson() {
- 
-	const lesson =
+
+    const lesson =
         state.currentLesson;
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
+
+
+    if (!lesson) {
+        return;
+    }
+
+
     state.progress[lesson.id] = {
- 
-    	completed: true
- 
-	};
- 
- 
-	renderProgress();
- 
-	renderContinue();
- 
-	renderLearnList();
- 
-	renderContents();
- 
- 
-	/*
-    	This is intentionally prepared for the
-    	eventual student_progress table.
- 
-    	We can connect the exact schema once the
-    	student progress table is finalized.
-	*/
- 
-	if (!state.user) {
-    	return;
-	}
- 
- 
-	try {
- 
-    	await supabaseClient
-            .from("student_progress")
-        	.upsert({
- 
-                user_id:
+
+        id:
+            state.progress[lesson.id]?.id,
+
+        student_id:
+            state.user?.id,
+
+        lesson_id:
+            lesson.id,
+
+        status:
+            "completed",
+
+        progress_percent:
+            100,
+
+        completed:
+            true,
+
+        completed_at:
+            new Date().toISOString()
+
+    };
+
+
+    renderProgress();
+
+    renderContinue();
+
+    renderLearnList();
+
+    renderContents();
+
+    renderLessonPlayer();
+
+
+    if (!state.user) {
+        return;
+    }
+
+
+    const existing =
+        state.progress[
+            lesson.id
+        ];
+
+
+    const payload = {
+
+        student_id:
+            state.user.id,
+
+        lesson_id:
+            lesson.id,
+
+        status:
+            "completed",
+
+        progress_percent:
+            100,
+
+        completed_at:
+            new Date().toISOString(),
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    let result;
+
+
+    if (existing?.id) {
+
+        result =
+            await supabaseClient
+                .from("lesson_progress")
+                .update(payload)
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+    } else {
+
+        result =
+            await supabaseClient
+                .from("lesson_progress")
+                .insert(payload);
+
+    }
+
+
+    if (result.error) {
+
+        console.warn(
+            "Lesson progress could not be saved:",
+            result.error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   MARK LESSON STARTED
+===================================================== */
+
+async function markLessonStarted(
+    lesson
+) {
+
+    if (!state.user || !lesson) {
+        return;
+    }
+
+
+    const existing =
+        state.progress[
+            lesson.id
+        ];
+
+
+    if (existing?.id) {
+
+        if (
+            existing.status === "completed"
+        ) {
+            return;
+        }
+
+
+        const result =
+            await supabaseClient
+                .from("lesson_progress")
+                .update({
+
+                    status:
+                        "in_progress",
+
+                    progress_percent:
+                        Math.max(
+                            Number(
+                                existing.progress_percent
+                            ) || 0,
+                            1
+                        ),
+
+                    started_at:
+                        existing.started_at ||
+                        new Date().toISOString(),
+
+                    updated_at:
+                        new Date().toISOString()
+
+                })
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+
+        if (result.error) {
+
+            console.warn(
+                "Could not update lesson start:",
+                result.error
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    const result =
+        await supabaseClient
+            .from("lesson_progress")
+            .insert({
+
+                student_id:
                     state.user.id,
- 
-                course_id:
-                    state.courseId,
- 
+
                 lesson_id:
                     lesson.id,
- 
-                completed:
-                    true,
- 
+
+                status:
+                    "in_progress",
+
+                progress_percent:
+                    1,
+
+                started_at:
+                    new Date().toISOString()
+
+            });
+
+
+    if (result.error) {
+
+        console.warn(
+            "Could not create lesson progress:",
+            result.error
+        );
+
+        return;
+
+    }
+
+
+    state.progress[lesson.id] = {
+
+        student_id:
+            state.user.id,
+
+        lesson_id:
+            lesson.id,
+
+        status:
+            "in_progress",
+
+        progress_percent:
+            1
+
+    };
+
+}
+
+
+/* =====================================================
+   COMPLETE ACTIVITY
+===================================================== */
+
+async function completeActivity(
+    activityId
+) {
+
+    if (!state.user) {
+
+        markActivityLocal(
+            activityId
+        );
+
+        return;
+
+    }
+
+
+    const existing =
+        state.activityProgress[
+            activityId
+        ];
+
+
+    const payload = {
+
+        student_id:
+            state.user.id,
+
+        activity_id:
+            activityId,
+
+        completed:
+            true,
+
+        attempts:
+            Number(
+                existing?.attempts || 0
+            ) + 1,
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    let result;
+
+
+    if (existing?.id) {
+
+        result =
+            await supabaseClient
+                .from("activity_progress")
+                .update(payload)
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+    } else {
+
+        result =
+            await supabaseClient
+                .from("activity_progress")
+                .insert(payload);
+
+    }
+
+
+    if (result.error) {
+
+        console.warn(
+            "Activity progress could not be saved:",
+            result.error
+        );
+
+        return;
+
+    }
+
+
+    state.activityProgress[
+        activityId
+    ] = {
+
+        ...existing,
+
+        ...payload,
+
+        completed:
+            true
+
+    };
+
+
+    await refreshCurrentLessonProgress();
+
+    await loadProgress();
+
+    await loadLessonContent(
+        state.currentLesson
+    );
+
+}
+
+
+/* =====================================================
+   LOCAL ACTIVITY COMPLETION
+===================================================== */
+
+function markActivityLocal(
+    activityId
+) {
+
+    state.activityProgress[
+        activityId
+    ] = {
+
+        completed:
+            true
+
+    };
+
+}
+
+
+/* =====================================================
+   SUBMIT ACTIVITY
+===================================================== */
+
+async function submitActivity(
+    activityId
+) {
+
+    const activity =
+        state.activities.find(
+            item =>
+                String(item.id) ===
+                String(activityId)
+        );
+
+
+    if (!activity) {
+        return;
+    }
+
+
+    const questions =
+        getQuestionsForActivity(
+            activity.id
+        );
+
+
+    if (!questions.length) {
+
+        await completeActivity(
+            activity.id
+        );
+
+        return;
+
+    }
+
+
+    let correct = 0;
+
+    const answers = {};
+
+
+    questions.forEach(
+        question => {
+
+            const input =
+                document.querySelector(
+                    `.activity-answer[data-question-id="${question.id}"]`
+                );
+
+
+            const answer =
+                input?.value?.trim() || "";
+
+
+            answers[
+                question.id
+            ] = answer;
+
+
+            if (
+                question.correct_answer &&
+                answer.toLowerCase() ===
+                String(
+                    question.correct_answer
+                )
+                    .trim()
+                    .toLowerCase()
+            ) {
+
+                correct++;
+
+            }
+
+        }
+    );
+
+
+    const score =
+        Math.round(
+            (
+                correct /
+                questions.length
+            ) * 100
+        );
+
+
+    if (!state.user) {
+
+        markActivityLocal(
+            activity.id
+        );
+
+        return;
+
+    }
+
+
+    const existing =
+        state.activityProgress[
+            activity.id
+        ];
+
+
+    const attempts =
+        Number(
+            existing?.attempts || 0
+        ) + 1;
+
+
+    const progressPayload = {
+
+        student_id:
+            state.user.id,
+
+        activity_id:
+            activity.id,
+
+        completed:
+            score >= 100,
+
+        score,
+
+        attempts,
+
+        last_answer:
+            JSON.stringify(
+                answers
+            ),
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    let progressResult;
+
+
+    if (existing?.id) {
+
+        progressResult =
+            await supabaseClient
+                .from("activity_progress")
+                .update(
+                    progressPayload
+                )
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+    } else {
+
+        progressResult =
+            await supabaseClient
+                .from("activity_progress")
+                .insert(
+                    progressPayload
+                );
+
+    }
+
+
+    if (progressResult.error) {
+
+        console.error(
+            "Activity progress save error:",
+            progressResult.error
+        );
+
+        return;
+
+    }
+
+
+    state.activityProgress[
+        activity.id
+    ] = {
+
+        ...existing,
+
+        ...progressPayload
+
+    };
+
+
+    /* -------------------------------------------------
+       ATTEMPT HISTORY
+    ------------------------------------------------- */
+
+    const attemptResult =
+        await supabaseClient
+            .from("activity_attempts")
+            .insert({
+
+                student_id:
+                    state.user.id,
+
+                course_id:
+                    state.courseId,
+
+                lesson_id:
+                    state.currentLesson?.id ||
+                    null,
+
+                activity_id:
+                    activity.id,
+
+                attempt_number:
+                    attempts,
+
+                score,
+
+                answer_data:
+                    answers,
+
                 completed_at:
                     new Date().toISOString()
- 
-        	}, {
- 
-                onConflict:
-                    "user_id,lesson_id"
- 
-        	});
- 
-	} catch (error) {
- 
-    	console.warn(
-            "Progress could not be saved yet:",
-        	error
-    	);
- 
-	}
- 
+
+            });
+
+
+    if (attemptResult.error) {
+
+        console.warn(
+            "Activity attempt history could not be saved:",
+            attemptResult.error
+        );
+
+    }
+
+
+    await refreshCurrentLessonProgress();
+
+    await loadProgress();
+
+    await loadLessonContent(
+        state.currentLesson
+    );
+
 }
- 
- 
+
+
+/* =====================================================
+   REFRESH LESSON PROGRESS
+===================================================== */
+
+async function refreshCurrentLessonProgress() {
+
+    const lesson =
+        state.currentLesson;
+
+
+    if (!lesson || !state.user) {
+        return;
+    }
+
+
+    const sections =
+        getSectionsForLesson(
+            lesson.id
+        );
+
+
+    const activities =
+        sections.flatMap(
+            section =>
+                getActivitiesForSection(
+                    section.id
+                )
+        );
+
+
+    if (!activities.length) {
+        return;
+    }
+
+
+    const completed =
+        activities.filter(
+            activity =>
+                state.activityProgress[
+                    activity.id
+                ]?.completed === true
+        ).length;
+
+
+    const percentage =
+        Math.round(
+            (
+                completed /
+                activities.length
+            ) * 100
+        );
+
+
+    const existing =
+        state.progress[
+            lesson.id
+        ];
+
+
+    const newStatus =
+        percentage >= 100
+            ? "completed"
+            : "in_progress";
+
+
+    const payload = {
+
+        student_id:
+            state.user.id,
+
+        lesson_id:
+            lesson.id,
+
+        status:
+            newStatus,
+
+        progress_percent:
+            percentage,
+
+        started_at:
+            existing?.started_at ||
+            new Date().toISOString(),
+
+        completed_at:
+            percentage >= 100
+                ? new Date().toISOString()
+                : null,
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    let result;
+
+
+    if (existing?.id) {
+
+        result =
+            await supabaseClient
+                .from("lesson_progress")
+                .update(payload)
+                .eq(
+                    "id",
+                    existing.id
+                );
+
+    } else {
+
+        result =
+            await supabaseClient
+                .from("lesson_progress")
+                .insert(payload);
+
+    }
+
+
+    if (result.error) {
+
+        console.warn(
+            "Lesson progress update failed:",
+            result.error
+        );
+
+        return;
+
+    }
+
+
+    state.progress[
+        lesson.id
+    ] = {
+
+        ...existing,
+
+        ...payload,
+
+        completed:
+            percentage >= 100
+
+    };
+
+}
+
+
+/* =====================================================
+   LESSON NAVIGATION
+===================================================== */
+
+function setupLessonNavigation() {
+
+    $("#lesson-back")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                showScreen("learn");
+
+            }
+        );
+
+
+    $("#previous-lesson")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const previous =
+                    state.lessons[
+                        state.currentLessonIndex - 1
+                    ];
+
+
+                if (previous) {
+
+                    openLesson(
+                        previous.id
+                    );
+
+                }
+
+            }
+        );
+
+
+    $("#next-lesson")
+        ?.addEventListener(
+            "click",
+            async () => {
+
+                const next =
+                    state.lessons[
+                        state.currentLessonIndex + 1
+                    ];
+
+
+                if (!next) {
+
+                    await completeCurrentLesson();
+
+                    showScreen("overview");
+
+                    return;
+
+                }
+
+
+                await completeCurrentLesson();
+
+                await openLesson(
+                    next.id
+                );
+
+            }
+        );
+
+
+    $("#lesson-save")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                toggleSaveCurrentLesson();
+
+            }
+        );
+
+
+    document.addEventListener(
+        "click",
+        async event => {
+
+            const button =
+                event.target.closest(
+                    "[data-action]"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const action =
+                button.dataset.action;
+
+
+            const activityId =
+                button.dataset.activityId;
+
+
+            if (
+                action ===
+                "complete-activity"
+            ) {
+
+                await completeActivity(
+                    activityId
+                );
+
+            }
+
+
+            if (
+                action ===
+                "submit-activity"
+            ) {
+
+                await submitActivity(
+                    activityId
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
 /* =====================================================
    SAVED LESSONS
 ===================================================== */
- 
+
 function toggleSaveCurrentLesson() {
- 
-	const lesson =
+
+    const lesson =
         state.currentLesson;
- 
- 
-	if (!lesson) {
-    	return;
-	}
- 
- 
-	if (
+
+
+    if (!lesson) {
+        return;
+    }
+
+
+    if (
         state.savedLessons.has(
-        	lesson.id
-    	)
-	) {
- 
+            lesson.id
+        )
+    ) {
+
         state.savedLessons.delete(
-        	lesson.id
-    	);
- 
-        $("#lesson-save").textContent =
-        	"♡";
- 
-	} else {
- 
+            lesson.id
+        );
+
+    } else {
+
         state.savedLessons.add(
-        	lesson.id
-    	);
- 
-        $("#lesson-save").textContent =
-        	"♥";
- 
-	}
- 
+            lesson.id
+        );
+
+    }
+
+
+    renderLessonPlayer();
+
+    renderSavedLessons();
+
 }
- 
- 
+
+
+/* =====================================================
+   SAVED SCREEN
+===================================================== */
+
+function renderSavedLessons() {
+
+    const screen =
+        $("#saved-screen");
+
+
+    if (!screen) {
+        return;
+    }
+
+
+    const lessons =
+        state.lessons.filter(
+            lesson =>
+                state.savedLessons.has(
+                    lesson.id
+                )
+        );
+
+
+    const existing =
+        screen.querySelector(
+            ".saved-lessons-list"
+        );
+
+
+    if (existing) {
+        existing.remove();
+    }
+
+
+    const list =
+        document.createElement(
+            "div"
+        );
+
+
+    list.className =
+        "saved-lessons-list";
+
+
+    if (!lessons.length) {
+
+        list.innerHTML = `
+
+            <div class="empty-state">
+
+                <strong>
+                    Nothing saved yet
+                </strong>
+
+                <span>
+                    Save lessons while learning
+                    to find them here.
+                </span>
+
+            </div>
+
+        `;
+
+    } else {
+
+        list.innerHTML =
+            lessons.map(
+                lesson => `
+
+                    <button
+                        class="content-lesson"
+                        type="button"
+                        data-saved-lesson="${escapeHTML(
+                            lesson.id
+                        )}"
+                    >
+
+                        <span class="content-lesson-icon">
+                            ✓
+                        </span>
+
+                        <span class="content-lesson-info">
+
+                            <strong>
+                                ${escapeHTML(
+                                    lesson.title
+                                )}
+                            </strong>
+
+                            <span>
+                                Saved lesson
+                            </span>
+
+                        </span>
+
+                    </button>
+
+                `
+            ).join("");
+
+    }
+
+
+    screen.appendChild(list);
+
+
+    list.querySelectorAll(
+        "[data-saved-lesson]"
+    ).forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                openLesson(
+                    button.dataset.savedLesson
+                );
+
+            }
+        );
+
+    });
+
+}
+
+
 /* =====================================================
    CONTINUE BUTTONS
 ===================================================== */
- 
+
 function setupContinueButtons() {
- 
-	const openContinue =
-    	() => {
- 
-        	const lesson =
+
+    const openContinue =
+        () => {
+
+            const lesson =
                 getContinueLesson();
- 
-        	if (lesson) {
- 
+
+
+            if (lesson) {
+
                 openLesson(
                     lesson.id
-            	);
- 
-        	}
- 
-    	};
- 
- 
+                );
+
+            }
+
+        };
+
+
     $("#continue-button")
         ?.addEventListener(
             "click",
             openContinue
-    	);
- 
- 
+        );
+
+
     $("#continue-card-button")
         ?.addEventListener(
             "click",
             openContinue
-    	);
- 
+        );
+
 }
- 
- 
+
+
 /* =====================================================
    EXIT COURSE
 ===================================================== */
- 
+
 function setupExitCourse() {
- 
+
     $("#exit-course")
         ?.addEventListener(
             "click",
-        	() => {
- 
+            () => {
+
                 toggleMoreMenu(false);
- 
- 
-            	/*
-                    The student page will eventually
-                    become the proper destination.
-            	*/
- 
-            	const destination =
-                    "../student.html";
- 
- 
+
                 window.location.href =
-                    destination;
- 
-        	}
-    	);
- 
+                    "../student.html";
+
+            }
+        );
+
 }
- 
- 
+
+
 /* =====================================================
-   APP INITIALIZATION
+   EMPTY STATES
 ===================================================== */
- 
-async function init() {
- 
-	showLoading();
- 
- 
-	state.courseId =
-    	getCourseId();
- 
- 
-	setupNavigation();
- 
-	setupMoreMenu();
- 
-    setupLessonNavigation();
- 
-    setupContinueButtons();
- 
-	setupExitCourse();
- 
- 
-	try {
- 
-    	await loadUser();
- 
-    	await loadCourse();
- 
-    	await loadModules();
- 
-	} catch (error) {
- 
-    	console.error(
-            "EduCore initialization error:",
-        	error
-    	);
- 
-	} finally {
- 
-    	hideLoading();
- 
-	}
- 
+
+function emptyPathHTML() {
+
+    return `
+
+        <div class="empty-state">
+
+            <strong>
+                Course structure coming soon
+            </strong>
+
+            <span>
+                Modules will appear here when
+                they are added.
+            </span>
+
+        </div>
+
+    `;
+
 }
- 
- 
+
+
+function emptyLessonHTML() {
+
+    return `
+
+        <div class="empty-state">
+
+            <strong>
+                No lessons yet
+            </strong>
+
+            <span>
+                Lessons will appear here when
+                the course is built.
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   RENDER EVERYTHING
+===================================================== */
+
+function renderEverything() {
+
+    renderCourse();
+
+    renderContinue();
+
+    renderPath();
+
+    renderLearnList();
+
+    renderContents();
+
+    renderProgress();
+
+    renderSavedLessons();
+
+    updateLessonCount();
+
+}
+
+
+/* =====================================================
+   ERRORS
+===================================================== */
+
+function renderNoCourse() {
+
+    const title =
+        $("#course-title");
+
+    if (title) {
+        title.textContent =
+            "Course not selected";
+    }
+
+
+    const description =
+        $("#course-description");
+
+    if (description) {
+
+        description.textContent =
+            "No course was selected for this learning session.";
+
+    }
+
+
+    const continueLesson =
+        $("#continue-lesson");
+
+    if (continueLesson) {
+
+        continueLesson.textContent =
+            "Select a course to begin";
+
+    }
+
+
+    hideLoading();
+
+}
+
+
+function renderCourseError() {
+
+    const title =
+        $("#course-title");
+
+    if (title) {
+
+        title.textContent =
+            "Unable to load course";
+
+    }
+
+
+    const description =
+        $("#course-description");
+
+    if (description) {
+
+        description.textContent =
+            "There was a problem loading this course from Supabase.";
+
+    }
+
+
+    hideLoading();
+
+}
+
+
+/* =====================================================
+   INITIALIZATION
+===================================================== */
+
+async function init() {
+
+    showLoading();
+
+
+    state.courseId =
+        getCourseId();
+
+
+    setupNavigation();
+
+    setupMoreMenu();
+
+    setupLessonNavigation();
+
+    setupContinueButtons();
+
+    setupExitCourse();
+
+
+    try {
+
+        await loadUser();
+
+        await loadCourse();
+
+        await loadModules();
+
+    } catch (error) {
+
+        console.error(
+            "EduCore initialization error:",
+            error
+        );
+
+        renderCourseError();
+
+    } finally {
+
+        hideLoading();
+
+    }
+
+}
+
+
 /* =====================================================
    START
 ===================================================== */
- 
+
 document.addEventListener(
     "DOMContentLoaded",
-	init
+    init
 );
-
